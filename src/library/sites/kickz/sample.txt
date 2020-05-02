@@ -1,0 +1,17 @@
+ProductDetails.changeSizeAffectedLinks(
+'13318254',
+'109,95 €',
+'109,95 €',
+'0',
+'0,00 €gespart!',
+'42 1/2',
+'5',
+'14',
+'true',
+'false',
+'false',
+'false',
+'unknown',
+'EU-',
+'AO3116-400',
+'[EU, US, UK]');

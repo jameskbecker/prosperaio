@@ -1,0 +1,102 @@
+{
+	"name": "ProsperAIO",
+	"version": "2.5.21",
+	"main": "./src/main/index.js",
+	"description": "Simple Design. Easy to Use. Insane Functionality.",
+	"author": "ProsperSoftware",
+	"keywords": [],
+	"license": "MIT",
+	"scripts": {
+		"start": "electron .",
+		"pack": "electron-builder --dir",
+		"package-mac": "electron-builder --mac",
+		"package-win": "electron-builder --win",
+		"package-all": "electron-builder --mac --win",
+		"release": "build --all --x64",
+		"pkg": "rm -rf ./pkg && pkg -t node8-macos-x64 --out-path pkg .",
+		"postpkg": "mkdir -p ./pkg/node_modules/puppeteer && cp -R ./node_modules/puppeteer/.local-chromium ./pkg/node_modules/puppeteer"
+	},
+	"dependencies": {
+		"@fortawesome/fontawesome-free": "^5.7.2",
+		"body-parser": "^1.18.3",
+		"bootstrap": "^4.3.1",
+		"btoa": "^1.2.1",
+		"chalk": "^2.4.2",
+		"cheerio": "^1.0.0-rc.2",
+		"discord-rpc": "^3.0.2",
+		"discord.js": "^11.5.0",
+		"electron-is-dev": "^1.1.0",
+		"electron-settings": "^3.2.0",
+		"express": "^4.16.4",
+		"font-awesome": "^4.7.0",
+		"jquery": "^3.4.1",
+		"jsencrypt": "^3.0.0-rc.1",
+		"jwt-decode": "^2.2.0",
+		"menu": "^0.2.5",
+		"moment": "^2.24.0",
+		"mousetrap": "^1.6.3",
+		"node-machine-id": "^1.1.10",
+		"os": "^0.1.1",
+		"popper.js": "^1.15.0",
+		"puppeteer": "^1.17.0",
+		"puppeteer-extra": "^2.1.3",
+		"puppeteer-extra-plugin-stealth": "^2.2.2",
+		"querystring": "^0.2.0",
+		"request": "^2.88.0",
+		"request-promise-native": "^1.0.8",
+		"underscore": "^1.9.1",
+		"unidecode": "^0.1.8",
+		"uuid": "^3.3.3",
+		"winston": "^3.1.0",
+		"xml2js": "^0.4.19"
+	},
+	"devDependencies": {
+		"electron": "^4.0.5",
+		"electron-builder": "^20.38.5",
+		"electron-packager": "^13.0.1",
+		"js-beautify": "^1.8.9"
+	},
+	"build": {
+		"asar": true,
+		"productName": "ProsperAIO",
+		"appId": "com.prosperaio.prosperaio",
+		"copyright": "Copyright © 2019 ProsperAIO",
+		"mac": {
+			"category": "public.app-category.utilities",
+			"target": [
+				{
+					"target": "DMG"
+				}
+			],
+			"icon": "assets/img/prosper-icon.icns",
+			"type": "distribution"
+		},
+		"dmg": {
+			"backgroundColor": "#1f1e1e",
+			"iconSize": 80,
+			"iconTextSize": 12,
+			"title": "${productName} ${version}"
+		},
+		"win": {
+			"target": [
+				{
+					"target": "NSIS"
+				}
+			],
+			"icon": "assets/img/Icon_Win.ico"
+		},
+		"nsis": {
+			"oneClick": true,
+			"perMachine": false,
+			"installerIcon": "",
+			"installerHeaderIcon": "",
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": true,
+			"shortcutName": "ProsperAIO"
+		},
+		"files": [
+			"src/**",
+			"assets/**"
+		]
+	}
+}

@@ -1,0 +1,1114 @@
+/*  --------------------------------------------------------   Variables  --------------------------------------------------------   */
+
+* {
+	--primary-color: #f44253 !important;
+	--secondary-color: #f44c41 !important;
+	--warning: #f48641;
+	--info: #4286f4;
+	--success: #2ed347;
+	--text-grey: #8c8f93 !important;
+	--primary-grey: #202020 !important;
+	--secondary-grey: #1f1e1e !important;
+	--tertiary-grey: #1a1919 !important;
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-app-region: no-drag;
+	cursor: default;
+}
+
+/*  --------------------------------------------------------   General  --------------------------------------------------------   */
+
+.icon-spinning::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f1ce" !important;
+	animation: spin-icon 2s infinite linear;
+}
+
+.icon-tick::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f00c" !important;
+}
+
+@keyframes spin-icon {
+	0% {
+		transform: rotate(0deg);
+		transform-origin: calc(50% - 0.25em);
+	}
+	100% {
+		transform: rotate(360deg);
+		transform-origin: calc(50% - 0.25em);
+	}
+}
+
+body {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	font-family: "Montserrat Medium";
+	color: white;
+	background-color: var(--secondary-grey);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.hidden, .thide-window {
+	transition: 1s;
+	opacity: 0;
+	display: none;
+}
+
+.shown, .tshow-window {
+	flex-basis: 100%;
+	-webkit-transition: opacity 2s ease-in-out;
+	display: flex;
+	opacity: 1;
+}
+
+.active-page, .active-page:before {
+	opacity: 1 !important;
+	color: whitesmoke;
+}
+
+.inactive, .inactive:before {
+	opacity: 0;
+	color: whitesmoke;
+	cursor: default;
+}
+
+.f-0 {
+	flex-basis: 0% !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-5 {
+	flex-basis: calc(5% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-10 {
+	flex-basis: calc(10 - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-15 {
+	flex-basis: calc(15% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-20 {
+	flex-basis: calc(20% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-25 {
+	flex-basis: calc(25% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-30 {
+	flex-basis: calc(30% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-1\/3 {
+	flex-basis: calc(100% / 3);
+	transition: 750ms ease-in-out;
+}
+
+.f-35 {
+	flex-basis: calc(35% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-40 {
+	flex-basis: calc(40% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-45 {
+	flex-basis: calc(45% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-50 {
+	flex-basis: calc(50% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-55 {
+	flex-basis: calc(55% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-60 {
+	flex-basis: calc(60% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-65 {
+	flex-basis: calc(65% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-70 {
+	flex-basis: calc(70% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-75 {
+	flex-basis: calc(75% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-80 {
+	flex-basis: calc(80% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-85 {
+	flex-basis: calc(85% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-90 {
+	flex-basis: calc(90% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-95 {
+	flex-basis: calc(95% - 0.5vw) !important;
+	transition: 750ms ease-in-out;
+}
+
+.f-100 {
+	flex-basis: 100% !important;
+	transition: 750ms ease-in-out;
+}
+
+.panel {
+	background-color: var(--primary-grey);
+	overflow-y: auto;
+	box-shadow: 0.25em 0.25em 1em var(--secondary-grey), inset 0.25em 0.25em 1em var(--tertiary-grey);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	flex-basis: 95%;
+	justify-content: space-evenly;
+	border-radius: 0.75vh !important;
+}
+
+.panel-main {
+	display: flex;
+	background-color: var(--primary-grey);
+	flex-basis: 100%;
+	align-content: space-evenly;
+	justify-content: space-evenly;
+	min-height: 87.5vh;
+	border-radius: 0 !important;
+	overflow: scroll;
+}
+
+.input, .btn {
+	min-height: 4vh;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-self: center;
+	justify-content: center;
+	font-family: "Montserrat Medium";
+	font-size: 1.15vh;
+	background-color: transparent;
+	box-shadow: 0.25em 0.25em 0.25em var(--tertiary-grey);
+	opacity: 1;
+	cursor: pointer;
+	-webkit-appearance: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 0 0 1vh 0vw;
+}
+
+* i::before {
+	padding-right: 0.5vw;
+}
+
+
+.input {
+	font-size: 1.5vh;
+	color: var(--text-grey);
+	text-indent: 0.5vw;
+	border: none;
+	/* border-bottom: 2px solid var(--text-grey); */
+	border-radius: 0.75vh;
+	/* border-radius: 0; */
+	background-color: var(--secondary-grey);
+	width: calc(100% - 55vw) !important;
+	/* box-shadow: none; */
+	box-sizing: border-box;
+}
+
+.input option {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.input[disabled], .input[disabled="disabled"], .btn[disabled] {
+	opacity: 0.5 !important;
+	cursor: not-allowed !important;
+	border-color: var(--text-grey);
+	color: var(--text-grey);
+}
+
+.btn[disabled]:hover {
+	background-image: none;
+	opacity: 0.65 !important;
+}
+
+.input [type="text"] {
+	cursor: text;
+}
+
+.input:not(select):focus {
+	transition: .5s;
+	color: white;
+	cursor: text;
+	opacity: 1;
+	outline: none !important;
+	box-shadow: 0.1em 0.1em 0.25em var(--primary-color), inset 0.1em 0.1em 0.25em var(--secondary-color);
+}
+
+.btn {
+	display: inline-flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-content: center;
+	justify-content: center;
+	font-family: "Montserrat Bold";
+	color: var(--primary-color);
+	border: 0.25vh solid var(--primary-color);
+	border-radius: 0.75vh;
+	opacity: 0.95;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.btn:hover {
+	transition: none !important;
+	color: whitesmoke;
+	background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+	opacity: 1;
+}
+
+button:focus {
+	outline: 0 !important;
+}
+
+.btn-add {
+	border-radius: 4000px !important;
+}
+
+.wrap {
+	flex-basis: 97% !important;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	overflow: scroll;
+	margin: auto !important;
+	margin-top: 1.25vh !important;
+}
+
+.table {
+	text-align: center;
+	color: white;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-self: center;
+	flex-basis: 97%;
+	table-layout: fixed;
+	margin-bottom: 0;
+	box-shadow: 0.25em 0.25em 0.25em var(--tertiary-grey);
+}
+
+.cell {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: center;
+	border: 0 !important;
+	height: 4vh;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis !important;
+	align-self: flex-start;
+}
+.cell-header {
+	height: 5vh;
+	align-content: center;
+	justify-content: center;
+}
+.cell-header-content, .cell-body-content {
+	display: flex;
+	flex-basis: 100%;
+	flex-direction: row;
+	flex-wrap: wrap;
+	text-align: center;
+}
+
+.cell-header-content {
+	height: 5vh;
+	font-family: "Montserrat Bold";
+	font-size: 1.2vh;
+	align-content: center;
+	justify-content: center;
+	background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+	border-radius: 0.75vh 0.75vh 0 0;
+}
+
+.cell-header-disabled {
+	background-image: none;
+	background-color: var(--tertiary-grey);
+	color: var(--secondary-grey);
+}
+
+.cell-body-content {
+	height: 60vh;
+	font-family: "Montserrat Light";
+	font-size: 1.2vh;
+	color: white;
+	background-color: var(--secondary-grey);
+	overflow-y: auto;
+	border-radius: p 0.75vh !important;
+	align-content: flex-start;
+	justify-content: space-evenly
+}
+
+.row {
+	display: flex;
+	flex-basis: 100%;
+	height: 4vh;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-content: flex-start;
+	justify-content: flex-start;
+	text-align: center;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.cell-body-content>.row:nth-child(odd), .cell-body-content>.row:nth-child(even) {
+	opacity: 0.75;
+}
+
+.cell-body-content>.row:nth-child(odd):hover, .cell-body-content>.row:nth-child(even):hover {
+	opacity: 1;
+}
+
+.cell-body-content>.row:nth-child(odd) {
+	background-color: var(--primary-grey);
+}
+
+.cell-body-content>.row:nth-child(even) {
+	background-color: var(--tertiary-grey);
+}
+
+.dropdown {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	z-index: 1;
+	cursor: pointer;
+}
+
+.dropdown::before:not(.dropdown > select[size]) {
+	color: var(--text-grey);
+	z-index: 0;
+	display: block;
+	flex-direction: row;
+	flex-wrap: wrap;
+	position: absolute;
+	align-content: center !important;
+	justify-content: space-evenly;
+	text-align: center;
+	right: 0.5rem;
+	top: 0;
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+	content: "\f0d7";
+	border-radius: 0 0.5vh 0.5vh 0;
+	padding-top: 0.25rem;
+}
+
+.input[size] {
+	color: white;
+	padding: 0;
+	box-shadow: 0.2em 0.2em 0.3em var(--tertiary-grey);
+	border-bottom: none;
+	background-color: var(--secondary-grey);
+	border-radius: 0.5vh;
+	overflow: scroll;
+}
+
+.input option {
+	padding: 1vh 0vh;
+	text-align: center;
+	color: white;
+	border: none;
+	outline: none;
+}
+
+.input option:checked {
+	background: var(--primary-color) linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+	color: white;
+	border: none;
+	outline: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+}
+
+select:focus {
+	outline: none;
+}
+
+.page-header {
+	font-family: "Montserrat Bold";
+	font-size: 4vh;
+	font-weight: 500 !important;
+	color: white;
+	display: flex;
+	padding: 0 0 0 3vh;
+	flex-basis: 100%;
+	align-self: space-evenly;
+}
+
+.panel-title {
+	font-family: "Montserrat Bold";
+	font-size: 3vh;
+	font-weight: 550;
+	color: var(--text-grey);
+	display: flex;
+	text-indent: 10px;
+	flex-basis: 100%;
+	padding: 0 0 1.5vh 0;
+	margin-top: -0.5vh;
+	text-align: left;
+}
+
+/*  --------------------------------------------------------   Banner  --------------------------------------------------------   */
+
+.banner {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-self: center;
+	justify-content: center;
+	flex-basis: 100%;
+	height: 5vh;
+	color: var(--text-grey);
+	background-color: var(--tertiary-grey);
+	-webkit-app-region: drag;
+}
+
+#bannerLogo {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	flex-basis: 5%;
+	height: 2vw;
+	align-self: center;
+	background-image: url(../img/XXXAIO_Logo_Transparent.png);
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-size: 2vw 2vw;
+	background-position-x: 1.5vw;
+	object-fit: scale-down;
+}
+
+.banner-main {
+	height: 5vh;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	flex-basis: 65%;
+	overflow: hidden;
+}
+
+.banner-controls {
+	display: flex;
+	flex-basis: 30%;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	align-items: flex-end;
+}
+
+.nav {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+.nav:hover {
+	transition: 0.75s linear;
+	opacity: 1;
+	color: whitesmoke;
+	text-decoration: none;
+	color: whitesmoke;
+}
+
+.nav-container {
+	display: inline-flex;
+	height: 5vh;
+	padding: 0 1vw;
+	font-family: "Montserrat Bold";
+	font-size: 0.8vw;
+	font-weight: 800;
+	align-items: space-between;
+	justify-content: space-between;
+}
+
+.nav-control i {
+	font-size: 1vmax;
+	align-self: center;
+	align-items: center;
+	justify-content: flex-end;
+	margin-right: 1vw;
+}
+
+#reloadApp {
+	color: var(--info);
+}
+
+#minimizeApp {
+	color: var(--warning);
+}
+
+#closeApp {
+	color: var(--primary-color);
+}
+
+/*  --------------------------------------------------------   Dashboard  --------------------------------------------------------   */
+
+#taskImport::before {
+	content: "\f56f";
+}
+
+#taskExport::before {
+	content: "\f56e"
+}
+
+#taskTableBody {
+	height: 52.5vh;
+}
+
+.col-id {
+	flex-basis: 5%;
+	border-left-width: 0 !important;
+}
+
+.col-site {
+	flex-basis: 12%;
+}
+
+.col-mode {
+	flex-basis: 7.5%;
+}
+
+.col-profile {
+	flex-basis: 10%;
+}
+
+.col-products {
+	flex-basis: 17.5%;
+	overflow: hidden;
+}
+
+.col-task-proxy {
+	flex-basis: 11%;
+}
+
+#panel-renderer {
+	height: 35vh;
+}
+
+.col-size {
+	flex-basis: 6%;
+}
+
+.col-timer {
+	flex-basis: 6%;
+}
+
+.col-status {
+	font-family: "Montserrat Bold";
+	flex-basis: 17.5%;
+}
+
+.col-actions {
+	flex-basis: 7.5%;
+	border-right-width: 0 !important;
+}
+
+#clearTokens::before {
+	content: "\f056";
+}
+
+#openMassChange::before {
+	content: "\f1c0";
+}
+
+.action-button {
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+	color: var(--primary-color);
+	padding: 0 0.2vw;
+	cursor: pointer;
+	opacity: 0.5;
+	-webkit-appearance: none;
+	background: none;
+	border: none;
+}
+
+.action-button:hover {
+	transition: 0.5s;
+	opacity: 1;
+	color: var(--primary-color);
+}
+
+.action-button:focus {
+	outline: 0;
+}
+
+.taskStartButton::before {
+	content: '\f04b';
+}
+
+.taskStopButton::before {
+	content: '\f04d';
+}
+
+.taskEditButton::before {
+	content: '\f044';
+}
+
+.taskDuplicateButton::before {
+	content: '\f24d';
+}
+
+.taskDeleteButton::before {
+	content: '\f2ed';
+}
+
+/*  --------------------------------------------------------   Profile Creator  --------------------------------------------------------   */
+
+#profileLoader {
+	height: 25vh;
+}
+
+#profileImport::before {
+	content: "\f56f";
+}
+
+#profileExport::before {
+	content: "\f56e"
+}
+
+/*  --------------------------------------------------------   New Task  --------------------------------------------------------   */
+
+#taskSite {
+	height: 22vh;
+}
+
+/*  --------------------------------------------------------   Captcha Manager  --------------------------------------------------------   */
+
+#panel_newCaptchaAccount {
+	height: 25vh;
+}
+
+#googleAccountTable {
+	max-height: 65vh;
+}
+
+.col-captcha-account {
+	flex-basis: 75%;
+}
+
+.col-captcha-actions {
+	flex-basis: 25%;
+}
+
+.captcha-account-openHarvester::before {
+	content: "\f35d";
+}
+
+.captcha-account-reLink::before {
+	content: "\f0c1";
+}
+
+.captcha-account-delete::before {
+	content: "\f2ed";
+}
+
+#captchaBankTable {
+	height: 34vh;
+}
+
+
+.col-bank-expiry {
+	flex-basis: 20%;
+}
+
+.col-bank-site {
+	flex-basis: 32%;
+}
+
+
+.col-bank-token {
+	flex-basis: 48%;
+}
+
+/*  --------------------------------------------------------   Proxies  --------------------------------------------------------   */
+
+#proxyMassInput {
+	height: 65vh;
+	resize: none;
+	border: none;
+	opacity: 1;
+	cursor: text;
+}
+
+#proxyMassInput:focus {
+	border: none;
+	outline: 0;
+}
+
+#proxyTestSite {
+	height: 30vh;
+}
+
+.col-proxy {
+	flex-basis: 45%;
+	border-left: 0 !important;
+}
+
+.col-proxyStatus {
+	flex-basis: 30%;
+}
+
+.col-proxySpeed {
+	flex-basis: 25%;
+	border-right: 0 !important;
+}
+
+/*  --------------------------------------------------------   Settings  --------------------------------------------------------   */
+
+
+/*  --------------------------------------------------------   Footer  --------------------------------------------------------   */
+
+.footer {
+	height: 3vh;
+	display: flex;
+	flex-basis: 100%;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
+	background-color: var(--tertiary-grey);
+	box-shadow: 0.2vw 0.2vw 0.2vw var(--secondary-grey), inset 0.2vw 0.2vw 0.2vw var(--secondary-grey);
+}
+
+.footer-text {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-evenly;
+	font-family: "Montserrat Bold";
+	font-size: 0.6vw;
+	text-align: center;
+	color: var(--text-grey);
+	height: 2.5vh;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	white-space: nowrap !important;
+	text-overflow: ellipsis !important;
+}
+
+.footer-icon {
+	text-align: left;
+	justify-content: flex-start;
+}
+
+.footer-icon::before {
+	font-family: "Font Awesome 5 Brands", "Font Awesome 5 Free";
+	font-weight: 900;
+	font-size: 1vh;
+	padding: 0 0.5vw;
+}
+
+#footerCopyright {
+	flex-basis: 36%;
+}
+
+#footerVersion {
+	flex-basis: 30%;
+}
+
+#footerTwitter {
+	flex-basis: 4%;
+}
+
+#footerGuides {
+	flex-basis: 7%;
+}
+
+#footerGuides::before {
+	content: "\f02d";
+	color: brown;
+}
+
+#footerTerms {
+	flex-basis: 9%;
+}
+
+#footerTerms::before {
+	content: "\f15c";
+	color: var(--warning);
+}
+
+#footerTwitter::before {
+	content: "\f099";
+	color: var(--info);
+}
+
+#footerInstagram {
+	flex-basis: 5%;
+}
+
+#footerInstagram::before {
+	content: "\f16d";
+	color: var(--secondary-color);
+}
+
+#footerUpdate {
+	flex-basis: 8%;
+}
+
+#footerUpdate::before {
+	content: "\f019";
+	color: var(--success);
+}
+
+label {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	font-family: "Montserrat Medium";
+	font-size: 1.25vh;
+	line-height: 100%;
+	text-align: left;
+	color: var(--text-grey);
+	align-content: flex-start;
+	justify-content: flex-start;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+h4 {
+	font-family: "Montserrat Bold";
+	font-size: 2vh;
+	text-align: center;
+	font-weight: 1800;
+	line-height: 100%;
+}
+
+a, a::after, a::before, img, img::after, img::before {
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-app-region: no-drag;
+}
+
+.logo {
+	display: flex;
+	margin-left: 20px;
+	flex-direction: row;
+	max-width: auto;
+	align-items: center;
+}
+
+.header {
+	flex-basis: 95% !important;
+	height: 10vh;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	background-color: var(--secondary-grey);
+}
+
+.section {
+	overflow: hidden;
+	max-height: 92vh;
+}
+
+.main {
+	overflow: auto;
+	opacity: 1;
+	max-height: 92vh;
+	flex-basis: 100%;
+}
+
+.content {
+	flex-direction: row;
+	overflow-y: auto;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	justify-content: center;
+}
+
+.panel-manage {
+	box-shadow: 0.25em 0.25em 1em var(--tertiary-grey);
+	margin-top: 20px;
+	height: 35vh;
+	align-content: flex-start;
+	justify-content: space-evenly;
+}
+
+.panel-control {
+	margin-top: 2vh;
+	background-color: var(--secondary-grey);
+	box-shadow: 0.25em 0.25em 0.25em var(--tertiary-grey);
+	padding: 1.5vh 0;
+	flex-basis: 97%;
+	display: flex;
+	align-self: space-evenly;
+	align-items: center;
+	justify-content: space-around;
+	flex-direction: row;
+	flex-wrap: wrap;
+	border-radius: 0.75vh !important;
+}
+
+.logger-body {
+	height: 40vh;
+	background-color: #0f0f0f;
+}
+
+#info-panel {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+}
+
+#info-panel h5 {
+	width: 100%;
+	display: block;
+	text-align: right;
+}
+
+.nowrap {
+	flex-wrap: nowrap;
+}
+
+.column {
+	max-height: 77.5vh;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	flex-basis: 100%;
+	justify-content: center;
+	align-content: flex-start;
+	margin-top: 2vh;
+	border-radius: 0.75vh !important;
+	background-color: var(--primary-grey);
+	box-shadow: 0.25em 0.25em 1em var(--tertiary-grey);
+	padding: 1.5vh 0;
+}
+
+.container {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: space-evenly;
+	align-self: flex-start;
+	background-color: transparent;
+}
+
+input[type=checkbox] {
+	display: none;
+}
+
+/* to hide the checkbox itself */
+
+.checkbox-label i::before {
+	color: var(--primary-color);
+	cursor: pointer;
+}
+
+/* unchecked icon */
+
+.checkbox-label i::before{
+	letter-spacing: 10px;
+}
+
+
+tr {
+	flex-direction: row;
+	align-self: space-evenly;
+	align-items: space-evenly;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+h5 {
+	font-family: "Montserrat Medium";
+	color: white;
+	font-size: 1.6vh;
+	text-align: center;
+	padding: 0;
+	margin-top: 0;
+	float: right;
+	margin-right: 20px;
+}
+
+/*Modal Styling*/
+
+.modal-dialog, .modal-content {
+	position: fixed;
+	top: 12.5vh;
+	left: 12.5vw;
+	padding: 0 !important;
+	max-height: 75vh !important;
+	max-width: 75vw !important;
+	overflow: hidden;
+}
+
+.modal-content, .modal-body, .modal-footer {
+	padding: 0 !important;
+	margin: 0 !important;
+	background-color: var(--primary-grey);
+}
+
+.modal-body {
+	overflow: scroll;
+}
+
+.modal-footer {
+	min-height: 5vh !important;
+	width: 75vw !important;
+	border: 0 !important;
+	background-color: var(--tertiary-grey);
+}
+
