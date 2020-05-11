@@ -5,7 +5,6 @@ function public(additionalFields = []) {
 		embeds: [{
 			"title": "Successfully Checked Out!",
 			"type": "rich",
-			"description": this.productName || "Product Name N/A",
 			"color": 3642623,
 			"thumbnail": { 
 				url: this.productImageUrl ? this.productImageUrl : "https://www.yankee-division.com/uploads/1/7/6/5/17659643/notavailable_2_orig.jpg?210",
@@ -21,19 +20,24 @@ function public(additionalFields = []) {
 	}
 	let fields = [
 		{
+			name: 'Product:',
+			value: this.productName || "Product Name N/A",
+			inline: false
+		},
+		{
 			name: "Store:",
 			value: sites.default[this.taskData.site].label || "N/A",
-			inline: false
+			inline: true
 		},
 		{
 			name: "Mode:",
 			value: this.taskData.setup.mode.split('-')[1].capitalise(),
-			inline: false
+			inline: true
 		},
 		{
 			name: "Size:",
 			value: this.productSizeName || "N/A",
-			inline: false
+			inline: true
 		}
 	]
 	for (let i = 0; i < additionalFields.length; i++) {

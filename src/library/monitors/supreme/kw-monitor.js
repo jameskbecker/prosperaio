@@ -1,11 +1,20 @@
 const request = require('request-promise-native');
 const settings = require('electron-settings');
 const ipcWorker = require('electron').ipcRenderer;
-const { logger } = require('../../other')
+const { logger, utilities } = require('../../other')
 class SupremeKWMonitor {
 	constructor(_options = {}) {
 		logger.info('[Monitor] Inititalising KW Monitor.');
 		this.baseUrl = _options.baseUrl;
+		this._proxyList = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : null;
+		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
+			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
+			if (proxies.hasOwnProperty(this._proxyList)) {
+				global.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+			}
+		}
+		
+		
 		this.inputData = {};
 		this._isRunning = false;
 		this._shouldStop = false;
@@ -19,8 +28,8 @@ class SupremeKWMonitor {
 		if (!this._isRunning && !this._shouldStop) {
 			this._isRunning = true;
 			this._fetchStockData('shop');
-			this._fetchStockData('mobile_stock');
-			this._fetchStockData('mobile/products');
+			// this._fetchStockData('mobile_stock');
+			// this._fetchStockData('mobile/products');
 		}
 	}
 
@@ -70,6 +79,18 @@ class SupremeKWMonitor {
 			}
 		}
 
+	} 
+
+	_getProxy() {
+		if (!this._proxyList) {
+			return null;
+		}
+		else if (global.activeProxyLists[this._proxyList].length < 1) {
+			return null;
+		}
+		let proxy = global.activeProxyLists[this._proxyList][0]
+		global.activeProxyLists[this._proxyList].push(global.activeProxyLists[this._proxyList].shift());
+		return proxy;
 	}
 
 	_hasMatchingsKeywords(data, positive, negative) {
@@ -85,7 +106,6 @@ class SupremeKWMonitor {
 		}
 		return true;
 	}
-
 
 	_parseCategory(key) {
 		const categories = {
@@ -142,7 +162,7 @@ class SupremeKWMonitor {
 		let options = {
 			url: this.baseUrl + '/' + endpoint + '.json',
 			method: 'GET',
-			proxy: null,
+			proxy: utilities.formatProxy(this._getProxy()),
 			json: true,
 			gzip: true,
 			time: true,
@@ -159,6 +179,7 @@ class SupremeKWMonitor {
 		request(options)
 		.then(response => {
 			let body = response.body;
+
 			let categories = body.products_and_categories;
 			if (Object.keys(categories).length === 0) {
 				this._setStatus('Webstore Closed.', 'ERROR');

@@ -387,6 +387,31 @@ exportProxyBtn.onclick = function () {
 	});
 }
 
+document.getElementById('proxyTestAll').onclick = function() {
+	let listName = document.getElementById('proxyListSelectorMain').value;
+	if (listName) {
+		ipcRenderer.send('proxyList.testAll', {
+			baseUrl: proxyTestSite.value,
+			listName
+		});
+	}
+}
+
+document.getElementById('proxyDeleteList').onclick = function() {
+	let data = settings.get('proxies');
+	try {
+		
+		document.getElementById('proxy-header').innerHTML = `Proxies`;
+		proxyTestTable.innerHTML = '';
+		console.log(document.getElementById('proxyListSelectorMain').value, data)
+		delete data[document.getElementById('proxyListSelectorMain').value];
+		settings.set('proxies', data, {prettify:true});
+		document.getElementById('proxyListSelectorMain').value = '';	
+		content.proxySelectors();
+		
+	} catch(err) {console.error(err)}
+}
+
 saveProxyList.onclick = function() {
 	let listName = proxyListName.value;
 	let proxyInput = massProxyInput.value.split('\n');
@@ -415,7 +440,18 @@ proxyListSelectorMain.onchange = function() {
 
 
 
+
+document.getElementById('clearAnalytics').onclick = function() {
+	settings.set('orders', [], {prettify:true});
+	content.orders();
+}
+
 /* --------- Page: SETTINGS --------- */
+monitorProxyList.value = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : '';
+monitorProxyList.onchange = function() {
+	settings.set('monitorProxyList', this.value, { prettify: true })
+}
+
 installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
 resetBtn.onclick = function () { ipcRenderer.send('reset settings'); }
 

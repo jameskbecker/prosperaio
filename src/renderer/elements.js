@@ -151,6 +151,7 @@ const harvester_ClearBtn = document.getElementById('clearCaptchaAccounts');
 const orderTableBody = document.getElementById('orderTableBody');
 
 //Settings
+const monitorProxyList = document.getElementById('monitorProxyList');
 const installBrowserBtn = document.getElementById('browserSetup');
 const resetBtn = document.getElementById('resetAllSettings');
 const signoutBtn = document.getElementById('signout');

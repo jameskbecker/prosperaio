@@ -10,11 +10,12 @@ exports.generateCookies = function () {
 		this.setStatus('Generating Cookies.', 'WARNING');
 		puppeteer.use(StealthPlugin())
 		try {
-			this.browser = await puppeteer.launch({ headless: true })
+			this.browser = await puppeteer.launch({ headless: false })
 			this.page = await this.browser.newPage();
 			await this.page.goto('https://www.kickz.com');
-			await this.page.hover('*');
-			await this.page.click('*');
+			await this.page.mouse.move((Math.random() * (1000 - 1) + 1), (Math.random() * (1000 - 1) + 1))
+			await this.page.hover('#cookiePolicyBtn');
+			await this.page.click('#cookiePolicyBtn');
 			let pageCookies = await this.page.cookies();
 			let validAbck = false;
 			for (let i = 0; i < pageCookies.length; i++) {

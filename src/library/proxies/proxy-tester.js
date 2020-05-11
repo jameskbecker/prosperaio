@@ -16,6 +16,7 @@ class ProxyTest {
  
 	run() {
 		return new Promise((resolve, reject) => { 
+			this.setProxyStatus('Testing', 'orange')
 			this.request({
 				url: `https://${this.baseUrl}`,
 				proxy: utilities.formatProxy(this.input),

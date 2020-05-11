@@ -5,6 +5,8 @@ const isDev = require('electron-is-dev')
 const settings = require('electron-settings');
 const { discord, sites } = require('../configuration');
 const { logger } = require('../other');
+require('dotenv').config()
+
 
 class Task {
 	constructor(_taskData = {}, id) {
@@ -19,7 +21,13 @@ class Task {
 		this.isActive = false;
 		this.isMonitoring = false;
 		this.shouldStop = false;
-		this.proxyList = [];
+		this._proxyList = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : null;
+		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
+			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
+			if (proxies.hasOwnProperty(this._proxyList)) {
+				global.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+			}
+		}
 
 		this.productData = {};
 		this.productImageUrl = null;
@@ -36,6 +44,7 @@ class Task {
 		
 		this.startTime = 0;
 		this.checkoutTime = 0;
+		this.successful = false;
 	}
 
 	init() {
@@ -43,11 +52,6 @@ class Task {
 			this.setStatus('Initialising.', 'INFO');
 			logger.info(`[T:${this.id}] Initialising.`)
 			this.isActive = true;
-		
-			let proxyLists = settings.has('proxies') ? settings.get('proxies') : {};
-			let listName = this.taskData.additional.proxyList;
-			let proxyData = proxyLists.hasOwnProperty(listName) ? proxyLists[listName] : {};
-			this.buildProxyList(proxyData)
 			
 			this.profile = settings.get(`profiles.${this.profileName}`);
 			this.hasCaptcha = this.taskData.additional.skipCaptcha ? false : true;
@@ -55,13 +59,16 @@ class Task {
 		})
 	}
 
-	buildProxyList(data = {}) {
-		let output = [];
-		for (let i = 0; i < Object.keys(data).length; i++) {
-			let proxyId = Object.keys(data)[i];
-			output.push(data[proxyId])
+	_getProxy() {
+		if (!this._proxyList) {
+			return null;
 		}
-		this.proxyList = output;
+		else if (global.activeProxyLists[this._proxyList].length < 1) {
+			return null;
+		}
+		let proxy = global.activeProxyLists[this._proxyList][0]
+		global.activeProxyLists[this._proxyList].push(global.activeProxyLists[this._proxyList].shift());
+		return proxy;
 	}
 	
 	callStop() {
@@ -143,9 +150,8 @@ class Task {
 	}
 
 	postPublicWebhook(additonalFields = []) {
-		const webhookUrl = !isDev ? settings.get('discord') : 'https://discordapp.com/api/webhooks/502032689138892800/mP-ufXie1I0TecSAcbY98dPw88G9RxTBpbkWvZ8Nz1LHuf2-cLm-yVJkg2Sc_UM1GN6l';
 		request({
-			url: webhookUrl,
+			url: process.env.SUCCESS_WEBHOOK_URL,
 			method: 'POST',
 			json: true,
 			body: discord.public.bind(this)(additonalFields)
@@ -224,7 +230,7 @@ class Task {
 		let currentOrders = settings.get('orders') || [];
 		currentOrders.push(exportData);
 		settings.set('orders', currentOrders, {prettify:true});
-		ipcWorker.send('sync settings', {type: 'orders'})
+		ipcWorker.send('sync settings', 'orders')
 	}
 } 
 module.exports = Task;

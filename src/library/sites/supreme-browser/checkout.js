@@ -1,6 +1,7 @@
 exports.fillForm = function () {
 	return new Promise(async (resolve, reject) => {
 		try {
+			await this.page.tap('#checkout-now');
 			let paymentInfo = this.profile.payment;
 			if (this.page.url !== `${this.baseUrl}/mobile#checkout`) {
 				await this.page.goto(`${this.baseUrl}/mobile#checkout`);
@@ -38,6 +39,7 @@ exports.submitForm = function() {
 		this.page.on('response', async response => {
 			if (response.url() === `${this.baseUrl}/checkout.json`) {
 				let body = JSON.parse(await response.text());
+				console.log(body)
 				this.checkoutData = body;
 				resolve();
 			}
@@ -78,48 +80,11 @@ exports.fillFormDesktopEu = function () {
 	})
 }
 
-exports.getStatus = function () {
-	return new Promise((resolve, reject) => {
-		this.request({
-			url: `https://${this.baseUrl}/checkout/${this.slug}/status.json`,
-			method: 'GET',
-			jar: this.cookieJar,
-			json: true,
-			headers: {
-				'accept': '*/*',
-				'accept-encoding': 'br, gzip, deflate',
-				'accept-language': 'en-us',
-				'referer': `https://${this.baseUrl}/mobile`,
-				'user-agent':	this.userAgent,
-				'x-requested-with':	'XMLHttpRequest'
-			}
-		}, (error, response, body) => {
-			if (error) {
-				reject(error);
-			}
-			else if (response.statusCode !== 200) {
-				switch (response.statusCode) {
-					case 302:
-					case 303:
-						error = new Error();
-						error.code = 'EMPTY CART';
-						return reject(error);
-					case 429:
-						error = new Error();
-						error.code = 'BANNED';
-						return reject(error);
-					default:
-						console.log(response.statusCode);
-						error = new Error();
-						error.code = 'UNEXPECTED';
-						return reject(error);
-
-				}
-			}
-			else {
-				this.checkoutData = body;
-				resolve(body);
-			}
-		})
-	})
+exports.pollStatus = function () {
+	let options = {
+		url: this.baseUrl + '/checkout/' + this.slug + '/status.json',
+		method: 'GET',
+		json: true
+	}
+	return this.request(options);
 }

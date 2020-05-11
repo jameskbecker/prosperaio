@@ -1,10 +1,10 @@
 const builder = require('./builder');
-
+const {utilities } = require('../../other')
 function fetchMobileTotals() {
 	let options = {
 		url: `${this.baseUrl}/checkout/totals_mobile.js`,
 		method: 'GET',
-		proxy: null,
+		proxy: utilities.formatProxy(this._getProxy()),
 		qs: builder.bind(this)('mobile-totals')
 	}
 	return this.request(options);
@@ -12,22 +12,30 @@ function fetchMobileTotals() {
 
 function fetchForm() {
 	let options = {
-		uri: `${this.baseUrl}/mobile`,
-		method: 'GET',
-		proxy: null
+		url: `${this.baseUrl}/mobile`,
+		proxy: utilities.formatProxy(this._getProxy()),
+		method: 'GET'
 	}
+	
 	return this.request(options);
 }
 
 function submit(endpoint) {
 	let path = endpoint !== 'cardinal' ? '/checkout.json' : '/checkout/' + this.slug + '/cardinal.json';
 	let options = {
-		uri: this.baseUrl + path,
+		url: this.baseUrl + path,
 		method: 'POST',
-		proxy: null,
+		proxy: utilities.formatProxy(this._getProxy()),
 		json: true,
-		form: builder.bind(this)('parsed-checkout')
+		form: builder.bind(this)('parsed-checkout'),
+		headers: {
+			'accept-encoding': 'gzip, deflate, br',
+			'origin': this.baseUrl,
+			'referer': this.baseUrl + '/mobile',
+			'user-agent': this.userAgent
+		}
 	}
+	console.log({proxy: options.proxy})
 	return this.request(options);
 }
  
@@ -35,8 +43,16 @@ function pollStatus() {
 	let options = {
 		url: this.baseUrl + '/checkout/' + this.slug + '/status.json',
 		method: 'GET',
-		json: true
+		proxy: utilities.formatProxy(this._getProxy()),
+		json: true,
+		headers: {
+			'accept-encoding': 'gzip, deflate, br',
+			'origin': this.baseUrl,
+			'referer': this.baseUrl + '/mobile',
+			'user-agent': this.userAgent
+		}
 	}
+	console.log({proxy: options.proxy})
 	return this.request(options);
 }
 // let options = {

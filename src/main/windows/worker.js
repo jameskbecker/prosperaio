@@ -14,15 +14,19 @@ function createWindow() {
 }
 
 function loadWindow() {
-	const workerWindow = module.exports.window;
-	workerWindow.loadURL(config.workerWindowPath);
-	workerWindow.webContents.once('dom-ready', ()=> {
-		if (isDev) {
-			workerWindow.webContents.openDevTools({
-				mode: 'detach'
-			});
-		}
-	})
+	return new Promise((resolve => {
+		const workerWindow = module.exports.window;
+		workerWindow.loadURL(config.workerWindowPath);
+		workerWindow.webContents.once('dom-ready', ()=> {
+			if (isDev) {
+				workerWindow.webContents.openDevTools({
+					mode: 'detach'
+				});
+			}
+			resolve();
+		})
+	}))
+	
 }
 
 module.exports = {

@@ -1,6 +1,9 @@
 const electron = require('electron');
 const ipcWorker = electron.ipcRenderer;
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+
+const pluginStealth = require("puppeteer-extra-plugin-stealth")
+puppeteer.use(pluginStealth())
 const settings = require('electron-settings');
 const utilities = require('./library/other/utilities');
 const taskActions = require('./library/tasks/task-actions');
@@ -11,6 +14,7 @@ String.prototype.capitalise = function() {
 	return this.substring(0, 1).toUpperCase() + this.substring(1);
 }
 
+global.activeProxyLists = {};
 global.activeTasks = {};
 global.monitors = {
 	'supreme': {
@@ -215,7 +219,17 @@ module.exports = {
 		})
 
 		ipcWorker.on('proxyList.testAll', (event, options) => {
-
+			let allProxies = settings.has('proxies') ? settings.get('proxies') : {};
+			if (allProxies.hasOwnProperty(options.listName)) {
+				for (let i = 0; i < Object.keys(allProxies[options.listName]).length; i++) {
+					let id = Object.keys(allProxies[options.listName])[i];
+					proxyActions.run({
+						baseUrl: options.baseUrl,
+						id,
+						input: allProxies[options.listName][id]
+					})
+				}
+			}
 		})
 	}
 }

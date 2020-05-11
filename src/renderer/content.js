@@ -168,33 +168,30 @@ function renderProxyTable(name) {
 		if (list) {
 			document.getElementById('proxy-header').innerHTML = '';
 			document.getElementById('proxy-header').innerHTML = `Proxies (${Object.keys(list).length} Total)`;
+			proxyTestTable.innerHTML = '';
 			for (let i = 0; i < Object.keys(list).length; i++) {
 				let proxyId = Object.keys(list)[i]
 				let proxyRow = document.createElement('tr');
 				proxyRow.className = 'row';
-
-				let idCell = document.createElement('td');
-				idCell.innerHTML = proxyId;
-				idCell.className = 'cell cell-body col-id';
-				proxyRow.appendChild(idCell);
+				proxyRow.setAttribute('data-row-id', proxyId)
 
 				let splitProxy = list[proxyId].split(':');
 				let ipCell = document.createElement('td');
-				ipCell.innerHTML = splitProxy[0];
+				ipCell.innerHTML = splitProxy[0] ? splitProxy[0] : 'localhost';
 				ipCell.className = 'cell cell-body col-proxy';
 				proxyRow.appendChild(ipCell);
 
 				let portCell = document.createElement('td');
 				if (splitProxy.length > 1) portCell.innerHTML = splitProxy[1];
 				else portCell.innerHTML = 'None';
-				portCell.className = 'cell cell-body col-proxy';
+				portCell.className = 'cell cell-body col-proxyPort';
 				proxyRow.appendChild(portCell);
 
 
 				let userCell = document.createElement('td');
 				if (splitProxy.length > 3) userCell.innerHTML = splitProxy[2];
 				else userCell.innerHTML = 'None';
-				userCell.className = 'cell cell-body col-proxy';
+				userCell.className = 'cell cell-body col-proxyUser';
 				proxyRow.appendChild(userCell);
 
 				let passCell = document.createElement('td');
@@ -224,22 +221,15 @@ function renderProxyTable(name) {
 					})
 				};
 				actionsCell.appendChild(startButton);
-				
-				let editButton = document.createElement('div');
-				editButton.innerHTML = '<i class="fas fa-edit"></i>';
-				editButton.className = 'action-button';
-				editButton.onclick = function () {
-				
-				};
-				actionsCell.appendChild(editButton);
 
 				let deleteButton = document.createElement('div');
 				deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 				deleteButton.className = 'action-button';
 				deleteButton.onclick = function () {
-					ipcRenderer.send('proxyList.deleteItem', {
-						
-					})
+					delete list[proxyId];
+					settings.set('proxies', proxyLists, {prettify:true})
+					let row = this.parentNode.parentNode
+					row.parentNode.removeChild(row);
 				};
 				actionsCell.appendChild(deleteButton);
 				proxyRow.appendChild(actionsCell);
@@ -407,7 +397,7 @@ function renderProxyListSelectors() {
 	let proxyLists = settings.has('proxies') ? settings.get('proxies') : {};
 
 	document.querySelectorAll('.proxylist-selector').forEach(function (element) {
-		element.options.length = 0;
+		element.options.length = 1;
 	});
 
 	for (let i = 0; i < Object.keys(proxyLists).length; i++) {
@@ -471,6 +461,24 @@ function renderHarvesters() {
 		loginBtnWrapper.appendChild(loginBtn)
 		optionsRow.appendChild(loginBtnWrapper);
 
+
+		let launchButtonWrapper = document.createElement('div');
+		launchButtonWrapper.setAttribute('class', 'container-element');
+
+		let launchButton = document.createElement('button');
+		launchButton.setAttribute('class', 'btn');
+		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i><span>Launch</span>';
+
+		launchButton.onclick = function () {
+			ipcRenderer.send('captcha.launch', {
+				'sessionName': existingHarvesters[i].name,
+				'site': siteSelector.value
+			})
+		}
+
+		launchButtonWrapper.appendChild(launchButton)
+		optionsRow.appendChild(launchButtonWrapper);
+
 		let deleteButtonWrapper = document.createElement('div');
 		deleteButtonWrapper.setAttribute('class', 'container-element');
 		let deleteButton = document.createElement('button');
@@ -491,32 +499,12 @@ function renderHarvesters() {
 
 		deleteButtonWrapper.appendChild(deleteButton)
 		optionsRow.appendChild(deleteButtonWrapper);
-
-
-		let launchRow = document.createElement('div');
-		launchRow.setAttribute('class', 'container');
-
-		let launchButtonWrapper = document.createElement('div');
-		launchButtonWrapper.setAttribute('class', 'container-element');
-
-		let launchButton = document.createElement('button');
-		launchButton.setAttribute('class', 'btn');
-		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i><span>Launch</span>';
-
-		launchButton.onclick = function () {
-			ipcRenderer.send('captcha.launch', {
-				'sessionName': existingHarvesters[i].name,
-				'site': siteSelector.value
-			})
-		}
-
-		launchButtonWrapper.appendChild(launchButton)
-		launchRow.appendChild(launchButtonWrapper);
+		optionsRow.style.marginTop = '20px';
+	
 
 		harvesterContainer.appendChild(harvesterName);
 		harvesterContainer.appendChild(siteRow);
 		harvesterContainer.appendChild(optionsRow);
-		harvesterContainer.appendChild(launchRow);
 
 		harvesterControlsWrapper.appendChild(harvesterContainer);
 	}

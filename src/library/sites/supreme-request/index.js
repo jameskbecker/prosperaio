@@ -8,7 +8,7 @@ const request = require('request-promise-native');
 class SupremeRequest extends Task {
 	constructor(_taskData, _id) {
 		super(_taskData, _id);
-		this.cardinal	 = {
+		this.cardinal = {
 			id: '',
 			tid: '',
 			transactionId: '',
@@ -28,22 +28,16 @@ class SupremeRequest extends Task {
 
 		this.checkoutAttempts = 0;
 		this.checkoutData = {};
-		
-		this.foundProduct = false;
+
 		this.productUrl = null;
-		
+
 		this.cookieJar = request.jar();
+		this.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Safari/604.1';
 		this.request = request.defaults({
 			gzip: true,
 			jar: this.cookieJar,
 			resolveWithFullResponse: true,
-			timeout: settings.get('globalTimeoutDelay') || 10000,
-			headers: {
-				'accept-encoding':	'gzip, deflate, br',
-				'origin':	this.baseUrl,
-				'referer':	this.baseUrl + '/mobile',
-				'user-agent':	'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-			}
+			timeout: settings.get('globalTimeoutDelay') || 5000
 		});
 		this.restockMode = false;
 		this.hasSubmittedCheckout = false;
@@ -61,14 +55,14 @@ class SupremeRequest extends Task {
 		try {
 			await this.init();
 			switch (this.taskData.site) {
-				case 'supreme-eu': 
-				case 'supreme-local': 
+				case 'supreme-eu':
+				case 'supreme-local':
 					this.region = 'eu';
 					break;
-				case 'supreme-us': 
+				case 'supreme-us':
 					this.region = 'us';
 					break;
-				case 'supreme-jp': 
+				case 'supreme-jp':
 					this.region = 'jp';
 					break;
 			}
@@ -85,12 +79,51 @@ class SupremeRequest extends Task {
 			logger.warn(`[Task ${this.id}] Starting.`);
 			await logic.findProduct.bind(this)();
 			await logic.getProductData.bind(this)();
+			await logic.fetchTicket1.bind(this)()
 			await logic.cartProduct.bind(this)();
-			//await logic.handlePooky.bind(this)();
+			await logic.fetchTicket2.bind(this)()
 			await logic.checkoutProduct.bind(this)();
 			await logic.processStatus.bind(this)();
-		 
-			
+
+			if (this.successful) {
+				this.setStatus('Success.', 'SUCCESS');
+				let privateFields = [];
+				let publicFields = [];
+				if (this.productColour) {
+					let field = {
+						name: "Colour:",
+						value: this.productColour,
+						inline: true
+					}
+					privateFields.push(field);
+					publicFields.push(field);
+				}
+
+				if (this.checkoutData.hasOwnProperty("status")) {
+					let field = {
+						name: "Status:",
+						value: this.checkoutData.status.capitalise(),
+						inline: true
+					}
+					privateFields.push(field)
+				}
+
+				if (this.cardinal.id) {
+					let field = {
+						name: "Transaction ID:",
+						value: '||' + this.cardinal.id + '||',
+						inline: true
+					}
+					privateFields.push(field);
+				}
+				this.postPublicWebhook(publicFields);
+				this.postPrivateWebhook(privateFields);
+				this.addToAnalystics();
+			}
+			else {
+				console.log('failed')
+			}
+
 		}
 		catch (error) {
 			switch (error.code) {

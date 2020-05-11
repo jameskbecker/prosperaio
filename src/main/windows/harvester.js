@@ -49,20 +49,21 @@ class Harvester {
 			show: true,
 			alwaysOnTop: true,
 			webPreferences: {
+				'nodeIntegration': true,
 				'webSecurity': false,
 				'session': captchaSession
 			}
 		});
-
 		this.window.webContents.session.setProxy({
-			proxyRules: 'http=127.0.0.1:' + this.serverPort,
+			proxyRules: 'http=localhost:' + this.serverPort,
 			proxyBypassRules: '.google.com, .gstatic.com'
-		}, () => {
+		})
+		.then(() => {
 			
 			this.window.loadURL(`http://${this.config.domain}:${this.serverPort}`);
 			//this.window.webContents.once('dom-ready', () => {
 				this.window.show();
-				if (isDev) this.window.webContents.openDevTools();
+				if (isDev) this.window.webContents.openDevTools({mode:'undocked'});
 			//});
 		})
 	}

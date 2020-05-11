@@ -41,6 +41,7 @@ exports.init = () => {
 	})
 
 	ipcRenderer.on('sync settings', (event, type) => {
+		console.log(type)
 		switch (type) {
 			case 'task': content.tasks();
 			break;

@@ -26,7 +26,7 @@ function reserveBasketItems() {
 	// 	this.request({
 	// 		url: `https://${this.baseUrl}/${this.region}/checkout/reserveBasketItemsAjax/timestamp/${Date.now()}`,
 	// 		method: 'GET',
-	// 		jar: this.cookies,
+	// 		
 	// 		headers: {
 	// 			'Accept': 'application/json, text/javascript, */*; q=0.01',
 	// 			'Accept-Encoding': 'gzip, deflate',
@@ -74,7 +74,7 @@ function loginOffer() {
 	let options = {
 		url: `${this.baseUrl}/${this.region}/checkout/login_offer`,
 		method: 'GET',
-		jar: this.cookies,
+		
 		headers: {
 			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
 			'Accept-Encoding': 'gzip, deflate',
@@ -91,7 +91,7 @@ function loginOffer() {
 	// 	this.request({
 	// 		url: `https://${this.baseUrl}/de/checkout/login_offer`,
 	// 		method: 'GET',
-	// 		jar: this.cookies,
+	// 		
 	// 		headers: {
 	// 			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
 	// 			'Accept-Encoding': 'gzip, deflate',
@@ -144,7 +144,7 @@ function paymentSummarySubmit() {
 	let options = {
 		url: `${this.baseUrl}/${this.region}/checkout/paymentSummarySubmit`,
 		method: 'POST',
-		jar: this.cookies,
+		
 		json: true,
 		headers: {
 			"accept": "application/json, text/plain, */*",
@@ -167,7 +167,7 @@ function paymentMethodSubmit() {
 	let options = {
 		url: `${this.baseUrl}/${this.region}/checkout/${this.paymentEndpoint}`,
 		method: 'POST',
-		jar: this.cookies,
+		
 		json: true,
 		headers: {
 			"accept": "application/json, text/plain, */*",
@@ -183,6 +183,7 @@ function paymentMethodSubmit() {
 		},
 		form: buildForm.bind(this)('submit-payment')
 	}
+	console.log(options)
 	return this.request(options);
 }
 
@@ -191,7 +192,7 @@ function getConfirmation() {
 		this.request({
 			url: this.payloadUrl,
 			method: 'GET',
-			jar: this.cookies,
+			
 			headers: {
 				'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
 				'Accept-Encoding': 'gzip, deflate',

@@ -7,37 +7,39 @@ const { mainWindow, loginWindow, worker } = require('./windows');
 const auth = require('./authentication')
 const { menuTemplate } = require('../library/configuration');
 const discord = require('./discord')
-
+const psList = require('ps-list');
 
 
 global.captchaWindows = [];
 
 global.config = require("../config");
-const menu = Menu.buildFromTemplate(menuTemplate);
-Menu.setApplicationMenu(menu)
+if (!isDev) {
+	const menu = Menu.buildFromTemplate(menuTemplate);
+	Menu.setApplicationMenu(menu)
+}
 
-app.once('ready', () => {
-	
+
+app.once('ready',async function() {
 	const settings = require('electron-settings');
 	mainWindow.create();
 	
-	if (!isDev) {
+	if (isDev) {
 		if (!worker.window)	worker.create();
-		worker.load();
+		await worker.load();
 		console.log('[MAIN] loading worker')
 		ipc.init();
 		discord.setPresence();
 		return mainWindow.show();
 	}
 	else if (settings.has('userKey')) {
-		auth.authenticate(settings.get('userKey'), (error) => {
+		auth.authenticate(settings.get('userKey'), async (error) => {
 			if (error) {
 				loginWindow.create();
 				loginWindow.show();
 			}
 			else {
 				if (!worker.window)	worker.create();
-				worker.load();
+				await worker.load();
 				console.log('loaded worker')
 				ipc.init();
 				discord.setPresence();
@@ -70,3 +72,11 @@ app.on("window-all-closed", function () {
 });
 
 
+
+
+setInterval(async () => {
+	let x = (await psList()).filter(process => process.cmd.toLowerCase().includes('charles'));
+	if (x.length > 0) {
+		app.quit();
+	}
+}, 10000)

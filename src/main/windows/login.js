@@ -8,7 +8,10 @@ function createWindow() {
 		width: electron.screen.getPrimaryDisplay().workAreaSize.width * 0.5,
 		height: electron.screen.getPrimaryDisplay().workAreaSize.height / 2	,
 		frame: false,
-		resizable: false
+		resizable: false,
+		webPreferences: {
+			nodeIntegration: true
+		}
 	})
 	module.exports.window = loginWindow;
 }

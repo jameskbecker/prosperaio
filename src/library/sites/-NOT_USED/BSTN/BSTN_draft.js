@@ -11,7 +11,7 @@ let dirURL_input = "https://www.bstn.com/p/jordan-wmns-air-jordan-4-retro-nrg-aq
 
 //Navigate to Product Page
 request({
-	uri: dirURL_input,
+	url: dirURL_input,
 	headers: {
 		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
 		"accept-encoding": "gzip",
@@ -26,7 +26,7 @@ request({
 setTimeout(() => {
 //Add to Cart
 request({
-	uri: "https://www.bstn.com/cart/add",
+	url: "https://www.bstn.com/cart/add",
 	method: "POST",
 	headers: {
 		"accept": "*/*",
@@ -149,7 +149,7 @@ let BSTNform = {
 
 
 request({
-	uri: "https://www.bstn.com/cart/guest",
+	url: "https://www.bstn.com/cart/guest",
 	method: "POST",
 	headers: {
 		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
@@ -168,7 +168,7 @@ request({
 
 //Payment
 request({
-	uri: "https://www.bstn.com/cart/payment",
+	url: "https://www.bstn.com/cart/payment",
 	method: "POST",
 	headers: {
 		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
@@ -184,7 +184,7 @@ request({
 })
 
 request({
-	uri: "https://www.bstn.com/cart/check",
+	url: "https://www.bstn.com/cart/check",
 	method: "POST",
 	headers: {
 		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",

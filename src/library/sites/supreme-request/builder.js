@@ -8,10 +8,10 @@ module.exports = function (type) {
 				form = {
 					"s": this.sizeId,
 					"st": this.styleId,
-					"ds": 'bog',
-					"ds1": 'bog2',
-					"ns": ((+this.sizeId) + (+this.styleId)),
-					"qty": qty
+					// "ds": 'bog',
+					// "ds1": 'bog2',
+					// "ns": ((+this.sizeId) + (+this.styleId)),
+					"qty": this.products[0].productQty || 1
 				}
 			}
 			else {
@@ -38,97 +38,82 @@ module.exports = function (type) {
 			if (Math.floor(Math.random() * 2)) form['is_from_ios_native'] = '1';
 		
 			for (let i = 0; i < this.formElements.length; i++) {
-				if (this.formElements[i].placeholder) {
-					if (this.formElements[i].style) {
-						form[this.formElements[i].name] = "";
-					} else {
-					switch (this.formElements[i].placeholder.replace('\u200c', '')) {
-						case 'name':
+				let element = this.formElements[i];
+				if (
+					element.hasOwnProperty('style') &&
+					element.style.includes('absolute')
+				) {
+					let name = element.name || element.id;
+					form[name] = element.value || '';
+				}
+				else if (element.placeholder) {
+					switch (element.placeholder) {
 						case 'full name':
-							form[this.formElements[i].name] = `${this.profile.billing.first} ${this.profile.billing.last}`;
+						case 'na‌me':
+							form[element.name] = `${this.profile.billing.first} ${this.profile.billing.last}` || '';
 							break;
-
+			
 						case 'email':
-							form[this.formElements[i].name] = this.profile.billing.email;
+							form[element.name] = this.profile.billing.email || '';
 							break;
-
+			
 						case 'telephone':
-							form[this.formElements[i].name] = this.profile.billing.telephone;
+							form[element.name] = this.profile.billing.telephone || '';
 							break;
-
 						case 'address':
-							form[this.formElements[i].name] = this.profile.billing.address1;
+							form[element.name] = this.profile.billing.address1 || '';
 							break;
-
+			
 						case 'address 2':
 						case 'apt, unit, etc':
-							form[this.formElements[i].name] = this.profile.billing.address2;
+							form[element.name] = this.profile.billing.address2 || '';
 							break;
-
-						case 'address 3':
-							form[this.formElements[i].name] = '';
-							break;
-
-						case 'city':
-							form[this.formElements[i].name] = this.profile.billing.city;
-							break;
-
+			
 						case 'postcode':
-							form[this.formElements[i].name] = this.profile.billing.zip;
+						case 'zip':
+							form[element.name] = this.profile.billing.zip || '';
 							break;
-
+						case 'city':
+							form[element.name] = this.profile.billing.city || '';
+							break;
+						case 'state':
+							form[element.name] = this.profile.billing.state || '';
+							break;
 						case 'credit card number':
-							form[this.formElements[i].name] = this.profile.payment.cardNumber
+							form[element.name] = this.profile.payment.cardNumber || '';
 							break;
-
 						case 'cvv':
-							form[this.formElements[i].name] = this.profile.payment.cvv
+							form[element.name] = this.profile.payment.cvv || '';
 							break;
 					}
-					}
+			
 				}
-				else if (this.formElements[i].id) {
-					switch (this.formElements[i].id) {
+				else if (element.id && !element.value) {
+					switch (element.id) {
 						case 'store_credit_id':
-							form[this.formElements[i].name] = '';
+							form[element.name] = '';
 							break;
-
 						case 'cookie-sub':
-							form[this.formElements[i].name] = this.cookieSub;
+							form[element.name] = this.cookieSub || '';
 							break;
-
-						case 'remember_address':
-							form[this.formElements[i].name] = '1';
-							break;
-
-						case 'order_terms':
-							form[this.formElements[i].name] = '1';
-							break;
-
 						case 'order_billing_country':
-							form[this.formElements[i].name] = this.profile.billing.country.toUpperCase();
+							form[element.name] = this.profile.billing.country || '';
 							break;
-
 						case 'credit_card_type':
-							form[this.formElements[i].name] = this.profile.payment.type;
+							form[element.name] = this.profile.payment.type || '';
 							break;
-
 						case 'credit_card_month':
-							form[this.formElements[i].name] = this.profile.payment.expiryMonth;
+							form[element.name] = this.profile.payment.expiryMonth || '';
 							break;
-
 						case 'credit_card_year':
-							form[this.formElements[i].name] = this.profile.payment.expiryYear;
+							form[element.name] = this.profile.payment.expiryYear || '';
 							break;
 					}
 				}
-				else {
-					form[this.formElements[i].name] = this.formElements[i].value || '';
+				else if(element.name !== 'store_address') {
+					form[element.name] = (element.hasOwnProperty('value') ? element.value : '');
 				}
-
-
 			}
-			form['order[terms]'] = '1';
 
 			if (this.cardinal.id) {
 				form['cardinal_id'] = this.cardinal.id;

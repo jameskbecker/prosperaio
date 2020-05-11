@@ -1,39 +1,37 @@
 const cart = require('./cart');
 const checkout = require('./checkout');
-const pollStatus = require('./poll');
 const settings = require('electron-settings');
 const puppeteer = require('puppeteer-extra');
+
 const pluginStealth = require("puppeteer-extra-plugin-stealth")
-const { cookies, keywords, convertSize, logger } = require('../../other');
+puppeteer.use(pluginStealth())
+const { cookies, keywords, utilities, convertSize, logger } = require('../../other');
 const { URLMonitor } = require('../../monitors/supreme');
-exports.init = function() {
+
+
+function setupBrowser() {
 	return new Promise(async (resolve) => {
-		puppeteer.use(pluginStealth())
-		this.executablePath = settings.get('browser-path');
-		let windowSize = '500,800';
 		this.browser = await puppeteer.launch({
-			headless: true,
+			headless: false,
 			executablePath: this.executablePath,
 
 			args: [
-				`--window-size=${windowSize}`,
+				`--window-size=500,800`,
 				'--disable-infobars'
-				// '--no-sandbox', 
-				// '--disable-setuid-sandbox'
 			]
 		});
 		this.page = (await this.browser.pages())[0];
 		this.page.emulate({
 			viewport: {
-				width: parseInt(windowSize.split(',')[0]),
-				height: parseInt(windowSize.split(',')[1]),
+				width: 500,
+				height: 800,
 				isMobile: true,
 				hasTouch: true,
 				isLandscape: false
 			},
 			userAgent: this.userAgent
 		})
-		
+
 		function buildJSAddress() {
 			let rememberedFields = [
 				this.profile.billing.first + ' ' + this.profile.billing.last, //#order_billing_name
@@ -42,14 +40,14 @@ exports.init = function() {
 				this.profile.billing.address1, //#order_billing_address
 				this.profile.billing.address2, //#order_billing_address_2
 				this.profile.billing.city, //#order_billing_city
-				undefined, //#order_billing_state
+				this.profile.billing.state, //#order_billing_state
 				this.profile.billing.zip, //#order_billing_zip
 				this.profile.billing.country.toUpperCase(), //#order_billing_country
 			]
 			if (this.region = 'EU') rememberedFields.push('');
 			return rememberedFields.join('|')
 		}
-		
+
 		await this.page.setCookie({
 			"domain": this.baseUrl.split('://')[1],
 			"httpOnly": false,
@@ -62,19 +60,20 @@ exports.init = function() {
 
 		this.page.on('close', () => {
 			if (this.shouldStop === false) {
-				this.setStatus('ERROR: BROWSER CLOSED.', 'ERROR');
+				this.setStatus('Error: Browser Closed.', 'ERROR');
 			}
 		});
 		this.browser.on('disconnected', () => {
 			if (this.shouldStop === false) {
-				this.setStatus('ERROR: BROWSER DISCONNECTED.', 'ERROR');
+				this.setStatus('Error: Browser Disconnected.', 'ERROR');
 			}
 		})
 
 		resolve();
 	})
 }
-exports.findProduct = function () {
+
+function fetchStockData() {
 	return new Promise((resolve, reject) => {
 		async function runStage() {
 			let searchInput = this.products[0].searchInput;
@@ -113,7 +112,7 @@ exports.findProduct = function () {
 	})
 }
 
-exports.getProductData = function () {
+function fetchProductData() {
 	return new Promise((resolve, reject) => {
 		this.setStatus('Fetching Product Data.', 'WARNING');
 		const runStage = async function () {
@@ -188,113 +187,8 @@ exports.getProductData = function () {
 
 	})
 }
-// exports.findProduct = function () {
-// 	return new Promise((resolve, reject) => {
-// 		const runStage = async function () {
-// 			try {
-// 				this.startTS = Date.now();
-// 				let searchInput = this.taskData.products[0].searchInput;
-// 				if (searchInput.includes('+') || searchInput.includes('-')) {
-// 					this.setStatus('Searching for Product.', 'WARNING');
-// 					let productOverview = await this.Monitor.checkStockEndpoint('mobile/products.json');
-// 					Object.assign(this.productData, productOverview);
-// 					this.setProductName(this.productData.productName);
-// 					resolve();
-// 				}
-// 				else if (searchInput.includes('supremenewyork.com')) {
-// 					let desktopUrlExp = /https:\/\/www\.supremenewyork\.com\/shop\/\w{1,}\/(\w{1,})\/?(\w{1,})?/
-// 					let mobileUrlExp = /https:\/\/www\.supremenewyork\.com\/mobile#products\/(\w{1,})\/?(\w{1,})?/;
 
-// 					if (desktopUrlExp.test(this.products[0].searchInput) === true) {
-// 						this.productData.productId = this.products[0].searchInput.match(desktopUrlExp)[1];
-// 						resolve();
-// 					}
-// 					else {
-// 						if (mobileUrlExp.test(this.products[0].searchInput) === true) {
-// 							this.productData.productId = this.products[0].searchInput.match(mobileUrlExp)[1];
-// 							this.setProductName(this.productData.productName);
-// 						}
-// 						else {
-// 							this.setStatus('INVALID URL', 'ERROR');
-// 							reject();
-// 						}
-// 					}
-// 				}
-// 				else {
-// 					this.setStatus('Invalid Search Input.', 'ERROR');
-// 					reject(null);
-// 				}
-// 			}
-// 			catch (err) {
-// 				switch (err.code) {
-// 					case 'PRODUCT NOT FOUND':
-// 						this.setStatus('Product Not Found.', 'ERROR');
-// 						return setTimeout(runStage.bind(this), this.taskData.delays.monitor);
-
-// 					case 'CATEGORY NOT FOUND':
-// 						this.setStatus('Category Not Found.', 'ERROR');
-// 						return setTimeout(runStage.bind(this), this.taskData.delays.monitor);
-
-// 					case 'WEBSTORE CLOSED':
-// 						this.setStatus('Store Closed.', 'ERROR');
-// 						return setTimeout(runStage.bind(this), this.taskData.delays.monitor);
-
-// 					case 'ETIMEDOUT':
-// 						this.setStatus('Timed Out.', 'ERROR');
-// 						return setTimeout(runStage.bind(this), this.taskData.delays.error);
-
-// 					case 'STOP':
-// 						return this.stop();
-
-// 					default:
-// 						console.log(err)
-// 						return setTimeout(runStage.bind(this), this.taskData.delays.error);
-// 				}
-// 			}
-// 		}
-// 		runStage.bind(this)();
-// 	})
-// }
-
-// exports.getProductData = function () {
-// 	return new Promise((resolve, reject) => {
-// 		const runStage = async function () {
-// 			try {
-// 				this.setStatus('Fetching Product Data.', 'WARNING')
-// 				let productDetails = await this.Monitor.fetchProductData(this.productData.productId);
-// 				Object.assign(this.productData, productDetails);
-// 				this.setSizeName(this.productData.sizeName);
-// 				resolve();
-// 			}
-// 			catch (err) {
-// 				switch (err.code) {
-// 					case 'OUT OF STOCK':
-// 						this.setStatus('Out of Stock.', 'ERROR');
-// 						setTimeout(exports.getProductData.bind(this), this.taskData.delays.monitor);
-// 						break;
-// 					case 'SIZE NOT FOUND':
-// 						this.setStatus('Size Not Found.', 'ERROR');
-// 						setTimeout(exports.getProductData.bind(this), this.taskData.delays.monitor);
-// 						break;
-// 					case 'STYLE NOT FOUND':
-// 						this.setStatus('Variant Not Found.', 'ERROR');
-// 						setTimeout(exports.getProductData.bind(this), this.taskData.delays.monitor);
-// 						break;
-// 					case 'VARIANT NOT FOUND':
-// 						this.setStatus('Variant Not Found.', 'ERROR');
-// 						setTimeout(runStage.bind(this), this.taskData.delays.monitor);
-// 						break;
-// 					case 'STOP':
-// 						return this.stop();
-// 				}
-// 			}
-// 		}
-// 		runStage.bind(this)();
-
-// 	})
-// }
-
-exports.cartProduct = async function () {
+function cartProduct() {
 	return new Promise(async (resolve, reject) => {
 		const runStage = async function () {
 			if (this.shouldStop === true) {
@@ -329,161 +223,107 @@ exports.cartProduct = async function () {
 	})
 }
 
-exports.checkoutProduct = function () {
+function checkoutProduct() {
 	return new Promise((resolve, reject) => {
-		async function runStage(callback) {
+		async function runStage() {
 			if (this.shouldStop === true) {
 				let stopErr = new Error();
 				stopErr.code = 'STOP';
-				reject(stopErr);
+				return reject(stopErr);
 			}
-			else {
-				try {
-					//			cookies.set.bind(this)('http://www.supremenewyork.com', 'lastVisitedFragment', 'checkout');
-					await checkout.fillForm.bind(this)();
-					
 
-					if (this.hasCaptcha === true) {
-						this.setStatus('Waiting for Captcha.', 'WARNING');
-						await this.requestCaptcha();
-					}
-					this.setStatus('Delaying Checkout', 'WARNING');
-					await utilities.sleep(this.taskData.delays.checkout);
-					this.setStatus('Submitting Checkout', 'WARNING');
-					
-					this.checkoutAttempts++;
-					this.checkoutTime = Date.now();
-					
-					await checkout.submitForm.bind(this)();	
-					console.log(this.checkoutData);
-					this.setStatus('PROCESSING', 'WARNING');
-
-					//callback.bind(this)();
-					resolve();
-				}
-				catch (err) {
-					console.log('caught error')
-					switch (err.code) {
-						case 'QUEUED':
-							setTimeout(callback.bind(this), this.taskData.delays.error);
-							break;
-						case 'OOS':
-							this.setStatus('Out of Stock.', 'ERROR');
-							this.restockMode = true;
-							this.taskData.delays.cart = 0;
-							this.taskData.delays.checkout = 0;
-							if (taskData.setup.restockMode === 'cart') {
-								setTimeout(exports.addCart.bind(this), this.taskData.delays.error);
-							}
-							else {
-								setTimeout(exports.getProductData)
-							}
-							break;
-						case 'CARD DECLINE':
-							this.setStatus('Payment Error.')
-							reject('FAILED');
-							break;
-						case 'PAYMENT ERROR':
-							this.setStatus(`Payment Error.`, 'ERROR');
-							eject(null);
-
-						case 'INVALID PAYMENT':
-							this.setStatus('Billing Error', 'ERROR');
-							this.isActive = false;
-							reject(null);
-							break;
-						case 'TERMS UNACCEPTED':
-							this.setStatus('TOS Error.', 'ERROR');
-							this.isActive = false;
-							reject(null);
-							break;
-						case 'INVALID BILLING':
-							this.setStatus('Billing Error', 'ERROR');
-							this.isActive = false;
-							reject(null);
-							break;
-
-						case 'PAID':
-						default:
-							console.log(err)
-							resolve();
-					}
-				}
-
-			}
-		}
-
-		async function checkStatus() {
 			try {
-				console.log(this.slug);
-				this.setStatus('PROCESSING', 'WARNING');
-				await pollStatus.getPoll.bind(this);
+				await checkout.fillForm.bind(this)();
+
+				if (this.hasCaptcha) {
+					this.setStatus('Waiting for Captcha', 'WARNING');
+					await this.requestCaptcha();
+				}
+
+				this.setStatus('Delaying Checkout', 'WARNING');
+				await utilities.sleep(this.taskData.delays.checkout || 0);
+
+				this.setStatus('Submitting Checkout', 'WARNING');
+				this.checkoutTime = Date.now();
+				this.checkoutAttempts++;
+
+				await checkout.submitForm.bind(this)();
+				resolve();
 			}
 			catch (err) {
+				console.log('caught error')
 				switch (err.code) {
-					case 'QUEUED':
-						setTimeout(checkStatus.bind(this), this.taskData.delays.error);
-						break;
+
 					case 'OOS':
-						this.setStatus('OUT OF STOCK', 'ERROR');
+						this.setStatus('Out of Stock.', 'ERROR');
 						this.restockMode = true;
 						this.taskData.delays.cart = 0;
 						this.taskData.delays.checkout = 0;
 						if (taskData.setup.restockMode === 'cart') {
-							setTimeout(exports.addCart.bind(this), this.taskData.delays.error);
+							return setTimeout(exports.addCart.bind(this), this.taskData.delays.error);
 						}
 						else {
-							setTimeout(exports.getProductData)
+							return setTimeout(exports.getProductData)
 						}
 						break;
-					case 'CARD DECLINE':
-						this.setStatus(`CARD DECLINED [${this.checkoutAttempts}]`, 'ERROR');
-						if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
-							setTimeout(runStage.bind(this, checkStatus), this.taskData.delays.error);
-						}
-						else {
-							resolve();
-						}
-						break;
-					case 'PAYMENT ERROR':
-						this.setStatus(`PAYMENT ERROR [${this.checkoutAttempts}]`, 'ERROR');
-						if (this.checkoutAttempts < this.taskData.checkoutAttempts + 0) {
 
-							setTimeout(runStage.bind(this, checkStatus), this.taskData.delays.error);
-						}
-						else reject(null);
-						break;
-					default:
-						console.log(err);
-						reject();
+
 				}
 			}
 		}
 
-		runStage.bind(this, checkStatus)();
+
+		runStage.bind(this)();
 	})
 }
 
-exports.processStatus = function () {
+function processStatus() {
 	return new Promise((resolve, reject) => {
 		async function runStage(isCheckoutResponse = false) {
 			try {
-				if (!isCheckoutResponse) await checkout.getStatus.bind(this)();
+				if (!isCheckoutResponse) {
+					checkout.pollStatus.bind(this)()
+						.then(response => {
+							this.checkoutData = response.body;
+						})
+						.catch(error => {
+							return setTimeout(runStage.bind(this), 1000);
+						})
+				}
 				let error;
 				switch (this.checkoutData.status) {
+					case 'paid':
+						if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
+						this.setStatus('Success', 'SUCCESS');
+						if (this.productColour) {
+							let field = {
+								name: "Colour:",
+								value: this.productColour,
+								inline: true
+							}
+							privateFields.push(field);
+							publicFields.push(field);
+						}
+
+						let field = {
+							name: "Status:",
+							value: "Paid",
+							inline: true
+						}
+						privateFields.push(field)
+
+						this.postPublicWebhook(publicFields);
+						this.postPrivateWebhook(privateFields);
+						this.addToAnalystics();
+						resolve();
+						return;
+
 					case 'queued':
-						this.setStatus('Queued.', 'WARNING');
+						this.setStatus('Processing.', 'WARNING');
 						logger.warn(this.slug ? `Queued - ${this.slug}` : 'Queued.');
 						if (this.checkoutData.hasOwnProperty('slug')) this.slug = this.checkoutData.slug;
 						return setTimeout(runStage.bind(this), 1000);
 
-					case 'cardinal_queued':
-						this.setStatus('Queued for Cardinal.', 'WARNING');
-						return setTimeout(runStage.bind(this), 1000);
-
-					case 'cca':
-						this.setStatus('Waiting for Authentication.', 'WARNING');
-						return setTimeout(runStage.bind(this), 1000);
 
 					case 'failed':
 						if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
@@ -494,13 +334,17 @@ exports.processStatus = function () {
 						}
 						else return this.setStatus('Billing Error.', 'ERROR');
 
-					case 'paid':
-						if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
-						this.setStatus('Check Email.', 'SUCCESS');
-						this.postSuccess();
-						this.postCustomWebhook();
-						resolve();
-						return;
+					case 'cardinal_queued':
+						this.setStatus('Queued for Cardinal.', 'WARNING');
+						return setTimeout(runStage.bind(this), 1000);
+
+					case 'cca':
+						this.setStatus('Waiting for Authentication.', 'WARNING');
+						return setTimeout(runStage.bind(this), 1000);
+
+
+
+
 
 					case 'dup':
 						this.setStatus('Duplicate Order.', 'ERROR');
@@ -556,9 +400,18 @@ exports.processStatus = function () {
 				}
 			}
 			catch (err) {
-				console.log(err)
+				return (setTimeout(runStage.bind(this), 1000))
 			}
 		}
 		runStage.bind(this)(true);
 	})
+}
+
+module.exports = {
+	setupBrowser,
+	fetchStockData,
+	fetchProductData,
+	cartProduct,
+	checkoutProduct,
+	processStatus
 }

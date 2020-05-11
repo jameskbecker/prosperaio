@@ -6,7 +6,7 @@ exports.getCookies = function () {
 	return new Promise((resolve, reject) => {
 		const j = this.request.jar()
 		this.request({
-			uri: 'https://www.off---white.com/en/DE',
+			url: 'https://www.off---white.com/en/DE',
 			method: 'GET',
 			jar: j,
 			followRedirect: true,
@@ -28,7 +28,7 @@ exports.getCookies = function () {
 
 exports.useCookies = function () {
 	console.log(this.request({
-		uri: this.keyUrl,
+		url: this.keyUrl,
 		jar: this.cookies,
 		followAllRedirects: true,
 		followRedirect: true,
@@ -99,7 +99,7 @@ exports.checkEndpoint = function() {
 exports.checkDOM = function() {
 	return new Promise((resolve, reject) => {	
 		this.request({
-			uri: `${this.taskData.searchInput}`,
+			url: `${this.taskData.searchInput}`,
 			headers: {
 				'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
 				'accept-encoding': 'gzip',

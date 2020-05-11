@@ -37,7 +37,11 @@ exports.sleep = function (delay) {
 }
 
 exports.formatProxy = function (input) {
-	if (typeof input === 'string' && ['localhost', '', ' '].indexOf(input) != -1) {
+	if (!input) {
+		return null
+	}
+	else if (typeof input === 'string' && ['localhost', '', ' '].indexOf(input) != -1) {
+		console.log('no proxy')
 		return null;
 	}
 	else {
@@ -67,7 +71,7 @@ exports.sendTestWebhook = function () {
 					type: 'rich',
 					color: '16007763',
 					thumbnail: {
-						url: 'https://i.imgur.com/Ce8ZncT.png',
+						url: 'https://i.imgur.com/NGGew9J.png',
 					},
 					fields: [
 						{
@@ -98,8 +102,8 @@ exports.sendTestWebhook = function () {
 
 					],
 					footer: {
-						text: `XXXAIO Success Monitor • ${new Date().toUTCString()}`,
-						icon_url: 'https://i.imgur.com/Ce8ZncT.png'
+						text: `ProsperAIO Success Monitor • ${new Date().toUTCString()}`,
+						icon_url: 'https://i.imgur.com/NGGew9J.png'
 					}
 
 				}]

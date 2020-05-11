@@ -8,7 +8,10 @@ function createWindow(taskId) {
 		height: 555,
 		frame: false,
 		show: false,
-		alwaysOnTop: true
+		alwaysOnTop: true,
+		webPreferences: {
+			nodeIntegration: true
+		}
 	})
 	global['CARDINAL_SOLVERS'][taskId] = threeDSWindow;
 }

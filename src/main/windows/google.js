@@ -8,7 +8,8 @@ function createWindow(accountName) {
 		frame: true,
 		show: false,
 		webPreferences: {
-			session: session.fromPartition(`persist: ${accountName}`)
+			session: session.fromPartition(`persist: ${accountName}`),
+			nodeIntegration: true
 		}
 	})
 	module.exports.window = googleWindow;

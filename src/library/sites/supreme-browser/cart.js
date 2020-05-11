@@ -23,13 +23,11 @@ exports.add = function () {
 				await this.page.select('select[name="size-options"]', '' + this.sizeId);
 
 				this.setStatus('Delaying ATC.', 'WARNING');
-				await this.page.waitFor(4930);
+				await this.page.waitFor(this.taskData.delays.cart || 0);
 				this.setStatus('Carting.', 'WARNING');
 				await this.page.tap('span.cart-button');
-				//await this.page.waitForResponse(`https://${this.baseUrl}/shop/${this.productId}/add.json`)
-				await this.page.waitFor('#checkout-now', { visibile: true});
-				this.setStatus('Carted. Product', 'SUCCESS');
-				await this.page.tap('#checkout-now');
+				await this.page.waitForResponse(`${this.baseUrl}/shop/${this.productId}/add.json`)
+				this.setStatus('Added to Cart.', 'SUCCESS');	
 				resolve();
 			}
 		}

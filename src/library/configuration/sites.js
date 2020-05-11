@@ -1,14 +1,14 @@
 module.exports = {
 	default: {
 		'kickz': {
-			enabled: false,
+			enabled: true,
 			type: 'kickz',
 			label: 'Kickz',
 			baseUrl: 'https://www.kickz.com'
 		},
 
 		'kickz-premium': {
-			enabled: false,
+			enabled: true,
 			type: 'kickz',
 			label: 'Kickz Premium',
 			baseUrl: 'https://www.kickzpremium.com'
@@ -22,7 +22,7 @@ module.exports = {
 		},
 
 		'supreme-local': {
-			enabled: true,
+			enabled: false,
 			type: 'supreme',
 			label: 'Supreme Local',
 			baseUrl: 'http://127.0.0.1:8000',
