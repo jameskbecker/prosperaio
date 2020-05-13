@@ -52,13 +52,15 @@ app.once('ready',async function() {
 		loginWindow.show();
 	}
 	ipcMain.on('authenticate', async (event, args) => {
-		auth.authenticate(args.key, (error) => {
+		auth.authenticate(args.key,async (error) => {
 			if (error) {
 				loginWindow.window.webContents.send('authentication error', error);
 			}
 			else {
 				settings.set('userKey', args.key);
 				loginWindow.window.close();
+				if (!worker.window)	worker.create();
+				await worker.load();
 				ipc.init();
 				discord.setPresence();
 				mainWindow.show();

@@ -20,8 +20,8 @@ function loadWindow(id, callback) {
 	const window = global['CARDINAL_SOLVERS'][id];
 	window.loadFile(config.threeDSWindowPath);
 	window.webContents.once('dom-ready', function() {
-		if (!isDev) {
-			window.webContents.openDevTools();
+		if (isDev) {
+			window.webContents.openDevTools({mode: 'detached'});
 		}
 		window.show();
 		callback();

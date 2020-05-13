@@ -476,7 +476,7 @@ label, .label {
 .table-header {
 	height: 5vh;
 	font-family: "Montserrat Bold";
-	font-size: 1.4vh;
+	font-size: 1.5vh;
 	align-content: center;
 	justify-content: center;
 	background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
@@ -486,7 +486,7 @@ label, .label {
 .table-body {
 	height: 60vh;
 	font-family: "Montserrat Medium";
-	font-size: 1.25vh;
+	font-size: 1.4vh;
 	color: whitesmoke;
 	background-color: var(--tertiary-grey);
 	overflow-y: auto;
@@ -509,7 +509,7 @@ label, .label {
 	text-align: center;
 	text-overflow: ellipsis;
 	overflow: hidden;
-	height: 4vh;
+	height: 5vh;
 }
 
 
@@ -524,7 +524,7 @@ label, .label {
 	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: center;
-	height: 4vh;
+	height: 5vh;
 	border: 0;
 	padding: 0;
 	overflow: hidden;
@@ -544,7 +544,7 @@ label, .label {
 }
 
 .cell-body {
-	height: 4vh;
+	height: 5vh;
 	border-bottom: 1px solid var(--tertiary-grey) !important;
 	
 	
@@ -566,6 +566,7 @@ tbody .row:nth-child(even) {
 }
 
 .action-button {
+	font-size: 1.4vh;
 	color: var(--primary-color);
 	cursor: pointer;
 	opacity: 0.75;

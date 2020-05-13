@@ -14,7 +14,7 @@ const { sites } = require('../src/library/configuration');
 /* --------- GENERAL --------- */
 ipc.init();
 ipcRenderer.send('check for browser executable');
-if (!settings.has('tasks')) settings.set('tasks', []);
+if (!settings.has('tasks') || (settings.has('tasks') && settings.get('tasks').constructor === [].constructor && settings.get('tasks').length == 0)) settings.set('tasks', {});
 if (!settings.has('profiles')) settings.set('profiles', {});
 
 //footerVersion.innerHTML = 'Version 3.4.0'

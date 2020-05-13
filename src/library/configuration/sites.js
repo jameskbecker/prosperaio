@@ -1,14 +1,14 @@
 module.exports = {
 	default: {
 		'kickz': {
-			enabled: true,
+			enabled: false,
 			type: 'kickz',
 			label: 'Kickz',
 			baseUrl: 'https://www.kickz.com'
 		},
 
 		'kickz-premium': {
-			enabled: true,
+			enabled: false,
 			type: 'kickz',
 			label: 'Kickz Premium',
 			baseUrl: 'https://www.kickzpremium.com'

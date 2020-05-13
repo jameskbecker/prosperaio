@@ -143,6 +143,7 @@ module.exports = {
 
 		ipcMain.on('cardinal.setupComplete', (event, args) => {
 			logger.debug('[MAIN] [IPC] cardinal.setupComplete');
+			global['CARDINAL_SOLVERS'][args.taskId].hide();
 			worker.window.webContents.send(`cardinal.setupComplete(${args.taskId})`, {
 				cardinalId: args.cardinalId
 			})
@@ -150,6 +151,7 @@ module.exports = {
 
 		ipcMain.on('cardinal.continue', (event, args) => {
 			logger.debug('[MAIN] [IPC] cardinal.continue');
+			global['CARDINAL_SOLVERS'][args.taskId].show();
 			global['CARDINAL_SOLVERS'][args.taskId].webContents.send('cardinal.continue', args)
 		});
 

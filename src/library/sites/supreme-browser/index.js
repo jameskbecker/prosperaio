@@ -47,8 +47,7 @@ class SupremeBrowser extends Task {
 			await utilities.setTimer.bind(this)();
 			this.setStatus('Starting Task.', 'WARNING');
 			await logic.fetchStockData.bind(this)();
-			await logic.fetchProductData.bind(this)();
-			return;
+			await logic.fetchProductData.bind(this)();	
 			await logic.cartProduct.bind(this)();
 
 			await logic.checkoutProduct.bind(this)();
