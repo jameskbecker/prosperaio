@@ -214,7 +214,7 @@ function cartProduct() {
 						delete cookieValue.cookie;
 						this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
 						console.log(this.cookieSub);
-						reject();
+						resolve();
 					}
 				})
 				.catch(error => {

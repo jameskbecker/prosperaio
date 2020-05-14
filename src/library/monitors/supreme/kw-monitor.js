@@ -27,8 +27,8 @@ class SupremeKWMonitor {
 	run() {
 		if (!this._isRunning && !this._shouldStop) {
 			this._isRunning = true;
-			this._fetchStockData('shop');
-			// this._fetchStockData('mobile_stock');
+			//this._fetchStockData('shop');
+			 this._fetchStockData('mobile_stock');
 			// this._fetchStockData('mobile/products');
 		}
 	}

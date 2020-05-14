@@ -1,6 +1,6 @@
 {
 	"name": "ProsperAIO",
-	"version": "2.5.63",
+	"version": "2.5.64",
 	"main": "./src/main/index.js",
 	"description": "Simple Design. Easy to Use. Insane Functionality.",
 	"author": "ProsperSoftware",
