@@ -1,5 +1,7 @@
 const builder = require('./builder');
-const {utilities } = require('../../other')
+const cheerio = require('cheerio');
+const ipcWorker = require('electron').ipcRenderer;
+const { logger, utilities } = require('../../other')
 function fetchMobileTotals() {
 	let options = {
 		url: `${this.baseUrl}/checkout/totals_mobile.js`,
@@ -8,6 +10,47 @@ function fetchMobileTotals() {
 		qs: builder.bind(this)('mobile-totals')
 	}
 	return this.request(options);
+}
+
+function handleMobileTotals(response) {
+	return new Promise((resolve, reject) => {
+		if (this.shouldStop) return Promise.reject(new Error('STOP'));
+		if (response) {
+			const body = response.body;
+			const $ = cheerio.load(body);
+			let serverJWT = $('#jwt_cardinal').val();
+			let orderTotal = $('#total').text();
+
+			if (orderTotal) {
+				this.orderTotal = orderTotal;
+				logger.info(`Order Total:\n${this.orderTotal}`);
+			}
+			if (serverJWT) {
+				this.cardinal.serverJWT = serverJWT;
+				logger.info(`Initial JWT:\n${this.cardinal.serverJWT}`);
+			}
+			resolve();
+
+		}
+		else {
+			resolve();
+		}
+	})
+}
+
+function setupThreeDS() {
+	return new Promise(resolve => {
+		logger.debug('Submitting Initial JWT.');
+		ipcWorker.send('cardinal.setup', {
+			jwt: this.cardinal.serverJWT,
+			profile: this.profileName,
+			taskId: this.id
+		})
+		ipcWorker.once(`cardinal.setupComplete(${this.id})`, (event, args) => {
+			this.cardinal.id = args.cardinalId;
+			resolve();
+		})
+	})
 }
 
 function fetchForm() {
@@ -20,6 +63,37 @@ function fetchForm() {
 	return this.request(options);
 }
 
+function handleFetchForm(response) {
+	return new Promise((resolve, reject) => {
+		if (this.shouldStop) return reject(new Error('STOP'));
+		let body = response.body;
+		let formElements = [];
+		let $ = cheerio.load(body);
+		let checkoutWrapper = $("#checkoutViewTemplate").html();
+		
+		$ = cheerio.load(checkoutWrapper);
+		let checkoutForm = $('form[action="https://www.supremenewyork.com/checkout.json"]').html();
+		$ = cheerio.load(checkoutForm);
+
+		$(':input[type!="submit"]').each(function () {
+			let formElement = $(this)[0].attribs;
+			let output = {};
+			let attributes = ["name", "id", "placeholder", "value", "style"]
+			attributes.forEach(attribute => {
+				if (Object.hasOwnProperty.bind(formElement)(attribute)) {
+					output[attribute] = formElement[attribute]
+				}
+			})
+			if (Object.keys(output).length > 0) {
+				logger.verbose(`Parsed Form Element:\n${output.name}`)
+				formElements.push(output);
+			}
+		})
+		this.formElements = formElements;
+		resolve();
+	})
+}
+
 function submit(endpoint) {
 	let path = endpoint !== 'cardinal' ? '/checkout.json' : '/checkout/' + this.slug + '/cardinal.json';
 	let options = {
@@ -27,6 +101,7 @@ function submit(endpoint) {
 		method: 'POST',
 		proxy: utilities.formatProxy(this._getProxy()),
 		json: true,
+		timeout: 7000,
 		form: builder.bind(this)('parsed-checkout'),
 		headers: {
 			'accept-encoding': 'gzip, deflate, br',
@@ -84,4 +159,4 @@ function pollStatus() {
 // 	console.log(error)
 // })
 
-module.exports = { fetchMobileTotals, fetchForm, submit, pollStatus }
+module.exports = { fetchMobileTotals, handleMobileTotals, setupThreeDS, fetchForm, handleFetchForm, submit, pollStatus }

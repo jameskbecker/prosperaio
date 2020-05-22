@@ -1,7 +1,7 @@
 'use strict'
 const _ = require('underscore');
 const electron = require('electron');
-const { ipcRenderer } = electron;
+const { ipcRenderer, remote } = electron;
 const mousetrap = require('mousetrap');
 const settings = require('electron-settings');
 
@@ -46,8 +46,9 @@ navigationSelectors.forEach((page, i) => {
 
 			activeNavigation.classList.remove('nav-active');
 			page.classList.add('nav-active');
-			activePage.classList.add('page-hidden');
+
 			selectedPage.classList.remove('page-hidden');
+			activePage.classList.add('page-hidden');
 		}
 	}
 
@@ -56,17 +57,17 @@ navigationSelectors.forEach((page, i) => {
 });
 
 /* --------- Tasks Page --------- */
-importTaskBtn.onclick = function() {
-	ipcRenderer.send('import data', {
-		type: 'Tasks'
-	});
-}
+// importTaskBtn.onclick = function() {
+// 	ipcRenderer.send('import data', {
+// 		type: 'Tasks'
+// 	});
+// }
 
-exportTaskBtn.onclick = function() {
-	ipcRenderer.send('export data', {
-		type: 'Tasks'
-	});
-}
+// exportTaskBtn.onclick = function() {
+// 	ipcRenderer.send('export data', {
+// 		type: 'Tasks'
+// 	});
+// }
 
 if (!settings.has('globalMonitorDelay')) {
 	settings.set('globalMonitorDelay', globalMonitorDelay.value);
@@ -308,6 +309,11 @@ saveProfileBtn.onclick = function () {
 	}
 };
 
+document.getElementById('deleteAllProfiles').onclick = function() {
+	settings.set('profiles', {}, {prettify: true});
+	content.profiles();
+}
+
 // importProfileBtn.onclick = function () {
 // 	ipcRenderer.send('import data', {
 // 		type: 'Profiles'
@@ -375,17 +381,17 @@ harvester_SaveBtn.onclick = function () {
 }
 
 /* --------- Page: PROXIES --------- */
-importProxyBtn.onclick = function () {
-	ipcRenderer.send('import data', {
-		type: 'Proxies'
-	});
-}
+// importProxyBtn.onclick = function () {
+// 	ipcRenderer.send('import data', {
+// 		type: 'Proxies'
+// 	});
+// }
 
-exportProxyBtn.onclick = function () {
-	ipcRenderer.send('export data', {
-		type: 'Proxies'
-	});
-}
+// exportProxyBtn.onclick = function () {
+// 	ipcRenderer.send('export data', {
+// 		type: 'Proxies'
+// 	});
+// }
 
 document.getElementById('proxyTestAll').onclick = function() {
 	let listName = document.getElementById('proxyListSelectorMain').value;
@@ -454,6 +460,8 @@ monitorProxyList.onchange = function() {
 
 installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
 resetBtn.onclick = function () { ipcRenderer.send('reset settings'); }
+
+document.getElementById('version').innerHTML = `Version ${remote.app.getVersion()}`
 
 customDiscord.value = settings.has('discord') ? settings.get('discord') : '';
 customDiscord.onchange = function () {

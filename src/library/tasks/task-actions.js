@@ -45,6 +45,7 @@ function runTask (id) {
 }
 
 function stopTask (id) {
+	console.log('STOPPING', id)
 	if (activeTasks[id]) {
 		activeTasks[id].callStop();
 	}
@@ -86,10 +87,12 @@ function runAll() {
 }
 
 function stopAll() {
-	for (id in activeTasks) {
+	for (let i = 0; i < Object.keys(activeTasks).length; i++) {
+		let id = Object.keys(activeTasks)[i];
 		if (activeTasks[id]) {
-			activeTasks[id].callStop();
+		 stopTask(id)
 		}
+		else console.log('TASK NOT ACTIVE')
 	}
 }
 

@@ -4,10 +4,10 @@ const ipcWorker = require('electron').ipcRenderer;
 const { logger, utilities } = require('../../other');
 
 class SupremeUrlMonitor {
-	constructor(_productUrl) {
-		logger.info('[Monitor] Inititalising Url Monitor.');
+	constructor(_productUrl, proxyList) {
+		logger.info('[Monitor] ['+proxyList+'] Inititalising Url Monitor.');
 		this.productUrl = _productUrl;
-		this._proxyList = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : null;
+		this._proxyList = proxyList;
 		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
 			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
@@ -118,7 +118,7 @@ class SupremeUrlMonitor {
 				'x-requested-with': 'XMLHttpRequest'
 			}
 		}
-		console.log({proxy: options})
+		console.log({ proxy: options.proxy })
 		request(options)
 		.then(response => {
 			if (!response.body.hasOwnProperty('styles')) { 
@@ -126,10 +126,11 @@ class SupremeUrlMonitor {
 				let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
 				return this.run();
 			}
+	
 			this._returnData(response.body.styles)
 		})
 		.catch(error => {
-			logger.error(`[Monitor] [${this.productUrl}] ${error.message}.`);
+			logger.error(`[Monitor1] [${this.productUrl}] ${error.message}.`);
 			this._setStatus('Error', 'ERROR', Object.keys(this.callbacks))
 			this.isRunning = false;
 			return this.run();

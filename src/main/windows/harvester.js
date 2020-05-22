@@ -39,7 +39,7 @@ class Harvester {
 		this.serverPort = Math.floor(Math.random() * 9999) + 1000;
 		this.server.listen(this.serverPort);
 
-		let captchaSession = session.fromPartition("persist:" + this.sessionName);
+		let captchaSession = session.fromPartition("persist: " + this.sessionName);
 		this.window = new BrowserWindow({
 			backgroundColor: '#202020',
 			height: 600,
@@ -56,11 +56,13 @@ class Harvester {
 		});
 		this.window.webContents.session.setProxy({
 			proxyRules: 'http=localhost:' + this.serverPort,
-			proxyBypassRules: '.google.com, .gstatic.com'
+			proxyBypassRules: '.google.com, .gstatic.com, .youtube.com'
 		})
 		.then(() => {
 			
-			this.window.loadURL(`http://${this.config.domain}:${this.serverPort}`);
+			this.window.loadURL(`http://${this.config.domain}:${this.serverPort}`, {
+				//userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Safari/604.1'
+			});
 			//this.window.webContents.once('dom-ready', () => {
 				this.window.show();
 				if (isDev) this.window.webContents.openDevTools({mode:'undocked'});

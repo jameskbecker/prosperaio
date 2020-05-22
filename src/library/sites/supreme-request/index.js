@@ -69,7 +69,8 @@ class SupremeRequest extends Task {
 
 			if (!global.monitors.supreme.kw) {
 				global.monitors.supreme.kw = new KWMonitor({
-					baseUrl: this.baseUrl
+					baseUrl: this.baseUrl,
+					proxyList: this._proxyList
 				});
 			}
 			global.monitors.supreme.kw._shouldStop = false;
@@ -79,9 +80,7 @@ class SupremeRequest extends Task {
 			logger.warn(`[Task ${this.id}] Starting.`);
 			await logic.findProduct.bind(this)();
 			await logic.getProductData.bind(this)();
-			await logic.fetchTicket1.bind(this)()
 			await logic.cartProduct.bind(this)();
-			await logic.fetchTicket2.bind(this)()
 			await logic.checkoutProduct.bind(this)();
 			await logic.processStatus.bind(this)();
 
@@ -123,6 +122,7 @@ class SupremeRequest extends Task {
 			else {
 				console.log('failed')
 			}
+			this.isActive = false;
 
 		}
 		catch (error) {

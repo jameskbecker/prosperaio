@@ -1,5 +1,5 @@
 const builder = require('./builder');
-const { utilities } = require('../../other');
+const { cookies, utilities, logger } = require('../../other');
 const settings = require('electron-settings');
 
 function add() {
@@ -8,7 +8,7 @@ function add() {
 		method: 'POST',
 		proxy: utilities.formatProxy(this._getProxy()),
 		json: true,
-		timeout: settings.has('globalTimeoutDelay') ? parseInt(settings.get('globalTimeoutDelay')) : 5000,
+		timeout: 4000,
 		form: this.atcForm ? this.atcForm : builder.bind(this)('cart-add'),
 		headers: {
 			'accept-encoding': 'gzip, deflate, br',
@@ -17,8 +17,15 @@ function add() {
 			'user-agent': this.userAgent
 		}
 	}
-	console.log({proxy: options.proxy})
+	console.log(options)
+	logger.warn(`[T:${this.id}] Adding ${this.productId} to Cart.`);
 	return this.request(options);
+}
+
+function handleAdd(response) {
+	return new Promise(resolve => {
+		
+	})
 }
 
 function remove() {
@@ -55,4 +62,4 @@ function check() {
 	return this.request(options);
 }
 
-module.exports = { add }
+module.exports = { add, handleAdd }

@@ -50,8 +50,8 @@ const newTask_threeD = document.getElementById('threeDCheckbox')
 
 
 const newTask_SearchInput = document.querySelectorAll('input[name="taskSearchInput"]');
-const newTask_Category = document.querySelectorAll('select[name="taskCategory"]');
-const newTask_Size = document.querySelectorAll('select[name="taskSize"]');
+const newTask_Category = document.querySelectorAll('input[name="taskCategory"]');
+const newTask_Size = document.querySelectorAll('input[name="taskSize"]');
 const newTask_Style = document.querySelectorAll('input[name="taskVariant"]');
 const newTask_ProductQty = document.querySelectorAll('input[name="taskProductQty"]');
 

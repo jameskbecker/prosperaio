@@ -1,6 +1,6 @@
 * {
 	--primary-color: #3794ff !important;
-	--secondary-color: #3188eb !important;
+	--secondary-color: #2576d3 !important;
 	--warning: #f48641 !important;
 	--info: #4286f4 !important;
 	--success: #2ed347 !important;
@@ -8,13 +8,13 @@
 	--primary-grey: #262626 !important;
 	--primary-grey2: #212121 !important;
 	--secondary-grey: #211e1e !important;
-	--tertiary-grey: #1a1919 !important;
+	--tertiary-grey: #1b1919 !important;
 }
 
 body {
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+	flex-direction: column;
+	flex-wrap: nowrap;
 	cursor: default;
 	-webkit-user-select: none;
 	-webkit-user-drag: none;
@@ -22,57 +22,66 @@ body {
 	background-color: var(--secondary-grey);
 	margin: 0;
 	padding: 0;
+	height: 100vh;
 }
 
 *::-webkit-scrollbar {
-	background-color: var(--tertiary-grey);
+	background-color: transparent;
 	width: 5px;
 }
 
 
 *::-webkit-scrollbar-thumb {
-	background-color: var(--primary-color);
+	background-color: transparent;
 	opacity: 0.75;
 }
-
+#banner {
+	flex: 0 0 5%;
+	max-height: 50px;
+	width: 100vw;
+}
 .banner {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-self: center;
 	align-content: center;
-	flex: 0 0 100%;
-	height: 5vh;
+	
 	color: var(--text-grey);
 	background-color: var(--tertiary-grey);
 	/* -webkit-app-region: drag; */
 	position: sticky;
+	
 }
 
 .banner-logo {
 	flex: 1;
+	height: 100%;
 	background-image: url(../img/prosperaio_logo.png);
 	background-color: transparent;
 	background-repeat: no-repeat;
-	background-size: 2vw 2vw;
+	background-size: 50%;
 	background-position: center;
 	object-fit: scale-down;
 	-webkit-app-region: drag;
 }
 
 .banner-draggable {
-flex: 6.5 6.5 0;
+	height: 100%;
+	flex: 6.5 6.5 0;
 	-webkit-app-region: drag;
 }
 
 .banner-nav {
 	flex: 15 15 0;
+	height: 100%;
 	justify-content: flex-start;
 	overflow: hidden;
 }
 
 .banner-controls {
-	flex: 1.5;
+	flex: 2.3;
+	height: 100%;
 	justify-content: space-evenly
 }
 
@@ -83,12 +92,14 @@ flex: 6.5 6.5 0;
 	display: flex;
 	flex: 1;
 	flex-direction: row;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: center;
-	height: 5vh;
+	height: 100%;
 	font-family: "Montserrat Bold";
-	font-size: 0.8vw;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 70%;
 	cursor: pointer;
 	opacity: 0.5;
 }
@@ -96,6 +107,7 @@ flex: 6.5 6.5 0;
 .control {
 	flex: 0 0 10%;
 	justify-content: center;
+
 }
 .nav:hover, .control:hover {
 	transition: 0.5s linear;
@@ -113,8 +125,8 @@ flex: 6.5 6.5 0;
 	flex-direction: row;
 	flex-wrap: wrap;
 	overflow: hidden;
-	flex: 1 0 100%;
-	height: 92.5vh;
+	width: 100%;
+	height: 100%;
 	align-content: flex-start;
 }
 
@@ -139,7 +151,7 @@ flex: 6.5 6.5 0;
 	flex-wrap: nowrap;
 	flex: 1;
 	font-family: "Montserrat Bold";
-	font-size: 4vh;
+	font-size: 2.5vmax;
 	height: 6vh;
 	font-weight: 500 !important;
 	color: white;
@@ -155,7 +167,7 @@ flex: 6.5 6.5 0;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	flex: 2;
+	flex: 1;
 	padding-right: 2.5vw;
 	justify-content: flex-end;
 		align-self: center;
@@ -225,7 +237,7 @@ flex: 6.5 6.5 0;
 	font-family: "Montserrat Bold";
 	height: 3.5vh;
 	padding: 1vh 0;
-	font-size: 3vh;
+	font-size: 2vmax;
 	color: var(--text-grey);
 	justify-content: flex-start;
 	overflow: hidden;
@@ -242,21 +254,25 @@ flex: 6.5 6.5 0;
 	flex: 1 1 100%;
 	height: inherit;
 	min-height: 0;
+	padding: 2.5px 0;
 	
 	
 }
 
-.padding-vertical {
+/* .padding-vertical {
 	padding: 1vh 0;
-}
+} */
 
 .container-start {
 	justify-content: flex-start;
 }
 
 .container-pages {
-	height: 92.5vh;
+	padding: 0;
+	flex: 20 20 0;
+	width: 100%;
 	margin: 0;
+	overflow: hidden;
 }
 
 .container-element {
@@ -271,7 +287,7 @@ flex: 6.5 6.5 0;
 
 
 .container-element-sm {
-	max-width: 10vw;
+	max-width: 15vw;
 }
 
 .container-element-md {
@@ -290,48 +306,75 @@ flex: 6.5 6.5 0;
 	flex: 3 0 0;
 }
 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button,
+input[type=time]::-webkit-inner-spin-button, 
+input[type=time]::-webkit-outer-spin-button,
+input[type=date]::-webkit-inner-spin-button,
+input[type=date]::-webkit-outer-spin-button
 
+{ 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
 .input, .btn {
 	display: flex;
-	flex-direction: row;
-	flex: 1 1 0;
-	flex-wrap: nowrap;
 	min-height: 4vh;
+	
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex: 1 1 0;
 	align-self: center;
+	align-items: center;
 	justify-content: center;
+	
 	font-family: "Montserrat Medium";
-	font-size: 1.15vh;
+	font-size: 1.5vh;
 	background-color: var(--secondary-grey);
-	opacity: 1;
+	margin: 0; 
+	opacity: 0.85;
 	cursor: pointer;
-	-webkit-appearance: none;
 	overflow: hidden;
+
+	border: 1px solid transparent;
+	border-radius: 0.75vh;
+	box-sizing: border-box;
+	
+	-webkit-appearance: none; 
 }
 
-
-
-.input[disabled], .input[disabled="disabled"], .btn[disabled] {
-	opacity: 0.35;
-	cursor: not-allowed !important;
-	border-color: var(--text-grey);
-	color: var(--text-grey);
-}
-
-input[disabled]:hover, .input[disabled="disabled"]:hover, .btn[disabled]:hover {
-	background-image: none;
-	opacity: 0.65 !important;
-	box-shadow: none;
-}
 
 .input {
-	font-size: 1.5vh;
+	
 	color: var(--text-grey);
 	text-indent: 0.5vw;
-	border: none;
-	border-radius: 0.75vh;
+	box-shadow: 1vh 1vh 1vh var(--tertiary-grey);
 	background-color: var(--primary-grey);
 	margin: 0.1em;
 }
+
+.input:hover {
+	transition: 1.5s;
+	color: white;
+	cursor: pointer;
+	opacity: 1;
+	outline: 0 !important;
+	border: 1px solid var(--primary-color);
+}
+
+.input[disabled], .input[disabled="disabled"], .btn[disabled] {
+	cursor: not-allowed !important;
+	opacity: 0.35;
+	color: var(--text-grey);
+}
+
+.input[disabled]:hover, .input[disabled="disabled"]:hover, .btn[disabled]:hover {
+	background-image: none;
+	box-shadow: none;
+	opacity: 0.35;
+	border: 0 !important;
+}
+
 
 .input option {
 	overflow: hidden !important;
@@ -354,9 +397,30 @@ input[disabled]:hover, .input[disabled="disabled"]:hover, .btn[disabled]:hover {
 .btn {
 	align-content: center;
 	font-family: "Montserrat Bold";
-	color: var(--primary-color);
-	border: 0.15vh solid var(--primary-color);
-	border-radius: 0.75vh;
+	background-color: transparent;
+	color: white;
+	border: 0.2vh solid var(--secondary-color);
+	
+}
+
+
+.btn:hover {
+	transition: 0.5s;
+	background-color: var(--primary-color);
+	color: whitesmoke;
+	opacity: 1;
+}
+
+.btn-transparent {
+	background-image: none;
+	background-color: transparent;
+	border-color: transparent;
+	color: var(--text-grey);
+}
+
+.btn-transparent:hover {
+	background-color: transparent;
+	background-image: none;
 }
 
 .btn-square {
@@ -364,11 +428,6 @@ input[disabled]:hover, .input[disabled="disabled"]:hover, .btn[disabled]:hover {
 	max-width: 4vh !important;
 }
 
-.btn:hover {
-	color: whitesmoke;
-	background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-	opacity: 1;
-}
 
 
 
@@ -410,7 +469,7 @@ input[type=checkbox]:checked + .checkbox-label::before {
 } /* allow space for check mark */
 
 .checkbox-label {
-	font-size: 1.5vh;
+	font-size: 0.9vmax;
 }
 input[type="checkbox"][disabled] + .checkbox-label::before {
 	color: var(--primary-grey);
@@ -420,14 +479,7 @@ input[type="checkbox"][disabled] + .checkbox-label::before {
 input[type="checkbox"][disabled] + .checkbox-label {
 	cursor: not-allowed !important;
 }
-.input:hover {
-	transition: 1.5s ease-in-out;
-	color: white;
-	cursor: pointer;
-	opacity: 1;
-	outline: 0 !important;
-	box-shadow: 0.1em 0.1em 0.25em var(--primary-color), inset 0.1em 0.1em 0.25em var(--secondary-color);
-}
+
 
 .input:focus, .btn:focus {
 	outline: 0;
@@ -439,7 +491,7 @@ label, .label {
 	
 	flex: 0 0 100%;
 	font-family: "Montserrat Medium";
-	font-size: 1.25vh;
+	font-size: 0.8vmax;
 	text-align: left;
 	color: var(--text-grey);
 	align-content: center;
@@ -470,29 +522,29 @@ label, .label {
 	flex-wrap: wrap;
 	flex-direction: row;
 	flex: 1 0 100%;
-	text-align: center;
+	justify-content: center;
+	
 }
 
 .table-header {
+	align-content: center;
 	height: 5vh;
 	font-family: "Montserrat Bold";
-	font-size: 1.5vh;
-	align-content: center;
-	justify-content: center;
-	background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+
+	font-size: 1vw;
+	background-image: transparent;
 	border-radius: 0.75vh 0.75vh 0 0;
 }
 
 .table-body {
-	height: 60vh;
-	font-family: "Montserrat Medium";
-	font-size: 1.4vh;
-	color: whitesmoke;
-	background-color: var(--tertiary-grey);
-	overflow-y: auto;
-	border-radius: 0 0 1vh 1vh !important;
 	align-content: flex-start;
-	justify-content: space-evenly
+	height: 62vh;
+	font-family: sans-serif;
+	font-weight: 600;
+	font-size: 0.8vw;
+	color: whitesmoke;
+	background-color: transparent;
+	overflow-y: auto;
 }
 
 .table-body-small {
@@ -509,30 +561,24 @@ label, .label {
 	text-align: center;
 	text-overflow: ellipsis;
 	overflow: hidden;
-	height: 5vh;
+	height: 3vw;
 }
 
 
 
-
-
 .cell {
-	border-radius: 0.75vh 0.75vh 0 0;
-	margin: 0;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: center;
-	height: 5vh;
-	border: 0;
+	height: 3vw;
+	margin: 0;
 	padding: 0;
 	overflow: hidden;
-	align-self: flex-start;
 }
 
 .cell-header {
-	height: 5vh;
 	align-content: center;
 	justify-content: center;
 }
@@ -544,36 +590,50 @@ label, .label {
 }
 
 .cell-body {
-	height: 5vh;
-	border-bottom: 1px solid var(--tertiary-grey) !important;
-	
-	
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;	
 	text-align: auto;
-	padding: 0 5px;
+
 }
 
-
+tbody .row {
+	border-radius: 100000px;
+	margin: 0.5vh 1vh;
+	
+}
 
 tbody .row:nth-child(odd) {
 	background-color: var(--primary-grey);
+	opacity: 0.8;
+	box-shadow: 0.1vh 0.1vh 0.1vh var(--tertiary-grey);
 }
 
 tbody .row:nth-child(even) {
-	background-color: var(--secondary-grey);
+	background-color: var(--tertiary-grey);
+	opacity: 0.8;
+	box-shadow: 1px 1px 1px var(--primary-grey);
+}
+
+tbody .row:nth-child(odd):hover {
+	background-color: var(--primary-grey);
+	opacity: 1
+}
+
+tbody .row:nth-child(even):hover {
+	background-color: var(--tertiary-grey);
+	opacity: 1
 }
 
 .action-button {
-	font-size: 1.4vh;
+	font-size: 0.8vw;
 	color: var(--primary-color);
 	cursor: pointer;
-	opacity: 0.75;
+	opacity: 0.5;
 }
 
 .action-button:hover {
-	transition: 0.5s;
+	transition: 0.25s;
 	opacity: 1;
 }
 
@@ -583,11 +643,11 @@ tbody .row:nth-child(even) {
 }
 
 .col-site {
-	flex: 2;
+	flex: 1.9;
 }
 
 .col-mode {
-	flex: 2;
+	flex: 1.5;
 }
 
 .col-profile {
@@ -598,9 +658,7 @@ tbody .row:nth-child(even) {
 	flex: 4;
 }
 
-td.col-products {
-	justify-content: flex-start;
-}
+
 
 .col-task-proxy {
 	flex: 3;
@@ -616,11 +674,11 @@ td.col-products {
 
 .col-status {
 	flex: 3;
-	font-family: "Montserrat Bold";
+
 }
 
 .col-actions {
-	flex: 3;
+	flex: 2.25;
 	border-right-width: 0 !important;
 }
 
@@ -648,7 +706,7 @@ td.col-products {
 }
 
 .col-order {
-	flex: 4;
+	flex: 2;
 }
 
 .col-actions-sm {
@@ -761,8 +819,8 @@ td.col-products {
 
 i {
 	align-self: center;
-	margin-left: 0.25em;
-	margin-right: 0.25em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 }
 
 .modal-open {

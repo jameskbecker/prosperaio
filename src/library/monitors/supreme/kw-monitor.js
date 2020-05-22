@@ -4,9 +4,9 @@ const ipcWorker = require('electron').ipcRenderer;
 const { logger, utilities } = require('../../other')
 class SupremeKWMonitor {
 	constructor(_options = {}) {
-		logger.info('[Monitor] Inititalising KW Monitor.');
+		logger.info('[Monitor] ['+_options.proxyList+'] Inititalising KW Monitor.');
 		this.baseUrl = _options.baseUrl;
-		this._proxyList = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : null;
+		this._proxyList = _options.proxyList;
 		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
 			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
@@ -27,8 +27,8 @@ class SupremeKWMonitor {
 	run() {
 		if (!this._isRunning && !this._shouldStop) {
 			this._isRunning = true;
-			//this._fetchStockData('shop');
-			 this._fetchStockData('mobile_stock');
+			this._fetchStockData('shop');
+			 //this._fetchStockData('mobile_stock');
 			// this._fetchStockData('mobile/products');
 		}
 	}
@@ -108,22 +108,23 @@ class SupremeKWMonitor {
 	}
 
 	_parseCategory(key) {
-		const categories = {
-			"new": "New",
-			't_shirts': 'T-Shirts',
-			'tops_sweaters': 'Tops/Sweaters',
-			'bags': 'Bags',
-			'hats': 'Hats',
-			'pants': 'Pants',
-			'sweatshirts': 'Sweatshirts',
-			'shirts': 'Shirts',
-			'accessories': 'Accessories',
-			'skate': 'Skate',
-			'jackets': 'Jackets',
-			'shorts': 'Shorts',
-			'shoes': 'Shoes'
-		}
-		return categories[key];
+		return key;
+		// const categories = {
+		// 	"new": "New",
+		// 	't_shirts': 'T-Shirts',
+		// 	'tops_sweaters': 'Tops/Sweaters',
+		// 	'bags': 'Bags',
+		// 	'hats': 'Hats',
+		// 	'pants': 'Pants',
+		// 	'sweatshirts': 'Sweatshirts',
+		// 	'shirts': 'Shirts',
+		// 	'accessories': 'Accessories',
+		// 	'skate': 'Skate',
+		// 	'jackets': 'Jackets',
+		// 	'shorts': 'Shorts',
+		// 	'shoes': 'Shoes'
+		// }
+		// return categories[key];
 	}
 
 	_setStatus(message, type, ids) {
@@ -176,10 +177,11 @@ class SupremeKWMonitor {
 				'x-requested-with': 'XMLHttpRequest'
 			}
 		}
+		console.log(options)
 		request(options)
 		.then(response => {
 			let body = response.body;
-
+			console.log(Object.keys(body))
 			let categories = body.products_and_categories;
 			if (Object.keys(categories).length === 0) {
 				this._setStatus('Webstore Closed.', 'ERROR');

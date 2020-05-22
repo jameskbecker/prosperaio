@@ -115,8 +115,8 @@ module.exports = function (type) {
 				}
 			}
 
-			if (this.cardinal.id) {
-				form['cardinal_id'] = this.cardinal.id;
+			if (this.region === 'eu') {
+				form['cardinal_id'] = this.cardinal.id || '';
 			}
 			break;
 	}

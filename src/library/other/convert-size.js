@@ -35,7 +35,7 @@ module.exports = function (type, input) {
 			if (input === 'SMALLEST' || input === 'LARGEST' || input === 'RANDOM') return input;
 			else {
 				const supremeSizes = {
-					'ONESIZE': 'N/A',
+					'OS': 'N/A',
 					'S': 'Small',
 					'M': 'Medium',
 					'L': 'Large',

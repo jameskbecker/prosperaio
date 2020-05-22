@@ -2,11 +2,13 @@ const settings = require('electron-settings');
 const { ipcRenderer } = require('electron');
 const { countries, sites } = require('../library/configuration');
 const $ = require('jquery');
+const dropData = require('../mock-drop');
+let selectedItem;
 function convertMode(id) {
 	let modes = {
-		'supreme-request': 'Request',
+		'supreme-request': 'Fast',
 		'supreme-hybrid': 'Hybrid',
-		'supreme-browser': 'Browser',
+		'supreme-browser': 'Safe',
 		'kickz-wire': 'Wire Transfer',
 		'kickz-paypal': 'Paypal'
 	}
@@ -23,16 +25,11 @@ function renderTaskTable() {
 			let taskRow = document.createElement('tr');
 			taskRow.className = 'row';
 
-			let taskId = Object.keys(tasks)[i]; 
-			let idCell = document.createElement('td');
-			idCell.innerHTML = taskId;
-			idCell.className = 'cell cell-body col-id';
-			taskRow.appendChild(idCell);
-
-			let profileCell = document.createElement('td');
-			profileCell.innerHTML = tasks[taskId].setup.profile;
-			profileCell.className = 'cell cell-body col-profile';
-			taskRow.appendChild(profileCell);
+			let taskId = Object.keys(tasks)[i];
+			// let idCell = document.createElement('td');
+			// idCell.innerHTML = taskId;
+			// idCell.className = 'cell cell-body col-id';
+			// taskRow.appendChild(idCell);
 
 			let siteCell = document.createElement('td');
 			siteCell.innerHTML = sites.default[tasks[taskId].site].label;
@@ -50,16 +47,28 @@ function renderTaskTable() {
 			searchInputCell.setAttribute('data-id', taskId);
 			taskRow.appendChild(searchInputCell);
 
-			let proxyCell = document.createElement('td');
-			proxyCell.innerHTML = tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
-			proxyCell.className = 'cell cell-body col-task-proxy';
-			taskRow.appendChild(proxyCell);
+
+
+
+
 
 			let sizeCell = document.createElement('td');
 			sizeCell.innerHTML = tasks[taskId].products[0].size;
 			sizeCell.className = 'cell cell-body col-size';
 			sizeCell.setAttribute('data-id', taskId);
 			taskRow.appendChild(sizeCell);
+
+			let profileCell = document.createElement('td');
+			profileCell.innerHTML = tasks[taskId].setup.profile;
+			profileCell.className = 'cell cell-body col-profile';
+			taskRow.appendChild(profileCell);
+
+			let proxyCell = document.createElement('td');
+			proxyCell.innerHTML = tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
+			proxyCell.className = 'cell cell-body col-task-proxy';
+			taskRow.appendChild(proxyCell);
+
+
 
 			let timerCell = document.createElement('td');
 			timerCell.innerHTML = tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
@@ -126,7 +135,7 @@ function renderTaskTable() {
 			// 	newTask_Size[0].value = tasks[taskId].products[0].size;
 			// 	newTask_ProductQty[0].value = tasks[taskId].products[0].productQty;
 			// };
-			// actionsCell.appendChild(editButton);
+			//actionsCell.appendChild(editButton);
 
 			let duplicateButton = document.createElement('div');
 			duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
@@ -208,7 +217,7 @@ function renderProxyTable(name) {
 
 				let actionsCell = document.createElement('td');
 				actionsCell.className = 'cell cell-body col-proxy';
-				
+
 				let startButton = document.createElement('div');
 				startButton.innerHTML = '<i class="fas fa-vial"></i>';
 				startButton.className = 'action-button';
@@ -227,7 +236,7 @@ function renderProxyTable(name) {
 				deleteButton.className = 'action-button';
 				deleteButton.onclick = function () {
 					delete list[proxyId];
-					settings.set('proxies', proxyLists, {prettify:true})
+					settings.set('proxies', proxyLists, { prettify: true })
 					let row = this.parentNode.parentNode
 					row.parentNode.removeChild(row);
 				};
@@ -261,66 +270,8 @@ function renderSites() {
 		newTask_RestockMode.disabled = false;
 		let selectedSite = sites.default[this.value] || null;
 		if (selectedSite) {
-			newTask_Style[0].disabled = false;
-			newTask_Category[0].disabled = false;
-			newTask_Size[0].disabled = false;
-			newTask_ProductQty[0].disabled = false;
-			newTask_SearchInput[0].disabled = false;
-			newTask_Mode.options.length = 1;
-			let requestMode = document.createElement('option');
-			switch (selectedSite.type) {
-				case 'kickz':
-					newTask_Style[0].parentElement.style.display = 'none';
-					newTask_Category[0].parentElement.style.display = 'none';
-					newTask_SearchInput[0].placeholder = "Enter Product Url.";
-
-					let wireMode = document.createElement('option');
-					wireMode.label = 'Request - Wire Transfer';
-					wireMode.value = 'kickz-wire';
-					newTask_Mode.add(wireMode);
-
-					let paypalMode = document.createElement('option');
-					paypalMode.label = 'Request - PayPal';
-					paypalMode.value = 'kickz-paypal';
-					newTask_Mode.add(paypalMode);
-					break;
-
-				case 'supreme':
-					newTask_Style[0].parentElement.style.display = 'flex';
-					newTask_Category[0].parentElement.style.display = 'flex';
-					newTask_SearchInput[0].placeholder = "Enter Keywords.";
-
-					requestMode.label = 'Request (Fast)';
-					requestMode.value = 'supreme-request';
-					newTask_Mode.add(requestMode);
-
-					let browserMode = document.createElement('option');
-					browserMode.label = 'Browser (Safest)';
-					browserMode.value = 'supreme-browser';
-					newTask_Mode.add(browserMode);
-					break;
-
-				case 'shopify':
-					newTask_Style[0].parentElement.style.display = 'none';
-					newTask_Category[0].parentElement.style.display = 'none';
-					newTask_SearchInput[0].placeholder = "Enter Keywords or Product Url.";
-
-					let fastMode = document.createElement('option');
-					fastMode.label = 'API (Fast)';
-					fastMode.value = 'shopify-api';
-					newTask_Mode.add(fastMode);
-
-					let safeMode = document.createElement('option');
-					safeMode.label = 'Frontend (Safe)';
-					safeMode.value = 'shopify-frontend';
-					newTask_Mode.add(safeMode);
-
-					break;
-				default: console.log(selectedSite.type)
-			}
-
 			newTask_Mode.onchange = function () {
-				newTask_RestockMode.options.length = 1;
+				newTask_RestockMode.options.length = 0;
 
 				let stockMode = document.createElement('option');
 				stockMode.label = 'Stock (Recommended)';
@@ -353,6 +304,118 @@ function renderSites() {
 					default: console.log('No Onchange Event for:', this.value)
 				}
 			}
+			newTask_Style[0].disabled = false;
+			newTask_Category[0].disabled = false;
+			newTask_Size[0].disabled = false;
+			newTask_ProductQty[0].disabled = false;
+			newTask_SearchInput[0].disabled = false;
+			newTask_Mode.options.length = 0;
+			let requestMode = document.createElement('option');
+			if (dropData[selectedSite.type]) {
+				document.getElementById("newTaskProducts").options.length = 1;
+				let data = dropData[selectedSite.type];
+				let itemNames = Object.keys(data);
+
+				for (let i = 0; i < itemNames.length; i++) {
+					let option = document.createElement('option');
+					option.label = itemNames[i];
+					option.value = itemNames[i];
+					document.getElementById("newTaskProducts").options.add(option)
+				}
+
+				document.getElementById("newTaskProducts").onchange = function () {
+					newTask_Size[0].value = '';
+					// if (!this.value) {
+					// 	return customRow.style.display = 'flex';
+					// }
+					//customRow.style.display = 'none';
+					selectedItem = data[this.value] || {};
+					newTask_SearchInput[0].value = selectedItem.keywords;
+					newTask_Category[0].value = selectedItem.category;
+					let styles = document.getElementById("newTaskStyles");
+					styles.options.length = 0;
+					for (let i = 0; i < selectedItem.styles.length; i++) {
+						let option = document.createElement('option');
+						option.label = selectedItem.styles[i].name;
+						option.value = selectedItem.styles[i].keywords;
+						styles.options.add(option);
+					}
+					styles.onchange = function () {
+						newTask_Style[0].value = this.value;
+
+					}
+					try {styles.onchange();} catch(err) {console.log(err)}
+					let sizes = document.getElementById('newTaskSizes');
+					sizes.options.length = 5;
+					for (let i = 0; i < selectedItem.sizes.length; i++) {
+						let option = document.createElement('option');
+						option.label = selectedItem.sizes[i].name;
+						option.value = selectedItem.sizes[i].keywords;
+						sizes.options.add(option);
+					}
+					sizes.onchange = function () {
+						newTask_Size[0].value = this.value;
+					}
+				}
+
+			}
+			switch (selectedSite.type) {
+				case 'kickz':
+					newTask_Style[0].parentElement.style.display = 'none';
+					newTask_Category[0].parentElement.style.display = 'none';
+					newTask_SearchInput[0].placeholder = "Enter Product Url.";
+
+					let wireMode = document.createElement('option');
+					wireMode.label = 'Request - Wire Transfer';
+					wireMode.value = 'kickz-wire';
+					newTask_Mode.add(wireMode);
+
+					let paypalMode = document.createElement('option');
+					paypalMode.label = 'Request - PayPal';
+					paypalMode.value = 'kickz-paypal';
+					newTask_Mode.add(paypalMode);
+					break;
+
+				case 'supreme':
+
+					newTask_Style[0].parentElement.style.display = 'flex';
+					newTask_Category[0].parentElement.style.display = 'flex';
+					newTask_SearchInput[0].placeholder = "Enter Keywords.";
+
+					requestMode.label = 'Fast';
+					requestMode.value = 'supreme-request';
+					newTask_Mode.add(requestMode);
+
+					let browserMode = document.createElement('option');
+					browserMode.label = 'Safe';
+					browserMode.value = 'supreme-browser';
+					newTask_Mode.add(browserMode);
+					break;
+
+				case 'shopify':
+					newTask_Style[0].parentElement.style.display = 'none';
+					newTask_Category[0].parentElement.style.display = 'none';
+					newTask_SearchInput[0].placeholder = "Enter Keywords or Product Url.";
+
+					let fastMode = document.createElement('option');
+					fastMode.label = 'API (Fast)';
+					fastMode.value = 'shopify-api';
+					newTask_Mode.add(fastMode);
+
+					let safeMode = document.createElement('option');
+					safeMode.label = 'Frontend (Safe)';
+					safeMode.value = 'shopify-frontend';
+					newTask_Mode.add(safeMode);
+
+					break;
+				default: console.log(selectedSite.type)
+			}
+			try {
+				newTask_Mode.onchange();
+			}
+			catch (err) { }
+
+
 		}
 	}
 }
@@ -402,7 +465,7 @@ function renderProxyListSelectors() {
 
 	for (let i = 0; i < Object.keys(proxyLists).length; i++) {
 		let name = Object.keys(proxyLists)[i]
-		
+
 		document.querySelectorAll('.proxylist-selector').forEach(function (element) {
 			let option = document.createElement('option');
 			option.label = name;
@@ -432,7 +495,7 @@ function renderHarvesters() {
 
 		let siteSelector = document.createElement('select');
 		siteSelector.setAttribute('class', 'input');
-		
+
 		sites.captcha.forEach(site => {
 			let option = document.createElement('option');
 			option.label = site.label;
@@ -449,7 +512,7 @@ function renderHarvesters() {
 		let loginBtnWrapper = document.createElement('div');
 		loginBtnWrapper.setAttribute('class', 'container-element');
 		let loginBtn = document.createElement('button');
-		loginBtn.setAttribute('class', 'btn');
+		loginBtn.setAttribute('class', 'btn btn-transparent');
 		loginBtn.innerHTML = '<i class="fab fa-youtube"></i><span>Login</span>';
 		loginBtn.onclick = function () {
 			ipcRenderer.send('captcha.signIn', {
@@ -466,7 +529,7 @@ function renderHarvesters() {
 		launchButtonWrapper.setAttribute('class', 'container-element');
 
 		let launchButton = document.createElement('button');
-		launchButton.setAttribute('class', 'btn');
+		launchButton.setAttribute('class', 'btn btn-transparent');
 		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i><span>Launch</span>';
 
 		launchButton.onclick = function () {
@@ -482,7 +545,7 @@ function renderHarvesters() {
 		let deleteButtonWrapper = document.createElement('div');
 		deleteButtonWrapper.setAttribute('class', 'container-element');
 		let deleteButton = document.createElement('button');
-		deleteButton.setAttribute('class', 'btn');
+		deleteButton.setAttribute('class', 'btn btn-transparent');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i><span>Delete</span>';
 		deleteButton.onclick = function () {
 			try {
@@ -491,7 +554,7 @@ function renderHarvesters() {
 					return harvester.name !== existingHarvesters[i].name
 				})
 				settings.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
-				renderHarvesters() 
+				renderHarvesters()
 				console.log(newHarvestrerArray)
 			} catch (err) { }
 		}
@@ -499,8 +562,8 @@ function renderHarvesters() {
 
 		deleteButtonWrapper.appendChild(deleteButton)
 		optionsRow.appendChild(deleteButtonWrapper);
-		optionsRow.style.marginTop = '20px';
-	
+		optionsRow.style.marginTop = '5px';
+
 
 		harvesterContainer.appendChild(harvesterName);
 		harvesterContainer.appendChild(siteRow);
@@ -512,68 +575,43 @@ function renderHarvesters() {
 
 function renderProfileSelectors() {
 	let existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
-	profilesWrapper.innerHTML = '';
 
+	document.getElementById('profileTableBody').innerHTML = '';
 	for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
 		let profileName = Object.keys(existingProfiles)[i];
-		let profileContainer = document.createElement('div');
-		profileContainer.setAttribute('class', 'panel panel-light panel-fixed-25');
+		let profileRow = document.createElement('tr');
+		profileRow.className = 'row';
 
-		let profileTitle = document.createElement('h2');
-		profileTitle.setAttribute('class', 'panel-title');
-		profileTitle.innerHTML = `<i></i><span>${profileName}</span>`;
 
-	/* ----------------------------------------------------------------------------- */
-		let nameRow = document.createElement('div');
-		nameRow.setAttribute('class', 'container');
+		let profileCell = document.createElement('td');
+		profileCell.innerHTML = profileName;
+		profileCell.className = 'cell cell-body col-profile';
+		profileRow.appendChild(profileCell);
 
-		let nameWrapper = document.createElement('div');
-		nameWrapper.setAttribute('class', 'container-element');
+		let nameCell = document.createElement('td');
+		nameCell.innerHTML = `${existingProfiles[profileName].billing.first} ${existingProfiles[profileName].billing.last}`;
+		nameCell.className = 'cell cell-body col-site';
+		profileRow.appendChild(nameCell);
 
-		let fullName = document.createElement('label');
-		fullName.innerHTML = `${existingProfiles[profileName].billing.first} ${existingProfiles[profileName].billing.last}`;
-		
-		nameWrapper.appendChild(fullName)
-		nameRow.appendChild(nameWrapper);
+		let addressCell = document.createElement('td');
+		addressCell.innerHTML = `${existingProfiles[profileName].billing.address1} ${existingProfiles[profileName].billing.address2}`;
+		addressCell.className = 'cell cell-body col-products';
+		profileRow.appendChild(addressCell);
 
-	/* ----------------------------------------------------------------------------- */
-		let typeRow = document.createElement('div');
-		typeRow.setAttribute('class', 'container');
+		let cardCell = document.createElement('td');
+		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileName].payment.cardNumber.substr(-4);
+		cardCell.className = 'cell cell-body col-status';
+		profileRow.appendChild(cardCell);
 
-		let typeWrapper = document.createElement('div');
-		typeWrapper.setAttribute('class', 'container-element');
+		let actionsCell = document.createElement('td');
+		actionsCell.className = 'cell cell-body table-row col-actions';
 
-		let cardType = document.createElement('label');
-		cardType.innerHTML = `${existingProfiles[profileName].billing.address1} ${existingProfiles[profileName].billing.address2}`;
-		typeWrapper.appendChild(cardType)
-		typeRow.appendChild(typeWrapper);
 
-	/* ----------------------------------------------------------------------------- */
-
-		let numberRow = document.createElement('div');
-		numberRow.setAttribute('class', 'container');
-
-		let maskedNumberWrapper = document.createElement('div');
-		maskedNumberWrapper.setAttribute('class', 'container-element');
-
-		let maskedNumber = document.createElement('label');
-		maskedNumber.innerHTML = '**** **** **** ' + existingProfiles[profileName].payment.cardNumber.substr(-4)
-
-		maskedNumberWrapper.appendChild(maskedNumber)
-		numberRow.appendChild(maskedNumberWrapper);
-
-	/* ----------------------------------------------------------------------------- */
-
-		let optionsRow = document.createElement('div');
-		optionsRow.setAttribute('class', 'container');
-
-		let editBtnWrapper = document.createElement('div');
-		editBtnWrapper.setAttribute('class', 'container-element');
-		let editBtn = document.createElement('button');
-		editBtn.setAttribute('class', 'btn');
-		editBtn.setAttribute('data-name', profileName)
-		editBtn.innerHTML = '<i class="fas fa-edit"></i><span>Edit</span>';
-		editBtn.onclick = function () {
+		let editButton = document.createElement('div');
+		editButton.innerHTML = '<i class="fas fa-edit"></i>';
+		editButton.className = 'action-button';
+		editButton.setAttribute('data-name', profileName)
+		editButton.onclick = function () {
 			const profileData = settings.get('profiles')[this.dataset.name]
 			document.getElementById('profileName').value = this.dataset.name;
 			try {
@@ -608,37 +646,157 @@ function renderProfileSelectors() {
 
 				$('#profileModal').modal('show')
 			}
-			catch(error) { console.error(error)}
+			catch (error) { console.error(error) }
 		}
 
-		editBtnWrapper.appendChild(editBtn)
-		optionsRow.appendChild(editBtnWrapper);
+		actionsCell.appendChild(editButton)
 
-		let deleteBtnWrapper = document.createElement('div');
-		deleteBtnWrapper.setAttribute('class', 'container-element');
-		let deleteBtn = document.createElement('button');
-		deleteBtn.setAttribute('class', 'btn');
-		deleteBtn.innerHTML = '<i class="fas fa-trash"></i><span>Delete</span>';
-		deleteBtn.onclick = function () {
-			let existingProfiles2 = settings.get('profiles');
-			delete existingProfiles2[profileName];
-			settings.set('profiles', existingProfiles2, { prettify: true})
-			renderProfileSelectors()
-		}
+		let duplicateButton = document.createElement('div');
+		duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
+		duplicateButton.className = 'action-button';
+		duplicateButton.onclick = function () {
+
+		};
+		actionsCell.appendChild(duplicateButton);
+
+		let deleteButton = document.createElement('div');
+		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+		deleteButton.className = 'action-button';
+		deleteButton.onclick = function () {
+				let existingProfiles2 = settings.get('profiles');
+				delete existingProfiles2[profileName];
+				settings.set('profiles', existingProfiles2, { prettify: true})
+				renderProfileSelectors()
+
+		};
+		actionsCell.appendChild(deleteButton)
+
+		profileRow.appendChild(actionsCell);
+
+		document.getElementById('profileTableBody').appendChild(profileRow)
+		// 	let profileContainer = document.createElement('div');
+		// 	profileContainer.setAttribute('class', 'panel panel-light panel-fixed-25');
+
+		// 	let profileTitle = document.createElement('h2');
+		// 	profileTitle.setAttribute('class', 'panel-title');
+		// 	profileTitle.innerHTML = `<i></i><span>${profileName}</span>`;
+
+		// /* ----------------------------------------------------------------------------- */
+		// 	let nameRow = document.createElement('div');
+		// 	nameRow.setAttribute('class', 'container');
+
+		// 	let nameWrapper = document.createElement('div');
+		// 	nameWrapper.setAttribute('class', 'container-element');
+
+		// 	let fullName = document.createElement('label');
+		// 	fullName.innerHTML = `${existingProfiles[profileName].billing.first} ${existingProfiles[profileName].billing.last}`;
+
+		// 	nameWrapper.appendChild(fullName)
+		// 	nameRow.appendChild(nameWrapper);
+
+		// /* ----------------------------------------------------------------------------- */
+		// 	let typeRow = document.createElement('div');
+		// 	typeRow.setAttribute('class', 'container');
+
+		// 	let typeWrapper = document.createElement('div');
+		// 	typeWrapper.setAttribute('class', 'container-element');
+
+		// 	let cardType = document.createElement('label');
+		// 	cardType.innerHTML = `${existingProfiles[profileName].billing.address1} ${existingProfiles[profileName].billing.address2}`;
+		// 	typeWrapper.appendChild(cardType)
+		// 	typeRow.appendChild(typeWrapper);
+
+		// /* ----------------------------------------------------------------------------- */
+
+		// 	let numberRow = document.createElement('div');
+		// 	numberRow.setAttribute('class', 'container');
+
+		// 	let maskedNumberWrapper = document.createElement('div');
+		// 	maskedNumberWrapper.setAttribute('class', 'container-element');
+
+		// 	let maskedNumber = document.createElement('label');
+		// 	maskedNumber.innerHTML = '**** **** **** ' + existingProfiles[profileName].payment.cardNumber.substr(-4)
+
+		// 	maskedNumberWrapper.appendChild(maskedNumber)
+		// 	numberRow.appendChild(maskedNumberWrapper);
+
+		// /* ----------------------------------------------------------------------------- */
+
+		// 	let optionsRow = document.createElement('div');
+		// 	optionsRow.setAttribute('class', 'container');
+
+		// 	let editBtnWrapper = document.createElement('div');
+		// 	editBtnWrapper.setAttribute('class', 'container-element');
+		// 	let editBtn = document.createElement('button');
+		// 	editBtn.setAttribute('class', 'btn btn-transparent');
+		// 	editBtn.setAttribute('data-name', profileName)
+		// 	editBtn.innerHTML = '<i class="fas fa-edit"></i><span>Edit</span>';
+		// 	editBtn.onclick = function () {
+		// 		const profileData = settings.get('profiles')[this.dataset.name]
+		// 		document.getElementById('profileName').value = this.dataset.name;
+		// 		try {
+		// 			billingFirst.value = profileData.billing.first
+		// 			billingLast.value = profileData.billing.last
+		// 			billingEmail.value = profileData.billing.email
+		// 			billingTelephone.value = profileData.billing.telephone
+		// 			billingAddress1.value = profileData.billing.address1
+		// 			billingAddress2.value = profileData.billing.address2
+		// 			billingCity.value = profileData.billing.city
+		// 			billingZip.value = profileData.billing.zip
+		// 			billingCountry.value = profileData.billing.country
+		// 			billingState.value = profileData.billing.state
+
+		// 			shippingFirst.value = profileData.shipping.first
+		// 			shippingLast.value = profileData.shipping.last
+		// 			shippingEmail.value = profileData.shipping.email
+		// 			shippingTelephone.value = profileData.shipping.telephone
+		// 			shippingAddress1.value = profileData.shipping.address1
+		// 			shippingAddress2.value = profileData.shipping.address2
+		// 			shippingCity.value = profileData.shipping.city
+		// 			shippingZip.value = profileData.shipping.zip
+		// 			shippingCountry.value = profileData.shipping.country
+		// 			shippingState.value = profileData.shipping.state
+
+		// 			paymentType.value = profileData.payment.type
+		// 			cardNumber.value = profileData.payment.cardNumber
+		// 			cardExpiryMonth.value = profileData.payment.expiryMonth
+		// 			cardExpiryYear.value = profileData.payment.expiryYear
+		// 			cardCvv.value = profileData.payment.cvv
 
 
-		deleteBtnWrapper.appendChild(deleteBtn)
-		optionsRow.appendChild(deleteBtnWrapper);
+		// 			$('#profileModal').modal('show')
+		// 		}
+		// 		catch(error) { console.error(error)}
+		// 	}
 
-	/* ----------------------------------------------------------------------------- */
+		// 	editBtnWrapper.appendChild(editBtn)
+		// 	optionsRow.appendChild(editBtnWrapper);
 
-		profileContainer.appendChild(profileTitle);
-		profileContainer.appendChild(nameRow);
-		profileContainer.appendChild(typeRow);
-		profileContainer.appendChild(numberRow);
-	  profileContainer.appendChild(optionsRow);
+		// 	let deleteBtnWrapper = document.createElement('div');
+		// 	deleteBtnWrapper.setAttribute('class', 'container-element');
+		// 	let deleteBtn = document.createElement('button');
+		// 	deleteBtn.setAttribute('class', 'btn btn-transparent');
+		// 	deleteBtn.innerHTML = '<i class="fas fa-trash"></i><span>Delete</span>';
+		// 	deleteBtn.onclick = function () {
+		// 		let existingProfiles2 = settings.get('profiles');
+		// 		delete existingProfiles2[profileName];
+		// 		settings.set('profiles', existingProfiles2, { prettify: true})
+		// 		renderProfileSelectors()
+		// 	}
 
-		profilesWrapper.appendChild(profileContainer);
+
+		// 	deleteBtnWrapper.appendChild(deleteBtn)
+		// 	optionsRow.appendChild(deleteBtnWrapper);
+
+		// /* ----------------------------------------------------------------------------- */
+
+		// 	profileContainer.appendChild(profileTitle);
+		// 	profileContainer.appendChild(nameRow);
+		// 	profileContainer.appendChild(typeRow);
+		// 	profileContainer.appendChild(numberRow);
+		//   profileContainer.appendChild(optionsRow);
+
+		// 	profilesWrapper.appendChild(profileContainer);
 
 	}
 	profileSelector.forEach(element => {
@@ -677,7 +835,7 @@ function renderOrderTable() {
 		for (let i = 0; i < orders.length; i++) {
 			let orderRow = document.createElement('tr');
 			orderRow.className = 'row';
-			
+
 
 			let dateCell = document.createElement('td');
 			dateCell.innerHTML = orders[i].date;
@@ -708,7 +866,7 @@ function renderOrderTable() {
 			deleteButton.className = 'action-button';
 
 			actionsCell.appendChild(deleteButton);
-			
+
 			orderRow.appendChild(actionsCell);
 			orderTableBody.appendChild(orderRow);
 
@@ -717,7 +875,7 @@ function renderOrderTable() {
 }
 
 function setProxyLists() {
-	
+
 }
 
 module.exports = {

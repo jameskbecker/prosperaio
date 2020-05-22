@@ -21,7 +21,7 @@ function loadWindow(id, callback) {
 	window.loadFile(config.threeDSWindowPath);
 	window.webContents.once('dom-ready', function() {
 		if (isDev) {
-			window.webContents.openDevTools({mode: 'detached'});
+			//window.webContents.openDevTools({mode: 'detached'});
 		}
 		window.show();
 		callback();

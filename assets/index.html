@@ -20,38 +20,38 @@
 		<div class="banner banner-nav">
 			<div id="nav_tasks" class="nav nav-active" data-page="tasks">
 				<i class="fas fa-list-ul"></i>
-				<span>Tasks</span>
+				<div>Tasks</div>
 			</div>
 
 
 			<div id="nav_newProfile" class="nav" data-page="newProfile">
 				<i class="fas fa-user-friends"></i>
-				<span>Profiles</span>
+				<div>Profiles</div>
 			</div>
 
 			<div id="nav_sx" class="nav" data-page="proxies">
 				<i class="fas fa-globe icon"></i>
-				<span>Proxies</span>
+				<div>Proxies</div>
 			</div>
 
 			<!-- <div id="" class="nav" data-page="">
 				<i class="fas fa-cookie"></i>
-				<span>Cookies</span>
+				<div>Cookies</div>
 			</div> -->
 
 			<div id="nav_harvesters" class="nav" data-page="harvesters">
 				<i class="fab fa-google icon"></i>
-				<span>Harvesters</span>
+				<div>Harvesters</div>
 			</div>
 
 			<div id="nav_analystics" class="nav" data-page="analytics">
 				<i class="fas fa-chart-pie"></i>
-				<span>Analytics</span>
+				<div>Analytics</div>
 			</div>
 
 			<div id="nav_settings" class="nav" data-page="settings">
 				<i class="fas fa-cogs icon"></i>
-				<span>Settings</span>
+				<div>Settings</div>
 			</div>
 		</div>
 		<div class="banner banner-draggable"></div>
@@ -79,25 +79,11 @@
 							<label></label>
 							<button class="btn" data-toggle="modal" data-target="#newTaskModal">
 								<i class="fas fa-plus icon"></i>
-								<span>New Task</span>
+								<div>New Task</div>
 							</button>
 						</div>
 
-						<div class="container-element">
-							<label></label>
-							<button id="importTasks" class="btn">
-								<i class="fas fa-file-import"></i>
-								<span>Import Tasks</span>
-							</button>
-						</div>
-
-						<div class="container-element">
-							<label></label>
-							<button id="exportTasks" class="btn">
-								<i class="fas fa-file-export"></i>
-								<span>Export Tasks</span>
-							</button>
-						</div>
+					
 
 						<div class="container-element">
 							<label class="label">Monitor Delay</label>
@@ -123,45 +109,45 @@
 								<table id="taskTable" class="table">
 									<thead id="taskTableHead" class="table-header">
 										<tr class="row">
-											<th class="cell cell-header col-id">
+											<!-- <th class="cell cell-header col-id">
 												<i class="fas fa-id-card"></i>
-												<span>ID</span>
-											</th>
-											<th class="cell cell-header col-profile">
-												<i class="fas fa-users"></i>
-												<span>Profile</span>
-											</th>
+												<div>ID</div>
+											</th> -->
 											<th class="cell cell-header col-site">
 												<i class="fas fa-store"></i>
-												<span>Store</span>
+												<div>Store</div>
 											</th>
 											<th class="cell cell-header col-mode">
 												<i class="fas fa-adjust"></i>
-												<span>Mode</span>
+												<div>Mode</div>
 											</th>
 											<th class="cell cell-header col-products">
 												<i class="fas fa-tshirt"></i>
-												<span>Product</span>
-											</th>
-											<th class="cell cell-header col-task-proxy">
-												<i class="fas fa-globe"></i>
-												<span>Proxy</span>
+												<div>Product</div>
 											</th>
 											<th class="cell cell-header col-size">
 												<i class="fas fa-ruler"></i>
-												<span>Size</span>
+												<div>Size</div>
+											</th>
+											<th class="cell cell-header col-profile">
+												<i class="fas fa-users"></i>
+												<div>Profile</div>
+											</th>
+											<th class="cell cell-header col-task-proxy">
+												<i class="fas fa-globe"></i>
+												<div>Proxy List</div>
 											</th>
 											<th class="cell cell-header col-timer">
 												<i class="fas fa-clock"></i>
-												<span>Timer</span>
+												<div>Timer</div>
 											</th>
 											<th id="statusHeader" class="cell cell-header col-status">
 												<i class="fas fa-info"></i>
-												<span>Status</span>
+												<div>Status</div>
 											</th>
 											<th id="actionsHeader" class="cell cell-header col-actions">
 												<i class="fas fa-tools"></i>
-												<span>Actions</span>
+												<div>Actions</div>
 											</th>
 										</tr>
 									</thead>
@@ -174,28 +160,41 @@
 				</div>
 
 				<div class="container">
-					<div class="panel panel-invisible">
-						<div class="container">
-							<span class="container-element container-element-md">
-								<button id="runAll" class="btn">
-									<i class="fas fa-play-circle"></i>
-									<span>Run All Tasks</span>
-								</button>
-							</span>
-							<span class="container-element container-element-md">
-								<button id="stopAll" class="btn">
-									<i class="fas fa-stop-circle"></i>
-									<span>Stop All Tasks</span>
-								</button>
-							</span>
-							<span class="container-element container-element-md">
-								<button id="clearTasks" class="btn">
-									<i class="fas fa-minus-circle"></i>
-									<span>Delete All Tasks</span>
-								</button>
-							</span>
-						</div>
+					<!-- <div class="container-element container-element-sm">
+	
+						<button id="importTasks" class="btn">
+							<i class="fas fa-file-import"></i>
+							<div>Import
+							</div>
+						</button>
 					</div>
+
+					<div class="container-element container-element-sm">
+
+						<button id="exportTasks" class="btn">
+							<i class="fas fa-file-export"></i>
+							<div>Export</div>
+						</button>
+					</div> -->
+					<div class="container-element container-element-sm">
+						<button id="runAll" class="btn">
+							<i class="fas fa-play-circle"></i>
+							<div>Run All</div>
+						</button>
+					</div>
+					<div class="container-element container-element-sm">
+						<button id="stopAll" class="btn">
+							<i class="fas fa-stop-circle"></i>
+							<div>Stop All</div>
+						</button>
+					</div>
+					<div class="container-element container-element-sm">
+						<button id="clearTasks" class="btn">
+							<i class="fas fa-minus-circle"></i>
+							<div>Delete All</div>
+						</button>
+					</div>
+				
 				</div>
 			</div>
 
@@ -204,153 +203,73 @@
 					<div class="modal-content">
 						<div class="header-container">
 							<h1 class="header-title">Task Editor</h1>
+							<div class="header-extra">
+
+									<div class="container-element container-element-sm">
+										<button id="taskSaveButton" class="btn">
+											<i class="fas fa-save"></i>
+											<div>Save Task</div>
+										</button>
+									</div>
+
+							</div>
 						</div>
 						<div class="panel panel-main">
 							<div class="container">
 								<div id=taskSetup class="panel panel-light">
 									<h2 id="taskConfiguration" class="panel-title">
 										<i class="fas fa-wrench"></i>
-										<span>Task Setup</span>
+										<div>Task Setup</div>
 									</h2>
 									<div class="container">
 										<div class="container-element">
 											<label for="taskSite" class="label">Store</label>
 											<select id="taskSite" class="input site-selector">
+												<option value="" label="Select Store" disabled selected></option>
+											</select>
+										</div>
+										<div class="container-element">
+											<label for="taskMode" class="">Task Mode</label>
+											<select id="taskMode" class="input">
 												<option value="" label="Select Site" disabled selected></option>
 											</select>
 										</div>
+
+										<div class="container-element">
+											<label for="taskCheckoutAttempts" class="label">Checkout Attempts</label>
+											<input type="number" id="taskCheckoutAttempts" class="input" value="1">
+										</div>
+									</div>
+
+									<div class="container">
 
 										<div class="container-element">
 											<label for="taskProfile" class="">Profile</label>
 											<select id="taskProfile" class="input profile-selector">
 											</select>
 										</div>
-									</div>
-
-									<div class="container">
-										<span class="container-element">
-											<label for="taskCheckoutAttempts" class="label">Checkout Attempts</label>
-											<input type="number" id="taskCheckoutAttempts" class="input" value="1">
-										</span>
-										<span class="container-element">
-											<label for="taskQuantity" class="label">Task Quantity</label>
-											<input type="number" id="taskQuantity" class="input " value="1">
-										</span>
-									</div>
-
-									<div class="container">
-										<span class="container-element">
-											<label for="taskMode" class="">Task Mode</label>
-											<select id="taskMode" class="input">
-												<option value="" label="Select Task Mode" disabled selected></option>
-											</select>
-										</span>
-
-										<span class="container-element">
+										<div class="container-element">
 											<label class="label">Restock Mode</label>
 											<select id="newTaskMonitorMode" class="input">
-												<option value="" label="Select Restock Mode" disabled selected></option>
+												<option value="" label="Select Task Mode" disabled selected></option>
 											</select>
-										</span>
+										</div>
+										
+										<div class="container-element">
+											<label for="taskQuantity" class="label">Task Quantity</label>
+											<input type="number" id="taskQuantity" class="input " value="1">
+										</div>
 									</div>
 
 								</div>
 
 							</div>
-							<div class="container">
-								<div id="taskDelayOptions" class="panel panel-light">
-									<h2 class="panel-title">
-										<i class="fas fa-clock"></i>
-										<span>Delays</span>
-									</h2>
-
-									<div class="container">
-										<span class="container-element">
-											<label for="taskCartDelay" class="">Cart (ms)</label>
-											<input type="number" id="taskCartDelay" class="input " placeholder="0">
-										</span>
-										<span class="container-element">
-											<label for="taskCheckoutDelay" class="">Checkout (ms)</label>
-											<input type="number" id="taskCheckoutDelay" class="input" placeholder="0">
-										</span>
-									</div>
-									<!-- <div class="container">
-											<span class="container-element">
-												<label for="taskMonitorDelay" class="">Monitor (ms)</label>
-												<input disabled type="text" id="taskMonitorDelay" class="input " placeholder="Use Dashboard.">
-											</span>
-											<span class="container-element">
-												<label for="taskErrorDelay" class="">Error (ms)</label>
-												<input disabled type="text" id="taskErrorDelay" class="input " placeholder="Use Dashboard.">
-											</span>
-										</div> -->
-									<!--<div class="container">
-											
-
-											 <span class="container-element">
-												<label for="taskTimeoutDelay" class="">Request Timeout (s)</label>
-												<input disabled type="text" id="taskTimeoutDelay" class="input" placeholder="Use Dashboard.">
-											</span> 
-										</div>-->
-
-								</div>
-							</div>
-
-							<div class="container">
-								<div id="taskAdditionalOptions" class="panel panel-light">
-									<h2 id="taskAdditionalOptions" class="panel-title">
-										<i class="fas fa-sliders-h"></i>
-										<span>Additional Options</span>
-									</h2>
-
-									<div class="container">
-										<span class="container-element">
-											<label for="taskProxyList" class="label">Proxy List</label>
-											<select id="taskProxyList" class="input proxylist-selector">
-												<option label="None" value=""></option>
-											</select>
-										</span>
-										<span class="container-element">
-											<label for="taskMaxPrice" class="label">Price Limit (GBP or USD)</label>
-											<input type="number" class="input" id="taskMaxPrice" step="0.01" placeholder="0.00">
-										</span>
-									</div>
-
-									<div class="container">
-										<span class="container-element">
-											<label for="taskStartDate" class="label">Start Date</label>
-											<input type="date" id="taskStartDate" class="input" step="3">
-										</span>
-										<span class="container-element">
-											<label for="taskStartTime" class="label">Start Time</label>
-											<input type="time" id="taskStartTime" class="input" step="3">
-										</span>
-									</div>
-
-									<div class="container">
-										<span class="container-element">
-											<input id="newTaskRestocks" type="checkbox" checked>
-											<label for="newTaskRestocks" class="checkbox-label">Monitor Restocks</label>
-										</span>
-
-										<span class="container-element">
-											<input id="captchaCheckbox" type="checkbox">
-											<label for="captchaCheckbox" class="checkbox-label">Bypass Captcha</label>
-										</span>
-
-										<span class="container-element">
-											<input id="threeDCheckbox" type="checkbox">
-											<label for="threeDCheckbox" class="checkbox-label">3D Secure</span></label>
-										</span>
-									</div>
-								</div>
-							</div>
-
+						
 							<div class="container">
 								<div id="addProductsContainer" class="panel panel-light">
 									<h2 id="taskPersonalization" class="panel-title">
 										<i class="fas fa-tshirt"></i>
-										<span>Product Details</span>
+										<div>Product Details</div>
 										<!-- <div class="container">
 											<button class="btn">
 												<i class="fas fa-plus"></i>
@@ -359,41 +278,27 @@
 									</h2>
 
 									<div class="container">
-										<span class="container-element">
-											<label class="label">Search Input</label>
-											<input type="text" class="input" name="taskSearchInput">
-										</span>
-										<span class="container-element">
-											<label class="label">Variant (+/-) (Optional)</label>
-											<input type="text" name="taskVariant" class="input">
-										</span>
-										<span class="container-element">
-											<label for="taskCategory" class="label">Category</label>
-											<select name="taskCategory" class="input">
-												<option value='' selected></option>
-												<option value="jackets">Jackets</option>
-												<option value="shirts">Shirts</option>
-												<option value="tops_sweaters">Tops/Sweaters</option>
-												<option value="sweatshirts">Sweatshirts</option>
-												<option value="pants">Pants</option>
-												<option value="shorts">Shorts</option>
-												<option value="t_shirts">T-Shirts</option>
-												<option value="hats">Hats</option>
-												<option value="bags">Bags</option>
-												<option value="accessories">Accessories</option>
-												<option value="skate">Skate</option>
-												<option value="shoes">Shoes</option>
+										<div class="container-element" style="flex: 2 2 0;">
+											<label>Product</label>
+											<select class="input" id="newTaskProducts">
+												<option>Custom</option>
 											</select>
-										</span>
-										<span class="container-element">
+										</div>
+										<div class="container-element" >
+											<label class="label">Style</label>
+											<select id="newTaskStyles" class="input"></select>
+										</div>
+										
+										<div class="container-element">
 											<label class="label">Size</label>
-											<select name="taskSize" class="input">
+											<select id="newTaskSizes" class="input">
 												<option value="" label=""></option>
 												<option value="RANDOM" label="Random"></option>
 												<option value="SMALLEST" label="Smallest In Stock"></option>
 												<option value="LARGEST" label="Largest In Stock"></option>
-												<option value="ONESIZE" label="One Size"></option>
-												<option value="S" label="S"></option>
+												<option value=" " label="--------------------------------"></option>
+												<!-- <option value="OS" label="One Size"></option> -->
+												<!-- <option value="S" label="S"></option>
 												<option value="M" label="M"></option>
 												<option value="L" label="L"></option>
 												<option value="XL" label="XL"></option>
@@ -421,30 +326,104 @@
 												<option value="13.5" label="13.5"></option>
 												<option value="14.0" label="14.0"></option>
 												<option value="14.5" label="14.5"></option>
-												<option value="15.0" label="15.0"></option>
+												<option value="15.0" label="15.0"></option> -->
 											</select>
-										</span>
-										<span class="container-element">
+										</div>
+										<div class="container-element">
 											<label class="label">Quantity</label>
-											<input type="number" name="taskProductQty" class="input">
-										</span>
+											<input type="number" name="taskProductQty" class="input" value="1">
+										</div>
 									</div>
 
+									<div id="customRow" class="container">
+										<div class="container-element" style="flex: 2 2 0">
+											<label class="label">Product Keywords</label>
+											<input type="text" class="input" name="taskSearchInput">
+										</div>
+
+
+										<div class="container-element">
+											<label class="label">Style Keywords</label>
+											<input type="text" name="taskVariant" class="input">
+										</div>
+
+										<div class="container-element">
+											<label>Size Keywords</label>
+											<input name="taskSize" class="input"/>
+										</div>
+
+										<div class="container-element">
+											<label for="taskCategory" class="label">Category</label>
+											<input name="taskCategory" class="input">
+										</div>
+									
+									</div>
 								</div>
 							</div>
 
 							<div class="container">
-								<div class="panel panel-invisible">
+								<div id="taskAdditionalOptions" class="panel panel-light">
+									<h2 id="taskAdditionalOptions" class="panel-title">
+										<i class="fas fa-sliders-h"></i>
+										<div>Additional Options</div>
+									</h2>
+
 									<div class="container">
-										<div class="container-element container-element-md">
-											<button id="taskSaveButton" class="btn">
-												<i class="fas fa-save"></i>
-												<span>Save</span>
-											</button>
+										<div class="container-element">
+											<label for="taskCartDelay" class="">Cart Delay (ms)</label>
+											<input type="number" id="taskCartDelay" class="input " placeholder="0">
+										</div>
+										<div class="container-element">
+											<label for="taskProxyList" class="label">Proxy List</label>
+											<select id="taskProxyList" class="input proxylist-selector">
+												<option label="None" value=""></option>
+											</select>
+										</div>
+										<div class="container-element">
+											<label for="taskStartDate" class="label">Start Date</label>
+											<input type="date" id="taskStartDate" class="input" step="3">
+										</div>
+									</div>
+
+									<div class="container">
+										<div class="container-element">
+											<label for="taskCheckoutDelay" class="">Checkout Delay (ms)</label>
+											<input type="number" id="taskCheckoutDelay" class="input" placeholder="0">
+										</div>
+										<div class="container-element">
+											<label for="taskMaxPrice" class="label">Price Limit (GBP or USD)</label>
+											<input type="number" class="input" id="taskMaxPrice" step="0.01" placeholder="0.00">
+										</div>
+										<div class="container-element">
+											<label for="taskStartTime" class="label">Start Time</label>
+											<input type="time" id="taskStartTime" class="input" step="3">
+										</div>
+									</div>
+
+
+
+									<div class="container">
+										<div class="container-element">
+											<input id="newTaskRestocks" type="checkbox" checked>
+											<label for="newTaskRestocks" class="checkbox-label">Monitor Restocks</label>
+										</div>
+
+										<div class="container-element">
+											<input id="captchaCheckbox" type="checkbox">
+											<label for="captchaCheckbox" class="checkbox-label">Bypass Captcha</label>
+										</div>
+
+										<div class="container-element">
+											<input id="threeDCheckbox" type="checkbox">
+											<label for="threeDCheckbox" class="checkbox-label">Bypass 3DS</div></label>
 										</div>
 									</div>
 								</div>
 							</div>
+
+							
+
+							
 						</div>
 					</div>
 				</div>
@@ -456,23 +435,78 @@
 			<div class="header-container">
 				<h1 class="header-title">Profiles</h1>
 				<div class="header-extra">
-					<div class="container-element container-element-sm">
-						<button class="btn" data-toggle="modal" data-target="#profileModal">
-							<i class="fas fa-plus icon"></i>
-							<span>New Profile</span>
-						</button>
+			
+						<div class="container-element container-element-sm">
+							<button class="btn" data-toggle="modal" data-target="#profileModal">
+								<i class="fas fa-plus icon"></i>
+								<div>New Profile</div>
+							</button>
+
 					</div>
+					
 					<!-- <div class="container-element container-element-sm">
 						<button class="btn">
 							<i class="fas fa-trash icon"></i>
-							<span>Clear Profiles</span>
+							<div>Clear Profiles</div>
 						</button>
 					</div> -->
 				</div>
 			</div>
 
 			<div class="panel panel-main">
-				<div id="profilesWrapper" class="container container-start"></div>
+				<div class="container">
+					<div class="panel panel-light padding-vertical">
+						<div class="container">
+							<div class="container-element">
+								<table id="profileTable" class="table">
+									<thead id="profileTableHead" class="table-header">
+										<tr class="row">
+											<th class="cell cell-header col-profile">
+												<i class="fas fa-user"></i>
+												Profile Name</th>
+											<th class="cell cell-header col-site">
+												<i class="fas fa-id-card"></i>
+												Name</th>
+											<th class="cell cell-header col-products">
+												<i class="fas fa-home"></i>
+												Address</th>
+											<th class="cell cell-header col-status">
+												<i class="fas fa-credit-card"></i>
+												Card</th>
+											<th class="cell cell-header col-actions">
+												<i class="fas fa-tools"></i>
+												Actions</th>
+										</tr>
+									</thead>
+									<tbody id="profileTableBody" class="table-body"></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="container">
+					<!-- <div class="container-element container-element-sm">
+						<button id="importProfiles" class="btn">
+							<i class="fas fa-file-import"></i>
+							<div>Import</div>
+						</button>
+					</div>
+
+					<div class="container-element container-element-sm">
+						<button id="exportProfiles" class="btn">
+							<i class="fas fa-file-export"></i>
+							<div>Export</div>
+						</button>
+					</div> -->
+
+					<div class="container-element container-element-sm">
+						<button id="deleteAllProfiles" class="btn">
+							<i class="fas fa-minus-circle"></i>
+							<div>Delete All</div>
+						</button>
+					</div>
+				</div>
 			</div>
 
 			<div class="modal fade" id="profileModal" tabindex="-1" role="dialog">
@@ -481,7 +515,7 @@
 						<div class="header-container">
 							<h2 class="panel-title modal-title" id="exampleModalLabel">
 								<i></i>
-								<span>Profile Editor</span>
+								<div>Profile Editor</div>
 							</h2>
 						</div>
 						<div class="panel panel-main">
@@ -490,78 +524,78 @@
 									<div id="billingOptions" class="panel panel-light">
 										<h2 id="profileBillingForm" class="panel-title">
 											<i class="fas fa-file-invoice-dollar"></i>
-											<span>Billing Information</span>
+											<div>Billing Information</div>
 										</h2>
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingFirst" class="">First Name</label>
 												<input type="text" id="profileBillingFirst" class="input">
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingLast" class="">Last Name</label>
 												<input type="text" id="profileBillingLast" class="input">
-											</span>
+											</div>
 										</div>
 
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingEmail" class="label">E-mail</label>
 												<input type="text" id="profileBillingEmail" class="input">
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingTelephone" class="">Telephone</label>
 												<input type="text" id="profileBillingTelephone" class="input ">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingAddress1" class="">Address 1</label>
 												<input type="text" id="profileBillingAddress1" class="input">
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingAddress2" class="">Address 2</label>
 												<input type="text" id="profileBillingAddress2" class="input">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingCity" class="label">City</label>
 												<input type="text" id="profileBillingCity" class="input">
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingZip" class="label">Zip Code</label>
 												<input type="text" id="profileBillingZip" class="input">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileBillingCountry" class="">Country</label>
 												<select id="profileBillingCountry" class="input country-selector">
 												</select>
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileBillingState" class="label">State</label>
 												<select id="profileBillingState" class="input">
 												</select>
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<input id="sameShippingCheckbox" type="checkbox">
 												<label for="sameShippingCheckbox" class="checkbox-label">
 													<!--<i class="far fa-square"></i>-->
-													<span>Same Shipping Information</span>
+													<div>Same Shipping Information</div>
 												</label>
-											</span>
+											</div>
 										</div>
 
 									</div>
@@ -570,67 +604,67 @@
 									<div id="shippingOptions" class="panel panel-light">
 										<h2 id="profileShippingForm" class="panel-title">
 											<i class="fas fa-shipping-fast"></i>
-											<span>Shipping Information</span>
+											<div>Shipping Information</div>
 										</h2>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingFirst" class="label">First Name</label>
 												<input type="text" id="profileShippingFirst" class="input">
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileShippingLast" class="label">Last Name</label>
 												<input type="text" id="profileShippingLast" class="input">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingEmail" class="label">E-mail</label>
 												<input type="text" id="profileShippingEmail" class="input">
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileShippingTelephone" class="label">Telephone</label>
 												<input type="text" id="profileShippingTelephone" class="input">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingAddress1" class="label">Address 1</label>
 												<input type="text" id="profileShippingAddress1" class="input">
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingAddress2" class="label">Address 2</label>
 												<input type="text" id="profileShippingAddress2" class="input">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingCity" class="label">City</label>
 												<input type="text" id="profileShippingCity" class="input">
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingZip" class="label">Zip Code</label>
 												<input type="text" id="profileShippingZip" class="input">
-											</span>
+											</div>
 										</div>
 
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingCountry" class="">Country</label>
 												<select id="profileShippingCountry" class="input country-selector">
 												</select>
-											</span>
+											</div>
 
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profileShippingState" class="">State</label>
 												<select id="profileShippingState" class="input " disabled>
 												</select>
-											</span>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -641,22 +675,22 @@
 									<div id="paymentOptions" class="panel panel-light">
 										<h2 id="profilePaymentForm" class="panel-title">
 											<i class="fas fa-credit-card"></i>
-											<span>Payment Information</span>
+											<div>Payment Information</div>
 										</h2>
 										<div class="container">
-											<span class="container-element">
+											<div class="container-element">
 												<label for="profilePaymentType" class="label">Payment Type</label>
 												<select id="profilePaymentType" class="input">
 													<option value="visa">Visa</option>
 													<option value="master">Mastercard</option>
 													<option value="american_express">American Express</option>
 												</select>
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileCardNumber" class="label">Card Number</label>
 												<input type="text" id="profileCardNumber" class="input">
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileExpiryMonth" class="label">Expiry Month</label>
 												<select id="profileExpiryMonth" class="input">
 													<option value="" label=""></option>
@@ -673,8 +707,8 @@
 													<option value="11" label="11"></option>
 													<option value="12" label="12"></option>
 												</select>
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileExpiryYear" class="label">Expiry Year</label>
 												<select id="profileExpiryYear" class="input">
 													<option value="" label=""></option>
@@ -692,11 +726,11 @@
 													<option value="2029" label="2029"></option>
 													<option value="2030" label="2030"></option>
 												</select>
-											</span>
-											<span class="container-element">
+											</div>
+											<div class="container-element">
 												<label for="profileCvv" class="label">CVV</label>
 												<input type="text" id="profileCvv" class="input">
-											</span>
+											</div>
 										</div>
 
 									</div>
@@ -714,7 +748,7 @@
 										<label for="profileName" class="f-95" style="opacity:0;">.</label>
 										<button id="profileSaveButton" class="btn">
 											<i class="fas fa-save"></i>
-											<span>Save Profile</span>
+											<div>Save Profile</div>
 										</button>
 									</div>
 
@@ -722,7 +756,7 @@
 										<label for="profileName" style="opacity:0;">.</label>
 										<button id="profileClearFieldButton" class="btn">
 											<i class="fas fa-broom"></i>
-											<span>Clear Fields</span>
+											<div>Clear Fields</div>
 										</button>
 									</div>
 								</div>
@@ -740,27 +774,13 @@
 			<div class="header-container">
 				<h1 id="proxy-header" class="header-title">Proxies</h1>
 				<div class="header-extra">
-					<div class="container-element">
-						<label class="label"> </label>
-						<button id="importProxies" class="btn">
-							<i class="fas fa-file-import"></i>
-							<span>Import Proxies</span>
-						</button>
-					</div>
-
-					<div class="container-element">
-						<label class="label"> </label>
-						<button id="exportProxies" class="btn">
-							<i class="fas fa-file-export"></i>
-							<span>Export Proxies</span>
-						</button>
-					</div>
+			
 
 					<div class="container-element">
 						<label class="label"> </label>
 						<button class="btn" data-toggle="modal" data-target="#proxyModal">
 							<i class="fas fa-plus"></i>
-							<span>New Proxy List</span>
+							<div>New Proxy List</div>
 						</button>
 					</div>
 
@@ -787,44 +807,44 @@
 					<div class="panel panel-light padding-vertical">
 
 						<div class="container">
-							<span class="container-element">
+							<div class="container-element">
 								<table class="table">
 									<thead class="table-header">
 										<tr class="row">
 											<!-- <th class="cell cell-header col-id">
 												<i class="fas fa-id-card"></i>
-												<span>ID</span>
+												<div>ID</div>
 											</th> -->
 											<th id="proxiesProxyHeader" class="cell-header cell col-proxy">
 												<i class="fas fa-globe"></i>
-												<span>IP Address</span>
+												<div>IP Address</div>
 											</th>
 											<th id="proxiesProxyHeader" class="cell-header cell col-proxyPort">
 												<i class="fas fa-plug"></i>
-												<span>Port</span>
+												<div>Port</div>
 											</th>
 											<th id="proxiesProxyHeader" class="cell-header cell col-proxyUser">
 												<i class="fas fa-user"></i>
-												<span>Username</span>
+												<div>Username</div>
 											</th>
 											<th id="proxiesProxyHeader" class="cell-header cell col-proxy">
 												<i class="fas fa-key"></i>
-												<span>Password</span>
+												<div>Password</div>
 											</th>
 											<th id="proxiesStatusHeader" class="cell-header cell col-proxyStatus">
 												<i class="fas fa-exchange-alt"></i>
-												<span>Status</span>
+												<div>Status</div>
 											</th>
 											<th id="proxiesPingHeader" class="cell-header cell col-proxySpeed">
 												<i class="fas fa-tools"></i>
-												<span>Actions</span>
+												<div>Actions</div>
 											</th>
 										</tr>
 									</thead>
 									<tbody id="proxyTestResults" class="table-body">
 									</tbody>
 								</table>
-							</span>
+							</div>
 						</div>
 					</div>
 
@@ -832,28 +852,37 @@
 				</div>
 
 				<div class="container">
-					<div class="panel panel-invisible">
-						<div class="container">
-							<span class="container-element container-element-md">
+					<!-- <div class="container-element container-element-sm">
+						<button id="importProxies" class="btn">
+							<i class="fas fa-file-import"></i>
+							<div>Import</div>
+						</button>
+					</div>
+
+					<div class="container-element container-element-sm">
+						<button id="exportProxies" class="btn">
+							<i class="fas fa-file-export"></i>
+							<div>Export</div>
+						</button>
+					</div> -->
+							<div class="container-element container-element-sm">
 								<button id="proxyTestAll" class="btn">
 									<i class="fas fa-play-circle"></i>
-									<span>Test Proxies</span>
+									<div>Test Proxies</div>
 								</button>
-							</span>
-							<!-- <span class="container-element container-element-md">
+							</div>
+							<!-- <div class="container-element container-element-md">
 									<button id="" class="btn">
 										<i class="fas fa-stop-circle"></i>
-										<span>Stop All Tasks</span>
+										<div>Stop All Tasks</div>
 									</button>
-								</span> -->
-							<span class="container-element container-element-md">
+								</div> -->
+							<div class="container-element container-element-sm">
 								<button id="proxyDeleteList" class="btn">
 									<i class="fas fa-trash"></i>
-									<span>Delete List</span>
+									<div>Delete List</div>
 								</button>
-							</span>
-						</div>
-					</div>
+							</div>
 				</div>
 			</div>
 
@@ -863,7 +892,7 @@
 						<div class="header-container modal-header">
 							<h2 class="panel-title modal-title" id="exampleModalLabel">
 								<i></i>
-								<span>New Proxy List</span>
+								<div>New Proxy List</div>
 							</h2>
 						</div>
 						<div class="modal-body panel">
@@ -882,7 +911,7 @@
 								<div class="container-element container-element-md">
 									<button id="saveProxyListBtn" class="btn">
 										<i class="fas fa-save"></i>
-										<span>Save List</span>
+										<div>Save List</div>
 									</button>
 								</div>
 							</div>
@@ -901,7 +930,7 @@
 						<div class="header-container modal-header">
 							<h2 class="panel-title modal-title" id="exampleModalLabel">
 								<i></i>
-								<span>New Harvester</span>
+								<div>New Harvester</div>
 							</h2>
 						</div>
 						<div class="modal-body panel">
@@ -923,18 +952,18 @@
 			<div class="header-container">
 				<h1 class="header-title">Harvesters</h1>
 				<div class="header-extra">
-					<span class="container-element container-element-sm">
+					<div class="container-element container-element-sm">
 						<button class="btn" data-toggle="modal" data-target="#harvesterModal">
 							<i class="fas fa-plus icon"></i>
 							New Harvester
 						</button>
-					</span>
-					<span class="container-element container-element-sm">
+					</div>
+					<!-- <div class="container-element container-element-sm">
 						<button class="btn">
 							<i class="fas fa-trash icon"></i>
 							Delete All
 						</button>
-					</span>
+					</div> -->
 				</div>
 			</div>
 
@@ -948,21 +977,17 @@
 			<div class="header-container">
 				<h1 class="header-title">Analytics</h1>
 				<div class="header-extra">
-					<span class="container-element container-element-sm">
+					<div class="container-element container-element-sm">
 						<button id="clearAnalytics" class="btn">
 							<i class="fas fa-broom"></i>
 							Clear
 						</button>
-					</span>
+					</div>
 				</div>
 			</div>
 			<div class="panel panel-main">
 				<div class="container">
 					<div class="panel panel-light">
-						<div id="analysticsHeader" class="panel-title">
-							<i class="fas fa-tasks"></i>
-							<span>Orders</span>
-						</div>
 						<div class="container">
 							<div class="container-element">
 								<table id="orderTable" class="table">
@@ -970,23 +995,23 @@
 										<tr class="row">
 											<th class="cell cell-header col-id">
 												<i class="fas fa-calendar-day"></i>
-												<span>Date</span>
+												<div>Date</div>
 											</th>
 											<th class="cell cell-header col-site">
 												<i class="fas fa-store"></i>
-												<span>Store</span>
+												<div>Store</div>
 											</th>
 											<th class="cell cell-header col-products">
 												<i class="fas fa-tshirt"></i>
-												<span>Product Name</span>
+												<div>Product Name</div>
 											</th>
 											<th class="cell cell-header col-order">
 												<i class="fas fa-hashtag"></i>
-												<span>Order Number</span>
+												<div>Order Number</div>
 											</th>
 											<th class="cell cell-header col-actions-sm">
 												<i class="fas fa-tools"></i>
-												<span>Actions</span>
+												<div>Actions</div>
 											</th>
 									</thead>
 									<tbody id="orderTableBody" class="table-body">
@@ -1011,10 +1036,10 @@
 						<div class="panel panel-light">
 							<h2 class="panel-title">
 								<i class="fas fa-cog"></i>
-								<span>General Settings</span>
+								<div>General Settings</div>
 							</h2>
 
-							<div class="container ">
+							<div class="container" style="display:none">
 								<div class="container-element">
 									<label class="label">Supreme Monitor Proxy List</label>
 									<select id="monitorProxyList" class="input proxylist-selector">
@@ -1026,29 +1051,36 @@
 
 							<div class="container">
 								<div class="container-element">
-									<button id="browserSetup" class="btn">
+									<button id="browserSetup" class="btn btn-transparent">
 										<i class="fas fa-box-open"></i>
-										<span>Setup Browser Mode</span>
+										<div>Setup Browser Mode</div>
 									</button>
 								</div>
 							</div>
 
 							<div class="container">
 								<div class="container-element">
-									<button id="resetAllSettings" class="btn">
+									<button id="resetAllSettings" class="btn btn-transparent">
 										<i class="fas fa-minus-circle"></i>
-										<span>Reset All Stored Settings</span>
+										<div>Reset All Stored Settings</div>
 									</button>
 								</div>
 							</div>
 
 							<div class="container">
 								<div class="container-element">
-									<button id="signout" class="btn">
+									<button id="signout" class="btn btn-transparent">
 										<i class="fas fa-sign-out-alt"></i>
-										<span>Sign Out</span>
+										<div>Sign Out</div>
 									</button>
 								</div>
+							</div>
+
+							<div class="container">
+								<div class="container-element container-element-sm">
+									<label id="version" style="justify-content: center;"></label>
+								</div>
+								
 							</div>
 						</div>
 					</div>
@@ -1058,13 +1090,13 @@
 						<div class="panel panel-light">
 							<h2 class="panel-title">
 								<i class="fas fa-robot"></i>
-								<span>Webhooks</span>
+								<div>Webhooks</div>
 							</h2>
 							<div class="container">
 								<div class="container-element">
 									<label class="label">
 										<i class="fab fa-discord"></i>
-										<span>Discord</span>
+										<div>Discord</div>
 									</label>
 									<input id="discordWebhook" class="input" type="text"
 										placeholder='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXXXXX/XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXX-XXXXXXXXXXXXXXXX'>
@@ -1073,7 +1105,7 @@
 									<label> </label>
 									<button id="testDiscordWebhook" class="btn">
 										<i class="fas fa-vial"></i>
-										<span>Test</span>
+										<div>Test</div>
 									</button>
 								</div>
 							</div>
@@ -1086,14 +1118,14 @@
 	</div>
 
 	<!-- Footer -->
-	<div class="container footer" id="footer">
-		<span id="footerCopyright" class="container-element footer-text">Copyright© 2020 ProsperAIO
-		</span>
-		<span id="footerCopyright" class="container-element footer-text">Version 2.5.63
-		</span>
-		<span id="footerCopyright" class="container-element footer-text">Twitter & Instagram: @prosperaio
-		</span>
-	</div>
+	<!-- <div class="container footer" id="footer">
+		<div id="footerCopyright" class="container-element footer-text">Copyright© 2020 ProsperAIO
+		</div>
+		<div id="footerCopyright" class="container-element footer-text">Version 2.5.63
+		</div>
+		<div id="footerCopyright" class="container-element footer-text">Twitter & Instagram: @prosperaio
+		</div>
+	</div> -->
 	<script src="../src/renderer/elements.js"></script>
 	<script src="../src/renderer/index.js"></script>
 </body>

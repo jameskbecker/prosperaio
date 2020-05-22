@@ -1,6 +1,6 @@
 const cart = require('./cart');
 const checkout = require('./checkout');
- const ticket = require('./ticket');
+const ticket = require('./ticket');
 const { convertSize, cookies, keywords, logger, utilities } = require('../../other');
 const { URLMonitor } = require('../../monitors/supreme');
 
@@ -25,10 +25,10 @@ function findProduct() {
 
 			logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
 			this.setStatus('Fetching Stock Data.', 'WARNING');
-			this.isMonitoring = true;
+			this.isMonitoringKW = true;
 
 			global.monitors.supreme.kw.add(this.id, searchInput, category, (name, id, price) => {
-				this.isMonitoring = false;
+				this.isMonitoringKW = false;
 				if (maxPrice > 0 && (price / 100) > maxPrice) {
 					this.setStatus('Price Exceeds Limit.', 'ERROR');
 					reject(new Error('PRICE LIMIT'));
@@ -39,6 +39,7 @@ function findProduct() {
 				this.productName = name;
 				this.productUrl = this.baseUrl + '/shop/' + this.productId;
 
+				cookies.set.bind(this)('www.supremenewyork.com', 'shoppingSessionId', new Date().getTime());
 				this.setProductName();
 				resolve();
 				return;
@@ -51,75 +52,117 @@ function findProduct() {
 function getProductData() {
 	return new Promise((resolve, reject) => {
 		async function runStage() {
+			if (this.shouldStop ) return this.stop();
 			logger.warn(`[T:${this.id}] Adding to Url Monitor.`);
 			this.setStatus('Fetching Product Data.', 'WARNING');
 			this.isMonitoring = true;
 
 			if (!global.monitors.supreme.url.hasOwnProperty(this.productUrl)) {
-				global.monitors.supreme.url[this.productUrl] = new URLMonitor(this.productUrl);
+				global.monitors.supreme.url[this.productUrl] = new URLMonitor(this.productUrl, this._proxyList);
 			}
 			let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
 			global.monitors.supreme.url[this.productUrl].monitorDelay = monitorDelay;
 			global.monitors.supreme.url[this.productUrl].add(this.id, (styles) => {
+				try {
+					let specific = false;
+					let matchedData;
+					let sizeData;
+					let styleName;
+					let styleId;
+					let imageUrl;
+					for (let i = 0; i < styles.length; i++) {
+						if (keywords.isMatch(styles[i].name.toLowerCase(), keywords.parse(this.products[0].style))) {
+							switch (this.products[0].size) {
+								case "RANDOM":
+								case "SMALLEST":
+								case "LARGEST":
+									matchedData = styles[i].sizes.filter(size => size.stock_level === 1);
+									break;
 
-				let instockSizes = []
-				let sizeData;
-				let styleName;
-				let styleId;
-				let imageUrl;
-				for (let i = 0; i < styles.length; i++) {
-					if (keywords.isMatch(styles[i].name.toLowerCase(), keywords.parse(this.products[0].style))) {
-						instockSizes = styles[i].sizes.filter(size => size.stock_level === 1);
-						styleName = styles[i].name;
-						styleId = styles[i].id
-						imageUrl = 'https:' + styles[i].image_url;
-						break;
-					}
+								default:
+									specific = true
+									console.log('SIZE:',this.products[0].size)
+									matchedData = styles[i].sizes.filter(size => size.name.toLowerCase().includes(this.products[0].size));
 
-				}
-
-				if (!instockSizes.length > 0) {
-					this.setStatus('Monitoring for Restocks.', 'INFO');
-					logger.error(`[T:${this.id}] [${this.productName}] OOS`)
-					let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
-					return setTimeout(runStage.bind(this), monitorDelay);
-				}
-				else {
-					switch (this.products[0].size) {
-						case 'SMALLEST': sizeData = instockSizes[0]
-							break;
-						case 'LARGEST': sizeData = instockSizes[instockSizes.length - 1];
-							break;
-						case 'RANDOM': sizeData = instockSizes[Math.floor(Math.random() * parseInt(instockSizes.length))];
-							break;
-						default:
-							for (let j = 0; j < instockSizes.length; j++) {
-								sizeData = instockSizes[j];
-								if (sizeData.name.includes(convertSize('supreme', this.products[0].size))) break;
 							}
 
+							styleName = styles[i].name;
+							styleId = styles[i].id
+							imageUrl = 'https:' + styles[i].image_url;
+							break;
+						}
+
+					}
+
+					if (matchedData.length === 0 && !specific) {
+						throw new Error('OOS');
+					}
+					else if (matchedData.length === 0 && specific) {
+						throw new Error('SIZE NOT FOUND')
+					}
+					else {
+						switch (this.products[0].size) {
+							case 'SMALLEST': sizeData = matchedData[0]
+							this.setSizeName();
+								break;
+							case 'LARGEST': sizeData = matchedData[matchedData.length - 1];
+							this.setSizeName();
+								break;
+							case 'RANDOM': sizeData = matchedData[Math.floor(Math.random() * parseInt(matchedData.length))];
+							this.setSizeName();
+								break;
+							default:
+								sizeData = matchedData[0]
+								this.productSizeName = sizeData.name;
+								this.setSizeName();
+								if (!sizeData.stock_level) {
+									throw new Error('OOS')
+								}
+
+						}
+					}
+
+					if (sizeData) {
+						this.setSizeName();
+						this.productSizeName = sizeData.name;
+						this.productColour = styleName;
+						this.sizeId = sizeData.id;
+						this.styleId = styleId;
+						this.productImageUrl = imageUrl;
+
+						logger.verbose(`[T:${this.id}] [${this.styleId}] Matched Style: ${this.productColour}.`);
+						logger.verbose(`[T:${this.id}] [${this.sizeId}] Matched Size : ${this.productSizeName}.`);
+						global.monitors.supreme.url[this.productUrl].remove(this.id);
+						
+						this.isMonitoring = false;
+						resolve();
+						return;
+					}
+					else {
+						logger.error('Style Not Found.');
+						let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+						return setTimeout(runStage.bind(this), errorDelay);
 					}
 				}
+				catch (error) {
+					switch (error.message) {
+						case 'OOS':
+							this.setStatus('OOS. Retrying.', 'ERROR');
+							logger.error(`[T:${this.id}] [${this.productName}] OOS`);
+							break;
 
-				if (sizeData) {
-					this.isMonitoring = false;
-					this.productSizeName = sizeData.name;
-					this.productColour = styleName;
-					this.sizeId = sizeData.id;
-					this.styleId = styleId;
-					this.productImageUrl = imageUrl;
+						case 'SIZE NOT FOUND':
+							this.setStatus('Size Not Found', 'ERROR');
+							logger.error(`[T:${this.id}] [${this.productName}] Size Not Found`);
+							break;
 
-					logger.verbose(`[T:${this.id}] [${this.styleId}] Matched Style: ${this.productColour}.`);
-					logger.verbose(`[T:${this.id}] [${this.sizeId}] Matched Size : ${this.productSizeName}.`);
-					global.monitors.supreme.url[this.productUrl].remove(this.id);
-					this.setSizeName();
-					resolve();
-					return;
-				}
-				else {
-					logger.error('Style Not Found.');
-					let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
-					return setTimeout(runStage.bind(this), errorDelay);
+						default:
+							this.setStatus('Error. Retrying', 'ERROR');
+							console.log(error);
+
+					}
+					let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
+					return setTimeout(runStage.bind(this), monitorDelay);
 				}
 			})
 
@@ -127,327 +170,204 @@ function getProductData() {
 		runStage.bind(this)();
 
 	})
-}
-
-function fetchTicket1() {
-	return new Promise((resolve, reject) => {
-		async function runStage() {
-			this.setStatus('Generating Ticket', 'WARNING');
-			logger.debug('Fetching Ticket #1')
-			//Get ATC _ticket
-			ticket.get.bind(this)()
-			.then(response => {
-				let body = response.body;
-				console.log(body)
-
-				if (body.userAgent && body.userAgent !== this.userAgent) {
-					this.userAgent = body.userAgent;
-				}
-
-				if (body.atcData && typeof body.atcData.atcForm === 'object') {
-					this.atcForm = body.atcData.atcForm;
-				}
-
-				if (body.ticket && body.ticket.value) {
-					let ticketValue = body.ticket.value;
-					cookies.set.bind(this)(this.baseUrl, ticketValue.split('=')[0], ticketValue.split('=')[0]);
-					return resolve();
-				}
-			})
-			.catch((error) => {
-				this.setStatus('Error', 'ERROR');
-				if (error) console.log(error);
-				else console.log('error')
-				let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
-				return setTimeout(runStage.bind(this), errorDelay);
-			})
-		}
-		runStage.bind(this)()
-	})
-	/*
-	
-	*/
 }
 
 function cartProduct() {
 	return new Promise((resolve, reject) => {
 		async function runStage() {
-			
-			//Delay ATC
-			this.setStatus('Delaying ATC.', 'WARNING');
+			try {
+				if (this.shouldStop) return this.stop();
+				//Get First _Ticket
+				this.setStatus('Generating Cookies', 'WARNING');
+				logger.debug('Fetching Ticket #1')
+
+				let response = await ticket.get.bind(this)()
+				let body = response.body;
+				console.log(body)
+
+				//User Agent used to Generate Ticket
+				if (body.userAgent) { this.userAgent = body.userAgent; }
+
+				//Parsed ATC Form
+				if (body.atcData && typeof body.atcData.atcForm === 'object') {
+					this.atcForm = body.atcData.atcForm;
+				}
+
+				// Pre-Cart Ticket
+				if (body.ticket && body.ticket.value) {
+					let ticketValue = body.ticket.value;
+					cookies.set.bind(this)(this.baseUrl, ticketValue.split('=')[0], ticketValue.split('=')[1]);
+				}
+
 				let cartDelay = !this.restockMode ? this.taskData.delays.cart : 0;
-				utilities.sleep(cartDelay)
+
+				//Delay ATC
+				this.setStatus('Delaying ATC.', 'WARNING');
+				logger.debug(`Delaying ATC (${cartDelay}ms).`)
+				await utilities.sleep(cartDelay);
+				
+				if (this.shouldStop) return this.stop();
+				
 				//ATC Request
-				.then(() => {
-					if (this.shouldStop) {
-						throw new Error('STOP');
-					}
-					this.setStatus('Adding to Cart.', 'WARNING');
-					logger.warn(`[T:${this.id}] Adding ${this.productId} to Cart.`);
-					return cart.add.bind(this)();
-				})
+				this.setStatus('Adding to Cart.', 'WARNING');
+				response = await cart.add.bind(this)();
+
 				//Handle ATC Response
-				.then(response => {
-					console.log(response.body)
-					let body = response.body;
-					//logger.info(`[T:${this.id}] Cart Response:\n${JSON.stringify(response.body, null, '\t')}`);
-					if (
-						(body.hasOwnProperty('length') && !body.length > 0) ||
-						(body.hasOwnProperty('success') && !body.success) ||
-						(body.hasOwnProperty('length') && !response.body[0].in_stock)
-					) {
-						throw new Error('OOS');
-					}
-					let pureCart;
-					let ticket;
+				body = response.body;
+				logger.info(`[T:${this.id}] Cart Response:\n${JSON.stringify(response.body, null, '\t')}`);
+				if (
+					(body.hasOwnProperty('length') && !body.length > 0) ||
+					(body.hasOwnProperty('success') && !body.success) ||
+					(body.hasOwnProperty('length') && !response.body[0].in_stock)
+				) {
+					throw new Error('OOS');
+				}
 
-					pureCart = cookies.get.bind(this)(this.baseUrl.replace('https://', ''), 'pure_cart').value || null
-					ticket = cookies.get.bind(this)(this.baseUrl.replace('https://', ''), 'ticket').value || '';
+				let pureCart; let _ticket;
 
-					if (ticket) {
-						logger.debug(`Ticket: ${ticket}`);
-						this.ticket = ticket;
-					}
-					if (pureCart) {
-						let cookieValue = JSON.parse(decodeURIComponent(pureCart));
-						console.log(cookieValue)
-						delete cookieValue.cookie;
-						this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
-						console.log(this.cookieSub);
-						resolve();
-					}
-				})
-				.catch(error => {
-					if (error.message === "STOP") {
-						console.log('hello')
+				pureCart = cookies.get.bind(this)(this.baseUrl.replace('https://', ''), 'pure_cart').value || null
+				_ticket = cookies.get.bind(this)(this.baseUrl.replace('https://', ''), 'ticket').value || '';
+
+				if (_ticket) {
+					logger.debug(`Ticket: ${ticket}`);
+					this.ticket = _ticket;
+				}
+				if (pureCart) {
+					let cookieValue = JSON.parse(decodeURIComponent(pureCart));
+					delete cookieValue.cookie;
+					this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
+				}
+
+				resolve();
+			}
+			catch (error) {
+				switch (error.message) {
+					case 'STOP':
 						return this.stop();
-					}
-					if (error.message === 'OOS') {
+
+					case 'OOS':
 						this.setStatus('Out of Stock.', 'ERROR');
-						logger.error('OOS')
-						return setTimeout(runStage.bind(this), 1000)
-					}
-					this.setStatus('Failed ATC.', 'ERROR');
-					logger.error(`[T:${this.id}] [ATC] ${error.message}.`);
-					return setTimeout(runStage.bind(this), 1000)
-				})
+						logger.error('OOS');
+						break;
+
+					default:
+						console.log(error);
+				}
+				return setTimeout(runStage.bind(this), 1000)
+			}
 		}
 		runStage.bind(this)();
 	})
 }
 
-function fetchTicket2() {
-	return new Promise((resolve, reject) => {
-		async function runStage() {
-			this.setStatus('Generating Ticket', 'WARNING');
-			logger.debug('Fetching Ticket #1')
-			//Get ATC _ticket
-			ticket.get.bind(this)()
-			.then(response => {
-				let body = response.body;
-				console.log(body)
-
-				if (body.userAgent && body.userAgent !== this.userAgent) {
-					this.userAgent = body.userAgent;
-				}
-
-				if (body.ticket && body.ticket.value) {
-					let ticketValue = body.ticket.value;
-					cookies.set.bind(this)(this.baseUrl, ticketValue.split('=')[0], ticketValue.split('=')[0]);
-					return resolve();
-				}
-			})
-			
-			.catch((error) => {
-				this.setStatus('Error', 'ERROR');
-				if (error) console.log(error);
-				else console.log('error')
-				let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
-				return setTimeout(runStage.bind(this), errorDelay);
-			})
-		}
-		runStage.bind(this)()
-	})
-	/*
-	
-	*/
-}
-
 function checkoutProduct() {
 	return new Promise((resolve, reject) => {
-		function runStage() {
-			cookies.set.bind(this)('www.supremenewyork.com', 'lastVisitedFragment', 'checkout');
-			this.setStatus("Parsing Checkout Form.");
-			//Fetch Mobile Page
-			checkout.fetchForm.bind(this)()
+		async function runStage() {
+			try {
+				if (this.shouldStop) return this.stop();
+				cookies.set.bind(this)('www.supremenewyork.com', 'lastVisitedFragment', 'checkout');
+				this.setStatus("Parsing Checkout Form.");
+				//Fetch Mobile Page
+				let response = await checkout.fetchForm.bind(this)();
 				//Parse Checkout Form
-				.then(response => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
+				await checkout.handleFetchForm.bind(this)(response);
+
+				if (this.shouldStop) return this.stop();
+				if (
+					this.region === 'eu' &&
+					!this.taskData.additional.enableThreeDS/*bypass*/
+				) {
+					this.setStatus('Initialising 3DS.', 'WARNING');
+					logger.debug(`[T:${this.id}] Fetching Mobile Totals.`);
+					//Fetch Mobile Totals
+					response = await checkout.fetchMobileTotals.bind(this)();
 					let body = response.body;
-					let formElements = [];
 					let $ = cheerio.load(body);
-				
-					let checkoutWrapper = $("#checkoutViewTemplate").html();
-					$ = cheerio.load(checkoutWrapper);
-					let checkoutForm = $('form[action="https://www.supremenewyork.com/checkout.json"]').html();
-					$ = cheerio.load(checkoutForm);
+					let serverJWT = $('#jwt_cardinal').val();
+					let orderTotal = $('#total').text();
 
-					$(':input[type!="submit"]').each(function () {
-						let formElement = $(this)[0].attribs;
-						let output = {};
-						let attributes = ["name", "id", "placeholder", "value", "style"]
-						attributes.forEach(attribute => {
-							if (Object.hasOwnProperty.bind(formElement)(attribute)) {
-								output[attribute] = formElement[attribute]
-							}
-						})
-						if (Object.keys(output).length > 0) {
-							logger.verbose(`Parsed Form Element:\n${output.name}`)
-							formElements.push(output);
-						}
-					})
-					this.formElements = formElements;
-					return Promise.resolve();
-				})
-				//Fetch Mobile Totals
-				.then(() => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
-					if (
-						this.region === 'eu' &&
-						this.taskData.additional.enableThreeDS
-					) {
-						this.setStatus('Initialising 3DS.', 'WARNING');
-						logger.debug(`[T:${this.id}] Fetching Mobile Totals.`);
-						return checkout.fetchMobileTotals.bind(this)();
-					}
-					else {
-						return Promise.resolve();
-					}
-				})
-				//Handle Mobile Totals Response
-				.then(response => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
-					if (response) {
-						const body = response.body;
-						const $ = cheerio.load(body);
-						let serverJWT = $('#jwt_cardinal').val();
-						let orderTotal = $('#total').text();
-
-						if (orderTotal) {
-							this.orderTotal = orderTotal;
-							logger.info(`Order Total:\n${this.orderTotal}`);
-						}
-						if (serverJWT) {
-							this.cardinal.serverJWT = serverJWT;
-							logger.info(`Initial JWT:\n${this.cardinal.serverJWT}`);
-						}
-						return Promise.resolve();
+					if (orderTotal) {
+						logger.info(`Order Total:\n${this.orderTotal}`);
+						this.orderTotal = orderTotal;
 
 					}
-					else {
-						return Promise.resolve();
+					if (serverJWT) {
+						logger.info(`Initial JWT:\n${this.cardinal.serverJWT}`);
+						this.cardinal.serverJWT = serverJWT;
 					}
 
-				})
-				//Request 3DS Solving
-				.then(async () => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
-					if (
-						this.region === 'eu' &&
-						this.taskData.additional.enableThreeDS
-					) {
-						console.log('REQUESTING 3DS')
-						function threeDHandler() {
-							return new Promise(resolve => {
-								logger.debug('Submitting Initial JWT.');
-								ipcWorker.send('cardinal.setup', {
-									jwt: this.cardinal.serverJWT,
-									profile: this.profileName,
-									taskId: this.id
-								})
-								ipcWorker.once(`cardinal.setupComplete(${this.id})`, (event, args) => {
-									this.cardinal.id = args.cardinalId;
-									resolve();
-								})
-							})
-						}
-						await threeDHandler.bind(this)();
-						return Promise.resolve();
-					}
-					else {
-						return Promise.resolve();
-					}
-				})
-				//Request Captcha
-				.then(() => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
-					if (this.hasCaptcha) {
-						return this.requestCaptcha();
-					}
-					else {
-						return Promise.resolve();
-					}
-				})
+					//Setup 3D Secure
+					await checkout.setupThreeDS.bind(this)();
+				}
+
+				if (this.shouldStop) return this.stop();
+
+				// //Request Captcha	
+				if (this.hasCaptcha) {
+					await this.requestCaptcha();
+				}
+
+				if (this.shouldStop) return this.stop();
+
 				//Delay Checkout
-				.then(() => {
-					if (this.shouldStop) {
-						return Promise.reject(new Error('STOP'));
-					}
-					if (!this.restockMode) {
-						let checkoutDelay;
-						if (!this.captchaTime) {
-							checkoutDelay = this.taskData.delays.checkout;
-						}
-						else {
-							checkoutDelay = this.taskData.delays.checkout - this.captchaTime;
-						}
-						if (checkoutDelay < 0) checkoutDelay = 0;
-
-						this.setStatus('Delaying Checkout.', 'WARNING');
-						return utilities.sleep(checkoutDelay);
+				if (!this.restockMode) {
+					let checkoutDelay;
+					if (!this.captchaTime) {
+						checkoutDelay = this.taskData.delays.checkout;
 					}
 					else {
-						return Promise.resolve();
+						checkoutDelay = this.taskData.delays.checkout - this.captchaTime;
 					}
-				})
-				// .then(() => {
-				// 	this.setStatus('Generating Ticket #2', 'WARNING');
-				// 	return ticket.get.bind(this)();
-				// })
-				// .then(response => {
-				// 	let body = response.body;
-				// 	console.log(body)
-				// 	if (body.ticket && body.ticket.value) {
-				// 		let ticketValue = body.ticket.value;
-				// 		cookies.set.bind(this)(this.baseUrl, ticketValue.split('=')[0], ticketValue.split('=')[0]);
-				// 		return Promise.resolve();
-				// 	}
+					if (checkoutDelay < 0) checkoutDelay = 0;
+
+					this.setStatus('Delaying Checkout.', 'WARNING');
+					await utilities.sleep(checkoutDelay);
+				}
+				if (this.shouldStop) return this.stop();
+				//Fetch Post-Cart Ticket
+				this.setStatus('Generating Ticket #2', 'WARNING');
+				response = await ticket.get.bind(this)();
+				let body = response.body;
+				if (body.ticket && body.ticket.value) {
+					let ticketValue = body.ticket.value;
+					cookies.set.bind(this)(this.baseUrl, ticketValue.split('=')[0], ticketValue.split('=')[1]);
+
+				}
 				// })
 				//Submit Checkout
-				.then(() => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
-					logger.warn('Submitting Checkout.');
-					this.setStatus('Submitting Checkout.', 'WARNING');
+				// .then(() => {
+				if (this.shouldStop) return this.stop();
+				logger.warn('Submitting Checkout.');
+				this.setStatus('Submitting Checkout.', 'WARNING');
 
-					this.checkoutAttempts++;
-					this.checkoutTS = Date.now();
-					this.checkoutTime = this.checkoutTS - this.startTS;
+				this.checkoutAttempts++;
+				this.checkoutTS = Date.now();
+				this.checkoutTime = this.checkoutTS - this.startTS;
 
-					return checkout.submit.bind(this)();
-				})
-				//Handle Checkout Response
-				.then(response => {
-					if (this.shouldStop) return Promise.reject(new Error('STOP'));
-					this.checkoutData = response.body;
-					resolve()
-					return Promise.resolve();
-				})
+				response = await checkout.submit.bind(this)();
+				// })
+				// //Handle Checkout Response
+				// .then(response => {
+				if (this.shouldStop) return this.stop();
+				this.checkoutData = response.body;
+				resolve()
+				// 	return Promise.resolve();
+				// })
 				//Error Handling	
-				.catch(error => {
-					if (error.message === "STOP") return this.stop();
-					console.error(error);
-					return setTimeout(runStage.bind(this), 1000);
-				})
+				// .catch(error => {
+				// 	if (error.message === "STOP") return this.stop();
+				// 	console.error(error);
+				// 	return setTimeout(runStage.bind(this), 1000);
+				// })
+			}
+			catch(error) {
+				switch(error.message) {
+					default:
+						this.setStatus('Error Checking Out', 'ERROR');
+						console.log(error);
+				}
+				return setTimeout(runStage.bind(this), 1000);
+			}
 		}
 		runStage.bind(this)();
 	})
@@ -563,7 +483,7 @@ function processStatus() {
 					case 'paid':
 						if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
 						this.successful = true;
-						
+
 						resolve();
 						return;
 
@@ -646,9 +566,7 @@ function processStatus() {
 module.exports = {
 	findProduct,
 	getProductData,
-	fetchTicket1,
 	cartProduct,
-	fetchTicket2,
 	checkoutProduct,
 	processStatus
 }

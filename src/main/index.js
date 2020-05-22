@@ -8,7 +8,7 @@ const auth = require('./authentication')
 const { menuTemplate } = require('../library/configuration');
 const discord = require('./discord')
 const psList = require('ps-list');
-
+const path = require('path')
 
 global.captchaWindows = [];
 
@@ -22,7 +22,7 @@ if (!isDev) {
 app.once('ready',async function() {
 	const settings = require('electron-settings');
 	mainWindow.create();
-	
+	console.log(path.resolve('..'))
 	if (isDev) {
 		if (!worker.window)	worker.create();
 		await worker.load();

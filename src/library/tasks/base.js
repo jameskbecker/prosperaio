@@ -21,7 +21,7 @@ class Task {
 		this.isActive = false;
 		this.isMonitoring = false;
 		this.shouldStop = false;
-		this._proxyList = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : null;
+		this._proxyList = _taskData.additional.proxyList || null;
 		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
 			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
@@ -45,16 +45,17 @@ class Task {
 		this.startTime = 0;
 		this.checkoutTime = 0;
 		this.successful = false;
+		logger.info(`[T:${this.id}] Initialising.`)
+		this.isActive = true;
+		
+		this.profile = settings.get(`profiles.${this.profileName}`);
+		this.hasCaptcha = this.taskData.additional.skipCaptcha ? false : true;
 	}
 
 	init() {
 		return new Promise((resolve) => {
 			this.setStatus('Initialising.', 'INFO');
-			logger.info(`[T:${this.id}] Initialising.`)
-			this.isActive = true;
-			
-			this.profile = settings.get(`profiles.${this.profileName}`);
-			this.hasCaptcha = this.taskData.additional.skipCaptcha ? false : true;
+		
 			resolve();
 		})
 	}
@@ -72,21 +73,30 @@ class Task {
 	}
 	
 	callStop() {
-		logger.warn(`[T:${this.id}] Stopping Task.`);
-		this.setStatus('Stopping.', 'WARNING');
-		if (this.isMonitoring) {
-			try { global.monitors.supreme.kw.remove(this.id); } 
-			catch(err) { }
-			try { global.monitors.supreme.url[this.productUrl].remove(this.id); } 
-			catch(err) { }
-
-			this.stop();
-
+		if (this.isActive) {
+			logger.warn(`[T:${this.id}] Stopping Task.`);
+			this.setStatus('Stopping.', 'WARNING');
+			this.shouldStop = true;
+			if (this.isMonitoringKW) {
+				try { global.monitors.supreme.kw.remove(this.id); 
+					this.stop();} 
+				
+				catch(err) { console.log(err) }
+			}
 		}
-		else { this.shouldStop = true; }
+		
 	}
 
 	stop() {	
+		console.log('RUNNING STOP()')
+		if (this.isMonitoring) {
+			
+			try { global.monitors.supreme.url[this.productUrl].remove(this.id); } 
+			catch(err) { console.log(err) }
+
+			
+
+		}
 		if (this.browser) {
 			logger.info(`[${this.id}] Closing Browser`)
 			this.browser.close();

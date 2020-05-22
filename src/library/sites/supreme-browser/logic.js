@@ -1,77 +1,9 @@
 const cart = require('./cart');
 const checkout = require('./checkout');
 const settings = require('electron-settings');
-const puppeteer = require('puppeteer-extra');
 
-const pluginStealth = require("puppeteer-extra-plugin-stealth")
-puppeteer.use(pluginStealth())
-const { cookies, keywords, utilities, convertSize, logger } = require('../../other');
+const { keywords, utilities, logger } = require('../../other');
 const { URLMonitor } = require('../../monitors/supreme');
-
-
-function setupBrowser() {
-	return new Promise(async (resolve) => {
-		this.browser = await puppeteer.launch({
-			headless: false,
-			executablePath: this.executablePath,
-
-			args: [
-				`--window-size=500,800`,
-				'--disable-infobars'
-			]
-		});
-		this.page = (await this.browser.pages())[0];
-		this.page.emulate({
-			viewport: {
-				width: 500,
-				height: 800,
-				isMobile: true,
-				hasTouch: true,
-				isLandscape: false
-			},
-			userAgent: this.userAgent
-		})
-
-		function buildJSAddress() {
-			let rememberedFields = [
-				this.profile.billing.first + ' ' + this.profile.billing.last, //#order_billing_name
-				this.profile.billing.email, //#order_email
-				this.profile.billing.telephone, //#order_tel
-				this.profile.billing.address1, //#order_billing_address
-				this.profile.billing.address2, //#order_billing_address_2
-				this.profile.billing.city, //#order_billing_city
-				this.profile.billing.state, //#order_billing_state
-				this.profile.billing.zip, //#order_billing_zip
-				this.profile.billing.country.toUpperCase(), //#order_billing_country
-			]
-			if (this.region = 'EU') rememberedFields.push('');
-			return rememberedFields.join('|')
-		}
-
-		await this.page.setCookie({
-			"domain": this.baseUrl.split('://')[1],
-			"httpOnly": false,
-			"name": 'js-address',
-			"path": "/",
-			"secure": false,
-			"value": encodeURIComponent(buildJSAddress.bind(this)())
-		})
-
-
-		this.page.on('close', () => {
-			if (this.shouldStop === false) {
-				this.setStatus('Error: Browser Closed.', 'ERROR');
-			}
-		});
-		this.browser.on('disconnected', () => {
-			if (this.shouldStop === false) {
-				this.setStatus('Error: Browser Disconnected.', 'ERROR');
-			}
-		})
-
-		resolve();
-	})
-}
 
 function fetchStockData() {
 	return new Promise((resolve, reject) => {
@@ -117,69 +49,108 @@ function fetchProductData() {
 		this.setStatus('Fetching Product Data.', 'WARNING');
 		const runStage = async function () {
 			if (!global.monitors.supreme.url.hasOwnProperty(this.productUrl)) {
-				global.monitors.supreme.url[this.productUrl] = new URLMonitor(this.productUrl);
+				global.monitors.supreme.url[this.productUrl] = new URLMonitor(this.productUrl, this._proxyList);
 			}
 			let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
 			global.monitors.supreme.url[this.productUrl].monitorDelay = monitorDelay;
 			global.monitors.supreme.url[this.productUrl].add(this.id, (styles) => {
-				let instockSizes = []
-				let sizeData;
-				let styleName;
-				let styleId;
-				let imageUrl;
-				for (let i = 0; i < styles.length; i++) {
-					if (keywords.isMatch(styles[i].name.toLowerCase(), keywords.parse(this.products[0].style))) {
-						instockSizes = styles[i].sizes.filter(size => size.stock_level === 1);
-						styleName = styles[i].name;
-						styleId = styles[i].id
-						imageUrl = 'https:' + styles[i].image_url;
-						break;
-					}
+				try {
+					let specific = false;
+					let matchedData;
+					let sizeData;
+					let styleName;
+					let styleId;
+					let imageUrl;
+					for (let i = 0; i < styles.length; i++) {
+						if (keywords.isMatch(styles[i].name.toLowerCase(), keywords.parse(this.products[0].style))) {
+							switch (this.products[0].size) {
+								case "RANDOM":
+								case "SMALLEST":
+								case "LARGEST":
+									matchedData = styles[i].sizes.filter(size => size.stock_level === 1);
+									break;
 
-				}
+								default:
+									specific = true
+									console.log('SIZE:', styles[i].sizes, this.products[0].size)
+									matchedData = styles[i].sizes.filter(size => size.name.toLowerCase().includes(this.products[0].size));
 
-				if (!instockSizes.length > 0) {
-					this.setStatus('Monitoring for Restocks.', 'INFO');
-					logger.error(`[T:${this.id}] [${this.productName}] OOS`)
-					let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
-					return setTimeout(runStage.bind(this), monitorDelay);
-				}
-				else {
-					switch (this.products[0].size) {
-						case 'SMALLEST': sizeData = instockSizes[0]
-							break;
-						case 'LARGEST': sizeData = instockSizes[instockSizes.length - 1];
-							break;
-						case 'RANDOM': sizeData = instockSizes[Math.floor(Math.random() * parseInt(instockSizes.length))];
-							break;
-						default:
-							for (let j = 0; j < instockSizes.length; j++) {
-								sizeData = instockSizes[j];
-								if (sizeData.name.includes(convertSize('supreme', this.products[0].size))) break;
 							}
 
+							styleName = styles[i].name;
+							styleId = styles[i].id
+							imageUrl = 'https:' + styles[i].image_url;
+							break;
+						}
+
+					}
+
+					if (matchedData.length === 0 && !specific) {
+						throw new Error('OOS');
+					}
+					else if (matchedData.length === 0 && specific) {
+						throw new Error('SIZE NOT FOUND')
+					}
+					else {
+						switch (this.products[0].size) {
+							case 'SMALLEST': sizeData = matchedData[0]
+								break;
+							case 'LARGEST': sizeData = matchedData[matchedData.length - 1];
+								break;
+							case 'RANDOM': sizeData = matchedData[Math.floor(Math.random() * parseInt(matchedData.length))];
+								break;
+							default:
+								sizeData = matchedData[0]
+								this.productSizeName = sizeData.name;
+								this.setSizeName();
+								if (!sizeData.stock_level) {
+									throw new Error('OOS')
+								}
+
+						}
+					}
+
+					if (sizeData) {
+
+						this.productSizeName = sizeData.name;
+						this.productColour = styleName;
+						this.sizeId = sizeData.id;
+						this.styleId = styleId;
+						this.productImageUrl = imageUrl;
+
+						logger.verbose(`[T:${this.id}] [${this.styleId}] Matched Style: ${this.productColour}.`);
+						logger.verbose(`[T:${this.id}] [${this.sizeId}] Matched Size : ${this.productSizeName}.`);
+						global.monitors.supreme.url[this.productUrl].remove(this.id);
+						this.setSizeName();
+						this.isMonitoring = false;
+						resolve();
+						return;
+					}
+					else {
+						logger.error('Style Not Found.');
+						let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+						return setTimeout(runStage.bind(this), errorDelay);
 					}
 				}
+				catch (error) {
+					switch (error.message) {
+						case 'OOS':
+							this.setStatus('OOS. Retrying.', 'ERROR');
+							logger.error(`[T:${this.id}] [${this.productName}] OOS`);
+							break;
 
-				if (sizeData) {
-					this.isMonitoring = false;
-					this.productSizeName = sizeData.name;
-					this.productColour = styleName;
-					this.sizeId = sizeData.id;
-					this.styleId = styleId;
-					this.productImageUrl = imageUrl;
+						case 'SIZE NOT FOUND':
+							this.setStatus('Size Not Found', 'ERROR');
+							logger.error(`[T:${this.id}] [${this.productName}] Size Not Found`);
+							break;
 
-					logger.verbose(`[T:${this.id}] [${this.styleId}] Matched Style: ${this.productColour}.`);
-					logger.verbose(`[T:${this.id}] [${this.sizeId}] Matched Size : ${this.productSizeName}.`);
-					global.monitors.supreme.url[this.productUrl].remove(this.id);
-					this.setSizeName();
-					resolve();
-					return;
-				}
-				else {
-					logger.error('Style Not Found.');
-					let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
-					return setTimeout(runStage.bind(this), errorDelay);
+						default:
+							this.setStatus('Error. Retrying', 'ERROR');
+							console.log(error);
+
+					}
+					let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
+					return setTimeout(runStage.bind(this), monitorDelay);
 				}
 			})
 		}
@@ -199,7 +170,30 @@ function cartProduct() {
 			else {
 				try {
 					this.startTime = Date.now();
-					await cart.add.bind(this)();
+					this.page.goto(this.mobileUrl + '/' + this.styleId, { waitUntil: 'networkidle2' });
+
+
+					this.setStatus('Loading Page', 'INFO')
+					await this.page.waitForSelector('.cart-button');
+					this.setStatus('Carting.', 'WARNING');
+					const cartButtonText = await this.page.$eval('.cart-button', button => button.innerHTML);
+					if (cartButtonText === 'sold out') {
+						let err = new Error();
+						err.code = 'Out of Stock.';
+						reject(err);
+					}
+
+					else {
+						await this.page.waitForSelector('select[name="size-options"]');
+						await this.page.select('select[name="size-options"]', '' + this.sizeId);
+
+						this.setStatus('Delaying ATC.', 'WARNING');
+						await this.page.waitFor(this.taskData.delays.cart || 0);
+						this.setStatus('Carting.', 'WARNING');
+						await this.page.tap('span.cart-button');
+						await this.page.waitForResponse(`${this.baseUrl}/shop/${this.productId}/add.json`)
+						this.setStatus('Added to Cart.', 'SUCCESS');
+					}
 					resolve();
 				}
 				catch (err) {
@@ -233,12 +227,30 @@ function checkoutProduct() {
 			}
 
 			try {
-				await checkout.fillForm.bind(this)();
+				let paymentInfo = this.profile.payment;
+				
+				await this.page.goto(this.baseUrl + '/mobile#checkout');	
+				await this.page.waitFor('#order_billing_name');
 
-				if (this.hasCaptcha) {
-					this.setStatus('Waiting for Captcha', 'WARNING');
-					await this.requestCaptcha();
+				this.setStatus('Filling Checkout Form.', 'WARNING');
+				if (this.region === 'EU') {
+					await this.page.select('select#credit_card_type', this.profile.payment.type);
 				}
+				await this.page.tap('input[placeholder="credit card number"]');
+				await this.page.evaluate(`$('input[placeholder="credit card number"]').val('${this.profile.payment.cardNumber.replace(/\s/g, '')}')`)
+				
+				await this.page.select('select#credit_card_month', this.profile.payment.expiryMonth);
+				await this.page.select('select#credit_card_year', paymentInfo.expiryYear);
+				
+				await this.page.tap('input[placeholder="cvv"]');
+				await this.page.type('input[placeholder="cvv"]', paymentInfo.cvv, { delay: 1 });
+				
+				await this.page.tap('#order_terms');
+
+				// if (this.hasCaptcha) {
+				// 	this.setStatus('Waiting for Captcha', 'WARNING');
+				// 	await this.requestCaptcha();
+				// }
 
 				this.setStatus('Delaying Checkout', 'WARNING');
 				await utilities.sleep(this.taskData.delays.checkout || 0);
@@ -248,10 +260,19 @@ function checkoutProduct() {
 				this.checkoutAttempts++;
 
 				await checkout.submitForm.bind(this)();
-				resolve();
+				await this.page.evaluate(`document.getElementById("g-recaptcha-response").innerHTML = "${this.captchaResponse}"`);
+				await this.page.tap('#submit_button');
+				this.page.on('response', async response => {
+					if (response.url() === `${this.baseUrl}/checkout.json`) {
+						let body = JSON.parse(await response.text());
+						console.log(body)
+						this.checkoutData = body;
+						resolve();
+					}
+				})
 			}
 			catch (err) {
-				console.log('caught error')
+				c	
 				switch (err.code) {
 
 					case 'OOS':
@@ -287,7 +308,7 @@ function processStatus() {
 							this.checkoutData = response.body;
 						})
 						.catch(error => {
-							return setTimeout(runStage.bind(this), 1000);
+							console.log(error)
 						})
 				}
 				let error;
@@ -408,7 +429,6 @@ function processStatus() {
 }
 
 module.exports = {
-	setupBrowser,
 	fetchStockData,
 	fetchProductData,
 	cartProduct,
