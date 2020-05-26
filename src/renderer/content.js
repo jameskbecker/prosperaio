@@ -2,7 +2,9 @@ const settings = require('electron-settings');
 const { ipcRenderer } = require('electron');
 const { countries, sites } = require('../library/configuration');
 const $ = require('jquery');
-const dropData = require('../mock-drop');
+//const dropData = require('../mock-drop');
+const dropList = require('../droplist');
+
 let selectedItem;
 function convertMode(id) {
 	let modes = {
@@ -289,7 +291,7 @@ function renderSites() {
 			};
 		}
 	}
-	newTask_Site.onchange = function () {
+	newTask_Site.onchange = async function () {
 		newTask_Mode.disabled = false;
 		newTask_RestockMode.disabled = false;
 		let selectedSite = sites.default[this.value] || null;
@@ -335,7 +337,9 @@ function renderSites() {
 			newTask_SearchInput[0].disabled = false;
 			newTask_Mode.options.length = 0;
 			let requestMode = document.createElement('option');
+			const dropData = await dropList();
 			if (dropData[selectedSite.type]) {
+				console.log('heey')
 				document.getElementById("newTaskProducts").options.length = 1;
 				let data = dropData[selectedSite.type];
 				let itemNames = Object.keys(data);
@@ -382,6 +386,9 @@ function renderSites() {
 					}
 				}
 
+			}
+			else{
+				console.log(dropData)
 			}
 			switch (selectedSite.type) {
 				case 'kickz':
@@ -660,7 +667,7 @@ function renderProfileSelectors() {
 		duplicateButton.onclick = function () {
 
 		};
-		actionsCell.appendChild(duplicateButton);
+		//actionsCell.appendChild(duplicateButton);
 
 		let deleteButton = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';

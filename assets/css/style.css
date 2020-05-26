@@ -282,6 +282,9 @@ body {
 	flex: 1 1 0;
 	margin: 0.25vmax 0.5vmax;
 	overflow: hidden;
+	color: var(--text-grey);
+	font-size: 13px;
+	font-family: "sans serif";
 	background-color: transparent;
 }
 

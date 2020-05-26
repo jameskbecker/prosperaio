@@ -54,17 +54,19 @@ class SupremeHybrid extends Supreme {
 
 	_setup() {
 		if (this.proxy) {
-			let splitProxy = this.proxy.split(':');
-			let host = splitProxy[0];
-			let port = splitProxy[1];
+			let splitProxy = this.proxy.replace('http://', '').split('@');
+			let host = splitProxy[1].split(':')[0];
+			let port = splitProxy[1].split(':')[1];
 			this.config.launch.args.push(`--proxy-server=http://${host}:${port}`);
 
-			if (splitProxy.length === 4) {
-				this.config.auth = {
-					username: splitProxy[2],
-					password: splitProxy[3]
-				}
+			if (splitProxy.length === 2) {
+				console.log(splitProxy)
+				let username = splitProxy[0].split(':')[0];
+				let password = splitProxy[0].split(':')[1] ;
+				this.config.auth = {username, password }
+				
 			}
+			console.log(this.config)
 		}
 		return new Promise(async (resolve) => {
 			puppeteer.use(pluginStealth());

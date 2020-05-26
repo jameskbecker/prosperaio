@@ -3,5 +3,5 @@ exports.proxyTester;
 
 module.exports = {
 	proxyActions: require('./proxy-actions'),
-	proxyTester: require('./proxy-tester')
+	proxyTester: require('./ProxyTester')
 }

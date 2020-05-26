@@ -466,11 +466,13 @@ let browserPath = document.getElementById('browserPath');
 currentBrowserPath.value = settings.has('browser-path') ? settings.get('browser-path') : '';
 
 currentBrowserPath.onchange = function() {
+	console.log('hey')
 	settings.set('browser-path', this.value, {prettify: true});
 }
 
 browserPath.onchange = function() {
-	currentBrowserPath.value = this.files[0].path
+	currentBrowserPath.value = this.files[0].path;
+	currentBrowserPath.onchange();
 }
 
 //installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
