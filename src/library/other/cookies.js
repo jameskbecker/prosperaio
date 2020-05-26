@@ -1,25 +1,25 @@
-exports.set = function (url, name, value) {
+exports.set = function (name, value) {
 	try {
-		delete this.cookieJar._jar.store.idx['' + url]['/']['' + name];
+		delete this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/']['' + name];
 
 	} catch (err) { }
 	try {
 		let cookie = `${name}=${value}`;
-		this.cookieJar.setCookie(cookie, url);
+		
+		this.cookieJar.setCookie(cookie, this.baseUrl);
 	} catch (err) { }
 };
 
-exports.get = function (url, name) {
-	console.log(arguments)
+exports.get = function (name) {
 	try {
-		return this.cookieJar._jar.store.idx['' + url]['/'][name];
+		return this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/'][name].value;
 
 	} catch (err) { console.error(err) }
 };
 
 
-exports.delete = function (url, name) {
+exports.delete = function  (name) {
 	try {
-		delete this.cookieJar._jar.store.idx['' + url]['/']['' + name];
+		delete this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/']['' + name];
 	} catch (err) { }
 };

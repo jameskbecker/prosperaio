@@ -39,7 +39,7 @@ class Harvester {
 		this.serverPort = Math.floor(Math.random() * 9999) + 1000;
 		this.server.listen(this.serverPort);
 
-		let captchaSession = session.fromPartition("persist: " + this.sessionName);
+		let captchaSession = session.fromPartition("persist:" + this.sessionName);
 		this.window = new BrowserWindow({
 			backgroundColor: '#202020',
 			height: 600,

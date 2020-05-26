@@ -5,20 +5,19 @@ const { logger } = require('../library/other');
 const $ = require('jquery');
 
 exports.init = () => {
-	ipcRenderer.on('installing browser mode', (event, args) => {
-		installBrowserBtn.disabled = true;
-		installBrowserBtn.innerHTML = 'Installing Browser Mode...';
-	})
+	// ipcRenderer.on('installing browser mode', (event, args) => {
+	// 	installBrowserBtn.disabled = true;
+	// 	installBrowserBtn.innerHTML = 'Installing Browser Mode...';
+	// })
 
-	ipcRenderer.on('check for browser executable', (event, args) => {
-		if (settings.has('browser-path') && settings.get('browser-path').length > 0) {
-			installBrowserBtn.disabled = true;
-			installBrowserBtn.innerHTML = 'Installed Browser Mode';
-		}
-	});
+	// ipcRenderer.on('check for browser executable', (event, args) => {
+	// 	if (settings.has('browser-path') && settings.get('browser-path').length > 0) {
+	// 		installBrowserBtn.disabled = true;
+	// 		installBrowserBtn.innerHTML = 'Installed Browser Mode';
+	// 	}
+	// });
 
 	ipcRenderer.on('task.setStatus', (event, args) => {
-		logger.debug('[RENDERER] [IPC] task.setStatus')
 		let statusCell = document.querySelector(`.col-status[data-taskId="${args.id}"`);
 		statusCell.innerHTML = args.message;
 		statusCell.style.color = args.color;

@@ -458,7 +458,22 @@ monitorProxyList.onchange = function() {
 	settings.set('monitorProxyList', this.value, { prettify: true })
 }
 
-installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
+let currentBrowserPath = document.getElementById('currentBrowserPath');
+let browserPath = document.getElementById('browserPath');
+// let filePath = settings.has('browser-path') ? settings.get('browser-path') : null;
+// let fileName = filePath ? filePath.split('/')[filePath.split('/').length - 1] : null;
+// browserPath.value = fileName ? fileName : '';
+currentBrowserPath.value = settings.has('browser-path') ? settings.get('browser-path') : '';
+
+currentBrowserPath.onchange = function() {
+	settings.set('browser-path', this.value, {prettify: true});
+}
+
+browserPath.onchange = function() {
+	currentBrowserPath.value = this.files[0].path
+}
+
+//installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
 resetBtn.onclick = function () { ipcRenderer.send('reset settings'); }
 
 document.getElementById('version').innerHTML = `Version ${remote.app.getVersion()}`

@@ -7,7 +7,6 @@ let selectedItem;
 function convertMode(id) {
 	let modes = {
 		'supreme-request': 'Fast',
-		'supreme-hybrid': 'Hybrid',
 		'supreme-browser': 'Safe',
 		'kickz-wire': 'Wire Transfer',
 		'kickz-paypal': 'Paypal'
@@ -89,6 +88,15 @@ function renderTaskTable() {
 			startButton.className = 'action-button';
 			startButton.setAttribute('data-taskId', taskId);
 			startButton.onclick = function () {
+				stopButton.style.color = 'var(--primary-color)';
+				startButton.style.color = 'var(--secondary-color)';
+				
+				startButton.setAttribute('disabled', true);
+				stopButton.setAttribute('disabled', false);
+				
+				startButton.style.opacity = 0.2;
+				stopButton.style.opacity = 0.5;
+				
 				ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
 			};
 			actionsCell.appendChild(startButton);
@@ -96,8 +104,24 @@ function renderTaskTable() {
 			let stopButton = document.createElement('div');
 			stopButton.innerHTML = '<i class="fas fa-stop"></i>';
 			stopButton.className = 'action-button';
+			
+			stopButton.style.color = 'var(--secondary-color)';
+			stopButton.setAttribute('disabled', true);
+			stopButton.style.opacity = 0.2;
+
+			
 			stopButton.setAttribute('data-taskId', taskId);
 			stopButton.onclick = function () {
+				startButton.style.color = 'var(--primary-color)';
+				stopButton.style.color = 'var(--secondary-color)';
+				
+				stopButton.setAttribute('disabled', true);
+				startButton.setAttribute('disabled', false);
+				
+				startButton.style.opacity = 0.5;
+				stopButton.style.opacity = 0.2;
+			
+				
 				ipcRenderer.send('task.stop', taskId)
 			};
 			actionsCell.appendChild(stopButton);
@@ -344,7 +368,7 @@ function renderSites() {
 						newTask_Style[0].value = this.value;
 
 					}
-					try {styles.onchange();} catch(err) {console.log(err)}
+					try { styles.onchange(); } catch (err) { console.log(err) }
 					let sizes = document.getElementById('newTaskSizes');
 					sizes.options.length = 5;
 					for (let i = 0; i < selectedItem.sizes.length; i++) {
@@ -476,77 +500,58 @@ function renderProxyListSelectors() {
 }
 
 function renderHarvesters() {
-	harvesterControlsWrapper.innerHTML = '';
+	harvesterTable.innerHTML = '';
 	let existingHarvesters = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
 	for (let i = 0; i < existingHarvesters.length; i++) {
-		let harvesterContainer = document.createElement('div');
-		harvesterContainer.setAttribute('class', 'panel panel-light panel-fixed-25');
+		let harvesterRow = document.createElement('tr');
+		harvesterRow.className = 'row';
 
-		let harvesterName = document.createElement('h2');
-		harvesterName.setAttribute('class', 'panel-title');
-		harvesterName.innerHTML = `<i></i><span>${existingHarvesters[i].name}</span>`;
+		let nameCell = document.createElement('td');
+		nameCell.innerHTML = existingHarvesters[i].name;
+		nameCell.className = 'cell cell-body col-profile';
+		
 
-
-		let siteRow = document.createElement('div');
-		siteRow.setAttribute('class', 'container')
-
-		let siteSelectorWrapper = document.createElement('div');
-		siteSelectorWrapper.setAttribute('class', 'container-element');
-
+		let siteCell = document.createElement('td');
+		siteCell.className = 'cell cell-body col-site';
+		
 		let siteSelector = document.createElement('select');
 		siteSelector.setAttribute('class', 'input');
-
 		sites.captcha.forEach(site => {
 			let option = document.createElement('option');
 			option.label = site.label;
 			option.value = site.value;
 			siteSelector.add(option);
 		})
+		
+		siteCell.appendChild(siteSelector);
+		
 
-		siteSelectorWrapper.appendChild(siteSelector)
-		siteRow.appendChild(siteSelectorWrapper);
+		let actionsCell = document.createElement('td');
+		actionsCell.className = 'cell cell-body table-row col-actions';
 
-		let optionsRow = document.createElement('div');
-		optionsRow.setAttribute('class', 'container');
-
-		let loginBtnWrapper = document.createElement('div');
-		loginBtnWrapper.setAttribute('class', 'container-element');
-		let loginBtn = document.createElement('button');
-		loginBtn.setAttribute('class', 'btn btn-transparent');
-		loginBtn.innerHTML = '<i class="fab fa-youtube"></i><span>Login</span>';
-		loginBtn.onclick = function () {
-			ipcRenderer.send('captcha.signIn', {
-				'sessionName': existingHarvesters[i].name,
-				'type': 'renew'
-			})
-		}
-
-		loginBtnWrapper.appendChild(loginBtn)
-		optionsRow.appendChild(loginBtnWrapper);
-
-
-		let launchButtonWrapper = document.createElement('div');
-		launchButtonWrapper.setAttribute('class', 'container-element');
-
-		let launchButton = document.createElement('button');
-		launchButton.setAttribute('class', 'btn btn-transparent');
-		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i><span>Launch</span>';
-
+		let launchButton = document.createElement('div');
+		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i>';
+		launchButton.className = 'action-button';
 		launchButton.onclick = function () {
 			ipcRenderer.send('captcha.launch', {
 				'sessionName': existingHarvesters[i].name,
 				'site': siteSelector.value
 			})
 		}
+	
+		let loginButton = document.createElement('div');
+		loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
+		loginButton.className = 'action-button';
+		loginButton.onclick = function () {
+			ipcRenderer.send('captcha.signIn', {
+				'sessionName': existingHarvesters[i].name,
+				'type': 'renew'
+			})
+		}
 
-		launchButtonWrapper.appendChild(launchButton)
-		optionsRow.appendChild(launchButtonWrapper);
-
-		let deleteButtonWrapper = document.createElement('div');
-		deleteButtonWrapper.setAttribute('class', 'container-element');
-		let deleteButton = document.createElement('button');
-		deleteButton.setAttribute('class', 'btn btn-transparent');
-		deleteButton.innerHTML = '<i class="fas fa-trash"></i><span>Delete</span>';
+		let deleteButton = document.createElement('div');
+		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+		deleteButton.className = 'action-button';
 		deleteButton.onclick = function () {
 			try {
 				existingHarvesters2 = settings.get('captchaHarvesters');
@@ -555,21 +560,19 @@ function renderHarvesters() {
 				})
 				settings.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
 				renderHarvesters()
-				console.log(newHarvestrerArray)
-			} catch (err) { }
+			} 
+			catch (err) { }
 		}
+		
+		actionsCell.appendChild(launchButton);
+		actionsCell.appendChild(loginButton);
+		actionsCell.appendChild(deleteButton);
 
+		harvesterRow.appendChild(nameCell);
+		harvesterRow.appendChild(siteCell);
+		harvesterRow.appendChild(actionsCell);
 
-		deleteButtonWrapper.appendChild(deleteButton)
-		optionsRow.appendChild(deleteButtonWrapper);
-		optionsRow.style.marginTop = '5px';
-
-
-		harvesterContainer.appendChild(harvesterName);
-		harvesterContainer.appendChild(siteRow);
-		harvesterContainer.appendChild(optionsRow);
-
-		harvesterControlsWrapper.appendChild(harvesterContainer);
+		harvesterTable.appendChild(harvesterRow);
 	}
 }
 
@@ -663,10 +666,10 @@ function renderProfileSelectors() {
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
 		deleteButton.onclick = function () {
-				let existingProfiles2 = settings.get('profiles');
-				delete existingProfiles2[profileName];
-				settings.set('profiles', existingProfiles2, { prettify: true})
-				renderProfileSelectors()
+			let existingProfiles2 = settings.get('profiles');
+			delete existingProfiles2[profileName];
+			settings.set('profiles', existingProfiles2, { prettify: true })
+			renderProfileSelectors()
 
 		};
 		actionsCell.appendChild(deleteButton)

@@ -6,8 +6,8 @@ const pluginStealth = require("puppeteer-extra-plugin-stealth")
 puppeteer.use(pluginStealth())
 const settings = require('electron-settings');
 const utilities = require('./library/other/utilities');
-const taskActions = require('./library/tasks/task-actions');
-const proxyActions = require('./library/proxies/proxy-actions');
+const taskActions = require('./task-actions');
+const { proxyActions } = require('./library/proxies');
 const fs = require('fs');
 
 String.prototype.capitalise = function() {

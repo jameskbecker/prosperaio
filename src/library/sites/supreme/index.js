@@ -1,7 +1,4 @@
-const Task = require('../../tasks/base');
-
-class Supreme extends Task {
-
+module.exports = {
+	SupremeHybrid: require('./SupremeHybrid'),
+	SupremeRequest:  require('./SupremeRequest')
 }
-
-module.exports = Supreme;

@@ -9,33 +9,6 @@ exports.generateId = function (length) {
 	return id;
 }
 
-exports.setTimer = function () {
-	return new Promise((resolve) => {
-		let timerInput = this.taskData.additional.timer
-		if ((timerInput !== ' ' || '' || null || undefined)) {
-			let dateInput = timerInput.split(' ')[0];
-			let timeInput = timerInput.split(' ')[1];
-			let scheduledTime = new Date();
-			scheduledTime.setFullYear(dateInput.split('-')[0], dateInput.split('-')[1] - 1, dateInput.split('-')[2])
-			scheduledTime.setHours(timeInput.split(':')[0]);
-			scheduledTime.setMinutes(timeInput.split(':')[1]);
-			scheduledTime.setSeconds(timeInput.split(':')[2]);
-			let remainingTime = scheduledTime.getTime() - Date.now();
-			setTimeout(resolve, remainingTime);
-			this.setStatus("Timer Set.", "INFO");
-		}
-		else {
-			resolve();
-		}
-	});
-}
-
-exports.sleep = function (delay) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, delay);
-	})
-}
-
 exports.formatProxy = function (input) {
 	if (!input) {
 		return null

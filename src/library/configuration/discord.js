@@ -36,7 +36,7 @@ function public(additionalFields = []) {
 		},
 		{
 			name: "Size:",
-			value: this.productSizeName || "N/A",
+			value: this.sizeName || "N/A",
 			inline: true
 		}
 	]
@@ -90,7 +90,7 @@ function private(additionalFields = []) {
 		},
 		{
 			name: "Size:",
-			value: this.productSizeName || "N/A",
+			value: this.sizeName || "N/A",
 			inline: true
 		},
 		{

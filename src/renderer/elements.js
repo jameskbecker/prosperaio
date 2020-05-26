@@ -144,7 +144,7 @@ const proxyTestTable = document.getElementById('proxyTestResults');
 //Harvesters
 const harverster_Name = document.getElementById('harvesterName');
 const harvester_SaveBtn = document.getElementById('saveHarvesterBtn');
-const harvester_ControlsWrapper = document.getElementById('harvesterControlsWrapper');
+const harvester_ControlsWrapper = document.getElementById('harvesterTable');
 const harvester_ClearBtn = document.getElementById('clearCaptchaAccounts');
 
 //Analytics
@@ -152,7 +152,7 @@ const orderTableBody = document.getElementById('orderTableBody');
 
 //Settings
 const monitorProxyList = document.getElementById('monitorProxyList');
-const installBrowserBtn = document.getElementById('browserSetup');
+//const installBrowserBtn = document.getElementById('browserSetup');
 const resetBtn = document.getElementById('resetAllSettings');
 const signoutBtn = document.getElementById('signout');
 const customDiscord = document.getElementById('discordWebhook');
