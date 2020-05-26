@@ -19,6 +19,7 @@ global['HARVESTER_QUEUES'] = {
 
 module.exports = {
 	init: () => {
+		console.log('YES')
 
 		/* ----------------------------------- WINDOW -------------------------------------- */
 

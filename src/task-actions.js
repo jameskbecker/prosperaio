@@ -6,6 +6,7 @@ const { supreme } = require('./library/sites');
 const { SupremeHybrid, SupremeRequest } = supreme;
 
 function runTask (id) {
+	console.log('HELLO')
 	let allTasks = settings.get('tasks');
 	const taskData = allTasks[id];
 	if (!taskData) {

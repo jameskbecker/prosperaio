@@ -233,14 +233,17 @@ class SupremeKWMonitor {
 			Object.keys(this.inputData).forEach(propName => {
 				let data = this.inputData[propName];
 				let message;
-				switch (error.error.code) {
-					case 'ESOCKETTIMEDOUT':
-					case 'ETIMEDOUT':
-						message = 'Timed Out.';
-						break;
-					default:
-						message = 'Connection Error.';				
+				if (error && error.error) {
+					switch (error.error.code) {
+						case 'ESOCKETTIMEDOUT':
+						case 'ETIMEDOUT':
+							message = 'Timed Out.';
+							break;
+						default:
+							message = 'Connection Error.';				
+					}
 				}
+				
 				logger.error(`[Monitor] ${error.message}.`);
 				this._setStatus(message, 'ERROR', data['IDS'])
 			});

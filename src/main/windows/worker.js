@@ -5,9 +5,12 @@ const config = require('../../config');
 
 function createWindow() {
 	const workerWindow = new BrowserWindow({
-		show: false,
+		show: true,
+		height: 100,
+		width: 100,
 		webPreferences: {
 			nodeIntegration: true
+			
 		}
 	})
 	module.exports.window = workerWindow;

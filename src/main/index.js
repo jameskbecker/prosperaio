@@ -76,9 +76,13 @@ app.on("window-all-closed", function () {
 
 
 
-setInterval(async () => {
-	let x = (await psList()).filter(process => process.cmd.toLowerCase().includes('charles'));
-	if (x.length > 0) {
-		app.quit();
-	}
-}, 10000)
+//setInterval(async () => {
+//	try {
+//		let x = (await psList()).filter(process => process.cmd.toLowerCase().includes('charles'));
+//		if (x.length > 0) {
+//			app.quit();
+//		}
+//	}
+//	catch(error) {console.log(error)}
+	
+//}, 10000)

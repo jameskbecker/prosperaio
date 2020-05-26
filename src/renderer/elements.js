@@ -152,7 +152,7 @@ const orderTableBody = document.getElementById('orderTableBody');
 
 //Settings
 const monitorProxyList = document.getElementById('monitorProxyList');
-//const installBrowserBtn = document.getElementById('browserSetup');
+const installBrowserBtn = document.getElementById('browserSetup');
 const resetBtn = document.getElementById('resetAllSettings');
 const signoutBtn = document.getElementById('signout');
 const customDiscord = document.getElementById('discordWebhook');

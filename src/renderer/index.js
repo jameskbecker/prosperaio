@@ -475,7 +475,7 @@ browserPath.onchange = function() {
 	currentBrowserPath.onchange();
 }
 
-//installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
+installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
 resetBtn.onclick = function () { ipcRenderer.send('reset settings'); }
 
 document.getElementById('version').innerHTML = `Version ${remote.app.getVersion()}`
