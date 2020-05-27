@@ -61,10 +61,10 @@ class SupremeBase extends Task {
 
 				logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
 				this._setStatus('Fetching Stock Data.', 'WARNING');
-				this.isMonitoring = true;
-
+				this.isMonitoringKW = true;
+				if (this.shouldStop) return this._stop();
 				global.monitors.supreme.kw.add(this.id, searchInput, category, (name, id, price) => {
-					this.isMonitoring = false;
+					this.isMonitoringKW = false;
 					if (maxPrice > 0 && (price / 100) > maxPrice) {
 						this._setStatus('Price Exceeds Limit.', 'ERROR');
 						reject(new Error('PRICE LIMIT'));

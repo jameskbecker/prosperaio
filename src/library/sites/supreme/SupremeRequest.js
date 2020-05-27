@@ -29,7 +29,7 @@ class SupremeRequest extends SupremeBase {
 			await this._setTimer();
 			this._setStatus('Starting Task.', 'WARNING');
 			logger.warn(`[Task ${this.id}] Starting.`);
-
+			console.log(this.profile)
 			//Find Product
 			await this._fetchStockData();
 			if (this.shouldStop) return this._stop();

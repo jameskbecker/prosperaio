@@ -12,8 +12,10 @@ class Task {
 		this.taskData = _taskData;
 		this.baseUrl = sites.default[_taskData.site].baseUrl;
 		this.products = _taskData.products;
-		this.profileName = _taskData.setup.profile;
-		this.profile = settings.get(`profiles.${this.profileName}`);
+		this._profileId = _taskData.setup.profile;
+		this.profile = settings.get(`profiles.${this._profileId}`);
+		this.profileName = this.profile.profileName;
+		
 		this.id = _id;
 
 		this.isActive = true;
@@ -100,6 +102,7 @@ class Task {
 				catch(err) { console.log(err) }
 			}
 		}
+		else console.log('TASK INACTIVE');
 		
 	}
 

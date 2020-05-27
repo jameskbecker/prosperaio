@@ -63,8 +63,10 @@ class SupremeKWMonitor {
 	}
 
 	remove(id) {
+		console.log('REMOVING FROM KW MONITOR')
 		for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 			let property = Object.keys(this.inputData)[i];
+			console.log(`if this.inputData[${property}]['IDS'] includes ${id}`)
 			if (this.inputData[property]['IDS'].includes(id)) {
 				this.inputData[property]['IDS'].splice(this.inputData[property]['IDS'].indexOf(id), 1);
 				console.log('Removed:', id);
@@ -174,6 +176,7 @@ class SupremeKWMonitor {
 				'accept-encoding': 'br, gzip, deflate',
 				'accept-language': 'en-us',
 				'user-agent': this.userAgent,
+				'upgrade-insecure-requests': '1',
 				'x-requested-with': 'XMLHttpRequest'
 			}
 		}

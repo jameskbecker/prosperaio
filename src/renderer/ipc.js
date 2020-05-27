@@ -13,7 +13,8 @@ exports.init = () => {
 	 ipcRenderer.on('check for browser executable', (event, args) => {
 	 	if (settings.has('browser-path') && settings.get('browser-path').length > 0) {
 	 		//installBrowserBtn.disabled = true;
-	 		installBrowserBtn.innerHTML = 'Installed Browser Mode';
+			 installBrowserBtn.innerHTML = 'Installed Browser Mode';
+			 document.getElementById('currentBrowserPath').value = settings.has('browser-path') ? settings.get('browser-path') : '';
 	 	}
 	 });
 

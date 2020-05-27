@@ -18,8 +18,11 @@ if (!isDev) {
 	Menu.setApplicationMenu(menu)
 }
 
-
+try {
+	app.disableHardwareAcceleration();
+} catch(e) {console.log(e)}
 app.once('ready',async function() {
+
 	const settings = require('electron-settings');
 	mainWindow.create();
 	console.log(path.resolve('..'))
