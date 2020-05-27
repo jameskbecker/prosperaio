@@ -98,6 +98,7 @@ const deleteProfileBtn = document.getElementById('profileDeleteButton');
 const clearProfilesBtn = document.getElementById('profileDeleteAllButton');
 
 const profileElements = [
+	document.getElementById('profileId'),
 	billingFirst, 
 	billingLast, 
 	billingEmail, 

@@ -7,7 +7,7 @@ function public(additionalFields = []) {
 			"type": "rich",
 			"color": 3642623,
 			"thumbnail": { 
-				url: this.productImageUrl ? this.productImageUrl : "https://www.yankee-division.com/uploads/1/7/6/5/17659643/notavailable_2_orig.jpg?210",
+				url: this._productImageUrl ? this._productImageUrl : "https://www.yankee-division.com/uploads/1/7/6/5/17659643/notavailable_2_orig.jpg?210",
 				height: 150,
 				width: 150
 			},
@@ -55,7 +55,7 @@ function private(additionalFields = []) {
 			"description": this.productName || "Product Name N/A",
 			"color": 3642623,
 			"image": { 
-				url: this.productImageUrl ? this.productImageUrl : "https://www.yankee-division.com/uploads/1/7/6/5/17659643/notavailable_2_orig.jpg?210",
+				url: this._productImageUrl ? this._productImageUrl : "https://www.yankee-division.com/uploads/1/7/6/5/17659643/notavailable_2_orig.jpg?210",
 				height: 150,
 				width: 150
 			},

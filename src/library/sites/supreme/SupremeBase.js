@@ -8,14 +8,15 @@ class SupremeBase extends Task {
 	constructor(_taskData, _id) {
 		super(_taskData, _id);
 		this.restockMode = false;
-		this.cookieJar = request.jar();
+		
 		this.request = request.defaults({
-			jar: this.cookieJar,
+			
 			gzip: true,
 			timeout: settings.has('globalTimeoutDelay') ? settings.get('globalTimeoutDelay') : 5000,
 			resolveWithFullResponse: true
 		});
-		this.productUrl;
+		this.cookieJar = this.request.jar();
+		
 		this.formElements = [];
 		this.cookieSub = '';
 		this.slug = '';
@@ -53,19 +54,19 @@ class SupremeBase extends Task {
 				let maxPrice = this.taskData.additional.maxPrice;
 
 				if (!searchInput.includes('+') && !searchInput.includes('-')) {
-					this.setStatus('Invalid Search Input.', 'ERROR');
+					this._setStatus('Invalid Search Input.', 'ERROR');
 					reject(new Error('INVALID INPUT'));
 					return;
 				}
 
 				logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
-				this.setStatus('Fetching Stock Data.', 'WARNING');
+				this._setStatus('Fetching Stock Data.', 'WARNING');
 				this.isMonitoring = true;
 
 				global.monitors.supreme.kw.add(this.id, searchInput, category, (name, id, price) => {
 					this.isMonitoring = false;
 					if (maxPrice > 0 && (price / 100) > maxPrice) {
-						this.setStatus('Price Exceeds Limit.', 'ERROR');
+						this._setStatus('Price Exceeds Limit.', 'ERROR');
 						reject(new Error('PRICE LIMIT'));
 						return;
 					}
@@ -73,7 +74,7 @@ class SupremeBase extends Task {
 					this.productId = id;
 					this.productName = name;
 					this.mobileUrl = this.baseUrl + '/mobile#products/' + this.productId;
-					this.productUrl = this.baseUrl + '/shop/' + this.productId;
+					this._productUrl = this.baseUrl + '/shop/' + this.productId;
 					resolve();
 					return;
 				})
@@ -84,19 +85,19 @@ class SupremeBase extends Task {
 
 	_fetchProductData() {
 		return new Promise(function runStage(resolve, reject) {		
-			if (!global.monitors.supreme.url.hasOwnProperty(this.productUrl)) {
-				global.monitors.supreme.url[this.productUrl] = new URLMonitor(this.productUrl, this._proxyList);
+			if (!global.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
+				global.monitors.supreme.url[this._productUrl] = new URLMonitor(this._productUrl, this._proxyList);
 			}
 			
 			
 			this.isMonitoring = true;
-			if (this.shouldStop) return this.stop();
-			this.setStatus('Fetching Product Data.', 'WARNING');
+			if (this.shouldStop) return this._stop();
+			this._setStatus('Fetching Product Data.', 'WARNING');
 			let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
-			global.monitors.supreme.url[this.productUrl].monitorDelay = monitorDelay;
-			global.monitors.supreme.url[this.productUrl].add(this.id, (styles) => {
+			global.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
+			global.monitors.supreme.url[this._productUrl].add(this.id, (styles) => {
 				try {
-					if (this.shouldStop) return this.stop();
+					if (this.shouldStop) return this._stop();
 
 					let sizeData;
 					let styleName;
@@ -134,41 +135,41 @@ class SupremeBase extends Task {
 					}
 
 					this.sizeName = sizeData.name;
-					this.productColour = styleName;
+					this._productStyleName = styleName;
 					this.sizeId = sizeData.id;
 					this.styleId = styleId;
-					this.productImageUrl = imageUrl;
+					this._productImageUrl = imageUrl;
 
-					logger.verbose(`[T:${this.id}] [${this.styleId}] Matched Style: ${this.productColour}.`);
+					logger.verbose(`[T:${this.id}] [${this.styleId}] Matched Style: ${this._productStyleName}.`);
 					logger.verbose(`[T:${this.id}] [${this.sizeId}] Matched Size : ${this.sizeName}.`);
 
 					if (this.taskData.setup.restockMode === 'stock' && !sizeData.stock_level) {
 						throw new Error('OOS')
 					}
 
-					global.monitors.supreme.url[this.productUrl].remove(this.id);
+					global.monitors.supreme.url[this._productUrl].remove(this.id);
 					this.isMonitoring = false;
 					resolve();
 				}
 				catch (error) {
 					switch (error.message) {
 						case 'OOS':
-							this.setStatus('OOS. Retrying.', 'ERROR');
+							this._setStatus('OOS. Retrying.', 'ERROR');
 							logger.error(`[T:${this.id}] [${this.productName}] OOS`);
 							break;
 
 						case 'Style Not Found':
-							this.setStatus('Style Not Found', 'ERROR');
+							this._setStatus('Style Not Found', 'ERROR');
 							logger.error(`[T:${this.id}] Style Not Found`);
 							break;
 
 						case 'Size Not Found':
-							this.setStatus('Size Not Found', 'ERROR');
+							this._setStatus('Size Not Found', 'ERROR');
 							logger.error(`[T:${this.id}] [${this.productName}] Size Not Found`);
 							break;
 
 						default:
-							this.setStatus('Error. Retrying', 'ERROR');
+							this._setStatus('Error. Retrying', 'ERROR');
 							console.log(error);
 
 					}
@@ -210,6 +211,7 @@ class SupremeBase extends Task {
 			method: 'GET',
 			proxy: utilities.formatProxy(this._getProxy()),
 			json: true,
+			jar: this.cookieJar,
 			headers: {
 				'accept': 'application/json',
 				'accept-encoding': 'gzip, deflate, br',
@@ -240,7 +242,7 @@ class SupremeBase extends Task {
 
 					switch (this.checkoutData.status) {
 						case 'queued':
-							this.setStatus('Processing...', 'WARNING');
+							this._setStatus('Processing...', 'WARNING');
 							logger.warn(this.slug ? `[T.${this.id}] Queued - ${this.slug}.` : `[T.${this.id}] Queued.`);
 							if (this.checkoutData.hasOwnProperty('slug')) this.slug = this.checkoutData.slug;
 							return setTimeout(runStage.bind(this, false), 1000);
@@ -249,7 +251,7 @@ class SupremeBase extends Task {
 						case 'failed':
 							if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
 							if (!this.checkoutData.errors) {
-								this.setStatus('Payment Failed.', 'ERROR');
+								this._setStatus('Payment Failed.', 'ERROR');
 								logger.error(`[T.${this.id}] Payment Failed.`);
 								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
 									return setTimeout(this.retryCheckout.bind(this), 1000)
@@ -260,11 +262,11 @@ class SupremeBase extends Task {
 									return resolve()
 								}
 							}
-							else return this.setStatus('Form Error.', 'ERROR');
+							else return this._setStatus('Form Error.', 'ERROR');
 
 
 						case 'cca':
-							this.setStatus('CCA', 'WARNING')
+							this._setStatus('CCA', 'WARNING')
 							this.cardinal.tid = uuidv4();
 							this.cardinal.transactionId = this.checkoutData.transaction_id;
 							this.cardinal.authentication.url = this.checkoutData.acs_url;
@@ -323,7 +325,7 @@ class SupremeBase extends Task {
 
 
 						case 'cardinal_queued':
-							this.setStatus('Processing...', 'WARNING');
+							this._setStatus('Processing...', 'WARNING');
 							logger.warn(`[T.${this.id}] Cardinal Queued.`);
 							return setTimeout(runStage.bind(this, false), 1000);
 
@@ -337,7 +339,7 @@ class SupremeBase extends Task {
 
 
 						case 'dup':
-							this.setStatus('Duplicate Order.', 'ERROR');
+							this._setStatus('Duplicate Order.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -345,7 +347,7 @@ class SupremeBase extends Task {
 
 
 						case 'canada':
-							this.setStatus('Not Available in Canada.', 'ERROR');
+							this._setStatus('Not Available in Canada.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -353,7 +355,7 @@ class SupremeBase extends Task {
 
 
 						case 'blocked_country':
-							this.setStatus('N/A in Selected Country.', 'ERROR');
+							this._setStatus('N/A in Selected Country.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -361,7 +363,7 @@ class SupremeBase extends Task {
 
 
 						case 'blacklisted':
-							this.setStatus('Blacklisted.', 'ERROR');
+							this._setStatus('Blacklisted.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -369,7 +371,7 @@ class SupremeBase extends Task {
 
 
 						case 'outOfStock':
-							this.setStatus('Out of Stock.', 'ERROR');
+							this._setStatus('Out of Stock.', 'ERROR');
 							if (this.taskData.additional.monitorRestocks) {
 								this.restockMode = true;
 								error = new Error();
@@ -384,12 +386,12 @@ class SupremeBase extends Task {
 
 
 						case 'paypal':
-							this.setStatus('Checkout Status: Paypal.', 'INFO')
+							this._setStatus('Checkout Status: Paypal.', 'INFO')
 							return;
 
 						default:
 							console.log(this.checkoutData)
-							this.setStatus('Unexpected Error', 'ERROR');
+							this._setStatus('Unexpected Error', 'ERROR');
 							error = new Error();
 							error.code = 'UNEXPECTED';
 							reject(error);
@@ -400,7 +402,7 @@ class SupremeBase extends Task {
 						case 'UNEXPECTED':
 						default:
 							console.log(error)
-							this.setStatus('Error. Retrying.');
+							this._setStatus('Error. Retrying.');
 							let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
 							setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
 					}
@@ -414,10 +416,10 @@ class SupremeBase extends Task {
 		let form;
 		switch (type) {
 			case 'cart-add':
-				if (this.region === 'us') {
+				if (this.region === 'US') {
 					form = {
-						"s": this.sizeId,
-						"st": this.styleId,
+						"s": this.sizeId + "",
+						"st": this.styleId + "",
 						// "ds": 'bog',
 						// "ds1": 'bog2',
 						// "ns": ((+this.sizeId) + (+this.styleId)),
@@ -426,8 +428,8 @@ class SupremeBase extends Task {
 				}
 				else {
 					form = {
-						"size": this.sizeId,
-						"style": this.styleId,
+						"size": this.sizeId + "",
+						"style": this.styleId + "",
 						"qty": this.products[0].productQty || 1
 					}
 				}
@@ -533,6 +535,35 @@ class SupremeBase extends Task {
 		logger.verbose(JSON.stringify(form, null, '\t'));
 		return form;
 	}
+
+	_setCookie(name, value) {
+		let url = this.baseUrl.replace('https://', '')
+		try {
+			if (this.cookieJar._jar.store.idx[url]){
+				delete this.cookieJar._jar.store.idx[url]['/']['' + name];
+		}
+			
+	
+		} catch (err) { console.log(err) }
+		try {
+			let cookie = `${name}=${value}`;
+			
+			this.cookieJar.setCookie(cookie, this.baseUrl);
+		} catch (err) {console.log(err) }
+	};
+
+	_deleteCookie(name) {
+		try {
+			delete this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/']['' + name];
+		} catch (err) { console.log(err)}
+	};
+
+	_getCookie(name) {
+		try {
+			return this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/'][name].value;
+	
+		} catch (err) { console.error(err) }
+	};
 
 
 }

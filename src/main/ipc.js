@@ -2,7 +2,7 @@
 const electron = require('electron');
 const { app, BrowserWindow, dialog, ipcMain, session } = electron;
 const { Harvester, mainWindow, worker, threeDS } = require('./windows');
-const { HarvesterLogin, logger } = require('../library/other');
+const { GoogleLogin, logger } = require('../library/other');
 const settings = require('electron-settings');
 
 global['CARDINAL_SOLVERS'] = {}
@@ -72,7 +72,7 @@ module.exports = {
 		ipcMain.on('captcha.signIn', (event, args) => {
 			logger.debug('[MAIN] [IPC] captcha.signIn');
 			let sessionName = args.sessionName;
-			new HarvesterLogin(sessionName, args.type);
+			new GoogleLogin(sessionName, args.type);
 		});
 
 		ipcMain.on('captcha.signOut', (event, args) => {

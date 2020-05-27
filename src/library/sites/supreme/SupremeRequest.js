@@ -1,5 +1,5 @@
 const SupremeBase = require('./SupremeBase');
-const { cookies, utilities, logger } = require('../../other');
+const { utilities, logger } = require('../../other');
 
 const cheerio = require('cheerio');
 const ipcWorker = require('electron').ipcRenderer;
@@ -21,36 +21,37 @@ class SupremeRequest extends SupremeBase {
 				payload: ''
 			}
 		};
+		this.ticket = ''
 	}
 
 	async run() {
 		try {
 			await this._setTimer();
-			this.setStatus('Starting Task.', 'WARNING');
+			this._setStatus('Starting Task.', 'WARNING');
 			logger.warn(`[Task ${this.id}] Starting.`);
 
 			//Find Product
 			await this._fetchStockData();
-			if (this.shouldStop) return this.stop();
+			if (this.shouldStop) return this._stop();
 			await this._fetchProductData();
 
 			//ATC Process
-			if (this.shouldStop) return this.stop();
+			if (this.shouldStop) return this._stop();
 			await this._atcProcess();
 
 			//Checkout Process
-			if (this.shouldStop) return this.stop();
+			if (this.shouldStop) return this._stop();
 			await this._checkoutProcess();
 			await this._processStatus();
 
 			if (this.successful) {
-				this.setStatus('Success.', 'SUCCESS');
+				this._setStatus('Success.', 'SUCCESS');
 				let privateFields = [];
 				let publicFields = [];
-				if (this.productColour) {
+				if (this._productStyleName) {
 					let field = {
 						name: "Colour:",
-						value: this.productColour,
+						value: this._productStyleName,
 						inline: true
 					}
 					privateFields.push(field);
@@ -74,9 +75,9 @@ class SupremeRequest extends SupremeBase {
 					}
 					privateFields.push(field);
 				}
-				this.postPublicWebhook(publicFields);
-				this.postPrivateWebhook(privateFields);
-				this.addToAnalystics();
+				this._postPublicWebhook(publicFields);
+				this._postPrivateWebhook(privateFields);
+				this._addToAnalystics();
 			}
 			else { console.log('failed') }
 			this.isActive = false;
@@ -87,7 +88,7 @@ class SupremeRequest extends SupremeBase {
 				case 'NO TASK MODE':
 					this.isActive = false;
 					alert('INVALID TASK MODE');
-					return this.stop();
+					return this._stop();
 
 				default:
 					console.log(error)
@@ -99,24 +100,29 @@ class SupremeRequest extends SupremeBase {
 		return new Promise(async function runStage(resolve, reject) {
 			try {
 				let cartDelay = !this.restockMode ? this.taskData.delays.cart : 0;
-				cookies.set.bind(this)('shoppingSessionId', (new Date().getTime()).toString())
+				this._setCookie('shoppingSessionId', (new Date().getTime()).toString())
 
 				//ATC Delay
 				if (!this.restockMode) {
-					this.setStatus('Delaying ATC.', 'WARNING');
+					this._setStatus('Delaying ATC.', 'WARNING');
 					await this._sleep(cartDelay);
 				}
 
-				if (this.shouldStop) return this.stop();
+				if (this.shouldStop) return this._stop();
 
 
-				this.setStatus('Adding to Cart.', 'WARNING');
+				this._setStatus('Adding to Cart.', 'WARNING');
 				logger.warn(`[T:${this.id}] Adding ${this.productId} to Cart.`);
 
 				
-				cookies.set.bind(this)('lastVisitedFragment', `products/${this.productId}/${this.styleId}`);
+				this._setCookie('lastVisitedFragment', `products/${this.productId}/${this.styleId}`);
+				this._setCookie('_ticket', this._generateTicket(1) || '');
 				/* ------------------------------------ ATC OPTIONS ------------------------------------ */
-				let body = await this._addToCart();
+			
+
+				let response = await this._addToCart();
+				console.log('atc response',response)
+				let body = response.body;
 				logger.info(`[T:${this.id}] Cart Response:\n${JSON.stringify(body)}`);
 				if (
 					(body.hasOwnProperty('length') && !body.length > 0) ||
@@ -126,8 +132,8 @@ class SupremeRequest extends SupremeBase {
 					throw new Error('OOS');
 				}
 
-				let pureCart = cookies.get.bind(this)('pure_cart') || null
-				let ticket = cookies.get.bind(this)('ticket') || '';
+				let pureCart = this._getCookie('pure_cart') || null
+				let ticket = this._getCookie('ticket') || '';
 
 				if (ticket) {
 					logger.debug(`Ticket: ${ticket}`);
@@ -140,19 +146,19 @@ class SupremeRequest extends SupremeBase {
 				let cookieValue = JSON.parse(decodeURIComponent(pureCart));
 				delete cookieValue.cookie;
 				this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
-				this.setStatus('Added to Cart!', 'SUCCESS');
+				this._setStatus('Added to Cart!', 'SUCCESS');
 				resolve();
 			}
 			catch (error) {
 				switch (error.message) {
 					case 'OOS':
-						this.setStatus('Out of Stock.', 'ERROR');
+						this._setStatus('Out of Stock.', 'ERROR');
 						logger.error('OOS');
 						//TODO: MAKE IT ENTER RESTOCK MODE
 						break;
 
 					default:
-						this.setStatus('ATC Error', 'ERROR');
+						this._setStatus('ATC Error', 'ERROR');
 						console.error(error);
 				}
 				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000
@@ -164,23 +170,23 @@ class SupremeRequest extends SupremeBase {
 	_checkoutProcess() {
 		return new Promise(async function runStage(resolve, reject) {
 			try {
-				cookies.set.bind(this)('lastVisitedFragment', 'checkout');
+				this._setCookie('lastVisitedFragment', 'checkout');
 
 				/* ---------------------------- FETCH & PARSE CHECKOUT FORM ----------------------------- */
 
-				this.setStatus("Parsing Checkout Form.", 'WARNING');
-				let body = await this._fetchMobile();
+				this._setStatus("Parsing Checkout Form.", 'WARNING');
+				let body = (await this._fetchMobile()).body;
 				let $ = cheerio.load(body);
 				let checkoutTemplate = $("#checkoutViewTemplate").html();
 				this.formElements = this._parseCheckoutForm(checkoutTemplate);
 				/* ------------------------------------------------------------------------------------- */
 				
-				if (this.shouldStop) return this.stop();
+				if (this.shouldStop) return this._stop();
 
 				/* ---------------------------------- SETUP 3D SECURE ---------------------------------- */
 
 				if (this.region === 'EU' && !this.taskData.additional.enableThreeDS) {
-					this.setStatus('Initialising 3DS.', 'WARNING');
+					this._setStatus('Initialising 3DS.', 'WARNING');
 					logger.debug(`[T:${this.id}] Fetching Mobile Totals.`);
 					
 					/* ----------------------------------------------------------------------------------- */
@@ -188,7 +194,7 @@ class SupremeRequest extends SupremeBase {
 					/* ----------------------------------------------------------------------------------- */
 					
 					//Fetch Mobile Totals
-					body = await this._fetchMobileTotals();
+					body = (await this._fetchMobileTotals()).body;
 					let $ = cheerio.load(body);
 					let serverJWT = $('#jwt_cardinal').val();
 					let orderTotal = $('#total').text();
@@ -208,21 +214,21 @@ class SupremeRequest extends SupremeBase {
 				}
 				/* ------------------------------------------------------------------------------------- */
 
-				if (this.shouldStop) return this.stop();
+				if (this.shouldStop) return this._stop();
 
 				/* ---------------------------------- REQUEST CAPTCHA ---------------------------------- */
 				
 				if (this.hasCaptcha) { 
-					await this.requestCaptcha() 
+					await this._requestCaptcha() 
 				}
 				/* ------------------------------------------------------------------------------------- */
 
-				if (this.shouldStop) return this.stop();				
+				if (this.shouldStop) return this._stop();				
 				
 				/* ----------------------------------- DELAY CHECKOUT ---------------------------------- */
 				
 				if (!this.restockMode) {
-					this.setStatus('Delaying Checkout.', 'WARNING');
+					this._setStatus('Delaying Checkout.', 'WARNING');
 					let checkoutDelay;
 					if (!this.captchaTime) { 
 						checkoutDelay = this.taskData.delays.checkout; 
@@ -238,23 +244,24 @@ class SupremeRequest extends SupremeBase {
 				}
 				/* ------------------------------------------------------------------------------------- */
 				
-				if (this.shouldStop) return this.stop();
+				if (this.shouldStop) return this._stop();
 
 				/* ---------------------------------- SUBMIT CHECKOUT ---------------------------------- */
 				logger.warn('Submitting Checkout.');
-				this.setStatus('Submitting Checkout.', 'WARNING');
+				this._setStatus('Submitting Checkout.', 'WARNING');
 				this.checkoutAttempts++;
 				this.checkoutTS = Date.now();
 				this.checkoutTime = this.checkoutTS - this.startTS;
-			
-				body = await this._submitCheckout();
+				this._setCookie('_ticket', this._generateTicket(2) || '');
+				let checkoutResponse = await this._submitCheckout()
+				body = checkoutResponse.body;
 				this.checkoutData = body;
 				resolve();
 			}
 			catch (error) {
 				switch (error.message) {
 					default:
-						this.setStatus('Error Checking Out', 'ERROR');
+						this._setStatus('Error Checking Out', 'ERROR');
 						console.log(error);
 				}
 				return setTimeout(runStage.bind(this), 1000);
@@ -275,20 +282,19 @@ class SupremeRequest extends SupremeBase {
 			proxy: this.proxy,
 			form: this.atcForm,
 			timeout: 5000,
+			jar: this.cookieJar,
 			json: true,
 			headers: {
-				"Accept": "application/json",
-				"Accept-Encoding": "gzip, deflate, br",
-				"Content-Type": "application/x-www-form-urlencoded",
-				"Origin": this.baseUrl,
-				"Referer": `${this.baseUrl}/mobile/`,
-				"User-Agent": this.userAgent,
-				"X-Requested-With": "XMLHttpRequest"
+				"accept": "application/json",
+				"accept-encoding": "gzip, deflate, br",
+				"content-type": "application/x-www-form-urlencoded",
+				"origin": this.baseUrl,
+				"referer": `${this.baseUrl}/mobile/`,
+				"user-agent": this.userAgent,
+				"x-requested-with": "XMLHttpRequest"
 			}
 		}
-
-		let response = await this.request(options);
-		return response.body;
+		return this.request(options);
 	}
 
 	async _fetchMobile() {
@@ -296,13 +302,13 @@ class SupremeRequest extends SupremeBase {
 			url: `${this.baseUrl}/mobile`,
 			method: 'GET',
 			proxy: this.proxy,
+			jar: this.cookieJar,
 			headers: {
 				"Upgrade-Insecure-Requests": "1",
 				"User-Agent": this.userAgent
 			}
 		}
-		let response = await this.request(options);
-		return response.body;
+		return this.request(options)
 	}
 
 	async _fetchMobileTotals() {
@@ -310,10 +316,10 @@ class SupremeRequest extends SupremeBase {
 			url: `${this.baseUrl}/checkout/totals_mobile.js`,
 			method: 'GET',
 			proxy: this.proxy,
+			jar: this.cookieJar,
 			qs: this._form('mobile-totals')
 		}
-		let response = await this.request(options);
-		return response.body;
+		return this.request(options);
 	}
 
 	async _submitCheckout() {
@@ -325,6 +331,7 @@ class SupremeRequest extends SupremeBase {
 			json: true,
 			timeout: 7000,
 			form: this._form('parsed-checkout'),
+			jar: this.cookieJar,
 			headers: {
 				"Accept": "application/json",
 				'Accept-Encoding': 'gzip, deflate, br',
@@ -333,11 +340,9 @@ class SupremeRequest extends SupremeBase {
 				'User-Agent': this.userAgent
 			}
 		}
-		let response = await this.request(options);
-		return response.body;
+		return this.request(options);
 	
 	}
-
 
 	_setupThreeDS() {
 		return new Promise(resolve => {
@@ -353,7 +358,17 @@ class SupremeRequest extends SupremeBase {
 		})
 	}
 
+	_generateTicket(type) {
+		let randomHex = [...Array(128)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+		let timeStamp = Math.floor(Date.now() / 1000);
+		switch(type) {
+			case 1:
+				return `${randomHex}${timeStamp}`;
 
+			case 2:
+				return `${this.ticket}${randomHex}${timeStamp}`
+		}
+	}
 
 }
 

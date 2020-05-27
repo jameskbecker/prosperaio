@@ -21,13 +21,14 @@ class Task {
 		this.shouldStop = false;
 		this.successful = false;		
 
-		this.productData = {};
-		this.productImageUrl = null;
+	
 
+		this._productUrl = null;
+		this._productImageUrl = null;
 		this._productName = null;
-		this._sizeName = null;
+		this._productStyleName = null;
+		this._productSizeName = null;
 
-		this.productColour = null;
 		this.orderNumber = null;
 		
 		this.hasCaptcha = _taskData.additional.skipCaptcha ? false : true;
@@ -76,11 +77,11 @@ class Task {
 			id: this.id,
 			name: value
 		});
-		this._sizeName = value;
+		this._productSizeName = value;
 	}
 
 	get sizeName() {
-		return this._sizeName;
+		return this._productSizeName;
 	}
 
 	get proxy() {
@@ -90,11 +91,11 @@ class Task {
 	callStop() {
 		if (this.isActive) {
 			logger.warn(`[T:${this.id}] Stopping Task.`);
-			this.setStatus('Stopping.', 'WARNING');
+			this._setStatus('Stopping.', 'WARNING');
 			this.shouldStop = true;
 			if (this.isMonitoringKW) {
 				try { global.monitors.supreme.kw.remove(this.id); 
-					this.stop();} 
+					this._stop();} 
 				
 				catch(err) { console.log(err) }
 			}
@@ -102,11 +103,12 @@ class Task {
 		
 	}
 
-	stop() {	
+
+	_stop() {	
 		console.log('RUNNING STOP()')
 		if (this.isMonitoring) {
 			
-			try { global.monitors.supreme.url[this.productUrl].remove(this.id); } 
+			try { global.monitors.supreme.url[this._productUrl].remove(this.id); } 
 			catch(err) { console.log(err) }
 
 			
@@ -120,7 +122,7 @@ class Task {
 		this.productName = this.taskData.products[0].searchInput;
 		this.sizeName = this.taskData.products[0].size;
 
-		this.setStatus('Stopped.', 'ERROR');
+		this._setStatus('Stopped.', 'ERROR');
 		logger.error(`[T:${this.id}] Stopped Task.`);
 		if (activeTasks[this.id]) delete activeTasks[this.id];
 		
@@ -128,9 +130,7 @@ class Task {
 		delete this;
 	}
 
-	
-
-	setStatus(message, type) {
+	_setStatus(message, type) {
 		let colors = {
 			DEFAULT: '#8c8f93',
 			INFO: '#4286f4',
@@ -146,10 +146,10 @@ class Task {
 		})
 	}
 	
-	requestCaptcha() {
+	_requestCaptcha() {
 		return new Promise((resolve) => {
 			this.captchaTS = Date.now();
-			this.setStatus('Waiting for Captcha.', 'WARNING');
+			this._setStatus('Waiting for Captcha.', 'WARNING');
 			ipcWorker.send('captcha.request', {
 				id: this.id,
 				type: sites.default[this.taskData.site].type
@@ -168,7 +168,7 @@ class Task {
 		})
 	}
 
-	postPublicWebhook(additonalFields = []) {
+	_postPublicWebhook(additonalFields = []) {
 		request({
 			url: process.env.SUCCESS_WEBHOOK_URL,
 			method: 'POST',
@@ -187,7 +187,7 @@ class Task {
 
 					case "TOO MANY REQUESTS":
 						console.log('Reached Rate Limit.');
-						return setTimeout(this.postPrivateWebhook.bind(this, additonalFields), 2500)
+						return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500)
 						break;
 
 					case "BAD REQUEST":
@@ -202,7 +202,7 @@ class Task {
 		})
 	}
  
-	postPrivateWebhook(additonalFields = []) {
+	_postPrivateWebhook(additonalFields = []) {
 		if (settings.has('discord')) {
 			const webhookUrl = settings.get('discord');
 			request({
@@ -223,7 +223,7 @@ class Task {
 
 						case "TOO MANY REQUESTS":
 							console.log('Reached Rate Limit.');
-							return setTimeout(this.postPrivateWebhook.bind(this, additonalFields), 2500)
+							return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500)
 							break;
 
 						case "BAD REQUEST":
@@ -239,7 +239,7 @@ class Task {
 		}
 	}
 
-	addToAnalystics() {
+	_addToAnalystics() {
 		let exportData = {
 			date: new Date().toLocaleString(),
 			site: sites.default[this.taskData.site].label,
@@ -265,7 +265,7 @@ class Task {
 				scheduledTime.setSeconds(timeInput.split(':')[2]);
 				let remainingTime = scheduledTime.getTime() - Date.now();
 				setTimeout(resolve, remainingTime);
-				this.setStatus("Timer Set.", "INFO");
+				this._setStatus("Timer Set.", "INFO");
 			}
 			else {
 				resolve();
@@ -323,5 +323,6 @@ class Task {
 			return true;
 		}
 	}
-} 
+}
+
 module.exports = Task;

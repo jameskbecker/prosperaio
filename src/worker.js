@@ -5,7 +5,7 @@ const puppeteer = require('puppeteer-extra');
 const pluginStealth = require("puppeteer-extra-plugin-stealth")
 puppeteer.use(pluginStealth())
 const settings = require('electron-settings');
-const utilities = require('./library/other/utilities');
+const {utilities} = require('./library/other');
 const taskActions = require('./task-actions');
 const { proxyActions } = require('./library/proxies');
 const fs = require('fs');

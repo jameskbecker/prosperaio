@@ -1,16 +1,18 @@
 const settings = require('electron-settings');
 const content = require('./content');
-
+const uuidv4 = require('uuid/v4');
 exports.init = () => {
 	if (!settings.has('profiles')) { settings.set('profiles', {}); }
 	content.profiles();
 }
 
-exports.save = (name, options = {}) => {
+exports.save = (id, options = {}) => {
+	if(!id) id = uuidv4()
 	let profileData = settings.get('profiles');
-	profileData[name] = options;
+	profileData[id] = options;
 	settings.set('profiles', profileData, { prettify: true });
-	content.profiles();
+	
+	require('jquery')('#profileModal').modal('hide')
 }
 
 exports.delete = (name) => {

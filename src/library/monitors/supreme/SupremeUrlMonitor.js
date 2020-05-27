@@ -6,7 +6,7 @@ const { logger, utilities } = require('../../other');
 class SupremeUrlMonitor {
 	constructor(_productUrl, proxyList) {
 		logger.info('[Monitor] ['+proxyList+'] Inititalising Url Monitor.');
-		this.productUrl = _productUrl;
+		this._productUrl = _productUrl;
 		this._proxyList = proxyList;
 		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
 			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
@@ -101,9 +101,9 @@ class SupremeUrlMonitor {
 
 	_fetchProductData() {
 		this._setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks))
-		logger.info(`[Monitor] [${this.productUrl}] Fetching Product Data.`);
+		logger.info(`[Monitor] [${this._productUrl}] Fetching Product Data.`);
 		let options = {
-			url: this.productUrl + '.json',
+			url: this._productUrl + '.json',
 			method: 'GET',
 			proxy: utilities.formatProxy(this._getProxy()),
 			json: true,
@@ -122,7 +122,7 @@ class SupremeUrlMonitor {
 		request(options)
 		.then(response => {
 			if (!response.body.hasOwnProperty('styles')) { 
-				logger.error(`[Monitor] [${this.productUrl}] No Style Data.`);
+				logger.error(`[Monitor] [${this._productUrl}] No Style Data.`);
 				let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
 				return this.run();
 			}
@@ -130,7 +130,7 @@ class SupremeUrlMonitor {
 			this._returnData(response.body.styles)
 		})
 		.catch(error => {
-			logger.error(`[Monitor1] [${this.productUrl}] ${error.message}.`);
+			logger.error(`[Monitor1] [${this._productUrl}] ${error.message}.`);
 			this._setStatus('Error', 'ERROR', Object.keys(this.callbacks))
 			this.isRunning = false;
 			return this.run();

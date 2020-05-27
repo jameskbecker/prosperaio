@@ -623,6 +623,9 @@ label, .label {
 tbody .row {
 	border-radius: 100000px;
 	margin: 0.5vh 1vh;
+	background-color: var(--secondary-grey);
+	opacity: 0.9;
+	box-shadow: 1px 1px 1px var(--tertiary-grey);
 	
 }
 
@@ -641,11 +644,7 @@ tbody .row:nth-child(odd) {
 	background-color: var(--tertiary-grey);
 } */
 
-tbody .row {
-	background-color: var(--tertiary-grey);
-	opacity: 0.8;
-	box-shadow: 1px 1px 1px var(--secondary-grey);
-}
+
 
 
 .action-button {

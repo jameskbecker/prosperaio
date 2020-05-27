@@ -1,6 +1,7 @@
 const settings = require('electron-settings');
 const { ipcRenderer } = require('electron');
 const { countries, sites } = require('../library/configuration');
+const profileActions = require('./profiles')
 const $ = require('jquery');
 //const dropData = require('../mock-drop');
 const dropList = require('../droplist');
@@ -90,14 +91,14 @@ function renderTaskTable() {
 			startButton.className = 'action-button';
 			startButton.setAttribute('data-taskId', taskId);
 			startButton.onclick = function () {
-				stopButton.style.color = 'var(--primary-color)';
-				startButton.style.color = 'var(--secondary-color)';
+				// stopButton.style.color = 'var(--primary-color)';
+				// startButton.style.color = 'var(--secondary-color)';
 				
-				startButton.setAttribute('disabled', true);
-				stopButton.setAttribute('disabled', false);
+				// startButton.setAttribute('disabled', true);
+				// stopButton.setAttribute('disabled', false);
 				
-				startButton.style.opacity = 0.2;
-				stopButton.style.opacity = 0.5;
+				// startButton.style.opacity = 0.2;
+				// stopButton.style.opacity = 0.5;
 				
 				ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
 			};
@@ -107,21 +108,21 @@ function renderTaskTable() {
 			stopButton.innerHTML = '<i class="fas fa-stop"></i>';
 			stopButton.className = 'action-button';
 			
-			stopButton.style.color = 'var(--secondary-color)';
-			stopButton.setAttribute('disabled', true);
-			stopButton.style.opacity = 0.2;
+			// stopButton.style.color = 'var(--secondary-color)';
+			// stopButton.setAttribute('disabled', true);
+			// stopButton.style.opacity = 0.2;
 
 			
 			stopButton.setAttribute('data-taskId', taskId);
 			stopButton.onclick = function () {
-				startButton.style.color = 'var(--primary-color)';
-				stopButton.style.color = 'var(--secondary-color)';
+				// startButton.style.color = 'var(--primary-color)';
+				// stopButton.style.color = 'var(--secondary-color)';
 				
-				stopButton.setAttribute('disabled', true);
-				startButton.setAttribute('disabled', false);
+				// stopButton.setAttribute('disabled', true);
+				// startButton.setAttribute('disabled', false);
 				
-				startButton.style.opacity = 0.5;
-				stopButton.style.opacity = 0.2;
+				// startButton.style.opacity = 0.5;
+				// stopButton.style.opacity = 0.2;
 			
 				
 				ipcRenderer.send('task.stop', taskId)
@@ -337,59 +338,7 @@ function renderSites() {
 			newTask_SearchInput[0].disabled = false;
 			newTask_Mode.options.length = 0;
 			let requestMode = document.createElement('option');
-			const dropData = await dropList();
-			if (dropData[selectedSite.type]) {
-				console.log('heey')
-				document.getElementById("newTaskProducts").options.length = 1;
-				let data = dropData[selectedSite.type];
-				let itemNames = Object.keys(data);
-
-				for (let i = 0; i < itemNames.length; i++) {
-					let option = document.createElement('option');
-					option.label = itemNames[i];
-					option.value = itemNames[i];
-					document.getElementById("newTaskProducts").options.add(option)
-				}
-
-				document.getElementById("newTaskProducts").onchange = function () {
-					newTask_Size[0].value = '';
-					// if (!this.value) {
-					// 	return customRow.style.display = 'flex';
-					// }
-					//customRow.style.display = 'none';
-					selectedItem = data[this.value] || {};
-					newTask_SearchInput[0].value = selectedItem.keywords;
-					newTask_Category[0].value = selectedItem.category;
-					let styles = document.getElementById("newTaskStyles");
-					styles.options.length = 0;
-					for (let i = 0; i < selectedItem.styles.length; i++) {
-						let option = document.createElement('option');
-						option.label = selectedItem.styles[i].name;
-						option.value = selectedItem.styles[i].keywords;
-						styles.options.add(option);
-					}
-					styles.onchange = function () {
-						newTask_Style[0].value = this.value;
-
-					}
-					try { styles.onchange(); } catch (err) { console.log(err) }
-					let sizes = document.getElementById('newTaskSizes');
-					sizes.options.length = 5;
-					for (let i = 0; i < selectedItem.sizes.length; i++) {
-						let option = document.createElement('option');
-						option.label = selectedItem.sizes[i].name;
-						option.value = selectedItem.sizes[i].keywords;
-						sizes.options.add(option);
-					}
-					sizes.onchange = function () {
-						newTask_Size[0].value = this.value;
-					}
-				}
-
-			}
-			else{
-				console.log(dropData)
-			}
+			
 			switch (selectedSite.type) {
 				case 'kickz':
 					newTask_Style[0].parentElement.style.display = 'none';
@@ -446,7 +395,59 @@ function renderSites() {
 			}
 			catch (err) { }
 
+			const dropData = await dropList();
+			if (dropData[selectedSite.type]) {
+				console.log('heey')
+				document.getElementById("newTaskProducts").options.length = 1;
+				let data = dropData[selectedSite.type];
+				let itemNames = Object.keys(data);
 
+				for (let i = 0; i < itemNames.length; i++) {
+					let option = document.createElement('option');
+					option.label = itemNames[i];
+					option.value = itemNames[i];
+					document.getElementById("newTaskProducts").options.add(option)
+				}
+
+				document.getElementById("newTaskProducts").onchange = function () {
+					newTask_Size[0].value = '';
+					// if (!this.value) {
+					// 	return customRow.style.display = 'flex';
+					// }
+					//customRow.style.display = 'none';
+					selectedItem = data[this.value] || {};
+					newTask_SearchInput[0].value = selectedItem.keywords;
+					newTask_Category[0].value = selectedItem.category;
+					let styles = document.getElementById("newTaskStyles");
+					styles.options.length = 0;
+					for (let i = 0; i < selectedItem.styles.length; i++) {
+						let option = document.createElement('option');
+						option.label = selectedItem.styles[i].name;
+						option.value = selectedItem.styles[i].keywords;
+						styles.options.add(option);
+					}
+					styles.onchange = function () {
+						newTask_Style[0].value = this.value;
+
+					}
+					try { styles.onchange(); } catch (err) { console.log(err) }
+					let sizes = document.getElementById('newTaskSizes');
+					sizes.options.length = 4;
+					for (let i = 0; i < selectedItem.sizes.length; i++) {
+						let option = document.createElement('option');
+						option.label = selectedItem.sizes[i].name;
+						option.value = selectedItem.sizes[i].keywords;
+						sizes.options.add(option);
+					}
+					sizes.onchange = function () {
+						newTask_Size[0].value = this.value;
+					}
+				}
+
+			}
+			else{
+				console.log(dropData)
+			}
 		}
 	}
 }
@@ -588,28 +589,28 @@ function renderProfileSelectors() {
 
 	document.getElementById('profileTableBody').innerHTML = '';
 	for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
-		let profileName = Object.keys(existingProfiles)[i];
+		let profileId = Object.keys(existingProfiles)[i];
 		let profileRow = document.createElement('tr');
 		profileRow.className = 'row';
 
 
 		let profileCell = document.createElement('td');
-		profileCell.innerHTML = profileName;
+		profileCell.innerHTML = existingProfiles[profileId].profileName || '';
 		profileCell.className = 'cell cell-body col-profile';
 		profileRow.appendChild(profileCell);
 
 		let nameCell = document.createElement('td');
-		nameCell.innerHTML = `${existingProfiles[profileName].billing.first} ${existingProfiles[profileName].billing.last}`;
+		nameCell.innerHTML = `${existingProfiles[profileId].billing.first} ${existingProfiles[profileId].billing.last}`;
 		nameCell.className = 'cell cell-body col-site';
 		profileRow.appendChild(nameCell);
 
 		let addressCell = document.createElement('td');
-		addressCell.innerHTML = `${existingProfiles[profileName].billing.address1} ${existingProfiles[profileName].billing.address2}`;
+		addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
 		addressCell.className = 'cell cell-body col-products';
 		profileRow.appendChild(addressCell);
 
 		let cardCell = document.createElement('td');
-		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileName].payment.cardNumber.substr(-4);
+		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
 		cardCell.className = 'cell cell-body col-status';
 		profileRow.appendChild(cardCell);
 
@@ -620,10 +621,11 @@ function renderProfileSelectors() {
 		let editButton = document.createElement('div');
 		editButton.innerHTML = '<i class="fas fa-edit"></i>';
 		editButton.className = 'action-button';
-		editButton.setAttribute('data-name', profileName)
+		editButton.setAttribute('data-id', profileId || '')
 		editButton.onclick = function () {
-			const profileData = settings.get('profiles')[this.dataset.name]
-			document.getElementById('profileName').value = this.dataset.name;
+			const profileData = settings.get('profiles')[this.dataset.id]
+			document.getElementById('profileId').value = this.dataset.id || '';
+			document.getElementById('profileName').value = profileData.profileName || '';
 			try {
 				billingFirst.value = profileData.billing.first
 				billingLast.value = profileData.billing.last
@@ -664,17 +666,20 @@ function renderProfileSelectors() {
 		let duplicateButton = document.createElement('div');
 		duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 		duplicateButton.className = 'action-button';
+		duplicateButton.setAttribute('data-id', profileId || '')
 		duplicateButton.onclick = function () {
-
+			const profileData = settings.get('profiles')[this.dataset.id]
+			 profileActions.save(null, profileData);
+			renderProfileSelectors();
 		};
-		//actionsCell.appendChild(duplicateButton);
+		actionsCell.appendChild(duplicateButton);
 
 		let deleteButton = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
 		deleteButton.onclick = function () {
 			let existingProfiles2 = settings.get('profiles');
-			delete existingProfiles2[profileName];
+			delete existingProfiles2[profileId];
 			settings.set('profiles', existingProfiles2, { prettify: true })
 			renderProfileSelectors()
 
@@ -689,7 +694,7 @@ function renderProfileSelectors() {
 
 		// 	let profileTitle = document.createElement('h2');
 		// 	profileTitle.setAttribute('class', 'panel-title');
-		// 	profileTitle.innerHTML = `<i></i><span>${profileName}</span>`;
+		// 	profileTitle.innerHTML = `<i></i><span>${profileId}</span>`;
 
 		// /* ----------------------------------------------------------------------------- */
 		// 	let nameRow = document.createElement('div');
@@ -699,7 +704,7 @@ function renderProfileSelectors() {
 		// 	nameWrapper.setAttribute('class', 'container-element');
 
 		// 	let fullName = document.createElement('label');
-		// 	fullName.innerHTML = `${existingProfiles[profileName].billing.first} ${existingProfiles[profileName].billing.last}`;
+		// 	fullName.innerHTML = `${existingProfiles[profileId].billing.first} ${existingProfiles[profileId].billing.last}`;
 
 		// 	nameWrapper.appendChild(fullName)
 		// 	nameRow.appendChild(nameWrapper);
@@ -712,7 +717,7 @@ function renderProfileSelectors() {
 		// 	typeWrapper.setAttribute('class', 'container-element');
 
 		// 	let cardType = document.createElement('label');
-		// 	cardType.innerHTML = `${existingProfiles[profileName].billing.address1} ${existingProfiles[profileName].billing.address2}`;
+		// 	cardType.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
 		// 	typeWrapper.appendChild(cardType)
 		// 	typeRow.appendChild(typeWrapper);
 
@@ -725,7 +730,7 @@ function renderProfileSelectors() {
 		// 	maskedNumberWrapper.setAttribute('class', 'container-element');
 
 		// 	let maskedNumber = document.createElement('label');
-		// 	maskedNumber.innerHTML = '**** **** **** ' + existingProfiles[profileName].payment.cardNumber.substr(-4)
+		// 	maskedNumber.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4)
 
 		// 	maskedNumberWrapper.appendChild(maskedNumber)
 		// 	numberRow.appendChild(maskedNumberWrapper);
@@ -739,7 +744,7 @@ function renderProfileSelectors() {
 		// 	editBtnWrapper.setAttribute('class', 'container-element');
 		// 	let editBtn = document.createElement('button');
 		// 	editBtn.setAttribute('class', 'btn btn-transparent');
-		// 	editBtn.setAttribute('data-name', profileName)
+		// 	editBtn.setAttribute('data-name', profileId)
 		// 	editBtn.innerHTML = '<i class="fas fa-edit"></i><span>Edit</span>';
 		// 	editBtn.onclick = function () {
 		// 		const profileData = settings.get('profiles')[this.dataset.name]
@@ -789,7 +794,7 @@ function renderProfileSelectors() {
 		// 	deleteBtn.innerHTML = '<i class="fas fa-trash"></i><span>Delete</span>';
 		// 	deleteBtn.onclick = function () {
 		// 		let existingProfiles2 = settings.get('profiles');
-		// 		delete existingProfiles2[profileName];
+		// 		delete existingProfiles2[profileId];
 		// 		settings.set('profiles', existingProfiles2, { prettify: true})
 		// 		renderProfileSelectors()
 		// 	}
@@ -813,10 +818,10 @@ function renderProfileSelectors() {
 		element.options.length = 0;
 		let existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
 		for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
-			let profileName = Object.keys(existingProfiles)[i]
+			let profileId = Object.keys(existingProfiles)[i]
 			let option = document.createElement('option');
-			option.value = profileName;
-			option.label = profileName;
+			option.value = profileId;
+			option.label = existingProfiles[profileId].profileName || 'Nameless Profile';
 			element.options.add(option);
 		}
 	})

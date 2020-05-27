@@ -3,7 +3,7 @@ const { utilities } = require('./library/other');
 
 //Bot Module Imports
 const { supreme } = require('./library/sites');
-const { SupremeHybrid, SupremeRequest } = supreme;
+const { SupremeSafe, SupremeRequest } = supreme;
 
 function runTask (id) {
 	console.log('HELLO')
@@ -15,7 +15,7 @@ function runTask (id) {
 	if (!activeTasks[id]) {
 		switch (taskData.setup.mode) {
 			case 'supreme-browser':
-				activeTasks[id] = new SupremeHybrid(taskData, id);
+				activeTasks[id] = new SupremeSafe(taskData, id);
 				return activeTasks[id].run();
 		
 			case 'supreme-request':

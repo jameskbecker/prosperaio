@@ -237,23 +237,21 @@
 
 								<div class="container">
 									<div id="addProductsContainer" class="panel panel-light">
+										
 										<h2 id="taskPersonalization" class="panel-title">
 											<i class="fas fa-tshirt"></i>
 											<div>Product Details</div>
-											<!-- <div class="container">
-											<button class="btn">
-												<i class="fas fa-plus"></i>
-											</button>
-										</div> -->
 										</h2>
 
 										<div class="container">
+											
 											<div class="container-element" style="flex: 2 2 0;">
 												<label>Product</label>
 												<select class="input" id="newTaskProducts">
 													<option>Custom</option>
 												</select>
 											</div>
+
 											<div class="container-element">
 												<label class="label">Style</label>
 												<select id="newTaskStyles" class="input"></select>
@@ -262,55 +260,26 @@
 											<div class="container-element">
 												<label class="label">Size</label>
 												<select id="newTaskSizes" class="input">
-													<option value="" label=""></option>
 													<option value="RANDOM" label="Random"></option>
 													<option value="SMALLEST" label="Smallest"></option>
 													<option value="LARGEST" label="Largest"></option>
 													<option value=" " label="--------------------------------"></option>
-													<!-- <option value="OS" label="One Size"></option> -->
-													<!-- <option value="S" label="S"></option>
-												<option value="M" label="M"></option>
-												<option value="L" label="L"></option>
-												<option value="XL" label="XL"></option>
-												<option value="XXL" label="XXL"></option>
-												<option value="XXXL" label="XXXL"></option>
-												<option value="7.0" label="4.0"></option>
-												<option value="4.5" label="4.5"></option>
-												<option value="5.0" label="5.0"></option>
-												<option value="5.5" label="5.5"></option>
-												<option value="6.0" label="6.0"></option>
-												<option value="6.5" label="6.5"></option>
-												<option value="7.0" label="7.0"></option>
-												<option value="7.5" label="7.5"></option>
-												<option value="8.0" label="8.0"></option>
-												<option value="8.5" label="8.5"></option>
-												<option value="9.0" label="9.0"></option>
-												<option value="9.5" label="9.5"></option>
-												<option value="10.0" label="10.0"></option>
-												<option value="10.5" label="10.5"></option>
-												<option value="11.0" label="11.0"></option>
-												<option value="11.5" label="11.5"></option>
-												<option value="12.0" label="12.0"></option>
-												<option value="12.5" label="12.5"></option>
-												<option value="13.0" label="13.0"></option>
-												<option value="13.5" label="13.5"></option>
-												<option value="14.0" label="14.0"></option>
-												<option value="14.5" label="14.5"></option>
-												<option value="15.0" label="15.0"></option> -->
 												</select>
 											</div>
+
 											<div class="container-element">
 												<label class="label">Quantity</label>
 												<input type="number" name="taskProductQty" class="input" value="1">
 											</div>
+
 										</div>
 
 										<div id="customRow" class="container">
+
 											<div class="container-element" style="flex: 2 2 0">
 												<label class="label">Product Keywords</label>
 												<input type="text" class="input" name="taskSearchInput">
 											</div>
-
 
 											<div class="container-element">
 												<label class="label">Style Keywords</label>
@@ -339,35 +308,43 @@
 										</h2>
 
 										<div class="container">
+
 											<div class="container-element">
 												<label for="taskCartDelay" class="">Cart Delay (ms)</label>
 												<input type="number" id="taskCartDelay" class="input " placeholder="0">
 											</div>
+											
 											<div class="container-element">
 												<label for="taskProxyList" class="label">Proxy List</label>
 												<select id="taskProxyList" class="input proxylist-selector">
 													<option label="None" value=""></option>
 												</select>
 											</div>
+
 											<div class="container-element">
 												<label for="taskStartDate" class="label">Start Date</label>
 												<input type="date" id="taskStartDate" class="input">
 											</div>
+
 										</div>
 
 										<div class="container">
+
 											<div class="container-element">
 												<label for="taskCheckoutDelay" class="">Checkout Delay (ms)</label>
 												<input type="number" id="taskCheckoutDelay" class="input" placeholder="0">
 											</div>
+
 											<div class="container-element">
 												<label for="taskMaxPrice" class="label">Price Limit (GBP or USD)</label>
 												<input type="number" class="input" id="taskMaxPrice" step="0.01" placeholder="0.00">
 											</div>
+
 											<div class="container-element">
 												<label for="taskStartTime" class="label">Start Time</label>
 												<input type="time" id="taskStartTime" class="input" step="3">
 											</div>
+
 										</div>
 
 
@@ -411,15 +388,8 @@
 							<i class="fas fa-plus icon"></i>
 							<div>New Profile</div>
 						</button>
-
 					</div>
-
-					<!-- <div class="container-element container-element-sm">
-						<button class="btn">
-							<i class="fas fa-trash icon"></i>
-							<div>Clear Profiles</div>
-						</button>
-					</div> -->
+					
 				</div>
 			</div>
 
@@ -473,6 +443,7 @@
 						<div class="header-container">
 							<h2 class="header-title">Profile Editor</h2>
 							<div class="header-extra">
+								<input type="hidden" id="profileId" class="input">
 								<div class="container-element container-element-sm">
 									<label for="profileName" class="f-95">Profile Name</label>
 									<input type="text" id="profileName" class="input">
@@ -977,7 +948,7 @@
 									<button id="browserSetup" class="btn">Install Browser Mode</button>
 								</div>
 								<div class="container-element">
-									<label class="label">Select Browser Path</label>
+									<label class="label">Custom Browser</label>
 									<input id="browserPath" class="input" type="file">
 								</div>
 								<div class="container-element" style="flex: 2 2 0;">

@@ -270,6 +270,7 @@ cardNumber.onkeyup = function () {
 
 saveProfileBtn.onclick = function () {
 	let profileData = {
+		profileName: profileName.value || "",
 		billing: {
 			"first": billingFirst.value || "",
 			"last": billingLast.value || "",
@@ -303,7 +304,8 @@ saveProfileBtn.onclick = function () {
 		}
 	};
 
-	profile.save(profileName.value, profileData);
+	profile.save(document.getElementById('profileId').value, profileData);
+	content.profiles()
 	for (let i = 0; i < profileElements.length; i++) {
 		profileElements[i].value = profileElements[i].id.includes('Country') ? 'GB' : '';
 	}
