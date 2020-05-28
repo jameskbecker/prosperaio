@@ -3,7 +3,7 @@ const electron = require('electron')
 const { app, BrowserWindow, ipcMain, Menu } = electron;
 const ipc = require('./ipc');
 const isDev = require('electron-is-dev');
-const { mainWindow, loginWindow, worker } = require('./windows');
+const { MainWindow, LoginWindow, WorkerWindow } = require('./windows');
 const auth = require('./authentication')
 const { menuTemplate } = require('../library/configuration');
 const discord = require('./discord')
@@ -24,49 +24,49 @@ try {
 app.once('ready',async function() {
 
 	const settings = require('electron-settings');
-	mainWindow.create();
+	MainWindow.create();
 	console.log(path.resolve('..'))
 	if (isDev) {
-		if (!worker.window)	worker.create();
-		await worker.load();
-		console.log('[MAIN] loading worker')
+		if (!WorkerWindow.window)	WorkerWindow.create();
+		await WorkerWindow.load();
+		console.log('[MAIN] loading WorkerWindow')
 		ipc.init();
 		discord.setPresence();
-		return mainWindow.show();
+		return MainWindow.show();
 	}
 	else if (settings.has('userKey')) {
 		auth.authenticate(settings.get('userKey'), async (error) => {
 			if (error) {
-				loginWindow.create();
-				loginWindow.show();
+				LoginWindow.create();
+				LoginWindow.show();
 			}
 			else {
-				if (!worker.window)	worker.create();
-				await worker.load();
-				console.log('loaded worker')
+				if (!WorkerWindow.window)	WorkerWindow.create();
+				await WorkerWindow.load();
+				console.log('loaded WorkerWindow')
 				ipc.init();
 				discord.setPresence();
-				mainWindow.show();
+				MainWindow.show();
 			}
 		})
 	}
 	else {
-		loginWindow.create();
-		loginWindow.show();
+		LoginWindow.create();
+		LoginWindow.show();
 	}
 	ipcMain.on('authenticate', async (event, args) => {
 		auth.authenticate(args.key,async (error) => {
 			if (error) {
-				loginWindow.window.webContents.send('authentication error', error);
+				LoginWindow.window.webContents.send('authentication error', error);
 			}
 			else {
 				settings.set('userKey', args.key);
-				loginWindow.window.close();
-				if (!worker.window)	worker.create();
-				await worker.load();
+				LoginWindow.window.close();
+				if (!WorkerWindow.window)	WorkerWindow.create();
+				await WorkerWindow.load();
 				ipc.init();
 				discord.setPresence();
-				mainWindow.show();
+				MainWindow.show();
 			}
 		})
 	})

@@ -1,6 +1,6 @@
-exports.mainWindow = require('./main');
-exports.loginWindow = require('./login');
-exports.worker = require('./worker');
-exports.Harvester = require('./Harvester');
-exports.google = require('./google');
-exports.threeDS = require('./threeDS');
+exports.MainWindow = require('./MainWindow');
+exports.LoginWindow = require('./LoginWindow');
+exports.WorkerWindow = require('./WorkerWindow');
+exports.Harvester = require('./HarvesterWindow');
+exports.GoogleWindow = require('./GoogleWindow');
+exports.threeDS = require('./ThreeDSWindow');

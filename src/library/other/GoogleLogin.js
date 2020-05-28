@@ -1,4 +1,4 @@
-const { mainWindow, google } = require('../../main/windows');
+const { mainWindow, GoogleWindow } = require('../../main/windows');
 
 class GoogleLogin {
 	constructor(_name, _type) {
@@ -8,11 +8,11 @@ class GoogleLogin {
 	}
 
 	spawn() {
-		google.create(this.name);
-		google.load();
-		google.window.once('closed', () => {
-			google.window = null;
-			mainWindow.window.webContents.send('logged into google', {
+		GoogleWindow.create(this.name);
+		GoogleWindow.load();
+		GoogleWindow.window.once('closed', () => {
+			GoogleWindow.window = null;
+			mainWindow.window.webContents.send('logged into GoogleWindow', {
 				type: this.type
 			});
 		})

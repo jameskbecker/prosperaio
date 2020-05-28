@@ -7,7 +7,7 @@ const path = require('path')
 const isDev = require('electron-is-dev')
 const harvesterConfiguration = require('../../library/configuration/sitekeys');
 
-class Harvester {
+class HarvesterWindow {
 	constructor(_sessionName, _siteId) {
 		this.state = 'init';
 		this.siteType = _siteId
@@ -73,4 +73,4 @@ class Harvester {
 
 
 
-module.exports = Harvester;
+module.exports = HarvesterWindow;

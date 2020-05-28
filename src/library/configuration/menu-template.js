@@ -1,5 +1,5 @@
 const isMac = process.platform === 'darwin'
-const { mainWindow, worker } = require('../../main/windows');
+const { MainWindow, WorkerWindow } = require('../../main/windows');
 module.exports = [
 	// { role: 'appMenu' }
 	...(isMac ? [{
@@ -26,8 +26,8 @@ module.exports = [
 				label: 'Run All Tasks',
 				accelerator: 'CommandOrControl+Shift+R',
 				click: function() {
-					if (worker.window) {
-						worker.window.webContents.send('run all tasks');
+					if (WorkerWindow.window) {
+						WorkerWindow.window.webContents.send('run all tasks');
 					}
 				}
 			},
@@ -35,8 +35,8 @@ module.exports = [
 				label: 'Stop All Tasks',
 				accelerator: 'CommandOrControl+Shift+S',
 				click: function() {
-					if (worker.window) {
-						worker.window.webContents.send('stop all tasks');
+					if (WorkerWindow.window) {
+						WorkerWindow.window.webContents.send('stop all tasks');
 					}
 				}
 			},
@@ -44,8 +44,8 @@ module.exports = [
 				label: 'Delete All Tasks',
 				accelerator: 'CommandOrControl+Shift+D',
 				click: function() {
-					if (worker.window) {
-						worker.window.webContents.send('delete all tasks');
+					if (WorkerWindow.window) {
+						WorkerWindow.window.webContents.send('delete all tasks');
 					}
 				}
 			}//,
@@ -85,7 +85,7 @@ module.exports = [
 			{ 
 				label: 'Reload Data',
 				click: function() {
-					if (worker.window) {
+					if (WorkerWindow.window) {
 						global['HARVESTERS'] = {
 							'supreme': [],
 							'kickz': [],
@@ -97,8 +97,8 @@ module.exports = [
 							'kickz': [],
 							'kickzpremium': [],
 						}
-						worker.window.webContents.reload();
-						mainWindow.window.webContents.reload();
+						WorkerWindow.window.webContents.reload();
+						MainWindow.window.webContents.reload();
 					}
 				},
 				accelerator: 'CommandOrControl+R' 
