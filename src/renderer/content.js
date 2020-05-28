@@ -19,6 +19,7 @@ function convertMode(id) {
 
 function renderTaskTable() {
 	let tasks = settings.has('tasks') ? settings.get('tasks') : {};
+	let profiles = settings.has('profiles') ? settings.get('profiles') : {}
 	tasksHeader.innerHTML = `Tasks (${Object.keys(tasks).length} Total)`;
 	taskTableBody.innerHTML = '';
 
@@ -61,7 +62,7 @@ function renderTaskTable() {
 			taskRow.appendChild(sizeCell);
 
 			let profileCell = document.createElement('td');
-			profileCell.innerHTML = tasks[taskId].setup.profile;
+			profileCell.innerHTML = profiles[tasks[taskId].setup.profile] && profiles[tasks[taskId].setup.profile].profileName ? profiles[tasks[taskId].setup.profile].profileName : '';
 			profileCell.className = 'cell cell-body col-profile';
 			taskRow.appendChild(profileCell);
 

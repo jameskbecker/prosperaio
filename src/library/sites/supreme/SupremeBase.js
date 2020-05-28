@@ -144,6 +144,7 @@ class SupremeBase extends Task {
 					logger.verbose(`[T:${this.id}] [${this.sizeId}] Matched Size : ${this.sizeName}.`);
 
 					if (this.taskData.setup.restockMode === 'stock' && !sizeData.stock_level) {
+						this.restockMode = true;
 						throw new Error('OOS')
 					}
 
@@ -250,11 +251,15 @@ class SupremeBase extends Task {
 
 						case 'failed':
 							if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
-							if (!this.checkoutData.errors) {
-								this._setStatus('Payment Failed.', 'ERROR');
+							if (this.checkoutData.errors) {
+								this.setStatus('Billing Error', 'ERROR');
+							}
+							else if(this.checkoutData.page) {
+								this.setStatus('High Traffic Decline')
 								logger.error(`[T.${this.id}] Payment Failed.`);
 								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
-									return setTimeout(this.retryCheckout.bind(this), 1000)
+									let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
+									return setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
 								}
 								else {
 									error = new Error();
@@ -262,7 +267,19 @@ class SupremeBase extends Task {
 									return resolve()
 								}
 							}
-							else return this._setStatus('Form Error.', 'ERROR');
+							else {
+								this._setStatus('Payment Declined.', 'ERROR');
+								logger.error(`[T.${this.id}] Payment Failed.`);
+								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
+									let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
+									setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
+								}
+								else {
+									error = new Error();
+									error.code = 'FAILED'
+									return resolve()
+								}
+							}
 
 
 						case 'cca':

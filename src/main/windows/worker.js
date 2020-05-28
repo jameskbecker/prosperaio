@@ -5,7 +5,7 @@ const config = require('../../config');
 
 function createWindow() {
 	const workerWindow = new BrowserWindow({
-		show: true,
+		show: false,
 		height: 100,
 		width: 100,
 		webPreferences: {

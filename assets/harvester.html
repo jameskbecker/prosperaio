@@ -12,9 +12,9 @@
 		<div class="banner banner-logo" style="display:none"></div>
 		<div class="banner banner-nav banner-draggable">
 		</div>
-		<div id="minimize" class="control">
+		<!-- <div id="minimize" class="control">
 			<i class="fas fa-window-minimize"></i>
-		</div>
+		</div> -->
 		<div id="close" class="control">
 			<i class="fas fa-times"></i>
 		</div>
@@ -70,8 +70,8 @@
 
 
 		let closeBtn = document.getElementById('close');
-		let minimizeBtn = document.getElementById('minimize');
-		let reloadBtn = document.getElementById('reload');
+		//let minimizeBtn = document.getElementById('minimize');
+		//let reloadBtn = document.getElementById('reload');
 
 
 		let accountData = settings.has('captcha-sessions') ? settings.get('captcha-sessions') : [];
@@ -164,7 +164,7 @@
 		ipcHarvester.on('cleared queue', (event, args) => {
 			console.log(args)
 		})
-		minimizeBtn.addEventListener('click', () => remote.getCurrentWindow().minimize());
+		// minimizeBtn.addEventListener('click', () => remote.getCurrentWindow().minimize());
 
 
 	</script>

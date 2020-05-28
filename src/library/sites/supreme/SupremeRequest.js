@@ -26,6 +26,7 @@ class SupremeRequest extends SupremeBase {
 
 	async run() {
 		try {
+			
 			await this._setTimer();
 			this._setStatus('Starting Task.', 'WARNING');
 			logger.warn(`[Task ${this.id}] Starting.`);
@@ -154,6 +155,7 @@ class SupremeRequest extends SupremeBase {
 					case 'OOS':
 						this._setStatus('Out of Stock.', 'ERROR');
 						logger.error('OOS');
+						this.restockMode = true;
 						//TODO: MAKE IT ENTER RESTOCK MODE
 						break;
 
@@ -281,7 +283,7 @@ class SupremeRequest extends SupremeBase {
 			method: 'POST',
 			proxy: this.proxy,
 			form: this.atcForm,
-			timeout: 5000,
+			timeout: 6000,
 			jar: this.cookieJar,
 			json: true,
 			headers: {
