@@ -250,7 +250,7 @@ body {
 	flex-direction: row;
 	flex-wrap: wrap;
 	align-self: flex-start;
-	justify-content: space-evenly;
+	justify-content: center;
 	flex: 1 1 100%;
 	height: inherit;
 	min-height: 0;

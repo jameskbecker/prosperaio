@@ -4,7 +4,7 @@ const os = require("os");
 const isDev = require("electron-is-dev");
 const path = require("path")
 
-let interfaceAuthPath, interfaceMainPath, interfaceHarvesterPath, interfaceWorkerPath, userSettingsPath, version;
+let interfaceAuthPath, interfaceMainPath, interfaceHarvesterPath, interfaceThreeDSPath, interfaceWorkerPath, userSettingsPath, version;
 
 if (isDev) {
 	interfaceAuthPath = `file:///${app.getAppPath()}/assets/authenticator.html`;

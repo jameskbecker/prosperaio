@@ -1,10 +1,7 @@
 const electron = require('electron');
 const { BrowserWindow, session } = electron;
 const path = require('path')
-const puppeteer = require('puppeteer-extra');
 
-const pluginStealth = require("puppeteer-extra-plugin-stealth")
-puppeteer.use(pluginStealth())
 function createWindow(accountName) {
 	const googleWindow = new BrowserWindow({
 		width: electron.screen.getPrimaryDisplay().workAreaSize.width / 2,

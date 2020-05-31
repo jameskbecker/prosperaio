@@ -1,15 +1,14 @@
-'use strict'
 const _ = require('underscore');
 const electron = require('electron');
 const { ipcRenderer, remote } = electron;
 const mousetrap = require('mousetrap');
 const settings = require('electron-settings');
 
-const content = require('../src/renderer/content');
-const profile = require('../src/renderer/profiles');
-const ipc = require('../src/renderer/ipc');
-const { utilities } = require('../src/library/other');
-const { sites } = require('../src/library/configuration');
+const content = require('../build/renderer/content');
+const profile = require('../build/renderer/profiles');
+const ipc = require('../build/renderer/ipc');
+const { utilities } = require('../build/library/other');
+const { sites } = require('../build/library/configuration');
 
 /* --------- GENERAL --------- */
 ipc.init();

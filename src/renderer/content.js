@@ -1,10 +1,10 @@
 const settings = require('electron-settings');
 const { ipcRenderer } = require('electron');
 const { countries, sites } = require('../library/configuration');
-const profileActions = require('./profiles')
+const profileActions = require('./profiles');
 const $ = require('jquery');
 //const dropData = require('../mock-drop');
-const dropList = require('../droplist');
+const dropList = require('./droplist');
 
 let selectedItem;
 function convertMode(id) {
@@ -13,13 +13,13 @@ function convertMode(id) {
 		'supreme-browser': 'Safe',
 		'kickz-wire': 'Wire Transfer',
 		'kickz-paypal': 'Paypal'
-	}
-	return modes.hasOwnProperty(id) ? modes[id] : null
+	};
+	return modes.hasOwnProperty(id) ? modes[id] : null;
 }
 
 function renderTaskTable() {
 	let tasks = settings.has('tasks') ? settings.get('tasks') : {};
-	let profiles = settings.has('profiles') ? settings.get('profiles') : {}
+	let profiles = settings.has('profiles') ? settings.get('profiles') : {};
 	tasksHeader.innerHTML = `Tasks (${Object.keys(tasks).length} Total)`;
 	taskTableBody.innerHTML = '';
 
@@ -126,7 +126,7 @@ function renderTaskTable() {
 				// stopButton.style.opacity = 0.2;
 			
 				
-				ipcRenderer.send('task.stop', taskId)
+				ipcRenderer.send('task.stop', taskId);
 			};
 			actionsCell.appendChild(stopButton);
 
@@ -170,7 +170,7 @@ function renderTaskTable() {
 			duplicateButton.className = 'action-button';
 			duplicateButton.setAttribute('data-taskId', taskId);
 			duplicateButton.onclick = function () {
-				ipcRenderer.send('task.duplicate', taskId)
+				ipcRenderer.send('task.duplicate', taskId);
 			};
 			actionsCell.appendChild(duplicateButton);
 
@@ -179,7 +179,7 @@ function renderTaskTable() {
 			deleteButton.className = 'action-button';
 			deleteButton.setAttribute('data-taskId', taskId);
 			deleteButton.onclick = function () {
-				ipcRenderer.send('task.delete', taskId)
+				ipcRenderer.send('task.delete', taskId);
 			};
 			actionsCell.appendChild(deleteButton);
 
@@ -195,7 +195,7 @@ function renderTaskTable() {
 			taskTableBody.appendChild(taskRow);
 
 		};
-	} catch (err) { console.log(err) }
+	} catch (err) { console.log(err);}
 }
 
 function renderProxyTable(name) {
@@ -207,10 +207,10 @@ function renderProxyTable(name) {
 			document.getElementById('proxy-header').innerHTML = `Proxies (${Object.keys(list).length} Total)`;
 			proxyTestTable.innerHTML = '';
 			for (let i = 0; i < Object.keys(list).length; i++) {
-				let proxyId = Object.keys(list)[i]
+				let proxyId = Object.keys(list)[i];
 				let proxyRow = document.createElement('tr');
 				proxyRow.className = 'row';
-				proxyRow.setAttribute('data-row-id', proxyId)
+				proxyRow.setAttribute('data-row-id', proxyId);
 
 				let splitProxy = list[proxyId].split(':');
 				let ipCell = document.createElement('td');
@@ -239,7 +239,7 @@ function renderProxyTable(name) {
 
 				let statusCell = document.createElement('td');
 				statusCell.className = 'cell cell-body col-status col-proxy';
-				statusCell.innerHTML = 'Idle.'
+				statusCell.innerHTML = 'Idle.';
 				statusCell.setAttribute('data-proxyId', proxyId);
 				proxyRow.appendChild(statusCell);
 
@@ -255,7 +255,7 @@ function renderProxyTable(name) {
 						baseUrl: proxyTestSite.value,
 						id: proxyId,
 						input: list[proxyId],
-					})
+					});
 				};
 				actionsCell.appendChild(startButton);
 
@@ -264,8 +264,8 @@ function renderProxyTable(name) {
 				deleteButton.className = 'action-button';
 				deleteButton.onclick = function () {
 					delete list[proxyId];
-					settings.set('proxies', proxyLists, { prettify: true })
-					let row = this.parentNode.parentNode
+					settings.set('proxies', proxyLists, { prettify: true });
+					let row = this.parentNode.parentNode;
 					row.parentNode.removeChild(row);
 				};
 				actionsCell.appendChild(deleteButton);
@@ -293,7 +293,7 @@ function renderSites() {
 			};
 		}
 	}
-	newTask_Site.onchange = async function () {
+	newTask_Site.onchange = function () {
 		newTask_Mode.disabled = false;
 		newTask_RestockMode.disabled = false;
 		let selectedSite = sites.default[this.value] || null;
@@ -329,9 +329,9 @@ function renderSites() {
 					case 'shopify-frontend':
 						newTask_RestockMode.add(stockMode);
 						break;
-					default: console.log('No Onchange Event for:', this.value)
+					default: console.log('No Onchange Event for:', this.value);
 				}
-			}
+			};
 			newTask_Style[0].disabled = false;
 			newTask_Category[0].disabled = false;
 			newTask_Size[0].disabled = false;
@@ -389,74 +389,77 @@ function renderSites() {
 					newTask_Mode.add(safeMode);
 
 					break;
-				default: console.log(selectedSite.type)
+				default: console.log(selectedSite.type);
 			}
 			try {
 				newTask_Mode.onchange();
 			}
 			catch (err) { }
 
-			const dropData = await dropList();
-			if (dropData[selectedSite.type]) {
-				console.log('heey')
-				document.getElementById("newTaskProducts").options.length = 1;
-				let data = dropData[selectedSite.type];
-				let itemNames = Object.keys(data);
-
-				for (let i = 0; i < itemNames.length; i++) {
-					let option = document.createElement('option');
-					option.label = itemNames[i];
-					option.value = itemNames[i];
-					document.getElementById("newTaskProducts").options.add(option)
-				}
-
-				document.getElementById("newTaskProducts").onchange = function () {
-					newTask_Size[0].value = '';
-					// if (!this.value) {
-					// 	return customRow.style.display = 'flex';
-					// }
-					//customRow.style.display = 'none';
-					selectedItem = data[this.value] || {};
-					newTask_SearchInput[0].value = selectedItem.keywords;
-					newTask_Category[0].value = selectedItem.category;
-					let styles = document.getElementById("newTaskStyles");
-					styles.options.length = 0;
-					for (let i = 0; i < selectedItem.styles.length; i++) {
+			dropList()
+			.then(dropData => {
+				if (dropData[selectedSite.type]) {
+					console.log('heey');
+					document.getElementById("newTaskProducts").options.length = 1;
+					let data = dropData[selectedSite.type];
+					let itemNames = Object.keys(data);
+	
+					for (let i = 0; i < itemNames.length; i++) {
 						let option = document.createElement('option');
-						option.label = selectedItem.styles[i].name;
-						option.value = selectedItem.styles[i].keywords;
-						styles.options.add(option);
+						option.label = itemNames[i];
+						option.value = itemNames[i];
+						document.getElementById("newTaskProducts").options.add(option);
 					}
-					styles.onchange = function () {
-						newTask_Style[0].value = this.value;
-
-					}
-					try { styles.onchange(); } catch (err) { console.log(err) }
-					let sizes = document.getElementById('newTaskSizes');
-					sizes.options.length = 4;
-					for (let i = 0; i < selectedItem.sizes.length; i++) {
-						let option = document.createElement('option');
-						option.label = selectedItem.sizes[i].name;
-						option.value = selectedItem.sizes[i].keywords;
-						sizes.options.add(option);
-					}
-					sizes.onchange = function () {
-						newTask_Size[0].value = this.value;
-					}
+	
+					document.getElementById("newTaskProducts").onchange = function () {
+						newTask_Size[0].value = '';
+						// if (!this.value) {
+						// 	return customRow.style.display = 'flex';
+						// }
+						//customRow.style.display = 'none';
+						selectedItem = data[this.value] || {};
+						newTask_SearchInput[0].value = selectedItem.keywords;
+						newTask_Category[0].value = selectedItem.category;
+						let styles = document.getElementById("newTaskStyles");
+						styles.options.length = 0;
+						for (let i = 0; i < selectedItem.styles.length; i++) {
+							let option = document.createElement('option');
+							option.label = selectedItem.styles[i].name;
+							option.value = selectedItem.styles[i].keywords;
+							styles.options.add(option);
+						}
+						styles.onchange = function () {
+							newTask_Style[0].value = this.value;
+	
+						};
+						try { styles.onchange(); } catch (err) { console.log(err); }
+						let sizes = document.getElementById('newTaskSizes');
+						sizes.options.length = 4;
+						for (let i = 0; i < selectedItem.sizes.length; i++) {
+							let option = document.createElement('option');
+							option.label = selectedItem.sizes[i].name;
+							option.value = selectedItem.sizes[i].keywords;
+							sizes.options.add(option);
+						}
+						sizes.onchange = function () {
+							newTask_Size[0].value = this.value;
+						};
+					};
+	
 				}
-
-			}
-			else{
-				console.log(dropData)
-			}
+				else{
+					console.log(dropData);
+				}
+			});
+			
 		}
-	}
+	};
 }
 
 function renderCountries() {
 	for (let i = 0; i < countries.length; i++) {
 		for (let j = 0; j < countrySelectors.length; j++) {
-			let option = document.createElement('option')
+			let option = document.createElement('option');
 			option.label = countries[i].label;
 			option.value = countries[i].value;
 			countrySelectors[j].add(option);
@@ -470,9 +473,9 @@ function renderCountries() {
 }
 
 function renderStates(selector, value) {
-	let selectedCountry = countries.filter(country => { return country.value === value })[0];
+	let selectedCountry = countries.filter(country => { return country.value === value; })[0];
 	let hasStates = selectedCountry.hasOwnProperty('states');
-	console.log(document.getElementById(selector))
+	console.log(document.getElementById(selector));
 	document.getElementById(selector).options.length = 0;
 
 	if (hasStates) {
@@ -481,7 +484,7 @@ function renderStates(selector, value) {
 			let option = document.createElement('option');
 			option.label = selectedCountry.states[i].label;
 			option.value = selectedCountry.states[i].value;
-			document.getElementById(selector).add(option)
+			document.getElementById(selector).add(option);
 		}
 	}
 	else {
@@ -497,7 +500,7 @@ function renderProxyListSelectors() {
 	});
 
 	for (let i = 0; i < Object.keys(proxyLists).length; i++) {
-		let name = Object.keys(proxyLists)[i]
+		let name = Object.keys(proxyLists)[i];
 
 		document.querySelectorAll('.proxylist-selector').forEach(function (element) {
 			let option = document.createElement('option');
@@ -530,7 +533,7 @@ function renderHarvesters() {
 			option.label = site.label;
 			option.value = site.value;
 			siteSelector.add(option);
-		})
+		});
 		
 		siteCell.appendChild(siteSelector);
 		
@@ -545,8 +548,8 @@ function renderHarvesters() {
 			ipcRenderer.send('captcha.launch', {
 				'sessionName': existingHarvesters[i].name,
 				'site': siteSelector.value
-			})
-		}
+			});
+		};
 	
 		let loginButton = document.createElement('div');
 		loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
@@ -555,8 +558,8 @@ function renderHarvesters() {
 			ipcRenderer.send('captcha.signIn', {
 				'sessionName': existingHarvesters[i].name,
 				'type': 'renew'
-			})
-		}
+			});
+		};
 
 		let deleteButton = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
@@ -564,14 +567,14 @@ function renderHarvesters() {
 		deleteButton.onclick = function () {
 			try {
 				existingHarvesters2 = settings.get('captchaHarvesters');
-				let newHarvestrerArray = existingHarvesters2.filter((harvester, index) => {
-					return harvester.name !== existingHarvesters[i].name
-				})
+				let newHarvestrerArray = existingHarvesters2.filter((harvester) => {
+					return harvester.name !== existingHarvesters[i].name;
+				});
 				settings.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
-				renderHarvesters()
+				renderHarvesters();
 			} 
 			catch (err) { }
-		}
+		};
 		
 		actionsCell.appendChild(launchButton);
 		actionsCell.appendChild(loginButton);
@@ -622,54 +625,54 @@ function renderProfileSelectors() {
 		let editButton = document.createElement('div');
 		editButton.innerHTML = '<i class="fas fa-edit"></i>';
 		editButton.className = 'action-button';
-		editButton.setAttribute('data-id', profileId || '')
+		editButton.setAttribute('data-id', profileId || '');
 		editButton.onclick = function () {
-			const profileData = settings.get('profiles')[this.dataset.id]
+			const profileData = settings.get('profiles')[this.dataset.id];
 			document.getElementById('profileId').value = this.dataset.id || '';
 			document.getElementById('profileName').value = profileData.profileName || '';
 			try {
-				billingFirst.value = profileData.billing.first
-				billingLast.value = profileData.billing.last
-				billingEmail.value = profileData.billing.email
-				billingTelephone.value = profileData.billing.telephone
-				billingAddress1.value = profileData.billing.address1
-				billingAddress2.value = profileData.billing.address2
-				billingCity.value = profileData.billing.city
-				billingZip.value = profileData.billing.zip
-				billingCountry.value = profileData.billing.country
-				billingState.value = profileData.billing.state
+				billingFirst.value = profileData.billing.first;
+				billingLast.value = profileData.billing.last;
+				billingEmail.value = profileData.billing.email;
+				billingTelephone.value = profileData.billing.telephone;
+				billingAddress1.value = profileData.billing.address1;
+				billingAddress2.value = profileData.billing.address2;
+				billingCity.value = profileData.billing.city;
+				billingZip.value = profileData.billing.zip;
+				billingCountry.value = profileData.billing.country;
+				billingState.value = profileData.billing.state;
 
-				shippingFirst.value = profileData.shipping.first
-				shippingLast.value = profileData.shipping.last
-				shippingEmail.value = profileData.shipping.email
-				shippingTelephone.value = profileData.shipping.telephone
-				shippingAddress1.value = profileData.shipping.address1
-				shippingAddress2.value = profileData.shipping.address2
-				shippingCity.value = profileData.shipping.city
-				shippingZip.value = profileData.shipping.zip
-				shippingCountry.value = profileData.shipping.country
-				shippingState.value = profileData.shipping.state
+				shippingFirst.value = profileData.shipping.first;
+				shippingLast.value = profileData.shipping.last;
+				shippingEmail.value = profileData.shipping.email;
+				shippingTelephone.value = profileData.shipping.telephone;
+				shippingAddress1.value = profileData.shipping.address1;
+				shippingAddress2.value = profileData.shipping.address2;
+				shippingCity.value = profileData.shipping.city;
+				shippingZip.value = profileData.shipping.zip;
+				shippingCountry.value = profileData.shipping.country;
+				shippingState.value = profileData.shipping.state;
 
-				paymentType.value = profileData.payment.type
-				cardNumber.value = profileData.payment.cardNumber
-				cardExpiryMonth.value = profileData.payment.expiryMonth
-				cardExpiryYear.value = profileData.payment.expiryYear
-				cardCvv.value = profileData.payment.cvv
+				paymentType.value = profileData.payment.type;
+				cardNumber.value = profileData.payment.cardNumber;
+				cardExpiryMonth.value = profileData.payment.expiryMonth;
+				cardExpiryYear.value = profileData.payment.expiryYear;
+				cardCvv.value = profileData.payment.cvv;
 
 
-				$('#profileModal').modal('show')
+				$('#profileModal').modal('show');
 			}
-			catch (error) { console.error(error) }
-		}
+			catch (error) { console.error(error); }
+		};
 
-		actionsCell.appendChild(editButton)
+		actionsCell.appendChild(editButton);
 
 		let duplicateButton = document.createElement('div');
 		duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 		duplicateButton.className = 'action-button';
-		duplicateButton.setAttribute('data-id', profileId || '')
+		duplicateButton.setAttribute('data-id', profileId || '');
 		duplicateButton.onclick = function () {
-			const profileData = settings.get('profiles')[this.dataset.id]
+			const profileData = settings.get('profiles')[this.dataset.id];
 			 profileActions.save(null, profileData);
 			renderProfileSelectors();
 		};
@@ -681,15 +684,15 @@ function renderProfileSelectors() {
 		deleteButton.onclick = function () {
 			let existingProfiles2 = settings.get('profiles');
 			delete existingProfiles2[profileId];
-			settings.set('profiles', existingProfiles2, { prettify: true })
-			renderProfileSelectors()
+			settings.set('profiles', existingProfiles2, { prettify: true });
+			renderProfileSelectors();
 
 		};
-		actionsCell.appendChild(deleteButton)
+		actionsCell.appendChild(deleteButton);
 
 		profileRow.appendChild(actionsCell);
 
-		document.getElementById('profileTableBody').appendChild(profileRow)
+		document.getElementById('profileTableBody').appendChild(profileRow);
 		// 	let profileContainer = document.createElement('div');
 		// 	profileContainer.setAttribute('class', 'panel panel-light panel-fixed-25');
 
@@ -819,29 +822,29 @@ function renderProfileSelectors() {
 		element.options.length = 0;
 		let existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
 		for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
-			let profileId = Object.keys(existingProfiles)[i]
+			let profileId = Object.keys(existingProfiles)[i];
 			let option = document.createElement('option');
 			option.value = profileId;
 			option.label = existingProfiles[profileId].profileName || 'Nameless Profile';
 			element.options.add(option);
 		}
-	})
+	});
 }
 
-function addTableRow(table, data = []) {
-	if (typeof data !== 'object' || data.length < 1) return;
-	let row = document.createElement('tr');
-	row.classList.add('row');
-	for (let i = 0; i < data.length; i++) {
-		let cell = document.createElement('td');
-		cell.classList.add('cell')
-		cell.classList.add('cell-body')
-		cell.classList.add(data[i].class);
-		cell.innerHTML = data[i].text;
-		row.appendChild(cell);
-	}
-	table.appendChild(row);
-}
+// function addTableRow(table, data = []) {
+// 	if (typeof data !== 'object' || data.length < 1) return;
+// 	let row = document.createElement('tr');
+// 	row.classList.add('row');
+// 	for (let i = 0; i < data.length; i++) {
+// 		let cell = document.createElement('td');
+// 		cell.classList.add('cell');
+// 		cell.classList.add('cell-body');
+// 		cell.classList.add(data[i].class);
+// 		cell.innerHTML = data[i].text;
+// 		row.appendChild(cell);
+// 	}
+// 	table.appendChild(row);
+// }
 
 function renderOrderTable() {
 	let orders = settings.has('orders') ? settings.get('orders') : [];
@@ -866,7 +869,7 @@ function renderOrderTable() {
 			let productCell = document.createElement('td');
 			productCell.innerHTML = orders[i].product;
 			productCell.className = 'cell cell-body col-products';
-			productCell.style.justifyContent = 'center'
+			productCell.style.justifyContent = 'center';
 			orderRow.appendChild(productCell);
 
 			let orderNumberCell = document.createElement('td');
@@ -887,12 +890,12 @@ function renderOrderTable() {
 			orderTableBody.appendChild(orderRow);
 
 		};
-	} catch (err) { console.log(err) }
+	} catch (err) { console.log(err); }
 }
 
-function setProxyLists() {
+// function setProxyLists() {
 
-}
+// }
 
 module.exports = {
 	"tasks": renderTaskTable,
@@ -904,4 +907,4 @@ module.exports = {
 	"states": renderStates,
 	"orders": renderOrderTable,
 	"harvesters": renderHarvesters
-}
+};

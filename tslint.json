@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "semicolon":true,
+    "strict-type-predicates":true,
+    "strict-boolean-expressions":true,
+    "no-var-requires": false,
+    "typedef": true,
+    "typedef-whitespace": true
+  }
+}

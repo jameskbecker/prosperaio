@@ -176,7 +176,7 @@ class Task {
 			url: process.env.SUCCESS_WEBHOOK_URL,
 			method: 'POST',
 			json: true,
-			body: discord.public.bind(this)(additonalFields)
+			body: discord.publicWebhook.bind(this)(additonalFields)
 		}, (error, response, body) => {	
 			if (error) {
 				console.log(error)
@@ -212,7 +212,7 @@ class Task {
 				url: webhookUrl,
 				method: 'POST',
 				json: true,
-				body: discord.private.bind(this)(additonalFields)
+				body: discord.privateWebhook.bind(this)(additonalFields)
 			}, (error, response, body) => {	
 				if (error) {
 					console.log(error)

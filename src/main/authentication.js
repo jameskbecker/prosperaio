@@ -14,15 +14,15 @@ exports.authenticate = function(userKey, callback) {
 			'device': machineIdSync()
 		}
 	}, (error, response, body) => {
-		if (error) return callback('Unable to connect to XXXAIO servers. Please try again.')
+		if (error) return callback('Unable to connect to ProsperAIO servers. Please try again.');
 		else {
 			switch (response.statusCode) {
 				case 200:
 					return body.message === 'successful' ? callback(null, true) : callback('Invalid licence key. Please try again.', false);
-				default: return callback('Unable to connect to XXXAIO servers. Please try again.');
+				default: return callback('Unable to connect to ProsperAIO servers. Please try again.');
 			}
 		}
 		
 	
 	});
-}
+};

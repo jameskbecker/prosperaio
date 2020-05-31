@@ -1,6 +1,5 @@
 const isMac = process.platform === 'darwin'
-const { MainWindow, WorkerWindow } = require('../../main/windows');
-module.exports = [
+export default [
 	// { role: 'appMenu' }
 	...(isMac ? [{
 		label: 'ProsperAIO',
@@ -26,8 +25,8 @@ module.exports = [
 				label: 'Run All Tasks',
 				accelerator: 'CommandOrControl+Shift+R',
 				click: function() {
-					if (WorkerWindow.window) {
-						WorkerWindow.window.webContents.send('run all tasks');
+					if (workerWindow) {
+						workerWindow.webContents.send('run all tasks');
 					}
 				}
 			},
@@ -35,8 +34,8 @@ module.exports = [
 				label: 'Stop All Tasks',
 				accelerator: 'CommandOrControl+Shift+S',
 				click: function() {
-					if (WorkerWindow.window) {
-						WorkerWindow.window.webContents.send('stop all tasks');
+					if (workerWindow) {
+						workerWindow.webContents.send('stop all tasks');
 					}
 				}
 			},
@@ -44,8 +43,8 @@ module.exports = [
 				label: 'Delete All Tasks',
 				accelerator: 'CommandOrControl+Shift+D',
 				click: function() {
-					if (WorkerWindow.window) {
-						WorkerWindow.window.webContents.send('delete all tasks');
+					if (workerWindow) {
+						workerWindow.webContents.send('delete all tasks');
 					}
 				}
 			}//,
@@ -85,7 +84,7 @@ module.exports = [
 			{ 
 				label: 'Reload Data',
 				click: function() {
-					if (WorkerWindow.window) {
+					if (workerWindow) {
 						global['HARVESTERS'] = {
 							'supreme': [],
 							'kickz': [],
@@ -97,8 +96,8 @@ module.exports = [
 							'kickz': [],
 							'kickzpremium': [],
 						}
-						WorkerWindow.window.webContents.reload();
-						MainWindow.window.webContents.reload();
+						workerWindow.webContents.reload();
+						mainWindow.webContents.reload();
 					}
 				},
 				accelerator: 'CommandOrControl+R' 

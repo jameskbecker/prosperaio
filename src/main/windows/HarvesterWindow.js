@@ -1,20 +1,20 @@
 const electron = require('electron');
 const { app, BrowserWindow, net, protocol, session } = electron;
 const bodyParser = require('body-parser');
-const config = require('../../config');
+const config = require('../config-not_needed');
 const express = require('express');
-const path = require('path')
-const isDev = require('electron-is-dev')
+const path = require('path');
+const isDev = require('electron-is-dev');
 const harvesterConfiguration = require('../../library/configuration/sitekeys');
 
-class HarvesterWindow {
+export class HarvesterWindow {
 	constructor(_sessionName, _siteId) {
 		this.state = 'init';
-		this.siteType = _siteId
+		this.siteType = _siteId;
 		this.config = harvesterConfiguration(_siteId);
 		this.sessionName = _sessionName;
 		this.server = express();
-		this.serverPort
+		this.serverPort;
 		this.window = null;
 	}
 
@@ -34,8 +34,8 @@ class HarvesterWindow {
 				res.json({
 					sessionName: this.sessionName,
 					site: this.siteType
-				})
-			})
+				});
+			});
 		this.serverPort = Math.floor(Math.random() * 9999) + 1000;
 		this.server.listen(this.serverPort);
 
@@ -67,10 +67,6 @@ class HarvesterWindow {
 				this.window.show();
 				if (isDev) this.window.webContents.openDevTools({mode:'undocked'});
 			//});
-		})
+		});
 	}
 }
-
-
-
-module.exports = HarvesterWindow;

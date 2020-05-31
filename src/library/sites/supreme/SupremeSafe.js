@@ -1,7 +1,7 @@
-const Supreme = require('./SupremeBase')
-const settings = require('electron-settings');
-const puppeteer = require('puppeteer-extra');
-const pluginStealth = require("puppeteer-extra-plugin-stealth")
+import * as Supreme from './SupremeBase';
+import * as settings from 'electron-settings';
+import * as puppeteer from 'puppeteer-extra';
+const pluginStealth = require("puppeteer-extra-plugin-stealth");
 const querystring = require('querystring');
 
 
@@ -27,14 +27,14 @@ class SupremeSafe extends Supreme {
 				}
 			},
 			auth: null
-		}
+		};
 		this.browser;
 		this.page;
 	}
 
 	async run() {
 		try {
-			this._setStatus('Initialising.', 'INFO')
+			this._setStatus('Initialising.', 'INFO');
 			await this._setup();
 			await this._setTimer(); 
 			this._setStatus('Starting Task.', 'WARNING');
@@ -53,7 +53,7 @@ class SupremeSafe extends Supreme {
 						name: "Style:",
 						value: this._productStyleName,
 						inline: true
-					}
+					};
 					privateFields.push(field);
 					publicFields.push(field);
 				}
@@ -63,15 +63,15 @@ class SupremeSafe extends Supreme {
 						name: "Status:",
 						value: this.checkoutData.status.capitalise(),
 						inline: true
-					}
-					privateFields.push(field)
+					};
+					privateFields.push(field);
 				}
 
 				this._postPublicWebhook(publicFields);
 				this._postPrivateWebhook(privateFields);
 				this._addToAnalystics();
 			}
-			else { console.log('failed') }
+			else { console.log('failed'); }
 			this.isActive = false;
 		}
 		catch (error) {
@@ -90,7 +90,7 @@ class SupremeSafe extends Supreme {
 				if (splitProxy.length === 2) {
 					let username = splitProxy[0].split(':')[0];
 					let password = splitProxy[0].split(':')[1] ;
-					this.config.auth = {username, password }
+					this.config.auth = {username, password };
 					
 				}
 			}
@@ -103,9 +103,9 @@ class SupremeSafe extends Supreme {
 
 			await this.page.emulate(this.config.emulate);
 			await this.page.authenticate(this.config.auth);
-			await this.page.goto(this.baseUrl)
+			await this.page.goto(this.baseUrl);
 			resolve();
-		})
+		});
 
 
 	}
@@ -118,7 +118,7 @@ class SupremeSafe extends Supreme {
 				await this.page.setCookie({
 					name: 'shoppingSessionId',
 					value: this.startTime.toString()
-				})
+				});
 				if (this.shouldStop) return this.stop();
 				await this.page.setCookie({
 					name: 'lastVisitedFragment',
@@ -131,7 +131,7 @@ class SupremeSafe extends Supreme {
 					size: this.sizeId,
 					style: this.styleId,
 					qty: 1
-				}
+				};
 				if (this.shouldStop) return this.stop();
 				let body = await this._request(`${this._productUrl}/add.json`, {
 					method: "POST",
@@ -144,7 +144,7 @@ class SupremeSafe extends Supreme {
 						"x-requested-with": "XMLHttpRequest"
 					},
 					body: querystring.stringify(this.cartForm)
-				})
+				});
 				if (
 					(body.hasOwnProperty('length') && body.length < 1) ||
 					(body.hasOwnProperty('success') && !body.success) ||
@@ -161,19 +161,19 @@ class SupremeSafe extends Supreme {
 					delete cookieValue.cookie;
 					this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
 					this._setStatus('Added to Cart!', 'SUCCESS');
-					console.log('cookie_sub:', this.cookieSub)
+					console.log('cookie_sub:', this.cookieSub);
 				resolve();
 				}
 			}
 			catch(error) {
 				this._setStatus('ATC Error', 'ERROR');
 				console.log(error);
-				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000
+				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
 				return setTimeout(runProcess.bind(this, resolve), errorDelay);
 			}
 				
 			
-		}.bind(this))
+		}.bind(this));
 	}
 
 	_checkoutProcess() {
@@ -195,7 +195,7 @@ class SupremeSafe extends Supreme {
 				if (this.shouldStop) return this.stop();
 				this._setStatus('Submitting Checkout', 'WARNING');
 	
-				this.checkoutForm = this._form('parsed-checkout')
+				this.checkoutForm = this._form('parsed-checkout');
 				
 				let options = {
 					method: "POST",
@@ -208,19 +208,19 @@ class SupremeSafe extends Supreme {
 						"content-type": "application/x-www-form-urlencoded",
 						"x-requested-with": "XMLHttpRequest"
 					}
-				}
+				};
 				
-				this.checkoutData = await this._request(`${this.baseUrl}/checkout.json`, options)
+				this.checkoutData = await this._request(`${this.baseUrl}/checkout.json`, options);
 				resolve();
 			}
 			catch(error) {
 				this._setStatus('Checkout Error', 'ERROR');
 				console.log(error);
-				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000
+				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
 				return setTimeout(runProcess.bind(this, resolve), errorDelay);
 			}
 			
-		}.bind(this))
+		}.bind(this));
 	}
 
 	_buildJSAddress() {
@@ -236,7 +236,7 @@ class SupremeSafe extends Supreme {
 					"#order_billing_city",
 					"#order_billing_state",
 					"#order_billing_zip"
-				]
+				];
 			case 'EU':
 				rememberedFields = [
 					this.profile.billing.first + ' ' + this.profile.billing.last,
@@ -249,7 +249,7 @@ class SupremeSafe extends Supreme {
 					this.profile.billing.zip,
 					this.profile.billing.country,
 					'' //#order_billing_address3
-				]
+				];
 				break;
 			case 'US':
 				rememberedFields = [
@@ -260,9 +260,9 @@ class SupremeSafe extends Supreme {
 					this.profile.billing.city,
 					this.profile.billing.state,
 					this.profile.billing.zip
-				]
+				];
 		}
-		return encodeURIComponent(rememberedFields.join('|'))
+		return encodeURIComponent(rememberedFields.join('|'));
 	}
 
 	async _request(url, options) {
@@ -272,7 +272,7 @@ class SupremeSafe extends Supreme {
 			), url, options);
 		}
 		catch(error) {
-			return setTimeout(this._request.bind(this,url,options), 1000)
+			return setTimeout(this._request.bind(this,url,options), 1000);
 		}
 		
 	}

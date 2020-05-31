@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/library/proxies/index.js"],"names":[],"mappings":"AAAA,OAAO,CAAC,YAAY,CAAC;AACrB,OAAO,CAAC,WAAW,CAAC;AAEpB,MAAM,CAAC,OAAO,GAAG;IAChB,YAAY,EAAE,OAAO,CAAC,iBAAiB,CAAC;IACxC,WAAW,EAAE,OAAO,CAAC,eAAe,CAAC;CACrC,CAAA"}

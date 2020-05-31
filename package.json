@@ -1,13 +1,15 @@
 {
 	"name": "ProsperAIO",
 	"version": "2.7.1",
-	"main": "./src/main/index.js",
+	"main": "./build/main/app.js",
 	"description": "Simple Design. Easy to Use. Insane Functionality.",
 	"author": "ProsperSoftware",
 	"keywords": [],
 	"license": "MIT",
 	"scripts": {
-		"start": "electron .",
+		"start": "nodemon -e js,ts --watch src --exec \"npm run dev:compile\"",
+		"dev:compile": "tsc -p src/main && npm run dev:start",
+		"dev:start": "electron .",
 		"pack": "electron-builder --dir",
 		"package-mac": "electron-builder --mac",
 		"package-win": "electron-builder --win",
@@ -18,6 +20,8 @@
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^5.13.0",
+		"@types/discord-rpc": "^3.0.4",
+		"@types/electron-settings": "^3.1.1",
 		"body-parser": "^1.18.3",
 		"bootstrap": "^4.3.1",
 		"btoa": "^1.2.1",
@@ -27,6 +31,7 @@
 		"discord.js": "^11.6.4",
 		"dotenv": "^8.2.0",
 		"electron-is-dev": "^1.2.0",
+		"electron-reload": "^1.5.0",
 		"electron-settings": "^3.2.0",
 		"express": "^4.16.4",
 		"font-awesome": "^4.7.0",
@@ -57,7 +62,10 @@
 		"electron": "^9.0.0",
 		"electron-builder": "^22.6.0",
 		"electron-packager": "^13.0.1",
-		"js-beautify": "^1.11.0"
+		"electron-prebuilt": "^1.4.13",
+		"js-beautify": "^1.11.0",
+		"nodemon": "^2.0.4",
+		"watch": "^1.0.2"
 	},
 	"build": {
 		"asar": true,

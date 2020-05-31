@@ -1,3 +1,3 @@
 module.exports = {
-	supreme: require('./supreme');
+	supreme: require('./supreme')
 }

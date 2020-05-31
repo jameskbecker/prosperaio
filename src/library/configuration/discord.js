@@ -1,6 +1,6 @@
 const sites = require('./sites')
 
-function public(additionalFields = []) {
+function publicWebhook(additionalFields = []) {
 	let content = {
 		embeds: [{
 			"title": "Successfully Checked Out!",
@@ -47,7 +47,7 @@ function public(additionalFields = []) {
 	return content;
 }
 
-function private(additionalFields = []) {
+function privateWebhook(additionalFields = []) {
 	let content = {
 		embeds: [{
 			"title": "Successfully Checked Out!",
@@ -107,4 +107,4 @@ function private(additionalFields = []) {
 	return content;
 }
 
-module.exports = { public, private }
+module.exports = { publicWebhook, privateWebhook }
