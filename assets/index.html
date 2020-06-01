@@ -5,10 +5,12 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>ProsperAIO - Main</title>
-	<link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
-	<link rel="stylesheet" href="./css/fonts.css">
-	<link rel="stylesheet" href="./css/style.css">
-
+	<link rel="stylesheet" href="../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+	<link rel="stylesheet" href="../../assets/css/fonts.css">
+	<link rel="stylesheet" href="../../assets/css/style.css">
+	<script type="text/javascript"
+	src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.20.13/system.js">
+</script>
 	<script>require('popper.js');</script>
 	<script>require('bootstrap');</script>
 </head>
@@ -1038,8 +1040,9 @@
 		<div id="footerCopyright" class="container-element footer-text">Twitter & Instagram: @prosperaio
 		</div>
 	</div> -->
-	<script src="../build/renderer/elements.js"></script>
-	<script src="../build/renderer/index.js"></script>
+	<script type="application/javascript">
+		require('../../build/renderer/index.js');
+	</script>
 </body>
 
 </html>

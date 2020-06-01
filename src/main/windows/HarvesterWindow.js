@@ -1,7 +1,6 @@
 const electron = require('electron');
-const { app, BrowserWindow, net, protocol, session } = electron;
+const { app, BrowserWindow, session } = electron;
 const bodyParser = require('body-parser');
-const config = require('../config-not_needed');
 const express = require('express');
 const path = require('path');
 const isDev = require('electron-is-dev');
@@ -28,7 +27,7 @@ export class HarvesterWindow {
 			.use('/library', express.static(path.join(app.getAppPath(), 'src/library')))
 			.use('/assets/fontawesome', express.static(path.join(app.getAppPath(), 'node_modules/@fortawesome/fontawesome-free')))
 			.get('/', (req, res) => {
-				res.sendFile(config.captchaWindowPath);
+				res.sendFile(`file:///${Main.application.getAppPath()}/assets/renderer/index.html`);
 			})
 			.get('/config', (req, res) => {
 				res.json({

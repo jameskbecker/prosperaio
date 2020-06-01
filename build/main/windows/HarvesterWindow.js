@@ -2,9 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HarvesterWindow = void 0;
 var electron = require('electron');
-var app = electron.app, BrowserWindow = electron.BrowserWindow, net = electron.net, protocol = electron.protocol, session = electron.session;
+var app = electron.app, BrowserWindow = electron.BrowserWindow, session = electron.session;
 var bodyParser = require('body-parser');
-var config = require('../config-not_needed');
 var express = require('express');
 var path = require('path');
 var isDev = require('electron-is-dev');
@@ -30,7 +29,7 @@ var HarvesterWindow = (function () {
             .use('/library', express.static(path.join(app.getAppPath(), 'src/library')))
             .use('/assets/fontawesome', express.static(path.join(app.getAppPath(), 'node_modules/@fortawesome/fontawesome-free')))
             .get('/', function (req, res) {
-            res.sendFile(config.captchaWindowPath);
+            res.sendFile("file:///" + Main.application.getAppPath() + "/assets/renderer/index.html");
         })
             .get('/config', function (req, res) {
             res.json({

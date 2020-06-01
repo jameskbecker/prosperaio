@@ -3,7 +3,7 @@ const { GoogleWindow } = require('../../main/windows');
 class GoogleLogin {
 	constructor(_name, _type) {
 		this.name = _name;
-		this.type = _type
+		this.type = _type;
 		this.spawn();
 	}
 
@@ -15,7 +15,7 @@ class GoogleLogin {
 			mainWindow.webContents.send('logged into GoogleWindow', {
 				type: this.type
 			});
-		})
+		});
 	}
 }
 

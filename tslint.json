@@ -2,9 +2,14 @@
   "rules": {
     "semicolon":true,
     "strict-type-predicates":true,
-    "strict-boolean-expressions":true,
-    "no-var-requires": false,
-    "typedef": true,
+    "strict-boolean-expressions":false,
+		"no-var-requires": true,
+		"typedef": [true, 
+			"call-signature", 
+			"arrow-call-signature",
+			"variable-declaration",
+			"member-variable-declaration"
+		],
     "typedef-whitespace": true
   }
 }

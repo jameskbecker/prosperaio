@@ -1,35 +1,36 @@
-var _ = require('underscore');
-var electron = require('electron');
-var ipcRenderer = electron.ipcRenderer, remote = electron.remote;
-var mousetrap = require('mousetrap');
-var settings = require('electron-settings');
-var content = require('../build/renderer/content');
-var profile = require('../build/renderer/profiles');
-var ipc = require('../build/renderer/ipc');
-var utilities = require('../build/library/other').utilities;
-var sites = require('../build/library/configuration').sites;
-ipc.init();
-ipcRenderer.send('check for browser executable');
-if (!settings.has('tasks') || (settings.has('tasks') && settings.get('tasks').constructor === [].constructor && settings.get('tasks').length == 0))
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("./elements");
+var electron_1 = require("electron");
+var mousetrap = require("mousetrap");
+var settings = require("electron-settings");
+var content_1 = require("./content");
+var profile = require("./profiles");
+var ipc_1 = require("./ipc");
+var other_1 = require("../library/other");
+ipc_1.default.init();
+electron_1.ipcRenderer.send('check for browser executable');
+var tasks = settings.has('tasks') ? settings.get('tasks') : null;
+if (!tasks || tasks.constructor === [])
     settings.set('tasks', {});
 if (!settings.has('profiles'))
     settings.set('profiles', {});
 try {
-    content.tasks();
-    content.profiles();
-    content.sites();
-    content.countries();
-    content.proxySelectors();
-    content.harvesters();
-    content.orders();
+    content_1.default.tasks();
+    content_1.default.profiles();
+    content_1.default.sites();
+    content_1.default.countries();
+    content_1.default.proxySelectors();
+    content_1.default.harvesters();
+    content_1.default.orders();
 }
 catch (err) {
     console.error(err);
 }
-signoutBtn.onclick = function () { ipcRenderer.send('signout'); };
-reloadBtn.onclick = function () { ipcRenderer.send('window.reload'); };
-minimizeBtn.onclick = function () { ipcRenderer.send('window.minimize'); };
-closeBtn.onclick = function () { ipcRenderer.send('window.close'); };
+signoutBtn.onclick = function () { electron_1.ipcRenderer.send('signout'); };
+reloadBtn.onclick = function () { electron_1.ipcRenderer.send('window.reload'); };
+minimizeBtn.onclick = function () { electron_1.ipcRenderer.send('window.minimize'); };
+closeBtn.onclick = function () { electron_1.ipcRenderer.send('window.close'); };
 navigationSelectors.forEach(function (page, i) {
     function navigationHandler() {
         var selectedPageId = page.getAttribute('data-page');
@@ -74,9 +75,9 @@ globalErrorDelay.onchange = function () {
 globalTimeoutDelay.onchange = function () {
     settings.set('globalTimeoutDelay', this.value, { prettify: true });
 };
-runAllBtn.onclick = function () { ipcRenderer.send('task.runAll'); };
-stopAllBtn.onclick = function () { ipcRenderer.send('task.stopAll'); };
-clearTasksBtn.onclick = function () { ipcRenderer.send('task.deleteAll'); };
+runAllBtn.onclick = function () { electron_1.ipcRenderer.send('task.runAll'); };
+stopAllBtn.onclick = function () { electron_1.ipcRenderer.send('task.stopAll'); };
+clearTasksBtn.onclick = function () { electron_1.ipcRenderer.send('task.deleteAll'); };
 newTask_Mode.disabled = true;
 newTask_RestockMode.disabled = true;
 newTask_SearchInput[0].placeholder = "Please Select Site.";
@@ -88,7 +89,8 @@ newTask_SearchInput[0].disabled = true;
 newTask_saveBtn.onclick = function () {
     try {
         if (newTask_Mode.value === 'browser' && !settings.has('browser-path')) {
-            return alert('Browser Mode Not Installed.');
+            alert('Browser Mode Not Installed.');
+            return;
         }
         var products = [];
         for (var i = 0; i < newTask_SearchInput.length; i++) {
@@ -105,27 +107,27 @@ newTask_saveBtn.onclick = function () {
         var timerVal = timerComps.length === 2 ? newTask_StartTime.value + ':00' : newTask_StartTime.value;
         var taskData = {
             'setup': {
-                profile: newTask_Profile.value || '',
-                mode: newTask_Mode.value || '',
-                restockMode: newTask_RestockMode.value || '',
-                checkoutAttempts: parseInt(newTask_CheckoutAttempts.value) || 1,
+                profile: newTask_Profile.value ? newTask_Profile.value : '',
+                mode: newTask_Mode.value ? newTask_Mode.value : '',
+                restockMode: newTask_RestockMode.value ? newTask_RestockMode.value : '',
+                checkoutAttempts: newTask_CheckoutAttempts.value ? parseInt(newTask_CheckoutAttempts.value) : 1,
             },
-            'site': newTask_Site.value || '',
+            'site': newTask_Site.value ? newTask_Site.value : '',
             'delays': {
-                cart: parseInt(newTask_CartDelay.value) || 0,
-                checkout: parseInt(newTask_CheckoutDelay.value) || 0
+                cart: newTask_CartDelay.value ? parseInt(newTask_CartDelay.value) : 0,
+                checkout: newTask_CheckoutDelay.value ? parseInt(newTask_CheckoutDelay.value) : 0
             },
             'additional': {
-                proxyList: newTask_ProxyList.value || '',
-                maxPrice: parseInt(newTask_PriceLimit.value) || 0,
-                timer: newTask_StartDate.value + " " + timerVal || '',
-                monitorRestocks: newTask_Restocks.checked || true,
-                skipCaptcha: newTask_SkipCaptcha.checked || false,
-                enableThreeDS: newTask_threeD.checked || false
+                proxyList: newTask_ProxyList.value ? newTask_ProxyList.value : '',
+                maxPrice: newTask_PriceLimit.value ? parseInt(newTask_PriceLimit.value) : 0,
+                timer: newTask_StartDate.value ? newTask_StartDate.value + " " + timerVal : '',
+                monitorRestocks: newTask_Restocks ? newTask_Restocks.checked : true,
+                skipCaptcha: newTask_SkipCaptcha ? newTask_SkipCaptcha.checked : false,
+                enableThreeDS: newTask_threeD ? newTask_threeD.checked : false
             },
             'products': products
         };
-        ipcRenderer.send('task.save', {
+        electron_1.ipcRenderer.send('task.save', {
             data: taskData,
             quantity: parseInt(newTask_Quantity.value)
         });
@@ -136,7 +138,7 @@ newTask_saveBtn.onclick = function () {
 };
 billingCountry.onchange = function () {
     try {
-        content.states('profileBillingState', this.value);
+        content_1.default.states('profileBillingState', this.value);
     }
     catch (err) {
         console.error(err);
@@ -144,7 +146,7 @@ billingCountry.onchange = function () {
 };
 shippingCountry.onchange = function () {
     try {
-        content.states('profileShippingState', this.value);
+        content_1.default.states('profileShippingState', this.value);
     }
     catch (err) {
         console.error(err);
@@ -195,7 +197,7 @@ billingZip.oninput = function () {
 billingCountry.oninput = function () {
     if (useSameShippingAddress.checked) {
         shippingCountry.value = this.value;
-        shippingCountry.onchange();
+        shippingCountry.onchange(new Event(null));
     }
 };
 billingState.oninput = function () {
@@ -221,7 +223,7 @@ useSameShippingAddress.onchange = function () {
     shippingZip.disabled = this.checked ? true : false;
     shippingCountry.value = this.checked ? billingCountry.value : 'GB';
     shippingCountry.disabled = this.checked ? true : false;
-    content.states('profileShippingState', shippingCountry.value);
+    content_1.default.states('profileShippingState', shippingCountry.value);
     shippingState.value = this.checked ? billingState.value : '';
 };
 cardNumber.onkeyup = function () {
@@ -237,48 +239,49 @@ cardNumber.onkeyup = function () {
 };
 saveProfileBtn.onclick = function () {
     var profileData = {
-        profileName: profileName.value || "",
+        profileName: profileName.value,
         billing: {
-            "first": billingFirst.value || "",
-            "last": billingLast.value || "",
-            "email": billingEmail.value || "",
-            "telephone": billingTelephone.value || "",
-            "address1": billingAddress1.value || "",
-            "address2": billingAddress2.value || "",
-            "city": billingCity.value || "",
-            "zip": billingZip.value || "",
-            "country": billingCountry.value || "",
-            "state": billingState.value || ""
+            "first": billingFirst.value,
+            "last": billingLast.value,
+            "email": billingEmail.value,
+            "telephone": billingTelephone.value,
+            "address1": billingAddress1.value,
+            "address2": billingAddress2.value,
+            "city": billingCity.value,
+            "zip": billingZip.value,
+            "country": billingCountry.value,
+            "state": billingState.value
         },
         shipping: {
-            "first": shippingFirst.value || "",
-            "last": shippingLast.value || "",
-            "email": shippingEmail.value || "",
-            "telephone": shippingTelephone.value || "",
-            "address1": shippingAddress1.value || "",
-            "address2": shippingAddress2.value || "",
-            "city": shippingCity.value || "",
-            "zip": shippingZip.value || "",
-            "country": shippingCountry.value || "",
-            "state": shippingState.value || ""
+            "first": shippingFirst.value,
+            "last": shippingLast.value,
+            "email": shippingEmail.value,
+            "telephone": shippingTelephone.value,
+            "address1": shippingAddress1.value,
+            "address2": shippingAddress2.value,
+            "city": shippingCity.value,
+            "zip": shippingZip.value,
+            "country": shippingCountry.value,
+            "state": shippingState.value
         },
         payment: {
-            "type": paymentType.value || "",
-            "cardNumber": cardNumber.value || "",
-            "expiryMonth": cardExpiryMonth.value || "",
-            "expiryYear": cardExpiryYear.value || "",
-            "cvv": cardCvv.value || ""
+            "type": paymentType.value,
+            "cardNumber": cardNumber.value,
+            "expiryMonth": cardExpiryMonth.value,
+            "expiryYear": cardExpiryYear.value,
+            "cvv": cardCvv.value
         }
     };
-    profile.save(document.getElementById('profileId').value, profileData);
-    content.profiles();
+    var profileId = document.getElementById('profileId');
+    profile.save(profileId.value, profileData);
+    content_1.default.profiles();
     for (var i = 0; i < profileElements.length; i++) {
         profileElements[i].value = profileElements[i].id.includes('Country') ? 'GB' : '';
     }
 };
 document.getElementById('deleteAllProfiles').onclick = function () {
     settings.set('profiles', {}, { prettify: true });
-    content.profiles();
+    content_1.default.profiles();
 };
 harvester_SaveBtn.onclick = function () {
     var existingHarvesters = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
@@ -286,14 +289,14 @@ harvester_SaveBtn.onclick = function () {
         name: harverster_Name.value
     });
     settings.set('captchaHarvesters', existingHarvesters, { prettify: true });
-    content.harvesters();
+    content_1.default.harvesters();
 };
 document.getElementById('proxyTestAll').onclick = function () {
-    var listName = document.getElementById('proxyListSelectorMain').value;
+    var listName = document.getElementById('proxyListSelectorMain');
     if (listName) {
-        ipcRenderer.send('proxyList.testAll', {
+        electron_1.ipcRenderer.send('proxyList.testAll', {
             baseUrl: proxyTestSite.value,
-            listName: listName
+            listName: listName.value
         });
     }
 };
@@ -302,11 +305,10 @@ document.getElementById('proxyDeleteList').onclick = function () {
     try {
         document.getElementById('proxy-header').innerHTML = "Proxies";
         proxyTestTable.innerHTML = '';
-        console.log(document.getElementById('proxyListSelectorMain').value, data);
-        delete data[document.getElementById('proxyListSelectorMain').value];
+        delete data[proxyListSelectorMain.value];
         settings.set('proxies', data, { prettify: true });
-        document.getElementById('proxyListSelectorMain').value = '';
-        content.proxySelectors();
+        proxyListSelectorMain.value = '';
+        content_1.default.proxySelectors();
     }
     catch (err) {
         console.error(err);
@@ -320,48 +322,43 @@ saveProxyList.onclick = function () {
     if (!listExists) {
         proxyLists[listName] = {};
         for (var i = 0; i < proxyInput.length; i++) {
-            var id = utilities.generateId(6);
+            var id = other_1.utilities.generateId(6);
             proxyLists[listName][id] = proxyInput[i];
         }
         settings.set('proxies', proxyLists, { prettify: true });
         proxyListSelectorMain.options.length = 0;
-        content.proxySelectors();
+        content_1.default.proxySelectors();
         proxyListName.value = '';
         massProxyInput.value = '';
     }
 };
 if (proxyListSelectorMain.options.length > 0)
-    content.proxies(proxyListSelectorMain.value);
+    content_1.default.proxies(proxyListSelectorMain.value);
 proxyListSelectorMain.onchange = function () {
-    content.proxies(this.value);
+    content_1.default.proxies(this.value);
 };
 document.getElementById('clearAnalytics').onclick = function () {
     settings.set('orders', [], { prettify: true });
-    content.orders();
-};
-monitorProxyList.value = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : '';
-monitorProxyList.onchange = function () {
-    settings.set('monitorProxyList', this.value, { prettify: true });
+    content_1.default.orders();
 };
 var currentBrowserPath = document.getElementById('currentBrowserPath');
 var browserPath = document.getElementById('browserPath');
 currentBrowserPath.value = settings.has('browser-path') ? settings.get('browser-path') : '';
 currentBrowserPath.onchange = function () {
-    console.log('hey');
     settings.set('browser-path', this.value, { prettify: true });
 };
 browserPath.onchange = function () {
     currentBrowserPath.value = this.files[0].path;
-    currentBrowserPath.onchange();
+    currentBrowserPath.onchange(new Event(null));
 };
-installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); };
-resetBtn.onclick = function () { ipcRenderer.send('reset settings'); };
-document.getElementById('version').innerHTML = "Version " + remote.app.getVersion();
+installBrowserBtn.onclick = function () { electron_1.ipcRenderer.send('setup browser mode'); };
+resetBtn.onclick = function () { electron_1.ipcRenderer.send('reset settings'); };
+document.getElementById('version').innerHTML = "Version " + electron_1.remote.app.getVersion();
 customDiscord.value = settings.has('discord') ? settings.get('discord') : '';
 customDiscord.onchange = function () {
     settings.set('discord', this.value, { prettify: true });
 };
 testDiscordBtn.onclick = function () {
-    utilities.sendTestWebhook();
+    other_1.utilities.sendTestWebhook();
 };
 //# sourceMappingURL=index.js.map

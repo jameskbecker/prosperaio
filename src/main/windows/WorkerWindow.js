@@ -1,7 +1,7 @@
 const electron = require('electron');
 const { BrowserWindow } = electron;
 const isDev = require('electron-is-dev');
-const config = require('../config-not_needed');
+//const config = require('../config-not_needed');
 
 const workerWindowProps = {
 	height: 100,

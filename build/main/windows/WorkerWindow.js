@@ -25,7 +25,6 @@ var __assign = (this && this.__assign) || function () {
 var electron = require('electron');
 var BrowserWindow = electron.BrowserWindow;
 var isDev = require('electron-is-dev');
-var config = require('../config-not_needed');
 var workerWindowProps = {
     height: 100,
     width: 100,

@@ -1,19 +1,17 @@
 { 
   "compilerOptions": {
-    //input
     "module": "commonjs",
-    //output
     "target": "ES5", 
-    "sourceMap": true,
-    "strict": false,
+		"sourceMap": true,
+		"allowJs": true,
+		"noImplicitAny": true,
+		"skipLibCheck": true,
     "removeComments": true,
-    "outDir": "../../build",
-    "allowJs": true,
-    "checkJs": false,
-    "skipLibCheck": true,
+    "outDir": "../../build"
   },
   "include": [
-    "../../src/**/*",
+		"../../src/**/*",
+		"../../src/**/*.html",
     "../../src/*"
   ],
   "exclude": [

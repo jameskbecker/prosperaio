@@ -31,9 +31,9 @@ const defaultProps:any = {
 		 nodeIntegration: true
 	 }
 };
-const loginWindowProps = {...defaultProps};
+const loginWindowProps:any = {...defaultProps};
 
-const workerWindowProps = {...defaultProps};
+const workerWindowProps:any = {...defaultProps};
 
 // if (!isDev) {
 // 	const menu = Menu.buildFromTemplate(menuTemplate);

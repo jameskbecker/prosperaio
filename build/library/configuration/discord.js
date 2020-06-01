@@ -1,6 +1,11 @@
-var sites = require('./sites');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.privateWebhook = exports.publicWebhook = void 0;
+var sites = require("./sites");
 function publicWebhook(additionalFields) {
     if (additionalFields === void 0) { additionalFields = []; }
+    var defaultSites = sites.def;
+    var siteData = defaultSites[this.taskData.site];
     var content = {
         embeds: [{
                 "title": "Successfully Checked Out!",
@@ -25,7 +30,7 @@ function publicWebhook(additionalFields) {
         },
         {
             name: "Store:",
-            value: sites.default[this.taskData.site].label || "N/A",
+            value: siteData.label || "N/A",
             inline: true
         },
         {
@@ -45,6 +50,7 @@ function publicWebhook(additionalFields) {
     content.embeds[0].fields = fields;
     return content;
 }
+exports.publicWebhook = publicWebhook;
 function privateWebhook(additionalFields) {
     if (additionalFields === void 0) { additionalFields = []; }
     var content = {
@@ -105,5 +111,5 @@ function privateWebhook(additionalFields) {
     console.log(fields);
     return content;
 }
-module.exports = { publicWebhook: publicWebhook, privateWebhook: privateWebhook };
+exports.privateWebhook = privateWebhook;
 //# sourceMappingURL=discord.js.map

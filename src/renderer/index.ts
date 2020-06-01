@@ -1,19 +1,22 @@
-const _ = require('underscore');
-const electron = require('electron');
-const { ipcRenderer, remote } = electron;
-const mousetrap = require('mousetrap');
-const settings = require('electron-settings');
-
-const content = require('../build/renderer/content');
-const profile = require('../build/renderer/profiles');
-const ipc = require('../build/renderer/ipc');
-const { utilities } = require('../build/library/other');
-const { sites } = require('../build/library/configuration');
+import './elements';
+import { ipcRenderer, remote } from 'electron';
+import * as mousetrap from 'mousetrap';
+import * as settings from 'electron-settings';
+import { default as content } from './content';
+import * as profile from './profiles';
+import { default as ipc } from './ipc';
+import { utilities } from '../library/other';
+//import { sites } from '../library/configuration';
 
 /* --------- GENERAL --------- */
+interface JsonValue {
+	length: any;
+}
+
 ipc.init();
 ipcRenderer.send('check for browser executable');
-if (!settings.has('tasks') || (settings.has('tasks') && settings.get('tasks').constructor === [].constructor && settings.get('tasks').length == 0)) settings.set('tasks', {});
+let tasks: any = settings.has('tasks') ? settings.get('tasks'): null;
+if (!tasks || tasks.constructor === []) settings.set('tasks', {});
 if (!settings.has('profiles')) settings.set('profiles', {});
 
 //footerVersion.innerHTML = 'Version 3.4.0'
@@ -28,20 +31,20 @@ try {
 } catch(err) { console.error(err); }
 
 /* --------- assets: BANNER --------- */
-signoutBtn.onclick = function () { ipcRenderer.send('signout'); }
-reloadBtn.onclick = function () { ipcRenderer.send('window.reload'); }
-minimizeBtn.onclick = function () { ipcRenderer.send('window.minimize'); }
-closeBtn.onclick = function () { ipcRenderer.send('window.close'); }
+signoutBtn.onclick = function ():void { ipcRenderer.send('signout'); };
+reloadBtn.onclick = function ():void { ipcRenderer.send('window.reload'); };
+minimizeBtn.onclick = function ():void { ipcRenderer.send('window.minimize'); };
+closeBtn.onclick = function ():void { ipcRenderer.send('window.close'); };
 
-navigationSelectors.forEach((page, i) => {
-	function navigationHandler() {
-		let selectedPageId = page.getAttribute('data-page');
-		let selectedPage = document.getElementById(selectedPageId);
+navigationSelectors.forEach((page, i):void => {
+	function navigationHandler():void {
+		let selectedPageId:any = page.getAttribute('data-page');
+		let selectedPage:any = document.getElementById(selectedPageId);
 
 		if (selectedPage.classList.contains('page-hidden')) {
-			let activeNavigation = document.querySelector('.nav-active');
-			let activePageId = activeNavigation.getAttribute('data-page');
-			let activePage = document.getElementById(activePageId);
+			let activeNavigation:any = document.querySelector('.nav-active');
+			let activePageId:any = activeNavigation.getAttribute('data-page');
+			let activePage:any = document.getElementById(activePageId);
 
 			activeNavigation.classList.remove('nav-active');
 			page.classList.add('nav-active');
@@ -52,7 +55,7 @@ navigationSelectors.forEach((page, i) => {
 	}
 
 	page.onclick = navigationHandler;
-	mousetrap.bind(`command+${i + 1}`, navigationHandler)
+	mousetrap.bind(`command+${i + 1}`, navigationHandler);
 });
 
 /* --------- Tasks Page --------- */
@@ -86,19 +89,19 @@ if (!settings.has('globalTimeoutDelay')) {
 	globalTimeoutDelay.value = settings.get('globalTimeoutDelay');
 }
 
-globalMonitorDelay.onchange = function () {
+globalMonitorDelay.onchange = function ():void {
 	settings.set('globalMonitorDelay', this.value, { prettify: true });
-}
-globalErrorDelay.onchange = function () {
+};
+globalErrorDelay.onchange = function ():void {
 	settings.set('globalErrorDelay', this.value, { prettify: true });
-}
-globalTimeoutDelay.onchange = function () {
+};
+globalTimeoutDelay.onchange = function ():void {
 	settings.set('globalTimeoutDelay', this.value, { prettify: true });
-}
+};
 
-runAllBtn.onclick = function () { ipcRenderer.send('task.runAll'); }
-stopAllBtn.onclick = function () { ipcRenderer.send('task.stopAll'); }
-clearTasksBtn.onclick = function () { ipcRenderer.send('task.deleteAll'); }
+runAllBtn.onclick = function ():void { ipcRenderer.send('task.runAll'); };
+stopAllBtn.onclick = function ():void { ipcRenderer.send('task.stopAll'); };
+clearTasksBtn.onclick = function ():void { ipcRenderer.send('task.deleteAll'); };
 
 /* --------- Modal: NEW TASK --------- */
 newTask_Mode.disabled = true;
@@ -111,14 +114,15 @@ newTask_Size[0].disabled = true;
 newTask_ProductQty[0].disabled = true;
 newTask_SearchInput[0].disabled = true;
 
-newTask_saveBtn.onclick = function () {
+newTask_saveBtn.onclick = function ():void {
 	try {
 		if (newTask_Mode.value === 'browser' && !settings.has('browser-path')) {
-			return alert('Browser Mode Not Installed.');
+			alert('Browser Mode Not Installed.');
+			return;
 		}
-		let products = [];
-		for (let i = 0; i < newTask_SearchInput.length; i++) {
-			let product = {
+		let products:any = [];
+		for (let i:any = 0; i < newTask_SearchInput.length; i++) {
+			let product:any = {
 				'searchInput': newTask_SearchInput[i].value,
 				'category': newTask_Category[i].value,
 				'size': newTask_Size[i].value,
@@ -127,28 +131,28 @@ newTask_saveBtn.onclick = function () {
 			};
 			products.push(product);
 		}
-		let timerComps = newTask_StartTime.value.split(':');
-		let timerVal = timerComps.length === 2 ? newTask_StartTime.value + ':00' : newTask_StartTime.value;
-		let taskData = {
+		let timerComps:any = newTask_StartTime.value.split(':');
+		let timerVal:any = timerComps.length === 2 ? newTask_StartTime.value + ':00' : newTask_StartTime.value;
+		let taskData:any = {
 			'setup': {
-				profile: newTask_Profile.value || '',
-				mode: newTask_Mode.value || '',
-				restockMode: newTask_RestockMode.value || '',
-				checkoutAttempts: parseInt(newTask_CheckoutAttempts.value) || 1,
+				profile: newTask_Profile.value ? newTask_Profile.value : '',
+				mode: newTask_Mode.value ? newTask_Mode.value : '',
+				restockMode: newTask_RestockMode.value ? newTask_RestockMode.value : '',
+				checkoutAttempts: newTask_CheckoutAttempts.value ? parseInt(newTask_CheckoutAttempts.value) : 1,
 			},
-			'site': newTask_Site.value || '',
+			'site': newTask_Site.value ? newTask_Site.value : '',
 			'delays': {
-				cart: parseInt(newTask_CartDelay.value) || 0,
-				checkout: parseInt(newTask_CheckoutDelay.value) || 0
+				cart: newTask_CartDelay.value ? parseInt(newTask_CartDelay.value) : 0,
+				checkout: newTask_CheckoutDelay.value ? parseInt(newTask_CheckoutDelay.value) : 0
 			},
 			'additional': {
-				proxyList: newTask_ProxyList.value || '',
-				maxPrice: parseInt(newTask_PriceLimit.value) || 0,
-				timer: `${newTask_StartDate.value} ${timerVal}` || '',
+				proxyList: newTask_ProxyList.value ? newTask_ProxyList.value : '',
+				maxPrice: newTask_PriceLimit.value ? parseInt(newTask_PriceLimit.value) : 0,
+				timer: newTask_StartDate.value ? `${newTask_StartDate.value} ${timerVal}` : '',
 
-				monitorRestocks: newTask_Restocks.checked || true,
-				skipCaptcha: newTask_SkipCaptcha.checked || false,
-				enableThreeDS: newTask_threeD.checked || false
+				monitorRestocks: newTask_Restocks ? newTask_Restocks.checked : true,
+				skipCaptcha: newTask_SkipCaptcha ? newTask_SkipCaptcha.checked : false,
+				enableThreeDS: newTask_threeD ? newTask_threeD.checked : false
 				
 			},
 			'products': products
@@ -157,71 +161,71 @@ newTask_saveBtn.onclick = function () {
 		ipcRenderer.send('task.save', {
 			data: taskData,
 			quantity: parseInt(newTask_Quantity.value)
-		})
+		});
 	} catch(err) { console.error(err); }
 };
 
 /* --------- Page: PROFILES ---------- */
-billingCountry.onchange = function () {
+billingCountry.onchange = function ():void {
 	try {
 		content.states('profileBillingState', this.value);
 	} catch(err) { console.error(err); }
-}
+};
 
-shippingCountry.onchange = function () {
+shippingCountry.onchange = function ():void {
 	try {
 		content.states('profileShippingState', this.value);
 	} catch(err) { console.error(err); }
-}
+};
 
-billingFirst.oninput = function () {
+billingFirst.oninput = function ():void {
 	try {
 		if (useSameShippingAddress.checked) shippingFirst.value = this.value;
 	} catch(err) { console.error(err); }
-}
+};
 
-billingLast.oninput = function () {
+billingLast.oninput = function ():void {
 	try {
 		if (useSameShippingAddress.checked) shippingLast.value = this.value;
 	} catch(err) { console.error(err); }
-}
+};
 
-billingEmail.oninput = function () {
+billingEmail.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingEmail.value = this.value;
-}
+};
 
-billingTelephone.oninput = function () {
+billingTelephone.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingTelephone.value = this.value;
-}
+};
 
-billingAddress1.oninput = function () {
+billingAddress1.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingAddress1.value = this.value;
-}
+};
 
-billingAddress2.oninput = function () {
+billingAddress2.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingAddress2.value = this.value;
-}
+};
 
-billingCity.oninput = function () {
+billingCity.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingCity.value = this.value;
-}
+};
 
-billingZip.oninput = function () {
+billingZip.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingZip.value = this.value;
-}
+};
 
-billingCountry.oninput = function () {
+billingCountry.oninput = function ():void {
 	if (useSameShippingAddress.checked) {
 		shippingCountry.value = this.value;
-		shippingCountry.onchange();
+		shippingCountry.onchange(new Event(null));
 	}
-}
+};
 
-billingState.oninput = function () {
+billingState.oninput = function ():void {
 	if (useSameShippingAddress.checked) shippingState.value = this.value;
-}
+};
 
-useSameShippingAddress.onchange = function () {
+useSameShippingAddress.onchange = function ():void {
 	shippingFirst.value = this.checked ? billingFirst.value : '';
 	shippingFirst.disabled = this.checked ? true : false;
 
@@ -254,7 +258,7 @@ useSameShippingAddress.onchange = function () {
 	//shippingState.disabled = this.checked ? true : false;
 };
 
-cardNumber.onkeyup = function () {
+cardNumber.onkeyup = function ():void {
 	switch (paymentType.value) {
 		case 'master':
 		case 'visa':
@@ -265,55 +269,55 @@ cardNumber.onkeyup = function () {
 			this.maxLength = 17;
 	}
 
-}
+};
 
-saveProfileBtn.onclick = function () {
-	let profileData = {
-		profileName: profileName.value || "",
+saveProfileBtn.onclick = function ():void {
+	let profileData:any = {
+		profileName: profileName.value,
 		billing: {
-			"first": billingFirst.value || "",
-			"last": billingLast.value || "",
-			"email": billingEmail.value || "",
-			"telephone": billingTelephone.value || "",
-			"address1": billingAddress1.value || "",
-			"address2": billingAddress2.value || "",
-			"city": billingCity.value || "",
-			"zip": billingZip.value || "",
-			"country": billingCountry.value || "",
-			"state": billingState.value || ""
+			"first": billingFirst.value,
+			"last": billingLast.value,
+			"email": billingEmail.value,
+			"telephone": billingTelephone.value,
+			"address1": billingAddress1.value,
+			"address2": billingAddress2.value,
+			"city": billingCity.value,
+			"zip": billingZip.value,
+			"country": billingCountry.value,
+			"state": billingState.value
 		},
 		shipping: {
-			"first": shippingFirst.value || "",
-			"last": shippingLast.value || "",
-			"email": shippingEmail.value || "",
-			"telephone": shippingTelephone.value || "",
-			"address1": shippingAddress1.value || "",
-			"address2": shippingAddress2.value || "",
-			"city": shippingCity.value || "",
-			"zip": shippingZip.value || "",
-			"country": shippingCountry.value || "",
-			"state": shippingState.value || ""
+			"first": shippingFirst.value,
+			"last": shippingLast.value,
+			"email": shippingEmail.value,
+			"telephone": shippingTelephone.value,
+			"address1": shippingAddress1.value,
+			"address2": shippingAddress2.value,
+			"city": shippingCity.value,
+			"zip": shippingZip.value,
+			"country": shippingCountry.value,
+			"state": shippingState.value
 		},
 		payment: {
-			"type": paymentType.value || "",
-			"cardNumber": cardNumber.value || "",
-			"expiryMonth": cardExpiryMonth.value || "",
-			"expiryYear": cardExpiryYear.value || "",
-			"cvv": cardCvv.value || ""
+			"type": paymentType.value,
+			"cardNumber": cardNumber.value,
+			"expiryMonth": cardExpiryMonth.value,
+			"expiryYear": cardExpiryYear.value,
+			"cvv": cardCvv.value
 		}
 	};
-
-	profile.save(document.getElementById('profileId').value, profileData);
-	content.profiles()
-	for (let i = 0; i < profileElements.length; i++) {
+	let profileId: any = document.getElementById('profileId');
+	profile.save(profileId.value, profileData);
+	content.profiles();
+	for (let i:any = 0; i < profileElements.length; i++) {
 		profileElements[i].value = profileElements[i].id.includes('Country') ? 'GB' : '';
 	}
 };
 
-document.getElementById('deleteAllProfiles').onclick = function() {
+document.getElementById('deleteAllProfiles').onclick = function():void {
 	settings.set('profiles', {}, {prettify: true});
 	content.profiles();
-}
+};
 
 // importProfileBtn.onclick = function () {
 // 	ipcRenderer.send('import data', {
@@ -372,14 +376,14 @@ document.getElementById('deleteAllProfiles').onclick = function() {
 // 	ipcRenderer.send('delete all profiles');
 // }
 /* --------- Page: HARVESTERS ----------*/
-harvester_SaveBtn.onclick = function () {
-	let existingHarvesters = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
+harvester_SaveBtn.onclick = function ():void {
+	let existingHarvesters:any = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
 	existingHarvesters.push({
 		name: harverster_Name.value
-	})
+	});
 	settings.set('captchaHarvesters', existingHarvesters, { prettify: true });
 	content.harvesters();
-}
+};
 
 /* --------- Page: PROXIES --------- */
 // importProxyBtn.onclick = function () {
@@ -394,41 +398,40 @@ harvester_SaveBtn.onclick = function () {
 // 	});
 // }
 
-document.getElementById('proxyTestAll').onclick = function() {
-	let listName = document.getElementById('proxyListSelectorMain').value;
+document.getElementById('proxyTestAll').onclick = function():void {
+	let listName:any = document.getElementById('proxyListSelectorMain');
 	if (listName) {
 		ipcRenderer.send('proxyList.testAll', {
 			baseUrl: proxyTestSite.value,
-			listName
+			listName: listName.value
 		});
 	}
-}
+};
 
-document.getElementById('proxyDeleteList').onclick = function() {
-	let data = settings.get('proxies');
+document.getElementById('proxyDeleteList').onclick = function():void {
+	let data:any = settings.get('proxies');
 	try {
 		
 		document.getElementById('proxy-header').innerHTML = `Proxies`;
 		proxyTestTable.innerHTML = '';
-		console.log(document.getElementById('proxyListSelectorMain').value, data)
-		delete data[document.getElementById('proxyListSelectorMain').value];
+		delete data[proxyListSelectorMain.value];
 		settings.set('proxies', data, {prettify:true});
-		document.getElementById('proxyListSelectorMain').value = '';	
+		proxyListSelectorMain.value = '';	
 		content.proxySelectors();
 		
-	} catch(err) {console.error(err)}
-}
+	} catch(err) { console.error(err); }
+};
 
-saveProxyList.onclick = function() {
-	let listName = proxyListName.value;
-	let proxyInput = massProxyInput.value.split('\n');
+saveProxyList.onclick = function():void {
+	let listName:any = proxyListName.value;
+	let proxyInput:any = massProxyInput.value.split('\n');
 
-	let proxyLists = settings.has('proxies') ? settings.get('proxies') : {};
-	let listExists = proxyLists.hasOwnProperty(listName);
+	let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
+	let listExists:any = proxyLists.hasOwnProperty(listName);
 	if (!listExists) {
 		proxyLists[listName] = {};
-		for (let i = 0; i < proxyInput.length; i++) {
-			let id = utilities.generateId(6);
+		for (let i:any = 0; i < proxyInput.length; i++) {
+			let id:any = utilities.generateId(6);
 			proxyLists[listName][id] = proxyInput[i];
 		}
 		settings.set('proxies', proxyLists, { prettify: true });
@@ -438,53 +441,52 @@ saveProxyList.onclick = function() {
 		massProxyInput.value = '';
 	}
 
-}
+};
 
-if (proxyListSelectorMain.options.length > 0) content.proxies(proxyListSelectorMain.value)
-proxyListSelectorMain.onchange = function() {
+if (proxyListSelectorMain.options.length > 0) content.proxies(proxyListSelectorMain.value);
+proxyListSelectorMain.onchange = function():void {
 	content.proxies(this.value);
-}
+};
 
 
 
 
-document.getElementById('clearAnalytics').onclick = function() {
+document.getElementById('clearAnalytics').onclick = function():void {
 	settings.set('orders', [], {prettify:true});
 	content.orders();
-}
+};
 
 /* --------- Page: SETTINGS --------- */
-monitorProxyList.value = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : '';
-monitorProxyList.onchange = function() {
-	settings.set('monitorProxyList', this.value, { prettify: true })
-}
+// monitorProxyList.value = settings.has('monitorProxyList') ? settings.get('monitorProxyList') : '';
+// monitorProxyList.onchange = function():void {
+// 	settings.set('monitorProxyList', this.value, { prettify: true });
+// };
 
-let currentBrowserPath = document.getElementById('currentBrowserPath');
-let browserPath = document.getElementById('browserPath');
+let currentBrowserPath:any = document.getElementById('currentBrowserPath');
+let browserPath:any = document.getElementById('browserPath');
 // let filePath = settings.has('browser-path') ? settings.get('browser-path') : null;
 // let fileName = filePath ? filePath.split('/')[filePath.split('/').length - 1] : null;
 // browserPath.value = fileName ? fileName : '';
 currentBrowserPath.value = settings.has('browser-path') ? settings.get('browser-path') : '';
 
-currentBrowserPath.onchange = function() {
-	console.log('hey')
+currentBrowserPath.onchange = function():void {
 	settings.set('browser-path', this.value, {prettify: true});
-}
+};
 
-browserPath.onchange = function() {
+browserPath.onchange = function():void {
 	currentBrowserPath.value = this.files[0].path;
-	currentBrowserPath.onchange();
-}
+	currentBrowserPath.onchange(new Event(null));
+};
 
-installBrowserBtn.onclick = function () { ipcRenderer.send('setup browser mode'); }
-resetBtn.onclick = function () { ipcRenderer.send('reset settings'); }
+installBrowserBtn.onclick = function ():void { ipcRenderer.send('setup browser mode'); };
+resetBtn.onclick = function ():void { ipcRenderer.send('reset settings'); };
 
-document.getElementById('version').innerHTML = `Version ${remote.app.getVersion()}`
+document.getElementById('version').innerHTML = `Version ${remote.app.getVersion()}`;
 
 customDiscord.value = settings.has('discord') ? settings.get('discord') : '';
-customDiscord.onchange = function () {
+customDiscord.onchange = function ():void {
 	settings.set('discord', this.value, { prettify: true });
-}
-testDiscordBtn.onclick = function () {
+};
+testDiscordBtn.onclick = function ():void {
 	utilities.sendTestWebhook();
-}
+};

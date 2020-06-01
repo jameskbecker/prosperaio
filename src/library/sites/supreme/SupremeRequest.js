@@ -170,7 +170,7 @@ class SupremeRequest extends SupremeBase {
 	}
 
 	_checkoutProcess() {
-		return new Promise(async function runStage(resolve, reject) {
+		return new Promise(async function runStage(resolve) {
 			try {
 				this._setCookie('lastVisitedFragment', 'checkout');
 

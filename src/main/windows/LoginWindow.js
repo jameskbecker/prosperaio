@@ -12,7 +12,7 @@ function createWindow() {
 		webPreferences: {
 			nodeIntegration: true
 		}
-	})
+	});
 	module.exports.window = loginWindow;
 }
 

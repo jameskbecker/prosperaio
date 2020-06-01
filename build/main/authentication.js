@@ -1,6 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authenticate = void 0;
 var machineIdSync = require('node-machine-id').machineIdSync;
 var request = require('request');
-exports.authenticate = function (userKey, callback) {
+function authenticate(userKey, callback) {
     request({
         url: 'https://q7y84200yh.execute-api.eu-central-1.amazonaws.com/v1/authenticate',
         method: 'POST',
@@ -13,15 +16,21 @@ exports.authenticate = function (userKey, callback) {
             'device': machineIdSync()
         }
     }, function (error, response, body) {
-        if (error)
-            return callback('Unable to connect to ProsperAIO servers. Please try again.');
+        if (error) {
+            callback('Unable to connect to ProsperAIO servers. Please try again.');
+            return;
+        }
         else {
             switch (response.statusCode) {
                 case 200:
-                    return body.message === 'successful' ? callback(null, true) : callback('Invalid licence key. Please try again.', false);
-                default: return callback('Unable to connect to ProsperAIO servers. Please try again.');
+                    body.message === 'successful' ? callback(null, true) : callback('Invalid licence key. Please try again.', false);
+                    return;
+                default:
+                    callback('Unable to connect to ProsperAIO servers. Please try again.');
+                    return;
             }
         }
     });
-};
+}
+exports.authenticate = authenticate;
 //# sourceMappingURL=authentication.js.map

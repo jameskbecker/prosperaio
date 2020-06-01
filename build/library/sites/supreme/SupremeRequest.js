@@ -237,9 +237,9 @@ var SupremeRequest = (function (_super) {
         }.bind(this));
     };
     SupremeRequest.prototype._checkoutProcess = function () {
-        return new Promise(function runStage(resolve, reject) {
+        return new Promise(function runStage(resolve) {
             return __awaiter(this, void 0, void 0, function () {
-                var body, $, checkoutTemplate, $_1, serverJWT, orderTotal, _a, checkoutDelay, checkoutResponse, error_3;
+                var body, $_1, checkoutTemplate, $_2, serverJWT, orderTotal, _a, checkoutDelay, checkoutResponse, error_3;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -249,8 +249,8 @@ var SupremeRequest = (function (_super) {
                             return [4, this._fetchMobile()];
                         case 1:
                             body = (_b.sent()).body;
-                            $ = cheerio.load(body);
-                            checkoutTemplate = $("#checkoutViewTemplate").html();
+                            $_1 = cheerio.load(body);
+                            checkoutTemplate = $_1("#checkoutViewTemplate").html();
                             this.formElements = this._parseCheckoutForm(checkoutTemplate);
                             if (this.shouldStop)
                                 return [2, this._stop()];
@@ -260,9 +260,9 @@ var SupremeRequest = (function (_super) {
                             return [4, this._fetchMobileTotals()];
                         case 2:
                             body = (_b.sent()).body;
-                            $_1 = cheerio.load(body);
-                            serverJWT = $_1('#jwt_cardinal').val();
-                            orderTotal = $_1('#total').text();
+                            $_2 = cheerio.load(body);
+                            serverJWT = $_2('#jwt_cardinal').val();
+                            orderTotal = $_2('#total').text();
                             if (orderTotal) {
                                 logger.info("Order Total:\n" + this.orderTotal);
                                 this.orderTotal = orderTotal;

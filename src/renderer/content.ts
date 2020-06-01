@@ -1,14 +1,18 @@
-const settings = require('electron-settings');
-const { ipcRenderer } = require('electron');
-const { countries, sites } = require('../library/configuration');
-const profileActions = require('./profiles');
-const $ = require('jquery');
+import './elements';
+import * as settings from 'electron-settings';
+import { ipcRenderer } from 'electron';
+import { countries, sites } from '../library/configuration';
+import * as profileActions from './profiles';
+import * as $ from 'jquery';
 //const dropData = require('../mock-drop');
-const dropList = require('./droplist');
+import {default as dropList} from './droplist';
 
-let selectedItem;
-function convertMode(id) {
-	let modes = {
+
+
+
+let selectedItem:any;
+function convertMode(id:any):any {
+	let modes:any = {
 		'supreme-request': 'Fast',
 		'supreme-browser': 'Safe',
 		'kickz-wire': 'Wire Transfer',
@@ -17,34 +21,36 @@ function convertMode(id) {
 	return modes.hasOwnProperty(id) ? modes[id] : null;
 }
 
-function renderTaskTable() {
-	let tasks = settings.has('tasks') ? settings.get('tasks') : {};
-	let profiles = settings.has('profiles') ? settings.get('profiles') : {};
+function renderTaskTable():void {
+	let tasks:any = settings.has('tasks') ? settings.get('tasks') : {};
+	let profiles:any = settings.has('profiles') ? settings.get('profiles') : {};
 	tasksHeader.innerHTML = `Tasks (${Object.keys(tasks).length} Total)`;
 	taskTableBody.innerHTML = '';
 
 	try {
-		for (let i = 0; i < Object.keys(tasks).length; i++) {
-			let taskRow = document.createElement('tr');
+		for (let i:any = 0; i < Object.keys(tasks).length; i++) {
+			let taskRow:any = document.createElement('tr');
 			taskRow.className = 'row';
 
-			let taskId = Object.keys(tasks)[i];
+			let taskId:any = Object.keys(tasks)[i];
 			// let idCell = document.createElement('td');
 			// idCell.innerHTML = taskId;
 			// idCell.className = 'cell cell-body col-id';
 			// taskRow.appendChild(idCell);
 
-			let siteCell = document.createElement('td');
-			siteCell.innerHTML = sites.default[tasks[taskId].site].label;
+			let siteCell:any = document.createElement('td');
+			let defaultSiteData:any = sites.default;
+			let siteData:any = defaultSiteData[tasks[taskId].site];
+			siteCell.innerHTML = siteData.label;
 			siteCell.className = 'cell cell-body col-site';
 			taskRow.appendChild(siteCell);
 
-			let modeCell = document.createElement('td');
+			let modeCell:any = document.createElement('td');
 			modeCell.innerHTML = convertMode(tasks[taskId].setup.mode);
 			modeCell.className = 'cell cell-body col-mode';
 			taskRow.appendChild(modeCell);
 
-			let searchInputCell = document.createElement('td');
+			let searchInputCell:any = document.createElement('td');
 			searchInputCell.innerHTML = tasks[taskId].products[0].searchInput;
 			searchInputCell.className = 'cell cell-body col-products';
 			searchInputCell.setAttribute('data-id', taskId);
@@ -55,43 +61,43 @@ function renderTaskTable() {
 
 
 
-			let sizeCell = document.createElement('td');
+			let sizeCell:any = document.createElement('td');
 			sizeCell.innerHTML = tasks[taskId].products[0].size;
 			sizeCell.className = 'cell cell-body col-size';
 			sizeCell.setAttribute('data-id', taskId);
 			taskRow.appendChild(sizeCell);
 
-			let profileCell = document.createElement('td');
+			let profileCell:any = document.createElement('td');
 			profileCell.innerHTML = profiles[tasks[taskId].setup.profile] && profiles[tasks[taskId].setup.profile].profileName ? profiles[tasks[taskId].setup.profile].profileName : '';
 			profileCell.className = 'cell cell-body col-profile';
 			taskRow.appendChild(profileCell);
 
-			let proxyCell = document.createElement('td');
+			let proxyCell:any = document.createElement('td');
 			proxyCell.innerHTML = tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
 			proxyCell.className = 'cell cell-body col-task-proxy';
 			taskRow.appendChild(proxyCell);
 
 
 
-			let timerCell = document.createElement('td');
+			let timerCell:any = document.createElement('td');
 			timerCell.innerHTML = tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
 			timerCell.className = 'cell cell-body col-timer';
 			taskRow.appendChild(timerCell);
 
-			let statusCell = document.createElement('td');
+			let statusCell:any = document.createElement('td');
 			statusCell.innerHTML = 'Idle.';
 			statusCell.className = 'cell cell-body col-status';
 			statusCell.setAttribute('data-taskId', taskId);
 			taskRow.appendChild(statusCell);
 
-			let actionsCell = document.createElement('td');
+			let actionsCell:any = document.createElement('td');
 			actionsCell.className = 'cell cell-body table-row col-actions';
 
-			let startButton = document.createElement('div');
+			let startButton:any = document.createElement('div');
 			startButton.innerHTML = '<i class="fas fa-play"></i>';
 			startButton.className = 'action-button';
 			startButton.setAttribute('data-taskId', taskId);
-			startButton.onclick = function () {
+			startButton.onclick = function ():void {
 				// stopButton.style.color = 'var(--primary-color)';
 				// startButton.style.color = 'var(--secondary-color)';
 				
@@ -105,7 +111,7 @@ function renderTaskTable() {
 			};
 			actionsCell.appendChild(startButton);
 
-			let stopButton = document.createElement('div');
+			let stopButton:any = document.createElement('div');
 			stopButton.innerHTML = '<i class="fas fa-stop"></i>';
 			stopButton.className = 'action-button';
 			
@@ -115,7 +121,7 @@ function renderTaskTable() {
 
 			
 			stopButton.setAttribute('data-taskId', taskId);
-			stopButton.onclick = function () {
+			stopButton.onclick = function ():void {
 				// startButton.style.color = 'var(--primary-color)';
 				// stopButton.style.color = 'var(--secondary-color)';
 				
@@ -165,20 +171,20 @@ function renderTaskTable() {
 			// };
 			//actionsCell.appendChild(editButton);
 
-			let duplicateButton = document.createElement('div');
+			let duplicateButton:any = document.createElement('div');
 			duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 			duplicateButton.className = 'action-button';
 			duplicateButton.setAttribute('data-taskId', taskId);
-			duplicateButton.onclick = function () {
+			duplicateButton.onclick = function ():void {
 				ipcRenderer.send('task.duplicate', taskId);
 			};
 			actionsCell.appendChild(duplicateButton);
 
-			let deleteButton = document.createElement('div');
+			let deleteButton:any = document.createElement('div');
 			deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 			deleteButton.className = 'action-button';
 			deleteButton.setAttribute('data-taskId', taskId);
-			deleteButton.onclick = function () {
+			deleteButton.onclick = function ():void {
 				ipcRenderer.send('task.delete', taskId);
 			};
 			actionsCell.appendChild(deleteButton);
@@ -194,63 +200,63 @@ function renderTaskTable() {
 
 			taskTableBody.appendChild(taskRow);
 
-		};
+		}
 	} catch (err) { console.log(err);}
 }
 
-function renderProxyTable(name) {
+function renderProxyTable(name:any):void {
 	try {
-		let proxyLists = settings.has('proxies') ? settings.get('proxies') : {};
-		let list = proxyLists[name];
+		let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
+		let list:any = proxyLists[name];
 		if (list) {
 			document.getElementById('proxy-header').innerHTML = '';
 			document.getElementById('proxy-header').innerHTML = `Proxies (${Object.keys(list).length} Total)`;
 			proxyTestTable.innerHTML = '';
-			for (let i = 0; i < Object.keys(list).length; i++) {
-				let proxyId = Object.keys(list)[i];
-				let proxyRow = document.createElement('tr');
+			for (let i:any = 0; i < Object.keys(list).length; i++) {
+				let proxyId:any = Object.keys(list)[i];
+				let proxyRow:any = document.createElement('tr');
 				proxyRow.className = 'row';
 				proxyRow.setAttribute('data-row-id', proxyId);
 
-				let splitProxy = list[proxyId].split(':');
-				let ipCell = document.createElement('td');
+				let splitProxy:any = list[proxyId].split(':');
+				let ipCell:any = document.createElement('td');
 				ipCell.innerHTML = splitProxy[0] ? splitProxy[0] : 'localhost';
 				ipCell.className = 'cell cell-body col-proxy';
 				proxyRow.appendChild(ipCell);
 
-				let portCell = document.createElement('td');
+				let portCell:any = document.createElement('td');
 				if (splitProxy.length > 1) portCell.innerHTML = splitProxy[1];
 				else portCell.innerHTML = 'None';
 				portCell.className = 'cell cell-body col-proxyPort';
 				proxyRow.appendChild(portCell);
 
 
-				let userCell = document.createElement('td');
+				let userCell:any = document.createElement('td');
 				if (splitProxy.length > 3) userCell.innerHTML = splitProxy[2];
 				else userCell.innerHTML = 'None';
 				userCell.className = 'cell cell-body col-proxyUser';
 				proxyRow.appendChild(userCell);
 
-				let passCell = document.createElement('td');
+				let passCell:any = document.createElement('td');
 				if (splitProxy.length > 3) passCell.innerHTML = splitProxy[3];
 				else passCell.innerHTML = 'None';
 				passCell.className = 'cell cell-body col-proxy';
 				proxyRow.appendChild(passCell);
 
-				let statusCell = document.createElement('td');
+				let statusCell:any = document.createElement('td');
 				statusCell.className = 'cell cell-body col-status col-proxy';
 				statusCell.innerHTML = 'Idle.';
 				statusCell.setAttribute('data-proxyId', proxyId);
 				proxyRow.appendChild(statusCell);
 
-				let actionsCell = document.createElement('td');
+				let actionsCell:any = document.createElement('td');
 				actionsCell.className = 'cell cell-body col-proxy';
 
-				let startButton = document.createElement('div');
+				let startButton:any = document.createElement('div');
 				startButton.innerHTML = '<i class="fas fa-vial"></i>';
 				startButton.className = 'action-button';
 				startButton.setAttribute('data-proxyId', proxyId);
-				startButton.onclick = function () {
+				startButton.onclick = function ():void {
 					ipcRenderer.send('proxyList.test', {
 						baseUrl: proxyTestSite.value,
 						id: proxyId,
@@ -259,13 +265,13 @@ function renderProxyTable(name) {
 				};
 				actionsCell.appendChild(startButton);
 
-				let deleteButton = document.createElement('div');
+				let deleteButton:any = document.createElement('div');
 				deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 				deleteButton.className = 'action-button';
-				deleteButton.onclick = function () {
+				deleteButton.onclick = function ():void {
 					delete list[proxyId];
 					settings.set('proxies', proxyLists, { prettify: true });
-					let row = this.parentNode.parentNode;
+					let row:any = this.parentNode.parentNode;
 					row.parentNode.removeChild(row);
 				};
 				actionsCell.appendChild(deleteButton);
@@ -280,32 +286,34 @@ function renderProxyTable(name) {
 	}
 }
 
-function renderSites() {
-	const siteKeys = Object.keys(sites.default);
-	for (let i = 0; i < siteKeys.length; i++) {
-		let site = sites.default[siteKeys[i]];
+function renderSites():void {
+	const siteKeys:any = Object.keys(sites.default);
+	for (let i:any = 0; i < siteKeys.length; i++) {
+		let defaultSiteData:any = sites.default;
+		let site:any = defaultSiteData[siteKeys[i]];
 		if (site.enabled) {
-			for (let j = 0; j < document.querySelectorAll('.site-selector').length; j++) {
-				let siteOption = document.createElement('option');
+			for (let j:any = 0; j < siteSelectors.length; j++) {
+				let siteOption:any = document.createElement('option');
 				siteOption.value = siteKeys[i];
 				siteOption.label = site.label;
-				document.querySelectorAll('.site-selector')[j].add(siteOption);
-			};
+				siteSelectors[j].add(siteOption);
+			}
 		}
 	}
-	newTask_Site.onchange = function () {
+	newTask_Site.onchange = function ():void {
 		newTask_Mode.disabled = false;
 		newTask_RestockMode.disabled = false;
-		let selectedSite = sites.default[this.value] || null;
+		let defaultSiteData:any = sites.default;
+		let selectedSite:any = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
 		if (selectedSite) {
-			newTask_Mode.onchange = function () {
+			newTask_Mode.onchange = function ():void {
 				newTask_RestockMode.options.length = 0;
 
-				let stockMode = document.createElement('option');
+				let stockMode:any = document.createElement('option');
 				stockMode.label = 'Stock (Recommended)';
 				stockMode.value = 'stock';
 
-				let cartMode = document.createElement('option');
+				let cartMode:any = document.createElement('option');
 				cartMode.label = 'Cart';
 				cartMode.value = 'cart';
 
@@ -318,10 +326,6 @@ function renderSites() {
 						break;
 					case 'supreme-browser':
 						newTask_RestockMode.add(stockMode);
-						newTask_Headless.disabled = false;
-						newTask_UseProxy.checked = false;
-						newTask_UseProxy.disabled = true;
-						newTask_UseProxy.onchange();
 						break;
 					case 'shopify-api':
 						newTask_RestockMode.add(stockMode);
@@ -338,7 +342,7 @@ function renderSites() {
 			newTask_ProductQty[0].disabled = false;
 			newTask_SearchInput[0].disabled = false;
 			newTask_Mode.options.length = 0;
-			let requestMode = document.createElement('option');
+			let requestMode:any = document.createElement('option');
 			
 			switch (selectedSite.type) {
 				case 'kickz':
@@ -346,12 +350,12 @@ function renderSites() {
 					newTask_Category[0].parentElement.style.display = 'none';
 					newTask_SearchInput[0].placeholder = "Enter Product Url.";
 
-					let wireMode = document.createElement('option');
+					let wireMode:any = document.createElement('option');
 					wireMode.label = 'Request - Wire Transfer';
 					wireMode.value = 'kickz-wire';
 					newTask_Mode.add(wireMode);
 
-					let paypalMode = document.createElement('option');
+					let paypalMode:any = document.createElement('option');
 					paypalMode.label = 'Request - PayPal';
 					paypalMode.value = 'kickz-paypal';
 					newTask_Mode.add(paypalMode);
@@ -367,7 +371,7 @@ function renderSites() {
 					requestMode.value = 'supreme-request';
 					newTask_Mode.add(requestMode);
 
-					let browserMode = document.createElement('option');
+					let browserMode:any = document.createElement('option');
 					browserMode.label = 'Safe';
 					browserMode.value = 'supreme-browser';
 					newTask_Mode.add(browserMode);
@@ -378,12 +382,12 @@ function renderSites() {
 					newTask_Category[0].parentElement.style.display = 'none';
 					newTask_SearchInput[0].placeholder = "Enter Keywords or Product Url.";
 
-					let fastMode = document.createElement('option');
+					let fastMode:any = document.createElement('option');
 					fastMode.label = 'API (Fast)';
 					fastMode.value = 'shopify-api';
 					newTask_Mode.add(fastMode);
 
-					let safeMode = document.createElement('option');
+					let safeMode:any = document.createElement('option');
 					safeMode.label = 'Frontend (Safe)';
 					safeMode.value = 'shopify-frontend';
 					newTask_Mode.add(safeMode);
@@ -392,56 +396,57 @@ function renderSites() {
 				default: console.log(selectedSite.type);
 			}
 			try {
-				newTask_Mode.onchange();
+				newTask_Mode.onchange(new Event(null));
 			}
 			catch (err) { }
 
 			dropList()
-			.then(dropData => {
+			.then((dropData):void => {
 				if (dropData[selectedSite.type]) {
-					console.log('heey');
-					document.getElementById("newTaskProducts").options.length = 1;
-					let data = dropData[selectedSite.type];
-					let itemNames = Object.keys(data);
+					newTask_products.options.length = 1;
+					let data:any = dropData[selectedSite.type];
+					let itemNames:any = Object.keys(data);
 	
-					for (let i = 0; i < itemNames.length; i++) {
-						let option = document.createElement('option');
+					for (let i:any = 0; i < itemNames.length; i++) {
+						let option:any = document.createElement('option');
 						option.label = itemNames[i];
 						option.value = itemNames[i];
-						document.getElementById("newTaskProducts").options.add(option);
+						newTask_products.options.add(option);
 					}
 	
-					document.getElementById("newTaskProducts").onchange = function () {
+					newTask_products.onchange = function ():void {
 						newTask_Size[0].value = '';
 						// if (!this.value) {
 						// 	return customRow.style.display = 'flex';
 						// }
 						//customRow.style.display = 'none';
-						selectedItem = data[this.value] || {};
+						selectedItem = data[this.value] ? data[this.value] : {};
 						newTask_SearchInput[0].value = selectedItem.keywords;
 						newTask_Category[0].value = selectedItem.category;
-						let styles = document.getElementById("newTaskStyles");
-						styles.options.length = 0;
-						for (let i = 0; i < selectedItem.styles.length; i++) {
-							let option = document.createElement('option');
+						newTask_styles.options.length = 0;
+						for (let i:any = 0; i < selectedItem.newTask_styles.length; i++) {
+							let option:any = document.createElement('option');
 							option.label = selectedItem.styles[i].name;
 							option.value = selectedItem.styles[i].keywords;
-							styles.options.add(option);
+							newTask_styles.options.add(option);
 						}
-						styles.onchange = function () {
+						newTask_styles.onchange = function ():void {
 							newTask_Style[0].value = this.value;
 	
 						};
-						try { styles.onchange(); } catch (err) { console.log(err); }
-						let sizes = document.getElementById('newTaskSizes');
-						sizes.options.length = 4;
-						for (let i = 0; i < selectedItem.sizes.length; i++) {
-							let option = document.createElement('option');
+						try { 
+							newTask_styles.onchange(new Event(null)); 
+						} 
+						catch (err) { console.log(err); }
+						
+						newTask_sizes.options.length = 4;
+						for (let i:any = 0; i < selectedItem.sizes.length; i++) {
+							let option:any = document.createElement('option');
 							option.label = selectedItem.sizes[i].name;
 							option.value = selectedItem.sizes[i].keywords;
-							sizes.options.add(option);
+							newTask_sizes.options.add(option);
 						}
-						sizes.onchange = function () {
+						newTask_sizes.onchange = function ():void {
 							newTask_Size[0].value = this.value;
 						};
 					};
@@ -456,80 +461,80 @@ function renderSites() {
 	};
 }
 
-function renderCountries() {
-	for (let i = 0; i < countries.length; i++) {
-		for (let j = 0; j < countrySelectors.length; j++) {
-			let option = document.createElement('option');
+function renderCountries():void {
+	for (let i:any = 0; i < countries.length; i++) {
+		for (let j:any = 0; j < countrySelectors.length; j++) {
+			let option:any = document.createElement('option');
 			option.label = countries[i].label;
 			option.value = countries[i].value;
 			countrySelectors[j].add(option);
 		}
 	}
-	for (let i = 0; i < countrySelectors.length; i++) {
+	for (let i:any = 0; i < countrySelectors.length; i++) {
 		countrySelectors[i].value = 'gb';
 	}
 	renderStates('profileBillingState', 'GB');
 	renderStates('profileShippingState', 'GB');
 }
 
-function renderStates(selector, value) {
-	let selectedCountry = countries.filter(country => { return country.value === value; })[0];
-	let hasStates = selectedCountry.hasOwnProperty('states');
-	console.log(document.getElementById(selector));
-	document.getElementById(selector).options.length = 0;
+function renderStates(selector:any, value:any):void {
+	let selectedCountry:any = countries.filter((country):boolean => { return country.value === value; })[0];
+	let hasStates:any = selectedCountry.hasOwnProperty('states');
+	let stateElement:any = document.getElementById(selector);
+	stateElement.options.length = 0;
 
 	if (hasStates) {
-		document.getElementById(selector).disabled = false;
-		for (let i = 0; i < selectedCountry.states.length; i++) {
-			let option = document.createElement('option');
+		stateElement.disabled = false;
+		for (let i:any = 0; i < selectedCountry.states.length; i++) {
+			let option:any = document.createElement('option');
 			option.label = selectedCountry.states[i].label;
 			option.value = selectedCountry.states[i].value;
-			document.getElementById(selector).add(option);
+			stateElement.add(option);
 		}
 	}
 	else {
-		document.getElementById(selector).disabled = true;
+		stateElement.disabled = true;
 	}
 }
 
-function renderProxyListSelectors() {
-	let proxyLists = settings.has('proxies') ? settings.get('proxies') : {};
+function renderProxyListSelectors():void {
+	let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
 
-	document.querySelectorAll('.proxylist-selector').forEach(function (element) {
+	document.querySelectorAll('.proxylist-selector').forEach(function (element:any):void {
 		element.options.length = 1;
 	});
 
-	for (let i = 0; i < Object.keys(proxyLists).length; i++) {
-		let name = Object.keys(proxyLists)[i];
+	for (let i:any = 0; i < Object.keys(proxyLists).length; i++) {
+		let name:any = Object.keys(proxyLists)[i];
 
-		document.querySelectorAll('.proxylist-selector').forEach(function (element) {
-			let option = document.createElement('option');
+		document.querySelectorAll('.proxylist-selector').forEach(function (element:any):void {
+			let option:any = document.createElement('option');
 			option.label = name;
 			option.value = name;
 			element.options.add(option);
 		});
-	};
+	}
 }
 
-function renderHarvesters() {
+function renderHarvesters():void {
 	harvesterTable.innerHTML = '';
-	let existingHarvesters = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
-	for (let i = 0; i < existingHarvesters.length; i++) {
-		let harvesterRow = document.createElement('tr');
+	let existingHarvesters:any = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
+	for (let i:any = 0; i < existingHarvesters.length; i++) {
+		let harvesterRow:any = document.createElement('tr');
 		harvesterRow.className = 'row';
 
-		let nameCell = document.createElement('td');
+		let nameCell:any = document.createElement('td');
 		nameCell.innerHTML = existingHarvesters[i].name;
 		nameCell.className = 'cell cell-body col-profile';
 		
 
-		let siteCell = document.createElement('td');
+		let siteCell:any = document.createElement('td');
 		siteCell.className = 'cell cell-body col-site';
 		
-		let siteSelector = document.createElement('select');
+		let siteSelector:any = document.createElement('select');
 		siteSelector.setAttribute('class', 'input');
-		sites.captcha.forEach(site => {
-			let option = document.createElement('option');
+		sites.captcha.forEach((site):void => {
+			let option:any = document.createElement('option');
 			option.label = site.label;
 			option.value = site.value;
 			siteSelector.add(option);
@@ -538,36 +543,36 @@ function renderHarvesters() {
 		siteCell.appendChild(siteSelector);
 		
 
-		let actionsCell = document.createElement('td');
+		let actionsCell:any = document.createElement('td');
 		actionsCell.className = 'cell cell-body table-row col-actions';
 
-		let launchButton = document.createElement('div');
+		let launchButton:any = document.createElement('div');
 		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i>';
 		launchButton.className = 'action-button';
-		launchButton.onclick = function () {
+		launchButton.onclick = function ():void {
 			ipcRenderer.send('captcha.launch', {
 				'sessionName': existingHarvesters[i].name,
 				'site': siteSelector.value
 			});
 		};
 	
-		let loginButton = document.createElement('div');
+		let loginButton:any = document.createElement('div');
 		loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
 		loginButton.className = 'action-button';
-		loginButton.onclick = function () {
+		loginButton.onclick = function ():void {
 			ipcRenderer.send('captcha.signIn', {
 				'sessionName': existingHarvesters[i].name,
 				'type': 'renew'
 			});
 		};
 
-		let deleteButton = document.createElement('div');
+		let deleteButton:any = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
-		deleteButton.onclick = function () {
+		deleteButton.onclick = function ():void {
 			try {
-				existingHarvesters2 = settings.get('captchaHarvesters');
-				let newHarvestrerArray = existingHarvesters2.filter((harvester) => {
+				let existingHarvesters2:any = settings.get('captchaHarvesters');
+				let newHarvestrerArray:any = existingHarvesters2.filter((harvester:{name: string}):boolean => {
 					return harvester.name !== existingHarvesters[i].name;
 				});
 				settings.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
@@ -588,48 +593,49 @@ function renderHarvesters() {
 	}
 }
 
-function renderProfileSelectors() {
-	let existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
+function renderProfileSelectors():void {
+	let existingProfiles:any = settings.has('profiles') ? settings.get('profiles') : {};
 
 	document.getElementById('profileTableBody').innerHTML = '';
-	for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
-		let profileId = Object.keys(existingProfiles)[i];
-		let profileRow = document.createElement('tr');
+	for (let i:any = 0; i < Object.keys(existingProfiles).length; i++) {
+		let profileId:any = Object.keys(existingProfiles)[i];
+		let profileRow:any = document.createElement('tr');
 		profileRow.className = 'row';
 
 
-		let profileCell = document.createElement('td');
-		profileCell.innerHTML = existingProfiles[profileId].profileName || '';
+		let profileCell:any = document.createElement('td');
+		profileCell.innerHTML = existingProfiles[profileId].profileName ? existingProfiles[profileId].profileName : '';
 		profileCell.className = 'cell cell-body col-profile';
 		profileRow.appendChild(profileCell);
 
-		let nameCell = document.createElement('td');
+		let nameCell:any = document.createElement('td');
 		nameCell.innerHTML = `${existingProfiles[profileId].billing.first} ${existingProfiles[profileId].billing.last}`;
 		nameCell.className = 'cell cell-body col-site';
 		profileRow.appendChild(nameCell);
 
-		let addressCell = document.createElement('td');
+		let addressCell:any = document.createElement('td');
 		addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
 		addressCell.className = 'cell cell-body col-products';
 		profileRow.appendChild(addressCell);
 
-		let cardCell = document.createElement('td');
+		let cardCell:any = document.createElement('td');
 		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
 		cardCell.className = 'cell cell-body col-status';
 		profileRow.appendChild(cardCell);
 
-		let actionsCell = document.createElement('td');
+		let actionsCell:any = document.createElement('td');
 		actionsCell.className = 'cell cell-body table-row col-actions';
 
 
-		let editButton = document.createElement('div');
+		let editButton:any = document.createElement('div');
 		editButton.innerHTML = '<i class="fas fa-edit"></i>';
 		editButton.className = 'action-button';
-		editButton.setAttribute('data-id', profileId || '');
-		editButton.onclick = function () {
-			const profileData = settings.get('profiles')[this.dataset.id];
-			document.getElementById('profileId').value = this.dataset.id || '';
-			document.getElementById('profileName').value = profileData.profileName || '';
+		editButton.setAttribute('data-id', (profileId ? profileId : ''));
+		editButton.onclick = function ():void {
+			let profiles: any = settings.has('profiles') ? settings.get('profiles') : {};
+			const profileData:any = profiles[this.dataset.id];
+			_profileId.value = this.dataset.id ? this.dataset.id : '';
+			profileName.value = profileData.profileName ? profileData.profileName : '';
 			try {
 				billingFirst.value = profileData.billing.first;
 				billingLast.value = profileData.billing.last;
@@ -658,31 +664,32 @@ function renderProfileSelectors() {
 				cardExpiryMonth.value = profileData.payment.expiryMonth;
 				cardExpiryYear.value = profileData.payment.expiryYear;
 				cardCvv.value = profileData.payment.cvv;
-
-
-				$('#profileModal').modal('show');
+				
+				
+				(<any>$('#profileModal')).modal('show');
 			}
 			catch (error) { console.error(error); }
 		};
 
 		actionsCell.appendChild(editButton);
 
-		let duplicateButton = document.createElement('div');
+		let duplicateButton:any = document.createElement('div');
 		duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 		duplicateButton.className = 'action-button';
-		duplicateButton.setAttribute('data-id', profileId || '');
-		duplicateButton.onclick = function () {
-			const profileData = settings.get('profiles')[this.dataset.id];
+		duplicateButton.setAttribute('data-id', profileId ? profileId : '');
+		duplicateButton.onclick = function ():void {
+			let profiles:any = settings.has('profiles') ? settings.get('profiles') : {};
+			const profileData:any = profiles[this.dataset.id];
 			 profileActions.save(null, profileData);
 			renderProfileSelectors();
 		};
 		actionsCell.appendChild(duplicateButton);
 
-		let deleteButton = document.createElement('div');
+		let deleteButton:any = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
-		deleteButton.onclick = function () {
-			let existingProfiles2 = settings.get('profiles');
+		deleteButton.onclick = function ():void {
+			let existingProfiles2:any = settings.get('profiles');
 			delete existingProfiles2[profileId];
 			settings.set('profiles', existingProfiles2, { prettify: true });
 			renderProfileSelectors();
@@ -818,12 +825,12 @@ function renderProfileSelectors() {
 		// 	profilesWrapper.appendChild(profileContainer);
 
 	}
-	profileSelector.forEach(element => {
+	profileSelector.forEach((element):void => {
 		element.options.length = 0;
-		let existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
-		for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
-			let profileId = Object.keys(existingProfiles)[i];
-			let option = document.createElement('option');
+		let existingProfiles:any = settings.has('profiles') ? settings.get('profiles') : {};
+		for (let i:any = 0; i < Object.keys(existingProfiles).length; i++) {
+			let profileId:any = Object.keys(existingProfiles)[i];
+			let option:any = document.createElement('option');
 			option.value = profileId;
 			option.label = existingProfiles[profileId].profileName || 'Nameless Profile';
 			element.options.add(option);
@@ -846,41 +853,41 @@ function renderProfileSelectors() {
 // 	table.appendChild(row);
 // }
 
-function renderOrderTable() {
-	let orders = settings.has('orders') ? settings.get('orders') : [];
+function renderOrderTable():void {
+	let orders:any = settings.has('orders') ? settings.get('orders') : [];
 	orderTableBody.innerHTML = '';
 
 	try {
-		for (let i = 0; i < orders.length; i++) {
-			let orderRow = document.createElement('tr');
+		for (let i:any = 0; i < orders.length; i++) {
+			let orderRow:any = document.createElement('tr');
 			orderRow.className = 'row';
 
 
-			let dateCell = document.createElement('td');
+			let dateCell:any = document.createElement('td');
 			dateCell.innerHTML = orders[i].date;
 			dateCell.className = 'cell cell-body col-id';
 			orderRow.appendChild(dateCell);
 
-			let storeCell = document.createElement('td');
+			let storeCell:any = document.createElement('td');
 			storeCell.innerHTML = orders[i].site;
 			storeCell.className = 'cell cell-body col-site';
 			orderRow.appendChild(storeCell);
 
-			let productCell = document.createElement('td');
+			let productCell:any = document.createElement('td');
 			productCell.innerHTML = orders[i].product;
 			productCell.className = 'cell cell-body col-products';
 			productCell.style.justifyContent = 'center';
 			orderRow.appendChild(productCell);
 
-			let orderNumberCell = document.createElement('td');
+			let orderNumberCell:any = document.createElement('td');
 			orderNumberCell.innerHTML = orders[i].orderNumber;
 			orderNumberCell.className = 'cell cell-body col-order';
 			orderRow.appendChild(orderNumberCell);
 
-			let actionsCell = document.createElement('td');
+			let actionsCell:any = document.createElement('td');
 			actionsCell.className = 'cell cell-body table-row col-actions-sm';
 
-			let deleteButton = document.createElement('div');
+			let deleteButton:any = document.createElement('div');
 			deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 			deleteButton.className = 'action-button';
 
@@ -889,7 +896,7 @@ function renderOrderTable() {
 			orderRow.appendChild(actionsCell);
 			orderTableBody.appendChild(orderRow);
 
-		};
+		}
 	} catch (err) { console.log(err); }
 }
 
@@ -897,7 +904,7 @@ function renderOrderTable() {
 
 // }
 
-module.exports = {
+export default {
 	"tasks": renderTaskTable,
 	"profiles": renderProfileSelectors,
 	"proxies": renderProxyTable,

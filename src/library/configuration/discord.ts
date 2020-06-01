@@ -1,7 +1,9 @@
-const sites = require('./sites')
+import * as sites from './sites';
 
-function publicWebhook(additionalFields = []) {
-	let content = {
+function publicWebhook(this: any, additionalFields:any = []): void {
+	let defaultSites:any = sites.def;
+	let siteData:any = defaultSites[this.taskData.site];
+	let content:any = {
 		embeds: [{
 			"title": "Successfully Checked Out!",
 			"type": "rich",
@@ -17,8 +19,8 @@ function publicWebhook(additionalFields = []) {
 			}
 
 		}]
-	}
-	let fields = [
+	};
+	let fields:any = [
 		{
 			name: 'Product:',
 			value: this.productName || "Product Name N/A",
@@ -26,7 +28,7 @@ function publicWebhook(additionalFields = []) {
 		},
 		{
 			name: "Store:",
-			value: sites.default[this.taskData.site].label || "N/A",
+			value: siteData.label || "N/A",
 			inline: true
 		},
 		{
@@ -39,16 +41,16 @@ function publicWebhook(additionalFields = []) {
 			value: this.sizeName || "N/A",
 			inline: true
 		}
-	]
-	for (let i = 0; i < additionalFields.length; i++) {
+	];
+	for (let i:any = 0; i < additionalFields.length; i++) {
 		fields.push(additionalFields[i]);
 	}
 	content.embeds[0].fields = fields;
 	return content;
 }
 
-function privateWebhook(additionalFields = []) {
-	let content = {
+function privateWebhook(additionalFields:any = []):void {
+	let content:any = {
 		embeds: [{
 			"title": "Successfully Checked Out!",
 			"type": "rich",
@@ -65,9 +67,9 @@ function privateWebhook(additionalFields = []) {
 			}
 
 		}]
-	}
-	if (this.checkoutData.id) this.orderNumber = this.checkoutData.id
-	let fields = [
+	};
+	if (this.checkoutData.id) this.orderNumber = this.checkoutData.id;
+	let fields:any = [
 		{
 			name: "Store:",
 			value: this.taskData.site.label || "N/A",
@@ -98,13 +100,13 @@ function privateWebhook(additionalFields = []) {
 			value: this.orderNumber ? "||" + this.orderNumber + "||" : "N/A",
 			inline: true
 		}
-	]
-	for (let i = 0; i < additionalFields.length; i++) {
+	];
+	for (let i:any = 0; i < additionalFields.length; i++) {
 		fields.push(additionalFields[i]);
 	}
 	content.embeds[0].fields = fields;
-	console.log(fields)
+	console.log(fields);
 	return content;
 }
 
-module.exports = { publicWebhook, privateWebhook }
+export { publicWebhook, privateWebhook };

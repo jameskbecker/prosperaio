@@ -1,10 +1,10 @@
-var ipcWorker = window.require('electron');
-var puppeteer = window.require('puppeteer');
-var settings = window.require('electron-settings');
-var utilities = window.require('./library/other').utilities;
-var taskActions = window.require('./task-actions');
-var proxyActions = window.require('./library/proxies').proxyActions;
-var fs = window.require('fs');
+var ipcWorker = require('electron').ipcRenderer;
+var puppeteer = require('puppeteer');
+var settings = require('electron-settings');
+var utilities = require('./library/other/index').utilities;
+var taskActions = require('./task-actions');
+var proxyActions = require('./library/proxies').proxyActions;
+var fs = require('fs');
 String.prototype.capitalise = function () {
     return this.substring(0, 1).toUpperCase() + this.substring(1);
 };
@@ -89,7 +89,6 @@ function init() {
                             ipcWorker.send('sync settings', 'profiles');
                             break;
                         case 'Proxies':
-                            var allProxies = settings.has('proxies') ? settings.get('proxies') : {};
                             break;
                     }
                 }

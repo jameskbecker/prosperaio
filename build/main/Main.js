@@ -1,14 +1,19 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ipc = require("./ipc");
 var Main = (function () {
     function Main() {
-        this.HARVESTERS = { 'supreme': [] };
-        this.HARVESTER_QUEUES = { 'supreme': [] };
-        this.CARDINAL_SOLVERS = {};
     }
     Main.main = function (app, browserWindow, isDev) {
         Main.isDev = isDev;
+        Main.isMac = process.platform === 'darwin';
         Main.BrowserWindow = browserWindow;
         Main.application = app;
         Main.application.on('ready', Main.onReady);
@@ -75,6 +80,108 @@ var Main = (function () {
             (_a = Main.workerWindow) === null || _a === void 0 ? void 0 : _a.webContents.openDevTools({ mode: 'detach' });
         }
     };
+    Main.buildMenu = function () {
+        __spreadArrays((Main.isMac ? [{
+                label: 'ProsperAIO',
+                submenu: [
+                    {
+                        role: 'about'
+                    },
+                    { type: 'separator' },
+                    { role: 'hide' },
+                    { role: 'unhide' },
+                    { type: 'separator' },
+                    { role: 'quit' }
+                ]
+            }] : []), [
+            {
+                label: 'File',
+                submenu: [
+                    {
+                        role: Main.isMac ? 'close' : 'quit'
+                    },
+                    { type: 'separator' },
+                    {
+                        label: 'Run All Tasks',
+                        accelerator: 'CommandOrControl+Shift+R',
+                        click: function () {
+                            if (Main.workerWindow) {
+                                Main.workerWindow.webContents.send('run all tasks');
+                            }
+                        }
+                    },
+                    {
+                        label: 'Stop All Tasks',
+                        accelerator: 'CommandOrControl+Shift+S',
+                        click: function () {
+                            if (Main.workerWindow) {
+                                Main.workerWindow.webContents.send('stop all tasks');
+                            }
+                        }
+                    },
+                    {
+                        label: 'Delete All Tasks',
+                        accelerator: 'CommandOrControl+Shift+D',
+                        click: function () {
+                            if (Main.workerWindow) {
+                                Main.workerWindow.webContents.send('delete all tasks');
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                label: 'Edit',
+                submenu: __spreadArrays([
+                    { role: 'undo' },
+                    { role: 'redo' },
+                    { type: 'separator' },
+                    { role: 'cut' },
+                    { role: 'copy' },
+                    { role: 'paste' }
+                ], (Main.isMac ? [
+                    { role: 'pasteAndMatchStyle' },
+                    { role: 'delete' },
+                    { role: 'selectAll' },
+                    { type: 'separator' },
+                ] : [
+                    { role: 'delete' },
+                    { type: 'separator' },
+                    { role: 'selectAll' }
+                ]))
+            },
+            {
+                label: 'Window',
+                submenu: [
+                    {
+                        label: 'Reload Data',
+                        click: function () {
+                            if (Main.workerWindow) {
+                                Main.HARVESTERS = {
+                                    'supreme': []
+                                };
+                                Main.HARVESTER_QUEUES = {
+                                    'supreme': []
+                                };
+                                Main.workerWindow.webContents.reload();
+                                Main.mainWindow.webContents.reload();
+                            }
+                        },
+                        accelerator: 'CommandOrControl+R'
+                    },
+                    {
+                        role: 'minimize'
+                    },
+                    {
+                        role: 'close'
+                    }
+                ]
+            }
+        ]);
+    };
+    Main.HARVESTERS = { 'supreme': [] };
+    Main.HARVESTER_QUEUES = { 'supreme': [] };
+    Main.CARDINAL_SOLVERS = {};
     return Main;
 }());
 exports.default = Main;

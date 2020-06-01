@@ -10,6 +10,7 @@
 		"start": "nodemon -e js,ts --watch src --exec \"npm run dev:compile\"",
 		"dev:compile": "tsc -p src/main && npm run dev:start",
 		"dev:start": "electron .",
+		"ts:watch": "tsc -p src/main -w",
 		"pack": "electron-builder --dir",
 		"package-mac": "electron-builder --mac",
 		"package-win": "electron-builder --win",
@@ -22,6 +23,10 @@
 		"@fortawesome/fontawesome-free": "^5.13.0",
 		"@types/discord-rpc": "^3.0.4",
 		"@types/electron-settings": "^3.1.1",
+		"@types/jquery": "^3.3.38",
+		"@types/mousetrap": "^1.6.3",
+		"@types/node": "^14.0.6",
+		"@types/request-promise-native": "^1.0.17",
 		"body-parser": "^1.18.3",
 		"bootstrap": "^4.3.1",
 		"btoa": "^1.2.1",
@@ -30,6 +35,7 @@
 		"discord-rpc": "^3.1.1",
 		"discord.js": "^11.6.4",
 		"dotenv": "^8.2.0",
+		"electron": "^8.3.0",
 		"electron-is-dev": "^1.2.0",
 		"electron-reload": "^1.5.0",
 		"electron-settings": "^3.2.0",
@@ -59,12 +65,12 @@
 		"xml2js": "^0.4.19"
 	},
 	"devDependencies": {
-		"electron": "^9.0.0",
 		"electron-builder": "^22.6.0",
 		"electron-packager": "^13.0.1",
 		"electron-prebuilt": "^1.4.13",
 		"js-beautify": "^1.11.0",
 		"nodemon": "^2.0.4",
+		"typescript": "^3.9.3",
 		"watch": "^1.0.2"
 	},
 	"build": {

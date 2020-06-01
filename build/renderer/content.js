@@ -1,9 +1,12 @@
-var settings = require('electron-settings');
-var ipcRenderer = require('electron').ipcRenderer;
-var _a = require('../library/configuration'), countries = _a.countries, sites = _a.sites;
-var profileActions = require('./profiles');
-var $ = require('jquery');
-var dropList = require('./droplist');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("./elements");
+var settings = require("electron-settings");
+var electron_1 = require("electron");
+var configuration_1 = require("../library/configuration");
+var profileActions = require("./profiles");
+var $ = require("jquery");
+var droplist_1 = require("./droplist");
 var selectedItem;
 function convertMode(id) {
     var modes = {
@@ -25,7 +28,9 @@ function renderTaskTable() {
             taskRow.className = 'row';
             var taskId = Object.keys(tasks)[i];
             var siteCell = document.createElement('td');
-            siteCell.innerHTML = sites.default[tasks[taskId].site].label;
+            var defaultSiteData = configuration_1.sites.default;
+            var siteData = defaultSiteData[tasks[taskId].site];
+            siteCell.innerHTML = siteData.label;
             siteCell.className = 'cell cell-body col-site';
             taskRow.appendChild(siteCell);
             var modeCell = document.createElement('td');
@@ -66,7 +71,7 @@ function renderTaskTable() {
             startButton.className = 'action-button';
             startButton.setAttribute('data-taskId', taskId);
             startButton.onclick = function () {
-                ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
+                electron_1.ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
             };
             actionsCell.appendChild(startButton);
             var stopButton = document.createElement('div');
@@ -74,7 +79,7 @@ function renderTaskTable() {
             stopButton.className = 'action-button';
             stopButton.setAttribute('data-taskId', taskId);
             stopButton.onclick = function () {
-                ipcRenderer.send('task.stop', taskId);
+                electron_1.ipcRenderer.send('task.stop', taskId);
             };
             actionsCell.appendChild(stopButton);
             var duplicateButton = document.createElement('div');
@@ -82,7 +87,7 @@ function renderTaskTable() {
             duplicateButton.className = 'action-button';
             duplicateButton.setAttribute('data-taskId', taskId);
             duplicateButton.onclick = function () {
-                ipcRenderer.send('task.duplicate', taskId);
+                electron_1.ipcRenderer.send('task.duplicate', taskId);
             };
             actionsCell.appendChild(duplicateButton);
             var deleteButton = document.createElement('div');
@@ -90,7 +95,7 @@ function renderTaskTable() {
             deleteButton.className = 'action-button';
             deleteButton.setAttribute('data-taskId', taskId);
             deleteButton.onclick = function () {
-                ipcRenderer.send('task.delete', taskId);
+                electron_1.ipcRenderer.send('task.delete', taskId);
             };
             actionsCell.appendChild(deleteButton);
             taskRow.appendChild(actionsCell);
@@ -99,7 +104,6 @@ function renderTaskTable() {
         for (var i = 0; i < Object.keys(tasks).length; i++) {
             _loop_1(i);
         }
-        ;
     }
     catch (err) {
         console.log(err);
@@ -156,7 +160,7 @@ function renderProxyTable(name) {
                 startButton.className = 'action-button';
                 startButton.setAttribute('data-proxyId', proxyId);
                 startButton.onclick = function () {
-                    ipcRenderer.send('proxyList.test', {
+                    electron_1.ipcRenderer.send('proxyList.test', {
                         baseUrl: proxyTestSite.value,
                         id: proxyId,
                         input: list_1[proxyId],
@@ -185,23 +189,24 @@ function renderProxyTable(name) {
     }
 }
 function renderSites() {
-    var siteKeys = Object.keys(sites.default);
+    var siteKeys = Object.keys(configuration_1.sites.default);
     for (var i = 0; i < siteKeys.length; i++) {
-        var site = sites.default[siteKeys[i]];
+        var defaultSiteData = configuration_1.sites.default;
+        var site = defaultSiteData[siteKeys[i]];
         if (site.enabled) {
-            for (var j = 0; j < document.querySelectorAll('.site-selector').length; j++) {
+            for (var j = 0; j < siteSelectors.length; j++) {
                 var siteOption = document.createElement('option');
                 siteOption.value = siteKeys[i];
                 siteOption.label = site.label;
-                document.querySelectorAll('.site-selector')[j].add(siteOption);
+                siteSelectors[j].add(siteOption);
             }
-            ;
         }
     }
     newTask_Site.onchange = function () {
         newTask_Mode.disabled = false;
         newTask_RestockMode.disabled = false;
-        var selectedSite = sites.default[this.value] || null;
+        var defaultSiteData = configuration_1.sites.default;
+        var selectedSite = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
         if (selectedSite) {
             newTask_Mode.onchange = function () {
                 newTask_RestockMode.options.length = 0;
@@ -220,10 +225,6 @@ function renderSites() {
                         break;
                     case 'supreme-browser':
                         newTask_RestockMode.add(stockMode);
-                        newTask_Headless.disabled = false;
-                        newTask_UseProxy.checked = false;
-                        newTask_UseProxy.disabled = true;
-                        newTask_UseProxy.onchange();
                         break;
                     case 'shopify-api':
                         newTask_RestockMode.add(stockMode);
@@ -283,53 +284,50 @@ function renderSites() {
                 default: console.log(selectedSite.type);
             }
             try {
-                newTask_Mode.onchange();
+                newTask_Mode.onchange(new Event(null));
             }
             catch (err) { }
-            dropList()
+            droplist_1.default()
                 .then(function (dropData) {
                 if (dropData[selectedSite.type]) {
-                    console.log('heey');
-                    document.getElementById("newTaskProducts").options.length = 1;
+                    newTask_products.options.length = 1;
                     var data_1 = dropData[selectedSite.type];
                     var itemNames = Object.keys(data_1);
                     for (var i = 0; i < itemNames.length; i++) {
                         var option = document.createElement('option');
                         option.label = itemNames[i];
                         option.value = itemNames[i];
-                        document.getElementById("newTaskProducts").options.add(option);
+                        newTask_products.options.add(option);
                     }
-                    document.getElementById("newTaskProducts").onchange = function () {
+                    newTask_products.onchange = function () {
                         newTask_Size[0].value = '';
-                        selectedItem = data_1[this.value] || {};
+                        selectedItem = data_1[this.value] ? data_1[this.value] : {};
                         newTask_SearchInput[0].value = selectedItem.keywords;
                         newTask_Category[0].value = selectedItem.category;
-                        var styles = document.getElementById("newTaskStyles");
-                        styles.options.length = 0;
-                        for (var i = 0; i < selectedItem.styles.length; i++) {
+                        newTask_styles.options.length = 0;
+                        for (var i = 0; i < selectedItem.newTask_styles.length; i++) {
                             var option = document.createElement('option');
                             option.label = selectedItem.styles[i].name;
                             option.value = selectedItem.styles[i].keywords;
-                            styles.options.add(option);
+                            newTask_styles.options.add(option);
                         }
-                        styles.onchange = function () {
+                        newTask_styles.onchange = function () {
                             newTask_Style[0].value = this.value;
                         };
                         try {
-                            styles.onchange();
+                            newTask_styles.onchange(new Event(null));
                         }
                         catch (err) {
                             console.log(err);
                         }
-                        var sizes = document.getElementById('newTaskSizes');
-                        sizes.options.length = 4;
+                        newTask_sizes.options.length = 4;
                         for (var i = 0; i < selectedItem.sizes.length; i++) {
                             var option = document.createElement('option');
                             option.label = selectedItem.sizes[i].name;
                             option.value = selectedItem.sizes[i].keywords;
-                            sizes.options.add(option);
+                            newTask_sizes.options.add(option);
                         }
-                        sizes.onchange = function () {
+                        newTask_sizes.onchange = function () {
                             newTask_Size[0].value = this.value;
                         };
                     };
@@ -342,11 +340,11 @@ function renderSites() {
     };
 }
 function renderCountries() {
-    for (var i = 0; i < countries.length; i++) {
+    for (var i = 0; i < configuration_1.countries.length; i++) {
         for (var j = 0; j < countrySelectors.length; j++) {
             var option = document.createElement('option');
-            option.label = countries[i].label;
-            option.value = countries[i].value;
+            option.label = configuration_1.countries[i].label;
+            option.value = configuration_1.countries[i].value;
             countrySelectors[j].add(option);
         }
     }
@@ -357,21 +355,21 @@ function renderCountries() {
     renderStates('profileShippingState', 'GB');
 }
 function renderStates(selector, value) {
-    var selectedCountry = countries.filter(function (country) { return country.value === value; })[0];
+    var selectedCountry = configuration_1.countries.filter(function (country) { return country.value === value; })[0];
     var hasStates = selectedCountry.hasOwnProperty('states');
-    console.log(document.getElementById(selector));
-    document.getElementById(selector).options.length = 0;
+    var stateElement = document.getElementById(selector);
+    stateElement.options.length = 0;
     if (hasStates) {
-        document.getElementById(selector).disabled = false;
+        stateElement.disabled = false;
         for (var i = 0; i < selectedCountry.states.length; i++) {
             var option = document.createElement('option');
             option.label = selectedCountry.states[i].label;
             option.value = selectedCountry.states[i].value;
-            document.getElementById(selector).add(option);
+            stateElement.add(option);
         }
     }
     else {
-        document.getElementById(selector).disabled = true;
+        stateElement.disabled = true;
     }
 }
 function renderProxyListSelectors() {
@@ -391,7 +389,6 @@ function renderProxyListSelectors() {
     for (var i = 0; i < Object.keys(proxyLists).length; i++) {
         _loop_3(i);
     }
-    ;
 }
 function renderHarvesters() {
     harvesterTable.innerHTML = '';
@@ -406,7 +403,7 @@ function renderHarvesters() {
         siteCell.className = 'cell cell-body col-site';
         var siteSelector = document.createElement('select');
         siteSelector.setAttribute('class', 'input');
-        sites.captcha.forEach(function (site) {
+        configuration_1.sites.captcha.forEach(function (site) {
             var option = document.createElement('option');
             option.label = site.label;
             option.value = site.value;
@@ -419,7 +416,7 @@ function renderHarvesters() {
         launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i>';
         launchButton.className = 'action-button';
         launchButton.onclick = function () {
-            ipcRenderer.send('captcha.launch', {
+            electron_1.ipcRenderer.send('captcha.launch', {
                 'sessionName': existingHarvesters[i].name,
                 'site': siteSelector.value
             });
@@ -428,7 +425,7 @@ function renderHarvesters() {
         loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
         loginButton.className = 'action-button';
         loginButton.onclick = function () {
-            ipcRenderer.send('captcha.signIn', {
+            electron_1.ipcRenderer.send('captcha.signIn', {
                 'sessionName': existingHarvesters[i].name,
                 'type': 'renew'
             });
@@ -438,7 +435,7 @@ function renderHarvesters() {
         deleteButton.className = 'action-button';
         deleteButton.onclick = function () {
             try {
-                existingHarvesters2 = settings.get('captchaHarvesters');
+                var existingHarvesters2 = settings.get('captchaHarvesters');
                 var newHarvestrerArray = existingHarvesters2.filter(function (harvester) {
                     return harvester.name !== existingHarvesters[i].name;
                 });
@@ -467,7 +464,7 @@ function renderProfileSelectors() {
         var profileRow = document.createElement('tr');
         profileRow.className = 'row';
         var profileCell = document.createElement('td');
-        profileCell.innerHTML = existingProfiles[profileId].profileName || '';
+        profileCell.innerHTML = existingProfiles[profileId].profileName ? existingProfiles[profileId].profileName : '';
         profileCell.className = 'cell cell-body col-profile';
         profileRow.appendChild(profileCell);
         var nameCell = document.createElement('td');
@@ -487,11 +484,12 @@ function renderProfileSelectors() {
         var editButton = document.createElement('div');
         editButton.innerHTML = '<i class="fas fa-edit"></i>';
         editButton.className = 'action-button';
-        editButton.setAttribute('data-id', profileId || '');
+        editButton.setAttribute('data-id', (profileId ? profileId : ''));
         editButton.onclick = function () {
-            var profileData = settings.get('profiles')[this.dataset.id];
-            document.getElementById('profileId').value = this.dataset.id || '';
-            document.getElementById('profileName').value = profileData.profileName || '';
+            var profiles = settings.has('profiles') ? settings.get('profiles') : {};
+            var profileData = profiles[this.dataset.id];
+            _profileId.value = this.dataset.id ? this.dataset.id : '';
+            profileName.value = profileData.profileName ? profileData.profileName : '';
             try {
                 billingFirst.value = profileData.billing.first;
                 billingLast.value = profileData.billing.last;
@@ -528,9 +526,10 @@ function renderProfileSelectors() {
         var duplicateButton = document.createElement('div');
         duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
         duplicateButton.className = 'action-button';
-        duplicateButton.setAttribute('data-id', profileId || '');
+        duplicateButton.setAttribute('data-id', profileId ? profileId : '');
         duplicateButton.onclick = function () {
-            var profileData = settings.get('profiles')[this.dataset.id];
+            var profiles = settings.has('profiles') ? settings.get('profiles') : {};
+            var profileData = profiles[this.dataset.id];
             profileActions.save(null, profileData);
             renderProfileSelectors();
         };
@@ -596,13 +595,12 @@ function renderOrderTable() {
             orderRow.appendChild(actionsCell);
             orderTableBody.appendChild(orderRow);
         }
-        ;
     }
     catch (err) {
         console.log(err);
     }
 }
-module.exports = {
+exports.default = {
     "tasks": renderTaskTable,
     "profiles": renderProfileSelectors,
     "proxies": renderProxyTable,

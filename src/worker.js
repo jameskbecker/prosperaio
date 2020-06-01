@@ -1,10 +1,10 @@
-const ipcWorker = window.require('electron');
-const puppeteer = window.require('puppeteer');
-const settings = window.require('electron-settings');
-const { utilities } = window.require('./library/other');
-const taskActions = window.require('./task-actions');
-const { proxyActions } = window.require('./library/proxies');
-const fs = window.require('fs');
+const ipcWorker = require('electron').ipcRenderer;
+const puppeteer = require('puppeteer');
+const settings = require('electron-settings');
+const { utilities } = require('./library/other/index');
+const taskActions = require('./task-actions');
+const { proxyActions } = require('./library/proxies');
+const fs = require('fs');
 
 // declare global {
 //   namespace NodeJS {
@@ -122,7 +122,7 @@ function init() {
 							break;
 
 						case 'Proxies':
-							let allProxies = settings.has('proxies') ? settings.get('proxies') : {};
+							//let allProxies = settings.has('proxies') ? settings.get('proxies') : {};
 							break;
 					}
 
