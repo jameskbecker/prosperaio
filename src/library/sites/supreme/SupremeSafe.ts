@@ -1,11 +1,15 @@
-import * as Supreme from './SupremeBase';
+import Supreme from './SupremeBase';
 import * as settings from 'electron-settings';
-import * as puppeteer from 'puppeteer-extra';
-const pluginStealth = require("puppeteer-extra-plugin-stealth");
-const querystring = require('querystring');
+import * as puppeteer from 'puppeteer';
+import pluginStealth from 'puppeteer-extra-plugin-stealth';
+import * as querystring from 'querystring';
 
 
 class SupremeSafe extends Supreme {
+	private config: any;
+	//private browser: any;
+	private page: any;
+
 	constructor(_taskData, _id) {
 		super(_taskData, _id);
 		this.config = {
@@ -32,12 +36,12 @@ class SupremeSafe extends Supreme {
 		this.page;
 	}
 
-	async run() {
+	public async run() {
 		try {
-			this._setStatus('Initialising.', 'INFO');
+			this.setStatus('Initialising.', 'INFO');
 			await this._setup();
 			await this._setTimer(); 
-			this._setStatus('Starting Task.', 'WARNING');
+			this.setStatus('Starting Task.', 'WARNING');
 			await this._fetchStockData();
 			await this._fetchProductData();
 			await this._atcProcess();
@@ -45,12 +49,12 @@ class SupremeSafe extends Supreme {
 			await this._processStatus();
 
 			if (this.successful) {
-				this._setStatus('Success.', 'SUCCESS');
+				this.setStatus('Success.', 'SUCCESS');
 				let privateFields = [];
 				let publicFields = [];
 				if (this._productStyleName) {
 					let field = {
-						name: "Style:",
+						name: 'Style:',
 						value: this._productStyleName,
 						inline: true
 					};
@@ -58,9 +62,9 @@ class SupremeSafe extends Supreme {
 					publicFields.push(field);
 				}
 
-				if (this.checkoutData.hasOwnProperty("status")) {
+				if (this.checkoutData.hasOwnProperty('status')) {
 					let field = {
-						name: "Status:",
+						name: 'Status:',
 						value: this.checkoutData.status.capitalise(),
 						inline: true
 					};
@@ -79,7 +83,7 @@ class SupremeSafe extends Supreme {
 		}
 	}
 
-	_setup() {
+	public _setup() {
 		return new Promise(async (resolve) => {
 			if (this.proxy) {
 				let splitProxy = this.proxy.replace('http://', '').split('@');
@@ -95,7 +99,7 @@ class SupremeSafe extends Supreme {
 				}
 			}
 			try {
-				puppeteer.use(pluginStealth());
+				//puppeteer.use(pluginStealth());
 			} catch(e) {}
 			
 			this.browser = await puppeteer.launch(this.config.launch);
@@ -110,7 +114,7 @@ class SupremeSafe extends Supreme {
 
 	}
 
-	_atcProcess() {
+	public _atcProcess() {
 		return new Promise(async function runProcess (resolve) {
 			try {
 				this.startTime = (new Date).getTime();
@@ -125,7 +129,7 @@ class SupremeSafe extends Supreme {
 					value: `products/${this.productId}/${this.styleId}`
 				});
 				
-				this._setStatus('Adding to Cart', 'WARNING');
+				this.setStatus('Adding to Cart', 'WARNING');
 
 				this.cartForm = {
 					size: this.sizeId,
@@ -134,14 +138,14 @@ class SupremeSafe extends Supreme {
 				};
 				if (this.shouldStop) return this.stop();
 				let body = await this._request(`${this._productUrl}/add.json`, {
-					method: "POST",
+					method: 'POST',
 					credentials: 'include',
 					headers: {
-						"accept": "application/json",
-						"accept-encoding": "gzip, deflate, br",
-						"accept-language": "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7",
-						"content-type": "application/x-www-form-urlencoded",
-						"x-requested-with": "XMLHttpRequest"
+						'accept': 'application/json',
+						'accept-encoding': 'gzip, deflate, br',
+						'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7',
+						'content-type': 'application/x-www-form-urlencoded',
+						'x-requested-with': 'XMLHttpRequest'
 					},
 					body: querystring.stringify(this.cartForm)
 				});
@@ -160,15 +164,15 @@ class SupremeSafe extends Supreme {
 					let cookieValue = JSON.parse(decodeURIComponent(pureCart[0].value));
 					delete cookieValue.cookie;
 					this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
-					this._setStatus('Added to Cart!', 'SUCCESS');
+					this.setStatus('Added to Cart!', 'SUCCESS');
 					console.log('cookie_sub:', this.cookieSub);
 				resolve();
 				}
 			}
 			catch(error) {
-				this._setStatus('ATC Error', 'ERROR');
+				this.setStatus('ATC Error', 'ERROR');
 				console.log(error);
-				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+				let errorDelay = settings.has('globalErrorDelay') ? parseInt(<string>settings.get('globalErrorDelay')) : 1000;
 				return setTimeout(runProcess.bind(this, resolve), errorDelay);
 			}
 				
@@ -176,7 +180,7 @@ class SupremeSafe extends Supreme {
 		}.bind(this));
 	}
 
-	_checkoutProcess() {
+	public _checkoutProcess() {
 		return new Promise(async function runProcess (resolve) {
 			try {
 				await this.page.setCookie({
@@ -184,29 +188,29 @@ class SupremeSafe extends Supreme {
 					value: `checkout`
 				});
 				if (this.shouldStop) return this.stop();
-				this._setStatus('Parsing Checkout Form', 'WARNING');
-				let checkoutTemplate = await this.page.$eval("#checkoutViewTemplate", (e) => e.innerHTML);
+				this.setStatus('Parsing Checkout Form', 'WARNING');
+				let checkoutTemplate = await this.page.$eval('#checkoutViewTemplate', (e) => e.innerHTML);
 				this.formElements = this._parseCheckoutForm(checkoutTemplate);
 				if (this.shouldStop) return this.stop();
 				if (this.hasCaptcha) {
-					this._setStatus('Waiting for Captcha', 'WARNING');
+					this.setStatus('Waiting for Captcha', 'WARNING');
 					await this._requestCaptcha();
 				}
 				if (this.shouldStop) return this.stop();
-				this._setStatus('Submitting Checkout', 'WARNING');
+				this.setStatus('Submitting Checkout', 'WARNING');
 	
 				this.checkoutForm = this._form('parsed-checkout');
 				
 				let options = {
-					method: "POST",
+					method: 'POST',
 					credentials: 'include',
 					body: querystring.stringify(this.checkoutForm),
 					headers: {
-						"accept": "application/json",
-						"accept-encoding": "gzip, deflate, br",
-						"accept-language": "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7",
-						"content-type": "application/x-www-form-urlencoded",
-						"x-requested-with": "XMLHttpRequest"
+						'accept': 'application/json',
+						'accept-encoding': 'gzip, deflate, br',
+						'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7',
+						'content-type': 'application/x-www-form-urlencoded',
+						'x-requested-with': 'XMLHttpRequest'
 					}
 				};
 				
@@ -214,28 +218,28 @@ class SupremeSafe extends Supreme {
 				resolve();
 			}
 			catch(error) {
-				this._setStatus('Checkout Error', 'ERROR');
+				this.setStatus('Checkout Error', 'ERROR');
 				console.log(error);
-				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+				let errorDelay = settings.has('globalErrorDelay') ? parseInt(<string>settings.get('globalErrorDelay')) : 1000;
 				return setTimeout(runProcess.bind(this, resolve), errorDelay);
 			}
 			
 		}.bind(this));
 	}
 
-	_buildJSAddress() {
+	public _buildJSAddress() {
 		let rememberedFields = [];
 		switch (this.region) {
 			case 'JP':
 				rememberedFields = [
-					"#order_billing_name",
-					"#order_billing_last_name",
-					"#order_email",
-					"#order_tel",
-					"#order_billing_address",
-					"#order_billing_city",
-					"#order_billing_state",
-					"#order_billing_zip"
+					'#order_billing_name',
+					'#order_billing_last_name',
+					'#order_email',
+					'#order_tel',
+					'#order_billing_address',
+					'#order_billing_city',
+					'#order_billing_state',
+					'#order_billing_zip'
 				];
 			case 'EU':
 				rememberedFields = [
@@ -265,7 +269,7 @@ class SupremeSafe extends Supreme {
 		return encodeURIComponent(rememberedFields.join('|'));
 	}
 
-	async _request(url, options) {
+	public async _request(url, options) {
 		try {
 			return await this.page.evaluate(async (url, options) => (
 				(await window.fetch(url, options)).json()
@@ -278,4 +282,4 @@ class SupremeSafe extends Supreme {
 	}
 }
 
-module.exports = SupremeSafe; 
+export default SupremeSafe;

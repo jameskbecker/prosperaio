@@ -1,51 +1,45 @@
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { Main } from './Main';
+import isDev from 'electron-is-dev';
+
+Main.main(app, BrowserWindow, isDev);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //'use strict';
 //declare function require(path: string);
 //import { BotWindow } from './src/main/windows';
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+
 //import {default as ipc} from './ipc';
 //const { LoginWindow, WorkerWindow } = require('./windows')
 //import {  default as menuTemplate } from '../library/configuration/menu-template';
 // import * as auth from './authentication';
 // import * as discord from './discord';
 // import * as config from './config';
-import * as  isDev from 'electron-is-dev';
+
 // import * as psList from 'ps-list';
 // import * as path from 'path';
 // import * as settings from 'electron-settings';
 
-import Main from './Main';
-var mainWindow: BrowserWindow | null;
-var workerWindow: BrowserWindow | null;
-var loginWindow: BrowserWindow | null;
-var threeDSWindows: Array<BrowserWindow>;
-var captchaWindows: Array<BrowserWindow>;
-
-
-
-const defaultProps:any = {
-	"backgroundColor": '#1a1919',
-	 "frame": false,
-	 "show": false,
-	 "resizable": true,
-	 "webPreferences": {
-		 nodeIntegration: true
-	 }
-};
-const loginWindowProps:any = {...defaultProps};
-
-const workerWindowProps:any = {...defaultProps};
-
-// if (!isDev) {
-// 	const menu = Menu.buildFromTemplate(menuTemplate);
-// 	Menu.setApplicationMenu(menu)
-// }
-
-try {
-	app.disableHardwareAcceleration();
-} catch(e) {console.log(e);}
-
-
-Main.main(app, BrowserWindow, isDev);
 // if (isDev) {
 // 	require('electron-reload')(path.join(__dirname, '..'), {
 // 		electron: require('electron')

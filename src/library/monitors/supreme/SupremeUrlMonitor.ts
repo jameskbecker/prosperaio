@@ -1,17 +1,27 @@
+import Worker from '../../../Worker';
 const request = require('request-promise-native');
 const settings = require('electron-settings');
 const ipcWorker = require('electron').ipcRenderer;
 const { logger, utilities } = require('../../other');
 
 class SupremeUrlMonitor {
-	constructor(_productUrl, proxyList) {
+	private _productUrl: string;
+	private _proxyList: string;
+	private _monitorDelay: number;
+	private _timeoutDelay: number;
+	private _isRunning: boolean;
+	private inputData: any;
+	private callbacks: any;
+	
+
+	constructor(_productUrl:string, proxyList:string) {
 		logger.info('[Monitor] ['+proxyList+'] Inititalising Url Monitor.');
 		this._productUrl = _productUrl;
 		this._proxyList = proxyList;
-		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
+		if (this._proxyList && this._proxyList !== '' && !Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
 			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
-				global.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+				Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
 			}
 		}
 		this.callbacks = {};
@@ -41,42 +51,42 @@ class SupremeUrlMonitor {
 		this._timeoutDelay = delay;
 	}
 
-	run() {
-		if (!this.isRunning && Object.keys(this.callbacks).length > 0) {	
-			this.isRunning = true;
+	public run() {
+		if (!this._isRunning && Object.keys(this.callbacks).length > 0) {	
+			this._isRunning = true;
 			setTimeout(this._fetchProductData.bind(this), this.monitorDelay);
 		}
 	}
 
-	add(id, callback) {
+	public add(id, callback) {
 		this.callbacks[id] = callback;
 		this.run();
 	}
 
-	remove(id) {
+	public remove(id) {
 		delete this.callbacks[id];
 	}
 
-	_getProxy() {
+	private _getProxy() {
 		if (!this._proxyList) {
 			return null;
 		}
-		else if (global.activeProxyLists[this._proxyList].length < 1) {
+		else if (Worker.activeProxyLists[this._proxyList].length < 1) {
 			return null;
 		}
-		let proxy = global.activeProxyLists[this._proxyList][0]
-		global.activeProxyLists[this._proxyList].push(global.activeProxyLists[this._proxyList].shift());
+		let proxy = Worker.activeProxyLists[this._proxyList][0];
+		Worker.activeProxyLists[this._proxyList].push(Worker.activeProxyLists[this._proxyList].shift());
 		return proxy;
 	}
 
-	_setStatus(message, type, ids) {
+	private setStatus(message, type, ids) {
 		let colors = {
 			DEFAULT: '#8c8f93',
 			INFO: '#4286f4',
 			ERROR: '#f44253',
 			WARNING: '#f48641',
 			SUCCESS: '#2ed347'
-		}
+		};
 		if (!ids) {
 			for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 				for (let j = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
@@ -84,7 +94,7 @@ class SupremeUrlMonitor {
 						id: this.inputData[Object.keys(this.inputData)[i]]['IDS'][j],
 						message: message,
 						color: colors[type]
-					})
+					});
 				}
 			}
 		}
@@ -94,13 +104,13 @@ class SupremeUrlMonitor {
 					id: ids[i],
 					message: message,
 					color: colors[type]
-				})
+				});
 			}
 		}
 	}
 
-	_fetchProductData() {
-		this._setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks))
+	private _fetchProductData() {
+		this.setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks));
 		logger.info(`[Monitor] [${this._productUrl}] Fetching Product Data.`);
 		let options = {
 			url: this._productUrl + '.json',
@@ -117,8 +127,8 @@ class SupremeUrlMonitor {
 				'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
 				'x-requested-with': 'XMLHttpRequest'
 			}
-		}
-		console.log({ proxy: options.proxy })
+		};
+		console.log({ proxy: options.proxy });
 		request(options)
 		.then(response => {
 			if (!response.body.hasOwnProperty('styles')) { 
@@ -127,24 +137,24 @@ class SupremeUrlMonitor {
 				return this.run();
 			}
 	
-			this._returnData(response.body.styles)
+			this._returnData(response.body.styles);
 		})
 		.catch(error => {
 			logger.error(`[Monitor1] [${this._productUrl}] ${error.message}.`);
-			this._setStatus('Error', 'ERROR', Object.keys(this.callbacks))
-			this.isRunning = false;
+			this.setStatus('Error', 'ERROR', Object.keys(this.callbacks));
+			this._isRunning = false;
 			return this.run();
-		})
+		});
 	}
 
-	_returnData(styles) {
+	private _returnData(styles) {
 		for (let i = 0; i < Object.keys(this.callbacks).length; i++) {
 			let id = Object.keys(this.callbacks)[i];
 			this.callbacks[id](styles);
 		} 
-		this.isRunning = false;
+		this._isRunning = false;
 		this.run();
 	}
 }
 
-module.exports = SupremeUrlMonitor;
+export default SupremeUrlMonitor;

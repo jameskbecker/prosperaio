@@ -1,60 +1,97 @@
-var electron = require('electron');
-var ipcWorker = electron.ipcRenderer;
-var request = require("request");
-var settings = require('electron-settings');
-var _a = require('../configuration'), discord = _a.discord, sites = _a.sites;
-var _b = require('../other'), logger = _b.logger, utilities = _b.utilities;
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var electron_1 = require("electron");
+var settings = __importStar(require("electron-settings"));
+var Worker_1 = __importDefault(require("../../Worker"));
+var configuration_1 = require("../configuration");
+var other_1 = require("../other");
 require('dotenv').config();
 var Task = (function () {
-    function Task(_taskData, _id) {
-        if (_taskData === void 0) { _taskData = {}; }
-        this.taskData = _taskData;
-        this.baseUrl = sites.default[_taskData.site].baseUrl;
-        this.products = _taskData.products;
-        this._profileId = _taskData.setup.profile;
-        this.profile = settings.get("profiles." + this._profileId);
+    function Task(taskData, _id) {
+        this._taskData = taskData;
+        this.baseUrl = configuration_1.sites.def[taskData.site].baseUrl;
+        this.products = taskData.products;
+        this._profileId = taskData.setup.profile;
+        this._profile = settings.get("profiles." + this._profileId);
         this.profileName = this.profile.profileName;
         this.id = _id;
         this.isActive = true;
         this.isMonitoring = false;
+        this.isMonitoringKW = false;
         this.shouldStop = false;
         this.successful = false;
-        this._productUrl = null;
-        this._productImageUrl = null;
-        this._productName = null;
-        this._productStyleName = null;
-        this._productSizeName = null;
+        this._productUrl = '';
+        this._productImageUrl = '';
+        this._productName = '';
+        this._productStyleName = '';
+        this._productSizeName = '';
         this.orderNumber = null;
-        this.hasCaptcha = _taskData.additional.skipCaptcha ? false : true;
-        this._proxyList = _taskData.additional.proxyList || null;
+        this.hasCaptcha = taskData.additional.skipCaptcha ? false : true;
+        this._proxyList = taskData.additional.proxyList || null;
         this.captchaResponse = '';
         this.captchaTime = 0;
         this.captchaTS = null;
         this.startTime = 0;
         this.checkoutTime = 0;
-        if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
+        if (this._proxyList && this._proxyList !== '' && !Worker_1.default.activeProxyLists.hasOwnProperty(this._proxyList)) {
             var proxies = settings.has('proxies') ? settings.get('proxies') : {};
             if (proxies.hasOwnProperty(this._proxyList)) {
-                global.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+                Worker_1.default.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
             }
         }
         if (!this._proxyList) {
             this._proxy = null;
         }
-        else if (global.activeProxyLists[this._proxyList].length < 1) {
+        else if (Worker_1.default.activeProxyLists[this._proxyList].length < 1) {
             this._proxy = null;
         }
         else {
-            this._proxy = global.activeProxyLists[this._proxyList][0];
-            global.activeProxyLists[this._proxyList].push(global.activeProxyLists[this._proxyList].shift());
+            this._proxy = Worker_1.default.activeProxyLists[this._proxyList][0];
+            Worker_1.default.activeProxyLists[this._proxyList].push(Worker_1.default.activeProxyLists[this._proxyList].shift());
         }
     }
+    Object.defineProperty(Task.prototype, "taskData", {
+        get: function () {
+            return this._taskData;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Task.prototype, "profile", {
+        get: function () {
+            return this._profile;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Task.prototype, "productName", {
         get: function () {
             return this._productName;
         },
         set: function (value) {
-            ipcWorker.send('task.setProductName', {
+            electron_1.ipcRenderer.send('task.setProductName', {
                 id: this.id,
                 name: value
             });
@@ -68,7 +105,7 @@ var Task = (function () {
             return this._productSizeName;
         },
         set: function (value) {
-            ipcWorker.send('task.setSizeName', {
+            electron_1.ipcRenderer.send('task.setSizeName', {
                 id: this.id,
                 name: value
             });
@@ -79,19 +116,19 @@ var Task = (function () {
     });
     Object.defineProperty(Task.prototype, "proxy", {
         get: function () {
-            return utilities.formatProxy(this._proxy);
+            return other_1.utilities.formatProxy(this._proxy);
         },
         enumerable: false,
         configurable: true
     });
     Task.prototype.callStop = function () {
         if (this.isActive) {
-            logger.warn("[T:" + this.id + "] Stopping Task.");
-            this._setStatus('Stopping.', 'WARNING');
+            other_1.logger.warn("[T:" + this.id + "] Stopping Task.");
+            this.setStatus('Stopping.', 'WARNING');
             this.shouldStop = true;
             if (this.isMonitoringKW) {
                 try {
-                    global.monitors.supreme.kw.remove(this.id);
+                    Worker_1.default.monitors.supreme.kw.remove(this.id);
                     this._stop();
                 }
                 catch (err) {
@@ -106,26 +143,25 @@ var Task = (function () {
         console.log('RUNNING STOP()');
         if (this.isMonitoring) {
             try {
-                global.monitors.supreme.url[this._productUrl].remove(this.id);
+                Worker_1.default.monitors.supreme.url[this._productUrl].remove(this.id);
             }
             catch (err) {
                 console.log(err);
             }
         }
-        if (this.browser) {
-            logger.info("[" + this.id + "] Closing Browser");
+        if (this.hasOwnProperty('browser')) {
+            other_1.logger.info("[" + this.id + "] Closing Browser");
             this.browser.close();
         }
         this.productName = this.taskData.products[0].searchInput;
         this.sizeName = this.taskData.products[0].size;
-        this._setStatus('Stopped.', 'ERROR');
-        logger.error("[T:" + this.id + "] Stopped Task.");
-        if (activeTasks[this.id])
-            delete activeTasks[this.id];
-        delete activeTasks[this.id];
-        delete this;
+        this.setStatus('Stopped.', 'ERROR');
+        other_1.logger.error("[T:" + this.id + "] Stopped Task.");
+        if (Worker_1.default.activeTasks[this.id])
+            delete Worker_1.default.activeTasks[this.id];
+        delete Worker_1.default.activeTasks[this.id];
     };
-    Task.prototype._setStatus = function (message, type) {
+    Task.prototype.setStatus = function (message, type) {
         var colors = {
             DEFAULT: '#8c8f93',
             INFO: '#4286f4',
@@ -133,7 +169,7 @@ var Task = (function () {
             WARNING: '#f48641',
             SUCCESS: '#2ed347'
         };
-        ipcWorker.send('task.setStatus', {
+        electron_1.ipcRenderer.send('task.setStatus', {
             id: this.id,
             message: message,
             color: colors[type]
@@ -143,117 +179,49 @@ var Task = (function () {
         var _this = this;
         return new Promise(function (resolve) {
             _this.captchaTS = Date.now();
-            _this._setStatus('Waiting for Captcha.', 'WARNING');
-            ipcWorker.send('captcha.request', {
+            _this.setStatus('Waiting for Captcha.', 'WARNING');
+            electron_1.ipcRenderer.send('captcha.request', {
                 id: _this.id,
-                type: sites.default[_this.taskData.site].type
+                type: configuration_1.sites.def[_this.taskData.site].type
             });
-            logger.debug('Requested Captcha Token.');
-            _this.continue = resolve;
-            ipcWorker.on('captcha response', function (event, args) {
+            other_1.logger.debug('Requested Captcha Token.');
+            electron_1.ipcRenderer.on('captcha response', function (event, args) {
                 if (args.id === _this.id) {
                     _this.captchaResponse = args.token;
                     _this.captchaTime = Date.now() - _this.captchaTS;
-                    logger.debug("Received Captcha Token.\n" + _this.captchaResponse + " (" + _this.captchaTime + "ms)");
+                    other_1.logger.debug("Received Captcha Token.\n" + _this.captchaResponse + " (" + _this.captchaTime + "ms)");
                     resolve();
                 }
             });
         });
     };
-    Task.prototype._postPublicWebhook = function (additonalFields) {
-        var _this = this;
-        if (additonalFields === void 0) { additonalFields = []; }
-        request({
-            url: process.env.SUCCESS_WEBHOOK_URL,
-            method: 'POST',
-            json: true,
-            body: discord.publicWebhook.bind(this)(additonalFields)
-        }, function (error, response, body) {
-            if (error) {
-                console.log(error);
-            }
-            else {
-                switch (response.statusMessage) {
-                    case "NO CONTENT":
-                        console.log('Sent Webhook.');
-                        console.log('Remaining Requests:', response.headers['x-ratelimit-remaining']);
-                        break;
-                    case "TOO MANY REQUESTS":
-                        console.log('Reached Rate Limit.');
-                        return setTimeout(_this._postPrivateWebhook.bind(_this, additonalFields), 2500);
-                        break;
-                    case "BAD REQUEST":
-                        console.log('Format Error');
-                        console.log(JSON.stringify(response.body));
-                        break;
-                    default:
-                        console.log(response.statusCode, response.statusMessage);
-                }
-            }
-        });
-    };
-    Task.prototype._postPrivateWebhook = function (additonalFields) {
-        var _this = this;
-        if (additonalFields === void 0) { additonalFields = []; }
-        if (settings.has('discord')) {
-            var webhookUrl = settings.get('discord');
-            request({
-                url: webhookUrl,
-                method: 'POST',
-                json: true,
-                body: discord.privateWebhook.bind(this)(additonalFields)
-            }, function (error, response, body) {
-                if (error) {
-                    console.log(error);
-                }
-                else {
-                    switch (response.statusMessage) {
-                        case "NO CONTENT":
-                            console.log('Sent Webhook.');
-                            console.log('Remaining Requests:', response.headers['x-ratelimit-remaining']);
-                            break;
-                        case "TOO MANY REQUESTS":
-                            console.log('Reached Rate Limit.');
-                            return setTimeout(_this._postPrivateWebhook.bind(_this, additonalFields), 2500);
-                            break;
-                        case "BAD REQUEST":
-                            console.log('Format Error');
-                            console.log(JSON.stringify(response.body));
-                            break;
-                        default:
-                            console.log(response.statusCode, response.statusMessage);
-                    }
-                }
-            });
-        }
-    };
     Task.prototype._addToAnalystics = function () {
         var exportData = {
             date: new Date().toLocaleString(),
-            site: sites.default[this.taskData.site].label,
+            site: configuration_1.sites.def[this.taskData.site].label,
             product: this.productName,
             orderNumber: this.orderNumber
         };
-        var currentOrders = settings.get('orders') || [];
+        var currentOrders = settings.has('orders') ? settings.get('orders') : [];
         currentOrders.push(exportData);
         settings.set('orders', currentOrders, { prettify: true });
-        ipcWorker.send('sync settings', 'orders');
+        electron_1.ipcRenderer.send('sync settings', 'orders');
     };
     Task.prototype._setTimer = function () {
         var _this = this;
         return new Promise(function (resolve) {
             var timerInput = _this.taskData.additional.timer;
-            if ((timerInput !== ' ' || '' || null || undefined)) {
+            if ((timerInput !== ' ')) {
                 var dateInput = timerInput.split(' ')[0];
                 var timeInput = timerInput.split(' ')[1];
                 var scheduledTime = new Date();
-                scheduledTime.setFullYear(dateInput.split('-')[0], dateInput.split('-')[1] - 1, dateInput.split('-')[2]);
-                scheduledTime.setHours(timeInput.split(':')[0]);
-                scheduledTime.setMinutes(timeInput.split(':')[1]);
-                scheduledTime.setSeconds(timeInput.split(':')[2]);
+                scheduledTime.setFullYear(parseInt(dateInput.split('-')[0]), parseInt(dateInput.split('-')[1]), parseInt(dateInput.split('-')[2]));
+                scheduledTime.setHours(parseInt(timeInput.split(':', 1)[0]));
+                scheduledTime.setMinutes(parseInt(timeInput.split(':', 1)[1]));
+                scheduledTime.setSeconds(parseInt(timeInput.split(':')[2]));
                 var remainingTime = scheduledTime.getTime() - Date.now();
                 setTimeout(resolve, remainingTime);
-                _this._setStatus("Timer Set.", "INFO");
+                _this.setStatus('Timer Set.', 'INFO');
             }
             else {
                 resolve();
@@ -308,5 +276,5 @@ var Task = (function () {
     };
     return Task;
 }());
-module.exports = Task;
+exports.default = Task;
 //# sourceMappingURL=Task.js.map

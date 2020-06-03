@@ -1,6 +1,7 @@
-const request = require('request')
-const settings = require('electron-settings');
-exports.generateId = function (length) {
+import * as request from 'request';
+import * as settings from 'electron-settings';
+
+export function generateId (length: number): string {
 	const idFormat = 'ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvxyz1234567890';
 	let id = '';
 	while (id.length < length) {
@@ -9,12 +10,12 @@ exports.generateId = function (length) {
 	return id;
 }
 
-exports.formatProxy = function (input) {
+export function formatProxy (input: string | null) : string | null {
 	if (!input) {
-		return null
+		return null;
 	}
-	else if (typeof input === 'string' && ['localhost', '', ' '].indexOf(input) != -1) {
-		console.log('no proxy')
+	else if (typeof input== 'string' && ['localhost', '', ' '].indexOf(input) != -1) {
+		console.log('no proxy');
 		return null;
 	}
 	else {
@@ -22,16 +23,16 @@ exports.formatProxy = function (input) {
 		let ip = proxyComponents[0];
 		let port = proxyComponents[1];
 		let user = proxyComponents[2];
-		let pass = proxyComponents[3]
+		let pass = proxyComponents[3];
 		
-		if (!user || !pass) return "http://" + ip + ":" + port;
-		else return "http://" + user + ":" + pass + "@" + ip + ":" + port;
+		if (!user || !pass) return 'http://' + ip + ':' + port;
+		else return 'http://' + user + ':' + pass + '@' + ip + ':' + port;
 	}
 }
 
-exports.sendTestWebhook = function () {
+export function sendTestWebhook (): void {
 	if (settings.has('discord')) {
-		let webhookUrl = settings.get('discord');
+		let webhookUrl:string = <string>settings.get('discord');
 		request({
 			url: webhookUrl,
 			method: 'POST',
@@ -83,14 +84,14 @@ exports.sendTestWebhook = function () {
 			}
 		}, (error, response, body) => {
 			if (error) {
-				console.log(error)
+				console.log(error);
 			}
 			else {
-				console.log(response.statusMessage)
+				console.log(response.statusMessage);
 			}
-		})
+		});
 	}
 	else {
-		console.log('no custom webhook')
+		console.log('no custom webhook');
 	}
 }

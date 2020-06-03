@@ -6,12 +6,12 @@ var countrySelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('
 var proxyListSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.proxylist-selector');
 var siteSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.site-selector');
 var navigationSelectors:NodeListOf<HTMLElement> = document.querySelectorAll('.nav');
-var reloadBtn:HTMLElement = document.getElementById('reloadApp');
-var minimizeBtn:HTMLElement = document.getElementById('minimizeApp');
-var closeBtn:HTMLElement = document.getElementById('closeApp');
+var reloadBtn:any = document.getElementById('reloadApp');
+var minimizeBtn:any = document.getElementById('minimizeApp');
+var closeBtn:any = document.getElementById('closeApp');
  
 //Dashboard
-var tasksHeader:HTMLElement = document.getElementById('tasksHeader');
+var tasksHeader:any = document.getElementById('tasksHeader');
 //var importTaskBtn:HTMLButtonElement = document.getElementById('importTasks');
 //var exportTaskBtn:HTMLButtonElement = document.getElementById('exportTasks');
 var globalMonitorDelay:any = document.getElementById('globalMonitor');
@@ -19,12 +19,12 @@ var globalErrorDelay:any = document.getElementById('globalError');
 var globalTimeoutDelay:any = document.getElementById('globalTimeout');
 
 
-var taskTable:HTMLElement = document.getElementById('taskTable');
-var taskTableBody:HTMLElement = document.getElementById('taskTableBody');
+var taskTable:any = document.getElementById('taskTable');
+var taskTableBody:any = document.getElementById('taskTableBody');
 
-var runAllBtn:HTMLElement = document.getElementById('runAll');
-var stopAllBtn:HTMLElement = document.getElementById('stopAll');
-var clearTasksBtn:HTMLElement = document.getElementById('clearTasks');
+var runAllBtn:any = document.getElementById('runAll');
+var stopAllBtn:any = document.getElementById('stopAll');
+var clearTasksBtn:any = document.getElementById('clearTasks');
 
 //Task Creator
 var newTask_Site:any = document.getElementById('taskSite');
@@ -97,10 +97,11 @@ var _profileId:any = document.getElementById('profileId');
 var profileName:any = document.getElementById('profileName');
 var saveProfileBtn:any = document.getElementById('profileSaveButton');
 var profileLoader:any = document.getElementById('profileLoader');
-var importProfileBtn:any = document.getElementById('importProfiles');
-var exportProfileBtn:any = document.getElementById('exportProfiles');
+
+//var importProfileBtn:any = document.getElementById('importProfiles');
+//var exportProfileBtn:any = document.getElementById('exportProfiles');
 var deleteProfileBtn:any = document.getElementById('profileDeleteButton');
-var clearProfilesBtn:any = document.getElementById('profileDeleteAllButton');
+var clearProfilesBtn:any = document.getElementById('deleteAllProfiles');
 
 var profileElements:any = [
 	document.getElementById('profileId'),
@@ -135,8 +136,10 @@ var profileElements:any = [
 	profileName
 ];
 //Proxies
-var importProxyBtn:any = document.getElementById('importProxies');
-var exportProxyBtn:any = document.getElementById('exportProxies');
+// var importProxyBtn:any = document.getElementById('importProxies');
+// var exportProxyBtn:any = document.getElementById('exportProxies');
+
+var proxyHeader:any = document.getElementById('proxy-header');
 
 var proxyListName:any = document.getElementById('proxyListName');
 var massProxyInput:any = document.getElementById('proxyInput');
@@ -146,6 +149,8 @@ var proxyListSelectorMain:any = document.getElementById('proxyListSelectorMain')
 var proxyTableName:any = document.getElementById('proxyTableName');
 var proxyTestSite:any = document.getElementById('proxySiteSelector');
 var proxyTestTable:any = document.getElementById('proxyTestResults');
+var proxyTestAll:any = document.getElementById('proxyTestAll');
+var proxyDeleteList:any = document.getElementById('proxyDeleteList');
 
 //Harvesters
 var harverster_Name:any = document.getElementById('harvesterName');
@@ -155,6 +160,7 @@ var harvester_ClearBtn:any = document.getElementById('clearCaptchaAccounts');
 
 //Analytics
 var orderTableBody:any = document.getElementById('orderTableBody');
+var clearAnalyticsBtn:any = document.getElementById('clearAnalytics');
 
 //Settings
 // var monitorProxyList:any = document.getElementById('monitorProxyList');
@@ -166,4 +172,4 @@ var customDiscord:any = document.getElementById('discordWebhook');
 var testDiscordBtn:any = document.getElementById('testDiscordWebhook');
 
 //Footer
-var footerVersion:any = document.getElementById('footerVersion');
+var version:any = document.getElementById('version');

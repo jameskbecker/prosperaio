@@ -1,3 +1,9 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var Worker_1 = __importDefault(require("../../../Worker"));
 var request = require('request-promise-native');
 var settings = require('electron-settings');
 var ipcWorker = require('electron').ipcRenderer;
@@ -7,10 +13,10 @@ var SupremeUrlMonitor = (function () {
         logger.info('[Monitor] [' + proxyList + '] Inititalising Url Monitor.');
         this._productUrl = _productUrl;
         this._proxyList = proxyList;
-        if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
+        if (this._proxyList && this._proxyList !== '' && !Worker_1.default.activeProxyLists.hasOwnProperty(this._proxyList)) {
             var proxies = settings.has('proxies') ? settings.get('proxies') : {};
             if (proxies.hasOwnProperty(this._proxyList)) {
-                global.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+                Worker_1.default.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
             }
         }
         this.callbacks = {};
@@ -44,8 +50,8 @@ var SupremeUrlMonitor = (function () {
         configurable: true
     });
     SupremeUrlMonitor.prototype.run = function () {
-        if (!this.isRunning && Object.keys(this.callbacks).length > 0) {
-            this.isRunning = true;
+        if (!this._isRunning && Object.keys(this.callbacks).length > 0) {
+            this._isRunning = true;
             setTimeout(this._fetchProductData.bind(this), this.monitorDelay);
         }
     };
@@ -60,14 +66,14 @@ var SupremeUrlMonitor = (function () {
         if (!this._proxyList) {
             return null;
         }
-        else if (global.activeProxyLists[this._proxyList].length < 1) {
+        else if (Worker_1.default.activeProxyLists[this._proxyList].length < 1) {
             return null;
         }
-        var proxy = global.activeProxyLists[this._proxyList][0];
-        global.activeProxyLists[this._proxyList].push(global.activeProxyLists[this._proxyList].shift());
+        var proxy = Worker_1.default.activeProxyLists[this._proxyList][0];
+        Worker_1.default.activeProxyLists[this._proxyList].push(Worker_1.default.activeProxyLists[this._proxyList].shift());
         return proxy;
     };
-    SupremeUrlMonitor.prototype._setStatus = function (message, type, ids) {
+    SupremeUrlMonitor.prototype.setStatus = function (message, type, ids) {
         var colors = {
             DEFAULT: '#8c8f93',
             INFO: '#4286f4',
@@ -98,7 +104,7 @@ var SupremeUrlMonitor = (function () {
     };
     SupremeUrlMonitor.prototype._fetchProductData = function () {
         var _this = this;
-        this._setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks));
+        this.setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks));
         logger.info("[Monitor] [" + this._productUrl + "] Fetching Product Data.");
         var options = {
             url: this._productUrl + '.json',
@@ -128,8 +134,8 @@ var SupremeUrlMonitor = (function () {
         })
             .catch(function (error) {
             logger.error("[Monitor1] [" + _this._productUrl + "] " + error.message + ".");
-            _this._setStatus('Error', 'ERROR', Object.keys(_this.callbacks));
-            _this.isRunning = false;
+            _this.setStatus('Error', 'ERROR', Object.keys(_this.callbacks));
+            _this._isRunning = false;
             return _this.run();
         });
     };
@@ -138,10 +144,10 @@ var SupremeUrlMonitor = (function () {
             var id = Object.keys(this.callbacks)[i];
             this.callbacks[id](styles);
         }
-        this.isRunning = false;
+        this._isRunning = false;
         this.run();
     };
     return SupremeUrlMonitor;
 }());
-module.exports = SupremeUrlMonitor;
+exports.default = SupremeUrlMonitor;
 //# sourceMappingURL=SupremeUrlMonitor.js.map

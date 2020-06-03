@@ -1,12 +1,192 @@
-import './elements';
+//import './elements';
 import { ipcRenderer, remote } from 'electron';
 import * as mousetrap from 'mousetrap';
-import * as settings from 'electron-settings';
+import settings from 'electron-settings';
 import { default as content } from './content';
 import * as profile from './profiles';
 import { default as ipc } from './ipc';
 import { utilities } from '../library/other';
 //import { sites } from '../library/configuration';
+
+
+//General
+var checkboxes:NodeListOf<HTMLInputElement> = document.querySelectorAll('.checkbox-label');
+var profileSelector:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.profile-selector');
+var accountSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.captchaAccount-selector');
+var countrySelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.country-selector');
+var proxyListSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.proxylist-selector');
+var siteSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.site-selector');
+var navigationSelectors:NodeListOf<HTMLElement> = document.querySelectorAll('.nav');
+var reloadBtn:any = document.getElementById('reloadApp');
+var minimizeBtn:any = document.getElementById('minimizeApp');
+var closeBtn:any = document.getElementById('closeApp');
+ 
+//Dashboard
+var tasksHeader:any = document.getElementById('tasksHeader');
+//var importTaskBtn:HTMLButtonElement = document.getElementById('importTasks');
+//var exportTaskBtn:HTMLButtonElement = document.getElementById('exportTasks');
+var globalMonitorDelay:any = document.getElementById('globalMonitor');
+var globalErrorDelay:any = document.getElementById('globalError');
+var globalTimeoutDelay:any = document.getElementById('globalTimeout');
+
+
+var taskTable:any = document.getElementById('taskTable');
+var taskTableBody:any = document.getElementById('taskTableBody');
+
+var runAllBtn:any = document.getElementById('runAll');
+var stopAllBtn:any = document.getElementById('stopAll');
+var clearTasksBtn:any = document.getElementById('clearTasks');
+
+//Task Creator
+var newTask_Site:any = document.getElementById('taskSite');
+var newTask_Profile:any = document.getElementById('taskProfile');
+var newTask_Mode:any = document.getElementById('taskMode');
+var newTask_RestockMode:any = document.getElementById('newTaskMonitorMode');
+var newTask_CheckoutAttempts:any = document.getElementById('taskCheckoutAttempts');
+var newTask_Quantity:any = document.getElementById('taskQuantity');
+
+var newTask_CartDelay:any = document.getElementById('taskCartDelay');
+var newTask_CheckoutDelay:any = document.getElementById('taskCheckoutDelay');
+var newTask_MonitorDelay:any = document.getElementById('taskMonitorDelay');
+var newTask_ErrorDelay:any = document.getElementById('taskErrorDelay');
+var newTask_Timeout:any = document.getElementById('taskTimeoutDelay');
+
+var newTask_ProxyList:any = document.getElementById('taskProxyList');
+var newTask_PriceLimit:any = document.getElementById('taskMaxPrice');
+var newTask_StartDate:any = document.getElementById('taskStartDate');
+var newTask_StartTime:any = document.getElementById('taskStartTime');
+
+var newTask_Restocks:any = document.getElementById('newTaskRestocks');
+var newTask_SkipCaptcha:any = document.getElementById('captchaCheckbox');
+var newTask_threeD:any = document.getElementById('threeDCheckbox');
+
+var newTask_products:any = document.getElementById('newTaskProducts');
+var newTask_styles:any = document.getElementById('newTaskStyles');
+var newTask_sizes:any = document.getElementById('newTaskSizes');
+
+var newTask_SearchInput:any = document.querySelectorAll('input[name="taskSearchInput"]');
+var newTask_Category:any = document.querySelectorAll('input[name="taskCategory"]');
+var newTask_Size:any = document.querySelectorAll('input[name="taskSize"]');
+var newTask_Style:any = document.querySelectorAll('input[name="taskVariant"]');
+var newTask_ProductQty:any = document.querySelectorAll('input[name="taskProductQty"]');
+
+var newTask_saveBtn:any = document.getElementById('taskSaveButton');
+
+//Profile Creator
+var profilesWrapper:any = document.getElementById('profilesWrapper');
+var billingFirst:any = document.getElementById('profileBillingFirst');
+var billingLast:any = document.getElementById('profileBillingLast');
+var billingEmail:any = document.getElementById('profileBillingEmail');
+var billingTelephone:any = document.getElementById('profileBillingTelephone');
+var billingAddress1:any = document.getElementById('profileBillingAddress1');
+var billingAddress2:any = document.getElementById('profileBillingAddress2');
+var billingCity:any = document.getElementById('profileBillingCity');
+var billingZip:any = document.getElementById('profileBillingZip');
+var billingCountry:any = document.getElementById('profileBillingCountry');
+var billingState:any = document.getElementById('profileBillingState'); 
+
+var useSameShippingAddress:any = document.getElementById('sameShippingCheckbox');
+
+var shippingFirst:any = document.getElementById('profileShippingFirst');
+var shippingLast:any = document.getElementById('profileShippingLast');
+var shippingEmail:any = document.getElementById('profileShippingEmail');
+var shippingTelephone:any = document.getElementById('profileShippingTelephone');
+var shippingAddress1:any = document.getElementById('profileShippingAddress1');
+var shippingAddress2:any = document.getElementById('profileShippingAddress2');
+var shippingCity:any = document.getElementById('profileShippingCity');
+var shippingZip:any = document.getElementById('profileShippingZip');
+var shippingCountry:any = document.getElementById('profileShippingCountry');
+var shippingState:any = document.getElementById('profileShippingState');
+
+var paymentType:any = document.getElementById('profilePaymentType');
+var cardNumber:any = document.getElementById('profileCardNumber');
+var cardExpiryMonth:any = document.getElementById('profileExpiryMonth');
+var cardExpiryYear:any = document.getElementById('profileExpiryYear');
+var cardCvv:any = document.getElementById('profileCvv');
+
+var _profileId:any = document.getElementById('profileId');
+var profileName:any = document.getElementById('profileName');
+var saveProfileBtn:any = document.getElementById('profileSaveButton');
+var profileLoader:any = document.getElementById('profileLoader');
+
+//var importProfileBtn:any = document.getElementById('importProfiles');
+//var exportProfileBtn:any = document.getElementById('exportProfiles');
+var deleteProfileBtn:any = document.getElementById('profileDeleteButton');
+var clearProfilesBtn:any = document.getElementById('deleteAllProfiles');
+
+var profileElements:any = [
+	document.getElementById('profileId'),
+	billingFirst, 
+	billingLast, 
+	billingEmail, 
+	billingTelephone,
+	billingAddress1,
+	billingAddress2,
+	billingCity,
+	billingZip,
+	billingCountry,
+	billingState,
+
+	shippingFirst,
+	shippingLast,
+	shippingEmail,
+	shippingTelephone,
+	shippingAddress1,
+	shippingAddress2,
+	shippingCity,
+	shippingZip,
+	shippingCountry,
+	shippingState,
+
+	paymentType,
+	cardNumber,
+	cardExpiryMonth,
+	cardExpiryYear,
+	cardCvv,
+
+	profileName
+];
+//Proxies
+// var importProxyBtn:any = document.getElementById('importProxies');
+// var exportProxyBtn:any = document.getElementById('exportProxies');
+
+var proxyHeader:any = document.getElementById('proxy-header');
+
+var proxyListName:any = document.getElementById('proxyListName');
+var massProxyInput:any = document.getElementById('proxyInput');
+var saveProxyList:any = document.getElementById('saveProxyListBtn');
+
+var proxyListSelectorMain:any = document.getElementById('proxyListSelectorMain');
+var proxyTableName:any = document.getElementById('proxyTableName');
+var proxyTestSite:any = document.getElementById('proxySiteSelector');
+var proxyTestTable:any = document.getElementById('proxyTestResults');
+var proxyTestAll:any = document.getElementById('proxyTestAll');
+var proxyDeleteList:any = document.getElementById('proxyDeleteList');
+
+//Harvesters
+var harverster_Name:any = document.getElementById('harvesterName');
+var harvester_SaveBtn:any = document.getElementById('saveHarvesterBtn');
+var harvesterTable:any = document.getElementById('harvesterTable');
+var harvester_ClearBtn:any = document.getElementById('clearCaptchaAccounts');
+
+//Analytics
+var orderTableBody:any = document.getElementById('orderTableBody');
+var clearAnalyticsBtn:any = document.getElementById('clearAnalytics');
+
+//Settings
+// var monitorProxyList:any = document.getElementById('monitorProxyList');
+var currentBrowserPath:any = document.getElementById('currentBrowserPath');
+var installBrowserBtn:any = document.getElementById('browserSetup');
+var resetBtn:any = document.getElementById('resetAllSettings');
+var signoutBtn:any = document.getElementById('signout');
+var customDiscord:any = document.getElementById('discordWebhook');
+var testDiscordBtn:any = document.getElementById('testDiscordWebhook');
+
+//Footer
+var version:any = document.getElementById('version');
+
+
+
 
 /* --------- GENERAL --------- */
 interface JsonValue {
@@ -32,7 +212,7 @@ try {
 
 /* --------- assets: BANNER --------- */
 signoutBtn.onclick = function ():void { ipcRenderer.send('signout'); };
-reloadBtn.onclick = function ():void { ipcRenderer.send('window.reload'); };
+//reloadBtn.onclick = function ():void { ipcRenderer.send('window.reload'); };
 minimizeBtn.onclick = function ():void { ipcRenderer.send('window.minimize'); };
 closeBtn.onclick = function ():void { ipcRenderer.send('window.close'); };
 
@@ -107,7 +287,7 @@ clearTasksBtn.onclick = function ():void { ipcRenderer.send('task.deleteAll'); }
 newTask_Mode.disabled = true;
 newTask_RestockMode.disabled = true;
 
-newTask_SearchInput[0].placeholder = "Please Select Site.";
+newTask_SearchInput[0].placeholder = 'Please Select Site.';
 newTask_Style[0].disabled = true;
 newTask_Category[0].disabled = true;
 newTask_Size[0].disabled = true;
@@ -148,7 +328,7 @@ newTask_saveBtn.onclick = function ():void {
 			'additional': {
 				proxyList: newTask_ProxyList.value ? newTask_ProxyList.value : '',
 				maxPrice: newTask_PriceLimit.value ? parseInt(newTask_PriceLimit.value) : 0,
-				timer: newTask_StartDate.value ? `${newTask_StartDate.value} ${timerVal}` : '',
+				timer: newTask_StartDate.value ? `${newTask_StartDate.value} ${timerVal}` : ' ',
 
 				monitorRestocks: newTask_Restocks ? newTask_Restocks.checked : true,
 				skipCaptcha: newTask_SkipCaptcha ? newTask_SkipCaptcha.checked : false,
@@ -217,7 +397,7 @@ billingZip.oninput = function ():void {
 billingCountry.oninput = function ():void {
 	if (useSameShippingAddress.checked) {
 		shippingCountry.value = this.value;
-		shippingCountry.onchange(new Event(null));
+		shippingCountry.onchange(new Event(''));
 	}
 };
 
@@ -275,35 +455,35 @@ saveProfileBtn.onclick = function ():void {
 	let profileData:any = {
 		profileName: profileName.value,
 		billing: {
-			"first": billingFirst.value,
-			"last": billingLast.value,
-			"email": billingEmail.value,
-			"telephone": billingTelephone.value,
-			"address1": billingAddress1.value,
-			"address2": billingAddress2.value,
-			"city": billingCity.value,
-			"zip": billingZip.value,
-			"country": billingCountry.value,
-			"state": billingState.value
+			'first': billingFirst.value,
+			'last': billingLast.value,
+			'email': billingEmail.value,
+			'telephone': billingTelephone.value,
+			'address1': billingAddress1.value,
+			'address2': billingAddress2.value,
+			'city': billingCity.value,
+			'zip': billingZip.value,
+			'country': billingCountry.value,
+			'state': billingState.value
 		},
 		shipping: {
-			"first": shippingFirst.value,
-			"last": shippingLast.value,
-			"email": shippingEmail.value,
-			"telephone": shippingTelephone.value,
-			"address1": shippingAddress1.value,
-			"address2": shippingAddress2.value,
-			"city": shippingCity.value,
-			"zip": shippingZip.value,
-			"country": shippingCountry.value,
-			"state": shippingState.value
+			'first': shippingFirst.value,
+			'last': shippingLast.value,
+			'email': shippingEmail.value,
+			'telephone': shippingTelephone.value,
+			'address1': shippingAddress1.value,
+			'address2': shippingAddress2.value,
+			'city': shippingCity.value,
+			'zip': shippingZip.value,
+			'country': shippingCountry.value,
+			'state': shippingState.value
 		},
 		payment: {
-			"type": paymentType.value,
-			"cardNumber": cardNumber.value,
-			"expiryMonth": cardExpiryMonth.value,
-			"expiryYear": cardExpiryYear.value,
-			"cvv": cardCvv.value
+			'type': paymentType.value,
+			'cardNumber': cardNumber.value,
+			'expiryMonth': cardExpiryMonth.value,
+			'expiryYear': cardExpiryYear.value,
+			'cvv': cardCvv.value
 		}
 	};
 	let profileId: any = document.getElementById('profileId');
@@ -314,7 +494,7 @@ saveProfileBtn.onclick = function ():void {
 	}
 };
 
-document.getElementById('deleteAllProfiles').onclick = function():void {
+clearProfilesBtn.onclick = function():void {
 	settings.set('profiles', {}, {prettify: true});
 	content.profiles();
 };
@@ -398,7 +578,7 @@ harvester_SaveBtn.onclick = function ():void {
 // 	});
 // }
 
-document.getElementById('proxyTestAll').onclick = function():void {
+proxyTestAll.onclick = function():void {
 	let listName:any = document.getElementById('proxyListSelectorMain');
 	if (listName) {
 		ipcRenderer.send('proxyList.testAll', {
@@ -408,11 +588,11 @@ document.getElementById('proxyTestAll').onclick = function():void {
 	}
 };
 
-document.getElementById('proxyDeleteList').onclick = function():void {
+proxyDeleteList.onclick = function():void {
 	let data:any = settings.get('proxies');
 	try {
 		
-		document.getElementById('proxy-header').innerHTML = `Proxies`;
+		proxyHeader.innerHTML = `Proxies`;
 		proxyTestTable.innerHTML = '';
 		delete data[proxyListSelectorMain.value];
 		settings.set('proxies', data, {prettify:true});
@@ -451,7 +631,7 @@ proxyListSelectorMain.onchange = function():void {
 
 
 
-document.getElementById('clearAnalytics').onclick = function():void {
+clearAnalyticsBtn.onclick = function():void {
 	settings.set('orders', [], {prettify:true});
 	content.orders();
 };
@@ -462,7 +642,6 @@ document.getElementById('clearAnalytics').onclick = function():void {
 // 	settings.set('monitorProxyList', this.value, { prettify: true });
 // };
 
-let currentBrowserPath:any = document.getElementById('currentBrowserPath');
 let browserPath:any = document.getElementById('browserPath');
 // let filePath = settings.has('browser-path') ? settings.get('browser-path') : null;
 // let fileName = filePath ? filePath.split('/')[filePath.split('/').length - 1] : null;
@@ -475,13 +654,13 @@ currentBrowserPath.onchange = function():void {
 
 browserPath.onchange = function():void {
 	currentBrowserPath.value = this.files[0].path;
-	currentBrowserPath.onchange(new Event(null));
+	currentBrowserPath.onchange(new Event(''));
 };
 
 installBrowserBtn.onclick = function ():void { ipcRenderer.send('setup browser mode'); };
 resetBtn.onclick = function ():void { ipcRenderer.send('reset settings'); };
 
-document.getElementById('version').innerHTML = `Version ${remote.app.getVersion()}`;
+version.innerHTML = `Version ${remote.app.getVersion()}`;
 
 customDiscord.value = settings.has('discord') ? settings.get('discord') : '';
 customDiscord.onchange = function ():void {
@@ -490,3 +669,4 @@ customDiscord.onchange = function ():void {
 testDiscordBtn.onclick = function ():void {
 	utilities.sendTestWebhook();
 };
+

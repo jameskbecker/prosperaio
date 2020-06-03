@@ -1,12 +1,14 @@
 const SupremeBase = require('./SupremeBase');
-const { utilities, logger } = require('../../other');
+const { logger } = require('../../other');
 
 const cheerio = require('cheerio');
 const ipcWorker = require('electron').ipcRenderer;
 const settings = require('electron-settings');
 
 class SupremeRequest extends SupremeBase {
-	constructor(_taskData, _id) {
+	private ticket: string;
+	
+	constructor(_taskData:any, _id:string) {
 		super(_taskData, _id);
 		this.cardinal = {
 			id: '',
@@ -21,16 +23,16 @@ class SupremeRequest extends SupremeBase {
 				payload: ''
 			}
 		};
-		this.ticket = ''
+		this.ticket = '';
 	}
 
-	async run() {
+	public async run() {
 		try {
 			
 			await this._setTimer();
-			this._setStatus('Starting Task.', 'WARNING');
+			this.setStatus('Starting Task.', 'WARNING');
 			logger.warn(`[Task ${this.id}] Starting.`);
-			console.log(this.profile)
+			console.log(this.profile);
 			//Find Product
 			await this._fetchStockData();
 			if (this.shouldStop) return this._stop();
@@ -46,41 +48,41 @@ class SupremeRequest extends SupremeBase {
 			await this._processStatus();
 
 			if (this.successful) {
-				this._setStatus('Success.', 'SUCCESS');
+				this.setStatus('Success.', 'SUCCESS');
 				let privateFields = [];
 				let publicFields = [];
 				if (this._productStyleName) {
 					let field = {
-						name: "Colour:",
+						name: 'Colour:',
 						value: this._productStyleName,
 						inline: true
-					}
+					};
 					privateFields.push(field);
 					publicFields.push(field);
 				}
 
-				if (this.checkoutData.hasOwnProperty("status")) {
+				if (this.checkoutData.hasOwnProperty('status')) {
 					let field = {
-						name: "Status:",
+						name: 'Status:',
 						value: this.checkoutData.status.capitalise(),
 						inline: true
-					}
-					privateFields.push(field)
+					};
+					privateFields.push(field);
 				}
 
 				if (this.cardinal.id) {
 					let field = {
-						name: "Transaction ID:",
+						name: 'Transaction ID:',
 						value: '||' + this.cardinal.id + '||',
 						inline: true
-					}
+					};
 					privateFields.push(field);
 				}
 				this._postPublicWebhook(publicFields);
 				this._postPrivateWebhook(privateFields);
 				this._addToAnalystics();
 			}
-			else { console.log('failed') }
+			else { console.log('failed'); }
 			this.isActive = false;
 
 		}
@@ -92,27 +94,27 @@ class SupremeRequest extends SupremeBase {
 					return this._stop();
 
 				default:
-					console.log(error)
+					console.log(error);
 			}
 		}
 	}
 
-	_atcProcess() {
-		return new Promise(async function runStage(resolve, reject) {
+	private _atcProcess() {
+		return new Promise(async function runStage(this: SupremeRequest, resolve:Function, reject:Function):Promise<any> {
 			try {
 				let cartDelay = !this.restockMode ? this.taskData.delays.cart : 0;
-				this._setCookie('shoppingSessionId', (new Date().getTime()).toString())
+				this._setCookie('shoppingSessionId', (new Date().getTime()).toString());
 
 				//ATC Delay
 				if (!this.restockMode) {
-					this._setStatus('Delaying ATC.', 'WARNING');
+					this.setStatus('Delaying ATC.', 'WARNING');
 					await this._sleep(cartDelay);
 				}
 
 				if (this.shouldStop) return this._stop();
 
 
-				this._setStatus('Adding to Cart.', 'WARNING');
+				this.setStatus('Adding to Cart.', 'WARNING');
 				logger.warn(`[T:${this.id}] Adding ${this.productId} to Cart.`);
 
 				
@@ -122,18 +124,18 @@ class SupremeRequest extends SupremeBase {
 			
 
 				let response = await this._addToCart();
-				console.log('atc response',response)
+				console.log('atc response',response);
 				let body = response.body;
 				logger.info(`[T:${this.id}] Cart Response:\n${JSON.stringify(body)}`);
 				if (
-					(body.hasOwnProperty('length') && !body.length > 0) ||
+					(body.hasOwnProperty('length') && body.length < 1) ||
 					(body.hasOwnProperty('success') && !body.success) ||
 					(body.hasOwnProperty('length') && !body[0].in_stock)
 				) {
 					throw new Error('OOS');
 				}
 
-				let pureCart = this._getCookie('pure_cart') || null
+				let pureCart = this._getCookie('pure_cart') || null;
 				let ticket = this._getCookie('ticket') || '';
 
 				if (ticket) {
@@ -142,44 +144,44 @@ class SupremeRequest extends SupremeBase {
 				}
 
 				if (!pureCart) {
-					throw new Error('NO PURE CART')
+					throw new Error('NO PURE CART');
 				}
 				let cookieValue = JSON.parse(decodeURIComponent(pureCart));
 				delete cookieValue.cookie;
 				this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
-				this._setStatus('Added to Cart!', 'SUCCESS');
+				this.setStatus('Added to Cart!', 'SUCCESS');
 				resolve();
 			}
 			catch (error) {
 				switch (error.message) {
 					case 'OOS':
-						this._setStatus('Out of Stock.', 'ERROR');
+						this.setStatus('Out of Stock.', 'ERROR');
 						logger.error('OOS');
 						this.restockMode = true;
 						//TODO: MAKE IT ENTER RESTOCK MODE
 						break;
 
 					default:
-						this._setStatus('ATC Error', 'ERROR');
+						this.setStatus('ATC Error', 'ERROR');
 						console.error(error);
 				}
-				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000
-				return setTimeout(runStage.bind(this, resolve, reject), errorDelay)
+				let errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+				return setTimeout(runStage.bind(this, resolve, reject), errorDelay);
 			}
-		}.bind(this))
+		}.bind(this));
 	}
 
-	_checkoutProcess() {
-		return new Promise(async function runStage(resolve) {
+	private _checkoutProcess() {
+		return new Promise(async function runStage(this: SupremeRequest, resolve: Function):Promise<any> {
 			try {
 				this._setCookie('lastVisitedFragment', 'checkout');
 
 				/* ---------------------------- FETCH & PARSE CHECKOUT FORM ----------------------------- */
 
-				this._setStatus("Parsing Checkout Form.", 'WARNING');
+				this.setStatus('Parsing Checkout Form.', 'WARNING');
 				let body = (await this._fetchMobile()).body;
 				let $ = cheerio.load(body);
-				let checkoutTemplate = $("#checkoutViewTemplate").html();
+				let checkoutTemplate = $('#checkoutViewTemplate').html();
 				this.formElements = this._parseCheckoutForm(checkoutTemplate);
 				/* ------------------------------------------------------------------------------------- */
 				
@@ -188,7 +190,7 @@ class SupremeRequest extends SupremeBase {
 				/* ---------------------------------- SETUP 3D SECURE ---------------------------------- */
 
 				if (this.region === 'EU' && !this.taskData.additional.enableThreeDS) {
-					this._setStatus('Initialising 3DS.', 'WARNING');
+					this.setStatus('Initialising 3DS.', 'WARNING');
 					logger.debug(`[T:${this.id}] Fetching Mobile Totals.`);
 					
 					/* ----------------------------------------------------------------------------------- */
@@ -221,7 +223,7 @@ class SupremeRequest extends SupremeBase {
 				/* ---------------------------------- REQUEST CAPTCHA ---------------------------------- */
 				
 				if (this.hasCaptcha) { 
-					await this._requestCaptcha() 
+					await this._requestCaptcha();
 				}
 				/* ------------------------------------------------------------------------------------- */
 
@@ -230,7 +232,7 @@ class SupremeRequest extends SupremeBase {
 				/* ----------------------------------- DELAY CHECKOUT ---------------------------------- */
 				
 				if (!this.restockMode) {
-					this._setStatus('Delaying Checkout.', 'WARNING');
+					this.setStatus('Delaying Checkout.', 'WARNING');
 					let checkoutDelay;
 					if (!this.captchaTime) { 
 						checkoutDelay = this.taskData.delays.checkout; 
@@ -250,12 +252,12 @@ class SupremeRequest extends SupremeBase {
 
 				/* ---------------------------------- SUBMIT CHECKOUT ---------------------------------- */
 				logger.warn('Submitting Checkout.');
-				this._setStatus('Submitting Checkout.', 'WARNING');
+				this.setStatus('Submitting Checkout.', 'WARNING');
 				this.checkoutAttempts++;
 				this.checkoutTS = Date.now();
 				this.checkoutTime = this.checkoutTS - this.startTS;
 				this._setCookie('_ticket', this._generateTicket(2) || '');
-				let checkoutResponse = await this._submitCheckout()
+				let checkoutResponse = await this._submitCheckout();
 				body = checkoutResponse.body;
 				this.checkoutData = body;
 				resolve();
@@ -263,18 +265,18 @@ class SupremeRequest extends SupremeBase {
 			catch (error) {
 				switch (error.message) {
 					default:
-						this._setStatus('Error Checking Out', 'ERROR');
+						this.setStatus('Error Checking Out', 'ERROR');
 						console.log(error);
 				}
 				return setTimeout(runStage.bind(this), 1000);
 			}
-		}.bind(this))
+		}.bind(this));
 	}
 
 
 
 	
-	async _addToCart() {
+	private async _addToCart() {
 		if (!this.atcForm) {
 			this.atcForm = this._form('cart-add');
 		}
@@ -287,44 +289,44 @@ class SupremeRequest extends SupremeBase {
 			jar: this.cookieJar,
 			json: true,
 			headers: {
-				"accept": "application/json",
-				"accept-encoding": "gzip, deflate, br",
-				"content-type": "application/x-www-form-urlencoded",
-				"origin": this.baseUrl,
-				"referer": `${this.baseUrl}/mobile/`,
-				"user-agent": this.userAgent,
-				"x-requested-with": "XMLHttpRequest"
+				'accept': 'application/json',
+				'accept-encoding': 'gzip, deflate, br',
+				'content-type': 'application/x-www-form-urlencoded',
+				'origin': this.baseUrl,
+				'referer': `${this.baseUrl}/mobile/`,
+				'user-agent': this.userAgent,
+				'x-requested-with': 'XMLHttpRequest'
 			}
-		}
+		};
 		return this.request(options);
 	}
 
-	async _fetchMobile() {
+	private async _fetchMobile():Promise<any> {
 		let options = {
 			url: `${this.baseUrl}/mobile`,
 			method: 'GET',
 			proxy: this.proxy,
 			jar: this.cookieJar,
 			headers: {
-				"Upgrade-Insecure-Requests": "1",
-				"User-Agent": this.userAgent
+				'Upgrade-Insecure-Requests': '1',
+				'User-Agent': this.userAgent
 			}
-		}
-		return this.request(options)
+		};
+		return this.request(options);
 	}
 
-	async _fetchMobileTotals() {
+	private async _fetchMobileTotals():Promise<any> {
 		let options = {
 			url: `${this.baseUrl}/checkout/totals_mobile.js`,
 			method: 'GET',
 			proxy: this.proxy,
 			jar: this.cookieJar,
 			qs: this._form('mobile-totals')
-		}
+		};
 		return this.request(options);
 	}
 
-	async _submitCheckout() {
+	public async _submitCheckout(endpoint?) {
 	//let path = endpoint !== 'cardinal' ? '/checkout.json' : '/checkout/' + this.slug + '/cardinal.json';
 		let options = {
 			url: this.baseUrl + '/checkout.json',
@@ -335,32 +337,32 @@ class SupremeRequest extends SupremeBase {
 			form: this._form('parsed-checkout'),
 			jar: this.cookieJar,
 			headers: {
-				"Accept": "application/json",
+				'Accept': 'application/json',
 				'Accept-Encoding': 'gzip, deflate, br',
 				'Origin': this.baseUrl,
 				'Referer': this.baseUrl + '/mobile',
 				'User-Agent': this.userAgent
 			}
-		}
+		};
 		return this.request(options);
 	
 	}
 
-	_setupThreeDS() {
+	private _setupThreeDS() {
 		return new Promise(resolve => {
 			logger.debug('Submitting Initial JWT.');
 			ipcWorker.send('cardinal.setup', {
 				jwt: this.cardinal.serverJWT,
 				profile: this.profileName,
 				taskId: this.id
-			})
+			});
 			ipcWorker.once(`cardinal.setupComplete(${this.id})`, (event, args) => {
 				resolve(args.cardinalId);
-			})
-		})
+			});
+		});
 	}
 
-	_generateTicket(type) {
+	private _generateTicket(type:number) {
 		let randomHex = [...Array(128)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 		let timeStamp = Math.floor(Date.now() / 1000);
 		switch(type) {
@@ -368,10 +370,10 @@ class SupremeRequest extends SupremeBase {
 				return `${randomHex}${timeStamp}`;
 
 			case 2:
-				return `${this.ticket}${randomHex}${timeStamp}`
+				return `${this.ticket}${randomHex}${timeStamp}`;
 		}
 	}
 
 }
 
-module.exports = SupremeRequest;
+export default SupremeRequest;

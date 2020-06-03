@@ -75,10 +75,8 @@ var _profileId = document.getElementById('profileId');
 var profileName = document.getElementById('profileName');
 var saveProfileBtn = document.getElementById('profileSaveButton');
 var profileLoader = document.getElementById('profileLoader');
-var importProfileBtn = document.getElementById('importProfiles');
-var exportProfileBtn = document.getElementById('exportProfiles');
 var deleteProfileBtn = document.getElementById('profileDeleteButton');
-var clearProfilesBtn = document.getElementById('profileDeleteAllButton');
+var clearProfilesBtn = document.getElementById('deleteAllProfiles');
 var profileElements = [
     document.getElementById('profileId'),
     billingFirst,
@@ -108,8 +106,7 @@ var profileElements = [
     cardCvv,
     profileName
 ];
-var importProxyBtn = document.getElementById('importProxies');
-var exportProxyBtn = document.getElementById('exportProxies');
+var proxyHeader = document.getElementById('proxy-header');
 var proxyListName = document.getElementById('proxyListName');
 var massProxyInput = document.getElementById('proxyInput');
 var saveProxyList = document.getElementById('saveProxyListBtn');
@@ -117,16 +114,19 @@ var proxyListSelectorMain = document.getElementById('proxyListSelectorMain');
 var proxyTableName = document.getElementById('proxyTableName');
 var proxyTestSite = document.getElementById('proxySiteSelector');
 var proxyTestTable = document.getElementById('proxyTestResults');
+var proxyTestAll = document.getElementById('proxyTestAll');
+var proxyDeleteList = document.getElementById('proxyDeleteList');
 var harverster_Name = document.getElementById('harvesterName');
 var harvester_SaveBtn = document.getElementById('saveHarvesterBtn');
 var harvesterTable = document.getElementById('harvesterTable');
 var harvester_ClearBtn = document.getElementById('clearCaptchaAccounts');
 var orderTableBody = document.getElementById('orderTableBody');
+var clearAnalyticsBtn = document.getElementById('clearAnalytics');
 var currentBrowserPath = document.getElementById('currentBrowserPath');
 var installBrowserBtn = document.getElementById('browserSetup');
 var resetBtn = document.getElementById('resetAllSettings');
 var signoutBtn = document.getElementById('signout');
 var customDiscord = document.getElementById('discordWebhook');
 var testDiscordBtn = document.getElementById('testDiscordWebhook');
-var footerVersion = document.getElementById('footerVersion');
+var version = document.getElementById('version');
 //# sourceMappingURL=elements.js.map

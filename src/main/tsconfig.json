@@ -2,17 +2,20 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES5", 
-		"sourceMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
 		"allowJs": true,
-		"noImplicitAny": true,
+		"noImplicitAny": false,
 		"skipLibCheck": true,
     "removeComments": true,
-    "outDir": "../../build"
+    "outDir": "../../build",
+    "typeRoots": [ "../../node_modules/@types"]
   },
   "include": [
 		"../../src/**/*",
 		"../../src/**/*.html",
-    "../../src/*"
+    "../../src/*",
+    "../../node_modules/@types/puppeteer/index.d.ts"
   ],
   "exclude": [
     "../../node_modules",

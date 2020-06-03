@@ -4,6 +4,8 @@
 	
 </script></head>
 <body>Worker
-	<script type="application/javascript">window._ = window.atob;
-		const worker = require('../build/worker');worker();</script>
+	<script>
+		const Worker = require('../build/Worker');
+		Worker.default.worker();
+	</script>
 </body>

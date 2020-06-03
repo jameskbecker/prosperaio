@@ -1,12 +1,33 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-require("./elements");
-var settings = require("electron-settings");
+var electron_settings_1 = __importDefault(require("electron-settings"));
 var electron_1 = require("electron");
 var configuration_1 = require("../library/configuration");
-var profileActions = require("./profiles");
-var $ = require("jquery");
-var droplist_1 = require("./droplist");
+var profileActions = __importStar(require("./profiles"));
+var $ = require('jquery');
+var droplist_1 = __importDefault(require("./droplist"));
 var selectedItem;
 function convertMode(id) {
     var modes = {
@@ -18,8 +39,8 @@ function convertMode(id) {
     return modes.hasOwnProperty(id) ? modes[id] : null;
 }
 function renderTaskTable() {
-    var tasks = settings.has('tasks') ? settings.get('tasks') : {};
-    var profiles = settings.has('profiles') ? settings.get('profiles') : {};
+    var tasks = electron_settings_1.default.has('tasks') ? electron_settings_1.default.get('tasks') : {};
+    var profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
     tasksHeader.innerHTML = "Tasks (" + Object.keys(tasks).length + " Total)";
     taskTableBody.innerHTML = '';
     try {
@@ -28,7 +49,7 @@ function renderTaskTable() {
             taskRow.className = 'row';
             var taskId = Object.keys(tasks)[i];
             var siteCell = document.createElement('td');
-            var defaultSiteData = configuration_1.sites.default;
+            var defaultSiteData = configuration_1.sites.def;
             var siteData = defaultSiteData[tasks[taskId].site];
             siteCell.innerHTML = siteData.label;
             siteCell.className = 'cell cell-body col-site';
@@ -111,11 +132,9 @@ function renderTaskTable() {
 }
 function renderProxyTable(name) {
     try {
-        var proxyLists_1 = settings.has('proxies') ? settings.get('proxies') : {};
+        var proxyLists_1 = electron_settings_1.default.has('proxies') ? electron_settings_1.default.get('proxies') : {};
         var list_1 = proxyLists_1[name];
         if (list_1) {
-            document.getElementById('proxy-header').innerHTML = '';
-            document.getElementById('proxy-header').innerHTML = "Proxies (" + Object.keys(list_1).length + " Total)";
             proxyTestTable.innerHTML = '';
             var _loop_2 = function (i) {
                 var proxyId = Object.keys(list_1)[i];
@@ -172,7 +191,7 @@ function renderProxyTable(name) {
                 deleteButton.className = 'action-button';
                 deleteButton.onclick = function () {
                     delete list_1[proxyId];
-                    settings.set('proxies', proxyLists_1, { prettify: true });
+                    electron_settings_1.default.set('proxies', proxyLists_1, { prettify: true });
                     var row = this.parentNode.parentNode;
                     row.parentNode.removeChild(row);
                 };
@@ -189,9 +208,9 @@ function renderProxyTable(name) {
     }
 }
 function renderSites() {
-    var siteKeys = Object.keys(configuration_1.sites.default);
+    var siteKeys = Object.keys(configuration_1.sites.def);
     for (var i = 0; i < siteKeys.length; i++) {
-        var defaultSiteData = configuration_1.sites.default;
+        var defaultSiteData = configuration_1.sites.def;
         var site = defaultSiteData[siteKeys[i]];
         if (site.enabled) {
             for (var j = 0; j < siteSelectors.length; j++) {
@@ -205,7 +224,7 @@ function renderSites() {
     newTask_Site.onchange = function () {
         newTask_Mode.disabled = false;
         newTask_RestockMode.disabled = false;
-        var defaultSiteData = configuration_1.sites.default;
+        var defaultSiteData = configuration_1.sites.def;
         var selectedSite = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
         if (selectedSite) {
             newTask_Mode.onchange = function () {
@@ -246,7 +265,7 @@ function renderSites() {
                 case 'kickz':
                     newTask_Style[0].parentElement.style.display = 'none';
                     newTask_Category[0].parentElement.style.display = 'none';
-                    newTask_SearchInput[0].placeholder = "Enter Product Url.";
+                    newTask_SearchInput[0].placeholder = 'Enter Product Url.';
                     var wireMode = document.createElement('option');
                     wireMode.label = 'Request - Wire Transfer';
                     wireMode.value = 'kickz-wire';
@@ -259,7 +278,7 @@ function renderSites() {
                 case 'supreme':
                     newTask_Style[0].parentElement.style.display = 'flex';
                     newTask_Category[0].parentElement.style.display = 'flex';
-                    newTask_SearchInput[0].placeholder = "Enter Keywords.";
+                    newTask_SearchInput[0].placeholder = 'Enter Keywords.';
                     requestMode.label = 'Fast';
                     requestMode.value = 'supreme-request';
                     newTask_Mode.add(requestMode);
@@ -271,7 +290,7 @@ function renderSites() {
                 case 'shopify':
                     newTask_Style[0].parentElement.style.display = 'none';
                     newTask_Category[0].parentElement.style.display = 'none';
-                    newTask_SearchInput[0].placeholder = "Enter Keywords or Product Url.";
+                    newTask_SearchInput[0].placeholder = 'Enter Keywords or Product Url.';
                     var fastMode = document.createElement('option');
                     fastMode.label = 'API (Fast)';
                     fastMode.value = 'shopify-api';
@@ -284,7 +303,7 @@ function renderSites() {
                 default: console.log(selectedSite.type);
             }
             try {
-                newTask_Mode.onchange(new Event(null));
+                newTask_Mode.onchange(new Event(''));
             }
             catch (err) { }
             droplist_1.default()
@@ -305,7 +324,7 @@ function renderSites() {
                         newTask_SearchInput[0].value = selectedItem.keywords;
                         newTask_Category[0].value = selectedItem.category;
                         newTask_styles.options.length = 0;
-                        for (var i = 0; i < selectedItem.newTask_styles.length; i++) {
+                        for (var i = 0; i < selectedItem.styles.length; i++) {
                             var option = document.createElement('option');
                             option.label = selectedItem.styles[i].name;
                             option.value = selectedItem.styles[i].keywords;
@@ -315,7 +334,7 @@ function renderSites() {
                             newTask_Style[0].value = this.value;
                         };
                         try {
-                            newTask_styles.onchange(new Event(null));
+                            newTask_styles.onchange(new Event(''));
                         }
                         catch (err) {
                             console.log(err);
@@ -373,7 +392,7 @@ function renderStates(selector, value) {
     }
 }
 function renderProxyListSelectors() {
-    var proxyLists = settings.has('proxies') ? settings.get('proxies') : {};
+    var proxyLists = electron_settings_1.default.has('proxies') ? electron_settings_1.default.get('proxies') : {};
     document.querySelectorAll('.proxylist-selector').forEach(function (element) {
         element.options.length = 1;
     });
@@ -392,7 +411,7 @@ function renderProxyListSelectors() {
 }
 function renderHarvesters() {
     harvesterTable.innerHTML = '';
-    var existingHarvesters = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
+    var existingHarvesters = electron_settings_1.default.has('captchaHarvesters') ? electron_settings_1.default.get('captchaHarvesters') : [];
     var _loop_4 = function (i) {
         var harvesterRow = document.createElement('tr');
         harvesterRow.className = 'row';
@@ -435,11 +454,11 @@ function renderHarvesters() {
         deleteButton.className = 'action-button';
         deleteButton.onclick = function () {
             try {
-                var existingHarvesters2 = settings.get('captchaHarvesters');
+                var existingHarvesters2 = electron_settings_1.default.get('captchaHarvesters');
                 var newHarvestrerArray = existingHarvesters2.filter(function (harvester) {
                     return harvester.name !== existingHarvesters[i].name;
                 });
-                settings.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
+                electron_settings_1.default.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
                 renderHarvesters();
             }
             catch (err) { }
@@ -457,7 +476,7 @@ function renderHarvesters() {
     }
 }
 function renderProfileSelectors() {
-    var existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
+    var existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
     document.getElementById('profileTableBody').innerHTML = '';
     var _loop_5 = function (i) {
         var profileId = Object.keys(existingProfiles)[i];
@@ -486,7 +505,7 @@ function renderProfileSelectors() {
         editButton.className = 'action-button';
         editButton.setAttribute('data-id', (profileId ? profileId : ''));
         editButton.onclick = function () {
-            var profiles = settings.has('profiles') ? settings.get('profiles') : {};
+            var profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
             var profileData = profiles[this.dataset.id];
             _profileId.value = this.dataset.id ? this.dataset.id : '';
             profileName.value = profileData.profileName ? profileData.profileName : '';
@@ -528,7 +547,7 @@ function renderProfileSelectors() {
         duplicateButton.className = 'action-button';
         duplicateButton.setAttribute('data-id', profileId ? profileId : '');
         duplicateButton.onclick = function () {
-            var profiles = settings.has('profiles') ? settings.get('profiles') : {};
+            var profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
             var profileData = profiles[this.dataset.id];
             profileActions.save(null, profileData);
             renderProfileSelectors();
@@ -538,9 +557,9 @@ function renderProfileSelectors() {
         deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
         deleteButton.className = 'action-button';
         deleteButton.onclick = function () {
-            var existingProfiles2 = settings.get('profiles');
+            var existingProfiles2 = electron_settings_1.default.get('profiles');
             delete existingProfiles2[profileId];
-            settings.set('profiles', existingProfiles2, { prettify: true });
+            electron_settings_1.default.set('profiles', existingProfiles2, { prettify: true });
             renderProfileSelectors();
         };
         actionsCell.appendChild(deleteButton);
@@ -552,7 +571,7 @@ function renderProfileSelectors() {
     }
     profileSelector.forEach(function (element) {
         element.options.length = 0;
-        var existingProfiles = settings.has('profiles') ? settings.get('profiles') : {};
+        var existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
         for (var i = 0; i < Object.keys(existingProfiles).length; i++) {
             var profileId = Object.keys(existingProfiles)[i];
             var option = document.createElement('option');
@@ -563,7 +582,7 @@ function renderProfileSelectors() {
     });
 }
 function renderOrderTable() {
-    var orders = settings.has('orders') ? settings.get('orders') : [];
+    var orders = electron_settings_1.default.has('orders') ? electron_settings_1.default.get('orders') : [];
     orderTableBody.innerHTML = '';
     try {
         for (var i = 0; i < orders.length; i++) {
@@ -601,14 +620,145 @@ function renderOrderTable() {
     }
 }
 exports.default = {
-    "tasks": renderTaskTable,
-    "profiles": renderProfileSelectors,
-    "proxies": renderProxyTable,
-    "proxySelectors": renderProxyListSelectors,
-    "sites": renderSites,
-    "countries": renderCountries,
-    "states": renderStates,
-    "orders": renderOrderTable,
-    "harvesters": renderHarvesters
+    'tasks': renderTaskTable,
+    'profiles': renderProfileSelectors,
+    'proxies': renderProxyTable,
+    'proxySelectors': renderProxyListSelectors,
+    'sites': renderSites,
+    'countries': renderCountries,
+    'states': renderStates,
+    'orders': renderOrderTable,
+    'harvesters': renderHarvesters
 };
+var checkboxes = document.querySelectorAll('.checkbox-label');
+var profileSelector = document.querySelectorAll('.profile-selector');
+var accountSelectors = document.querySelectorAll('.captchaAccount-selector');
+var countrySelectors = document.querySelectorAll('.country-selector');
+var proxyListSelectors = document.querySelectorAll('.proxylist-selector');
+var siteSelectors = document.querySelectorAll('.site-selector');
+var navigationSelectors = document.querySelectorAll('.nav');
+var reloadBtn = document.getElementById('reloadApp');
+var minimizeBtn = document.getElementById('minimizeApp');
+var closeBtn = document.getElementById('closeApp');
+var tasksHeader = document.getElementById('tasksHeader');
+var globalMonitorDelay = document.getElementById('globalMonitor');
+var globalErrorDelay = document.getElementById('globalError');
+var globalTimeoutDelay = document.getElementById('globalTimeout');
+var taskTable = document.getElementById('taskTable');
+var taskTableBody = document.getElementById('taskTableBody');
+var runAllBtn = document.getElementById('runAll');
+var stopAllBtn = document.getElementById('stopAll');
+var clearTasksBtn = document.getElementById('clearTasks');
+var newTask_Site = document.getElementById('taskSite');
+var newTask_Profile = document.getElementById('taskProfile');
+var newTask_Mode = document.getElementById('taskMode');
+var newTask_RestockMode = document.getElementById('newTaskMonitorMode');
+var newTask_CheckoutAttempts = document.getElementById('taskCheckoutAttempts');
+var newTask_Quantity = document.getElementById('taskQuantity');
+var newTask_CartDelay = document.getElementById('taskCartDelay');
+var newTask_CheckoutDelay = document.getElementById('taskCheckoutDelay');
+var newTask_MonitorDelay = document.getElementById('taskMonitorDelay');
+var newTask_ErrorDelay = document.getElementById('taskErrorDelay');
+var newTask_Timeout = document.getElementById('taskTimeoutDelay');
+var newTask_ProxyList = document.getElementById('taskProxyList');
+var newTask_PriceLimit = document.getElementById('taskMaxPrice');
+var newTask_StartDate = document.getElementById('taskStartDate');
+var newTask_StartTime = document.getElementById('taskStartTime');
+var newTask_Restocks = document.getElementById('newTaskRestocks');
+var newTask_SkipCaptcha = document.getElementById('captchaCheckbox');
+var newTask_threeD = document.getElementById('threeDCheckbox');
+var newTask_products = document.getElementById('newTaskProducts');
+var newTask_styles = document.getElementById('newTaskStyles');
+var newTask_sizes = document.getElementById('newTaskSizes');
+var newTask_SearchInput = document.querySelectorAll('input[name="taskSearchInput"]');
+var newTask_Category = document.querySelectorAll('input[name="taskCategory"]');
+var newTask_Size = document.querySelectorAll('input[name="taskSize"]');
+var newTask_Style = document.querySelectorAll('input[name="taskVariant"]');
+var newTask_ProductQty = document.querySelectorAll('input[name="taskProductQty"]');
+var newTask_saveBtn = document.getElementById('taskSaveButton');
+var profilesWrapper = document.getElementById('profilesWrapper');
+var billingFirst = document.getElementById('profileBillingFirst');
+var billingLast = document.getElementById('profileBillingLast');
+var billingEmail = document.getElementById('profileBillingEmail');
+var billingTelephone = document.getElementById('profileBillingTelephone');
+var billingAddress1 = document.getElementById('profileBillingAddress1');
+var billingAddress2 = document.getElementById('profileBillingAddress2');
+var billingCity = document.getElementById('profileBillingCity');
+var billingZip = document.getElementById('profileBillingZip');
+var billingCountry = document.getElementById('profileBillingCountry');
+var billingState = document.getElementById('profileBillingState');
+var useSameShippingAddress = document.getElementById('sameShippingCheckbox');
+var shippingFirst = document.getElementById('profileShippingFirst');
+var shippingLast = document.getElementById('profileShippingLast');
+var shippingEmail = document.getElementById('profileShippingEmail');
+var shippingTelephone = document.getElementById('profileShippingTelephone');
+var shippingAddress1 = document.getElementById('profileShippingAddress1');
+var shippingAddress2 = document.getElementById('profileShippingAddress2');
+var shippingCity = document.getElementById('profileShippingCity');
+var shippingZip = document.getElementById('profileShippingZip');
+var shippingCountry = document.getElementById('profileShippingCountry');
+var shippingState = document.getElementById('profileShippingState');
+var paymentType = document.getElementById('profilePaymentType');
+var cardNumber = document.getElementById('profileCardNumber');
+var cardExpiryMonth = document.getElementById('profileExpiryMonth');
+var cardExpiryYear = document.getElementById('profileExpiryYear');
+var cardCvv = document.getElementById('profileCvv');
+var _profileId = document.getElementById('profileId');
+var profileName = document.getElementById('profileName');
+var saveProfileBtn = document.getElementById('profileSaveButton');
+var profileLoader = document.getElementById('profileLoader');
+var deleteProfileBtn = document.getElementById('profileDeleteButton');
+var clearProfilesBtn = document.getElementById('deleteAllProfiles');
+var profileElements = [
+    document.getElementById('profileId'),
+    billingFirst,
+    billingLast,
+    billingEmail,
+    billingTelephone,
+    billingAddress1,
+    billingAddress2,
+    billingCity,
+    billingZip,
+    billingCountry,
+    billingState,
+    shippingFirst,
+    shippingLast,
+    shippingEmail,
+    shippingTelephone,
+    shippingAddress1,
+    shippingAddress2,
+    shippingCity,
+    shippingZip,
+    shippingCountry,
+    shippingState,
+    paymentType,
+    cardNumber,
+    cardExpiryMonth,
+    cardExpiryYear,
+    cardCvv,
+    profileName
+];
+var proxyHeader = document.getElementById('proxy-header');
+var proxyListName = document.getElementById('proxyListName');
+var massProxyInput = document.getElementById('proxyInput');
+var saveProxyList = document.getElementById('saveProxyListBtn');
+var proxyListSelectorMain = document.getElementById('proxyListSelectorMain');
+var proxyTableName = document.getElementById('proxyTableName');
+var proxyTestSite = document.getElementById('proxySiteSelector');
+var proxyTestTable = document.getElementById('proxyTestResults');
+var proxyTestAll = document.getElementById('proxyTestAll');
+var proxyDeleteList = document.getElementById('proxyDeleteList');
+var harverster_Name = document.getElementById('harvesterName');
+var harvester_SaveBtn = document.getElementById('saveHarvesterBtn');
+var harvesterTable = document.getElementById('harvesterTable');
+var harvester_ClearBtn = document.getElementById('clearCaptchaAccounts');
+var orderTableBody = document.getElementById('orderTableBody');
+var clearAnalyticsBtn = document.getElementById('clearAnalytics');
+var currentBrowserPath = document.getElementById('currentBrowserPath');
+var installBrowserBtn = document.getElementById('browserSetup');
+var resetBtn = document.getElementById('resetAllSettings');
+var signoutBtn = document.getElementById('signout');
+var customDiscord = document.getElementById('discordWebhook');
+var testDiscordBtn = document.getElementById('testDiscordWebhook');
+var version = document.getElementById('version');
 //# sourceMappingURL=content.js.map

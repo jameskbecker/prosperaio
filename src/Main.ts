@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron';
-import { HarvesterWindow } from './windows/index';
+import { HarvesterWindow } from './main/windows/index';
 import * as ipc from './ipc';
 import * as path from 'path';
 
@@ -9,7 +9,7 @@ interface harvesterProps {
 
 
 
-class Main {
+export class Main {
   static BrowserWindow: typeof BrowserWindow;
   static application: Electron.App;
 	static isDev: boolean;
@@ -28,42 +28,46 @@ class Main {
   static main(app: Electron.App, browserWindow: typeof BrowserWindow, isDev: boolean):void {
 		Main.isDev = isDev;
 		Main.isMac = process.platform === 'darwin';
-    Main.BrowserWindow = browserWindow;
+		Main.BrowserWindow = browserWindow;
+		try {
+			app.disableHardwareAcceleration();
+		} catch(e) {console.log(e);}
+		
     Main.application = app;
     Main.application.on('ready', Main.onReady);
   }
 
   private static onReady():void {
     Main.mainWindow = new Main.BrowserWindow({
-      "width": 1250,
-      "height": 750,
-      "backgroundColor": '#1a1919',
-      "frame": true,
-			"show": false,
+      'width': 1250,
+      'height': 750,
+      'backgroundColor': '#1a1919',
+      'frame': true,
+			'show': false,
 			
-      "resizable": true,
-      "webPreferences": {
+      'resizable': true,
+      'webPreferences': {
         nodeIntegration: true
       }
     });
     
     Main.loginWindow = new Main.BrowserWindow({
-      "height": 400,
-      "width": 700,
-      "backgroundColor": '#1a1919',
-      "frame": false,
-      "show": false,
-      "resizable": false,
-      "webPreferences": {
+      'height': 400,
+      'width': 700,
+      'backgroundColor': '#1a1919',
+      'frame': false,
+      'show': false,
+      'resizable': false,
+      'webPreferences': {
         nodeIntegration: true
       }
     });
 
     Main.workerWindow = new Main.BrowserWindow({
-      "height": 100,
-      "width": 100,
-      "show": false,
-      "webPreferences": {
+      'height': 100,
+      'width': 100,
+      'show': false,
+      'webPreferences': {
         nodeIntegration: true
       }
     });
@@ -220,5 +224,3 @@ class Main {
 		];
 	}
 }
-
-export default Main;

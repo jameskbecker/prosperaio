@@ -1,16 +1,26 @@
+import Worker from '../../../Worker';
 const request = require('request-promise-native');
 const settings = require('electron-settings');
 const ipcWorker = require('electron').ipcRenderer;
-const { logger, utilities } = require('../../other')
+const { logger, utilities } = require('../../other');
+
 class SupremeKWMonitor {
-	constructor(_options = {}) {
+	private baseUrl: string;
+	private inputData: any;
+	private userAgent: string;
+	private timeout: number;
+	private _isRunning: boolean;
+	private _shouldStop: boolean;
+	private _proxyList: string;
+
+	constructor(_options:any = {}) {
 		logger.info('[Monitor] ['+_options.proxyList+'] Inititalising KW Monitor.');
 		this.baseUrl = _options.baseUrl;
 		this._proxyList = _options.proxyList;
-		if (this._proxyList && this._proxyList !== "" && !global.activeProxyLists.hasOwnProperty(this._proxyList)) {
+		if (this._proxyList && this._proxyList !== '' && !Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
 			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
-				global.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+				Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
 			}
 		}
 		
@@ -18,13 +28,13 @@ class SupremeKWMonitor {
 		this.inputData = {};
 		this._isRunning = false;
 		this._shouldStop = false;
-		this.timeout
+		this.timeout;
 
 		this.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
 
 	}
 
-	run() {
+	public run() {
 		if (!this._isRunning && !this._shouldStop) {
 			this._isRunning = true;
 			this._fetchStockData('shop');
@@ -33,7 +43,7 @@ class SupremeKWMonitor {
 		}
 	}
 
-	add(taskId, name = '', category = '', callback) {
+	public add(taskId, name = '', category = '', callback) {
 		let input;
 		if (typeof callback !== 'function') {
 			return console.log('No Callback Given.');
@@ -62,40 +72,40 @@ class SupremeKWMonitor {
 		this.run();
 	}
 
-	remove(id) {
-		console.log('REMOVING FROM KW MONITOR')
+	public remove(id) {
+		console.log('REMOVING FROM KW MONITOR');
 		for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 			let property = Object.keys(this.inputData)[i];
-			console.log(`if this.inputData[${property}]['IDS'] includes ${id}`)
+			console.log(`if this.inputData[${property}]['IDS'] includes ${id}`);
 			if (this.inputData[property]['IDS'].includes(id)) {
 				this.inputData[property]['IDS'].splice(this.inputData[property]['IDS'].indexOf(id), 1);
 				console.log('Removed:', id);
 				if (this.inputData[property]['IDS'].length < 1) delete this.inputData[property];
 				if (Object.keys(this.inputData).length === 0) {
-					console.log('STOPPING MONITOR')
+					console.log('STOPPING MONITOR');
 					this._shouldStop = true;
 				}
 				else {
-					console.log('NOT STOPPING MONITOR')
+					console.log('NOT STOPPING MONITOR');
 				}
 			}
 		}
 
 	} 
 
-	_getProxy() {
+	private _getProxy() {
 		if (!this._proxyList) {
 			return null;
 		}
-		else if (global.activeProxyLists[this._proxyList].length < 1) {
+		else if (Worker.activeProxyLists[this._proxyList].length < 1) {
 			return null;
 		}
-		let proxy = global.activeProxyLists[this._proxyList][0]
-		global.activeProxyLists[this._proxyList].push(global.activeProxyLists[this._proxyList].shift());
+		let proxy = Worker.activeProxyLists[this._proxyList][0];
+		Worker.activeProxyLists[this._proxyList].push(Worker.activeProxyLists[this._proxyList].shift());
 		return proxy;
 	}
 
-	_hasMatchingsKeywords(data, positive, negative) {
+	private _hasMatchingsKeywords(data, positive, negative) {
 		for (let i = 0; i < positive.length; i++) {
 			if (!data.toLowerCase().includes(positive[i].toLowerCase())) {
 				return false;
@@ -109,7 +119,7 @@ class SupremeKWMonitor {
 		return true;
 	}
 
-	_parseCategory(key) {
+	private _parseCategory(key) {
 		return key;
 		// const categories = {
 		// 	"new": "New",
@@ -129,14 +139,14 @@ class SupremeKWMonitor {
 		// return categories[key];
 	}
 
-	_setStatus(message, type, ids) {
+	private setStatus(message:string, type:string, ids?:Array<string>) {
 		let colors = {
 			DEFAULT: '#8c8f93',
 			INFO: '#4286f4',
 			ERROR: '#f44253',
 			WARNING: '#f48641',
 			SUCCESS: '#2ed347'
-		}
+		};
 		if (!ids) {
 			for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 				for (let j = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
@@ -144,7 +154,7 @@ class SupremeKWMonitor {
 						id: this.inputData[Object.keys(this.inputData)[i]]['IDS'][j],
 						message: message,
 						color: colors[type]
-					})
+					});
 				}
 			}
 		}
@@ -154,14 +164,14 @@ class SupremeKWMonitor {
 					id: ids[i],
 					message: message,
 					color: colors[type]
-				})
+				});
 			}
 		}
 	}
 
-	_fetchStockData(endpoint) {
+	private _fetchStockData(endpoint) {
 		logger.info('[Monitor] ['+endpoint+'] Polling Supreme Stock Data.');
-		this._setStatus('Searching for Product.', 'WARNING');
+		this.setStatus('Searching for Product.', 'WARNING');
 		let options = {
 			url: this.baseUrl + '/' + endpoint + '.json',
 			method: 'GET',
@@ -179,32 +189,32 @@ class SupremeKWMonitor {
 				'upgrade-insecure-requests': '1',
 				'x-requested-with': 'XMLHttpRequest'
 			}
-		}
-		console.log(options)
+		};
+		console.log(options);
 		request(options)
 		.then(response => {
 			let body = response.body;
-			console.log(Object.keys(body))
+			console.log(Object.keys(body));
 			let categories = body.products_and_categories;
 			if (Object.keys(categories).length === 0) {
-				this._setStatus('Webstore Closed.', 'ERROR');
+				this.setStatus('Webstore Closed.', 'ERROR');
 				let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
 				this._isRunning = false;
-				return setTimeout(this.run.bind(this), monitorDelay)
+				return setTimeout(this.run.bind(this), monitorDelay);
 			}
 			Object.keys(this.inputData).forEach(propName => {
 				let data = this.inputData[propName];
-				this._setStatus('Searching for Product.', 'WARNING', data['IDS'])
-				let parsedCategory = this._parseCategory(data['CATEGORY'])
+				this.setStatus('Searching for Product.', 'WARNING', data['IDS']);
+				let parsedCategory = this._parseCategory(data['CATEGORY']);
 				if (!categories.hasOwnProperty(parsedCategory)) {
 					logger.error('[Monitor] Category Not Found.');
-					this._setStatus('Category Not Found.', 'ERROR');
+					this.setStatus('Category Not Found.', 'ERROR');
 					let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
 					this._isRunning = false;
-					return setTimeout(this.run.bind(this), monitorDelay)
+					return setTimeout(this.run.bind(this), monitorDelay);
 				}
 				else {
-					logger.verbose(`[Monitor] Matched Category: ${parsedCategory}`)
+					logger.verbose(`[Monitor] Matched Category: ${parsedCategory}`);
 					let products = categories[parsedCategory];
 					let productName;
 					let productId;
@@ -219,18 +229,18 @@ class SupremeKWMonitor {
 					}
 					if (!productId) {
 						logger.error('[Monitor] Product Not Found.');
-						this._setStatus('Product Not Found.', 'ERROR', data['IDS']);
+						this.setStatus('Product Not Found.', 'ERROR', data['IDS']);
 						let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
 						this._isRunning = false;
-						return setTimeout(this.run.bind(this), monitorDelay)
+						return setTimeout(this.run.bind(this), monitorDelay);
 					}
 					else {
-						logger.verbose(`[Monitor] [${endpoint}] Matched Product: ${productName} (${productId}).`)
+						logger.verbose(`[Monitor] [${endpoint}] Matched Product: ${productName} (${productId}).`);
 						this._returnData(propName, productName, productId, productPrice);
 
 					}
 				}
-			})
+			});
 		})
 		.catch(error => {
 			Object.keys(this.inputData).forEach(propName => {
@@ -248,14 +258,14 @@ class SupremeKWMonitor {
 				}
 				
 				logger.error(`[Monitor] ${error.message}.`);
-				this._setStatus(message, 'ERROR', data['IDS'])
+				this.setStatus(message, 'ERROR', data['IDS']);
 			});
 			this._isRunning = false;
 			return setTimeout(this.run.bind(this), settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000);
-		})
+		});
 	}
 
-	_returnData(propName, name, id, price) {
+	private _returnData(propName, name, id, price) {
 		let callbacks = this.inputData[propName]['CALLBACKS'];
 		for (let i = 0; i < callbacks.length; i++) {
 			callbacks[i](name, id, price);
@@ -265,4 +275,4 @@ class SupremeKWMonitor {
 	}
 }
 
-module.exports = SupremeKWMonitor;
+export default SupremeKWMonitor;

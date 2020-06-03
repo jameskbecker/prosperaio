@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,13 +54,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = void 0;
 var electron_1 = require("electron");
-var Main_1 = require("./Main");
+var Main_1 = __importDefault(require("./Main"));
 var index_1 = require("./windows/index");
-var logger = require('../library/other').logger;
-var settings = require('electron-settings');
+var other_1 = require("../library/other");
+var settings = __importStar(require("electron-settings"));
 var CARDINAL_SOLVERS = {};
 var HARVESTERS = {
     'supreme': [],
@@ -57,27 +79,27 @@ function init() {
     var _this = this;
     electron_1.ipcMain.on('window.reload', function () {
         var _a;
-        logger.debug('[MAIN] [IPC] window.reload');
+        other_1.logger.debug('[MAIN] [IPC] window.reload');
         (_a = Main_1.default.workerWindow) === null || _a === void 0 ? void 0 : _a.webContents.reload();
         Main_1.default.mainWindow.webContents.reload();
     });
     electron_1.ipcMain.on('window.minimize', function () {
         var _a;
-        logger.debug('[MAIN] [IPC] window.minimize');
+        other_1.logger.debug('[MAIN] [IPC] window.minimize');
         (_a = electron_1.BrowserWindow.getFocusedWindow()) === null || _a === void 0 ? void 0 : _a.minimize();
     });
     electron_1.ipcMain.on('window.close', function () {
-        logger.debug('[MAIN] [IPC] window.close');
+        other_1.logger.debug('[MAIN] [IPC] window.close');
         electron_1.app.quit();
     });
     electron_1.ipcMain.on('captcha.launch', function (event, args) {
-        logger.debug('[MAIN] [IPC] captcha.launch');
+        other_1.logger.debug('[MAIN] [IPC] captcha.launch');
         var harvester = new index_1.HarvesterWindow(args.sessionName, args.site);
         harvester.spawn();
         HARVESTERS[args.site].push(harvester);
     });
     electron_1.ipcMain.on('captcha.ready', function (event, args) {
-        logger.debug('[MAIN] [IPC] captcha.ready');
+        other_1.logger.debug('[MAIN] [IPC] captcha.ready');
         var harvester = HARVESTERS[args.site].find(function (harvester) { return harvester.sessionName === args.sessionName; });
         if (HARVESTER_QUEUES[args.site].length > 0) {
             harvester.state = 'busy';
@@ -92,13 +114,13 @@ function init() {
         }
     });
     electron_1.ipcMain.on('captcha.clearQueue', function (event, args) {
-        logger.debug('[MAIN] [IPC] captcha.clearQueue');
+        other_1.logger.debug('[MAIN] [IPC] captcha.clearQueue');
         HARVESTER_QUEUES[args].length = 0;
         event.sender.send('cleared queue', HARVESTER_QUEUES[args].length);
     });
     electron_1.ipcMain.on('captcha.signIn', function (event, args) {
         var _a;
-        logger.debug('[MAIN] [IPC] captcha.signIn');
+        other_1.logger.debug('[MAIN] [IPC] captcha.signIn');
         var sessionName = args.sessionName;
         index_1.GoogleWindow.create(sessionName);
         index_1.GoogleWindow.load();
@@ -110,16 +132,16 @@ function init() {
         });
     });
     electron_1.ipcMain.on('captcha.signOut', function (event, args) {
-        logger.debug('[MAIN] [IPC] captcha.signOut');
+        other_1.logger.debug('[MAIN] [IPC] captcha.signOut');
         var sessionName = args.name;
         electron_1.session.fromPartition("persist:" + sessionName).clearStorageData();
         Main_1.default.mainWindow.webContents.send('remove session', sessionName);
     });
     electron_1.ipcMain.on('captcha.request', function (event, args) {
-        logger.debug('[MAIN] [IPC] captcha.request');
+        other_1.logger.debug('[MAIN] [IPC] captcha.request');
         var readyHarvesters = HARVESTERS[args.type].filter(function (harvester) { return harvester.state === 'ready'; });
         if (readyHarvesters.length < 1) {
-            logger.debug('NO READY HARVESTERS... PLACING IN QUEUE');
+            other_1.logger.debug('NO READY HARVESTERS... PLACING IN QUEUE');
             HARVESTER_QUEUES[args.type].push(args);
         }
         else {
@@ -132,7 +154,7 @@ function init() {
     });
     electron_1.ipcMain.on('captcha.response', function (event, args) {
         var _a;
-        logger.debug('[MAIN] [IPC] captcha.response');
+        other_1.logger.debug('[MAIN] [IPC] captcha.response');
         (_a = Main_1.default.workerWindow) === null || _a === void 0 ? void 0 : _a.webContents.send('captcha response', {
             id: args.id,
             ts: args.ts,
@@ -151,7 +173,7 @@ function init() {
         }
     });
     electron_1.ipcMain.on('captcha.closeWindow', function (event, args) {
-        logger.debug('[MAIN] [IPC] captcha.closeWindow');
+        other_1.logger.debug('[MAIN] [IPC] captcha.closeWindow');
         var updatedHarvesters = HARVESTERS[args.site].filter(function (harvester) {
             var _a;
             if (harvester.sessionName === args.sessionName) {
@@ -171,7 +193,7 @@ function init() {
                 case 0: return [4, electron_1.dialog.showOpenDialog(Main_1.default.mainWindow, {
                         message: "Import " + args.type,
                         buttonLabel: 'Import',
-                        properties: ["multiSelections"],
+                        properties: ['multiSelections'],
                         filters: [
                             {
                                 name: 'ProsperAIO File',
@@ -319,7 +341,7 @@ function init() {
                             (_a = Main_1.default.workerWindow) === null || _a === void 0 ? void 0 : _a.webContents.send('reset settings');
                             break;
                         case 1:
-                            logger.debug('NO');
+                            other_1.logger.debug('NO');
                             break;
                     }
                     return [2];

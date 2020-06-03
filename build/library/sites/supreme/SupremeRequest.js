@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -54,8 +55,9 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var SupremeBase = require('./SupremeBase');
-var _a = require('../../other'), utilities = _a.utilities, logger = _a.logger;
+var logger = require('../../other').logger;
 var cheerio = require('cheerio');
 var ipcWorker = require('electron').ipcRenderer;
 var settings = require('electron-settings');
@@ -89,7 +91,7 @@ var SupremeRequest = (function (_super) {
                         return [4, this._setTimer()];
                     case 1:
                         _a.sent();
-                        this._setStatus('Starting Task.', 'WARNING');
+                        this.setStatus('Starting Task.', 'WARNING');
                         logger.warn("[Task " + this.id + "] Starting.");
                         console.log(this.profile);
                         return [4, this._fetchStockData()];
@@ -114,21 +116,21 @@ var SupremeRequest = (function (_super) {
                     case 6:
                         _a.sent();
                         if (this.successful) {
-                            this._setStatus('Success.', 'SUCCESS');
+                            this.setStatus('Success.', 'SUCCESS');
                             privateFields = [];
                             publicFields = [];
                             if (this._productStyleName) {
                                 field = {
-                                    name: "Colour:",
+                                    name: 'Colour:',
                                     value: this._productStyleName,
                                     inline: true
                                 };
                                 privateFields.push(field);
                                 publicFields.push(field);
                             }
-                            if (this.checkoutData.hasOwnProperty("status")) {
+                            if (this.checkoutData.hasOwnProperty('status')) {
                                 field = {
-                                    name: "Status:",
+                                    name: 'Status:',
                                     value: this.checkoutData.status.capitalise(),
                                     inline: true
                                 };
@@ -136,7 +138,7 @@ var SupremeRequest = (function (_super) {
                             }
                             if (this.cardinal.id) {
                                 field = {
-                                    name: "Transaction ID:",
+                                    name: 'Transaction ID:',
                                     value: '||' + this.cardinal.id + '||',
                                     inline: true
                                 };
@@ -178,7 +180,7 @@ var SupremeRequest = (function (_super) {
                             cartDelay = !this.restockMode ? this.taskData.delays.cart : 0;
                             this._setCookie('shoppingSessionId', (new Date().getTime()).toString());
                             if (!!this.restockMode) return [3, 2];
-                            this._setStatus('Delaying ATC.', 'WARNING');
+                            this.setStatus('Delaying ATC.', 'WARNING');
                             return [4, this._sleep(cartDelay)];
                         case 1:
                             _a.sent();
@@ -186,7 +188,7 @@ var SupremeRequest = (function (_super) {
                         case 2:
                             if (this.shouldStop)
                                 return [2, this._stop()];
-                            this._setStatus('Adding to Cart.', 'WARNING');
+                            this.setStatus('Adding to Cart.', 'WARNING');
                             logger.warn("[T:" + this.id + "] Adding " + this.productId + " to Cart.");
                             this._setCookie('lastVisitedFragment', "products/" + this.productId + "/" + this.styleId);
                             this._setCookie('_ticket', this._generateTicket(1) || '');
@@ -196,7 +198,7 @@ var SupremeRequest = (function (_super) {
                             console.log('atc response', response);
                             body = response.body;
                             logger.info("[T:" + this.id + "] Cart Response:\n" + JSON.stringify(body));
-                            if ((body.hasOwnProperty('length') && !body.length > 0) ||
+                            if ((body.hasOwnProperty('length') && body.length < 1) ||
                                 (body.hasOwnProperty('success') && !body.success) ||
                                 (body.hasOwnProperty('length') && !body[0].in_stock)) {
                                 throw new Error('OOS');
@@ -213,19 +215,19 @@ var SupremeRequest = (function (_super) {
                             cookieValue = JSON.parse(decodeURIComponent(pureCart));
                             delete cookieValue.cookie;
                             this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
-                            this._setStatus('Added to Cart!', 'SUCCESS');
+                            this.setStatus('Added to Cart!', 'SUCCESS');
                             resolve();
                             return [3, 5];
                         case 4:
                             error_2 = _a.sent();
                             switch (error_2.message) {
                                 case 'OOS':
-                                    this._setStatus('Out of Stock.', 'ERROR');
+                                    this.setStatus('Out of Stock.', 'ERROR');
                                     logger.error('OOS');
                                     this.restockMode = true;
                                     break;
                                 default:
-                                    this._setStatus('ATC Error', 'ERROR');
+                                    this.setStatus('ATC Error', 'ERROR');
                                     console.error(error_2);
                             }
                             errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
@@ -245,17 +247,17 @@ var SupremeRequest = (function (_super) {
                         case 0:
                             _b.trys.push([0, 10, , 11]);
                             this._setCookie('lastVisitedFragment', 'checkout');
-                            this._setStatus("Parsing Checkout Form.", 'WARNING');
+                            this.setStatus('Parsing Checkout Form.', 'WARNING');
                             return [4, this._fetchMobile()];
                         case 1:
                             body = (_b.sent()).body;
                             $_1 = cheerio.load(body);
-                            checkoutTemplate = $_1("#checkoutViewTemplate").html();
+                            checkoutTemplate = $_1('#checkoutViewTemplate').html();
                             this.formElements = this._parseCheckoutForm(checkoutTemplate);
                             if (this.shouldStop)
                                 return [2, this._stop()];
                             if (!(this.region === 'EU' && !this.taskData.additional.enableThreeDS)) return [3, 4];
-                            this._setStatus('Initialising 3DS.', 'WARNING');
+                            this.setStatus('Initialising 3DS.', 'WARNING');
                             logger.debug("[T:" + this.id + "] Fetching Mobile Totals.");
                             return [4, this._fetchMobileTotals()];
                         case 2:
@@ -288,7 +290,7 @@ var SupremeRequest = (function (_super) {
                             if (this.shouldStop)
                                 return [2, this._stop()];
                             if (!!this.restockMode) return [3, 8];
-                            this._setStatus('Delaying Checkout.', 'WARNING');
+                            this.setStatus('Delaying Checkout.', 'WARNING');
                             checkoutDelay = void 0;
                             if (!this.captchaTime) {
                                 checkoutDelay = this.taskData.delays.checkout;
@@ -307,7 +309,7 @@ var SupremeRequest = (function (_super) {
                             if (this.shouldStop)
                                 return [2, this._stop()];
                             logger.warn('Submitting Checkout.');
-                            this._setStatus('Submitting Checkout.', 'WARNING');
+                            this.setStatus('Submitting Checkout.', 'WARNING');
                             this.checkoutAttempts++;
                             this.checkoutTS = Date.now();
                             this.checkoutTime = this.checkoutTS - this.startTS;
@@ -323,7 +325,7 @@ var SupremeRequest = (function (_super) {
                             error_3 = _b.sent();
                             switch (error_3.message) {
                                 default:
-                                    this._setStatus('Error Checking Out', 'ERROR');
+                                    this.setStatus('Error Checking Out', 'ERROR');
                                     console.log(error_3);
                             }
                             return [2, setTimeout(runStage.bind(this), 1000)];
@@ -349,13 +351,13 @@ var SupremeRequest = (function (_super) {
                     jar: this.cookieJar,
                     json: true,
                     headers: {
-                        "accept": "application/json",
-                        "accept-encoding": "gzip, deflate, br",
-                        "content-type": "application/x-www-form-urlencoded",
-                        "origin": this.baseUrl,
-                        "referer": this.baseUrl + "/mobile/",
-                        "user-agent": this.userAgent,
-                        "x-requested-with": "XMLHttpRequest"
+                        'accept': 'application/json',
+                        'accept-encoding': 'gzip, deflate, br',
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'origin': this.baseUrl,
+                        'referer': this.baseUrl + "/mobile/",
+                        'user-agent': this.userAgent,
+                        'x-requested-with': 'XMLHttpRequest'
                     }
                 };
                 return [2, this.request(options)];
@@ -372,8 +374,8 @@ var SupremeRequest = (function (_super) {
                     proxy: this.proxy,
                     jar: this.cookieJar,
                     headers: {
-                        "Upgrade-Insecure-Requests": "1",
-                        "User-Agent": this.userAgent
+                        'Upgrade-Insecure-Requests': '1',
+                        'User-Agent': this.userAgent
                     }
                 };
                 return [2, this.request(options)];
@@ -395,7 +397,7 @@ var SupremeRequest = (function (_super) {
             });
         });
     };
-    SupremeRequest.prototype._submitCheckout = function () {
+    SupremeRequest.prototype._submitCheckout = function (endpoint) {
         return __awaiter(this, void 0, void 0, function () {
             var options;
             return __generator(this, function (_a) {
@@ -408,7 +410,7 @@ var SupremeRequest = (function (_super) {
                     form: this._form('parsed-checkout'),
                     jar: this.cookieJar,
                     headers: {
-                        "Accept": "application/json",
+                        'Accept': 'application/json',
                         'Accept-Encoding': 'gzip, deflate, br',
                         'Origin': this.baseUrl,
                         'Referer': this.baseUrl + '/mobile',
@@ -445,5 +447,5 @@ var SupremeRequest = (function (_super) {
     };
     return SupremeRequest;
 }(SupremeBase));
-module.exports = SupremeRequest;
+exports.default = SupremeRequest;
 //# sourceMappingURL=SupremeRequest.js.map

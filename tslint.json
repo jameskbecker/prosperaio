@@ -1,15 +1,15 @@
 {
   "rules": {
     "semicolon":true,
-    "strict-type-predicates":true,
-    "strict-boolean-expressions":false,
-		"no-var-requires": true,
-		"typedef": [true, 
-			"call-signature", 
-			"arrow-call-signature",
-			"variable-declaration",
-			"member-variable-declaration"
-		],
+    "strict-type-predicates":false,
+		"strict-boolean-expressions":false,
+    "quotemark": [true, "single"],
+    "member-access": [true, "no-public"],
+    "no-default-export": true,
+    "no-default-import": true,
+    "no-unused-variable": true,
+		"no-var-requires": false,
+		"typedef": [true, "call-signature", "parameter", "member-variable-declaration"],
     "typedef-whitespace": true
   }
 }

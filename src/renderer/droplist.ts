@@ -1,10 +1,10 @@
 import './elements';
-import * as request from 'request-promise-native';
+import request from 'request-promise-native';
 
 export default function getProducts():Promise<any> {
 	return new Promise((resolve:Function):void => {
 		let productApiStatus:any = document.getElementById('productApiStatus');
-		productApiStatus.value = "Fetching Products";
+		productApiStatus.value = 'Fetching Products';
 		request({
 			url: 'http://prosper-products-eu.herokuapp.com/supreme/latest',
 			method: 'GET',
@@ -16,11 +16,11 @@ export default function getProducts():Promise<any> {
 		})
 			.then((response:any):void => {
 				let body:any = response.body;
-				productApiStatus.value = "Loaded Products";
+				productApiStatus.value = 'Loaded Products';
 				resolve(body);
 			})
 			.catch((error:any):void => {
-				productApiStatus.value = "Error Fetching Products";
+				productApiStatus.value = 'Error Fetching Products';
 				console.log(error);
 				resolve({});
 			});

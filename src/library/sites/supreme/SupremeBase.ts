@@ -1,18 +1,46 @@
-const Task = require('../Task');
-const { utilities, logger } = require('../../other');
-const { URLMonitor, KWMonitor } = require('../../monitors/supreme');
-const settings = require('electron-settings');
-const request = require('request-promise-native');
-const cheerio = require('cheerio');
+import Worker from '../../../Worker';
+import Task from '../Task';
+import SupremeRequest from './SupremeRequest';
+import SupremeSafe from './SupremeSafe';
+import { ipcRenderer as ipcWorker } from 'electron';
+import { utilities, logger } from '../../other';
+import { SupremeUrlMonitor, SupremeKWMonitor } from '../../monitors/supreme';
+import { discord, sites } from '../../configuration';
+import * as  settings from 'electron-settings';
+import request from 'request-promise-native';
+import * as cheerio from 'cheerio';
+import { v4 as uuidv4 } from 'uuid'; 
+
+
 class SupremeBase extends Task {
-	constructor(_taskData, _id) {
+	restockMode: boolean;
+	request: any;
+	cookieJar: any;
+	formElements: any;
+	cookieSub: string;
+	slug: string;
+	checkoutAttempts: number;
+	checkoutData: any;
+	userAgent: string;
+	region: string;
+	startTS: number;
+	
+	mobileUrl: string;
+	productId: number;
+	sizeId: number;
+	styleId: number;
+	cardinal: any;
+
+
+
+	constructor(_taskData:any, _id:any) {
 		super(_taskData, _id);
 		this.restockMode = false;
 		
 		this.request = request.defaults({
 			
 			gzip: true,
-			timeout: settings.has('globalTimeoutDelay') ? settings.get('globalTimeoutDelay') : 5000,
+			timeout: settings.has('globalTimeoutDelay') ? parseInt((<string>settings.get('globalTimeoutDelay'))) : 5000,
 			resolveWithFullResponse: true
 		});
 		this.cookieJar = this.request.jar();
@@ -27,24 +55,28 @@ class SupremeBase extends Task {
 		switch (this.taskData.site) {
 			case 'supreme-eu': this.region = 'EU';
 				break;
-			case 'supreme-us': this.region = 'US';
-				break;
+			
 			case 'supreme-jp': this.region = 'JP';
+				break;
+				
+			case 'supreme-us': 
+			default:
+				this.region = 'US';
 				break;
 		}
 	}
 
-	set checkoutDelay(delay) {
+	set checkoutDelay(delay:any) {
 		if (delay <= 0) this.checkoutDelay = 0;
 		else this.checkoutDelay = delay;
 	}
 
-	_fetchStockData() {
+	_fetchStockData():Promise<any> {
 		return new Promise((resolve, reject) => {
-			async function runStage() {
+			async function runStage(this:SupremeBase):Promise<any> {
 				//Setup Keyword Monitor
-				if (!global.monitors.supreme.kw) {
-					global.monitors.supreme.kw = new KWMonitor({
+				if (!Worker.monitors.supreme.kw) {
+					Worker.monitors.supreme.kw = new SupremeKWMonitor({
 						baseUrl: this.baseUrl,
 						proxyList: this._proxyList
 					});
@@ -54,19 +86,19 @@ class SupremeBase extends Task {
 				let maxPrice = this.taskData.additional.maxPrice;
 
 				if (!searchInput.includes('+') && !searchInput.includes('-')) {
-					this._setStatus('Invalid Search Input.', 'ERROR');
+					this.setStatus('Invalid Search Input.', 'ERROR');
 					reject(new Error('INVALID INPUT'));
 					return;
 				}
 
 				logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
-				this._setStatus('Fetching Stock Data.', 'WARNING');
+				this.setStatus('Fetching Stock Data.', 'WARNING');
 				this.isMonitoringKW = true;
 				if (this.shouldStop) return this._stop();
-				global.monitors.supreme.kw.add(this.id, searchInput, category, (name, id, price) => {
+				Worker.monitors.supreme.kw.add(this.id, searchInput, category, (name:any, id:any, price:any) => {
 					this.isMonitoringKW = false;
 					if (maxPrice > 0 && (price / 100) > maxPrice) {
-						this._setStatus('Price Exceeds Limit.', 'ERROR');
+						this.setStatus('Price Exceeds Limit.', 'ERROR');
 						reject(new Error('PRICE LIMIT'));
 						return;
 					}
@@ -77,25 +109,25 @@ class SupremeBase extends Task {
 					this._productUrl = this.baseUrl + '/shop/' + this.productId;
 					resolve();
 					return;
-				})
+				});
 			}
 			runStage.bind(this)();
-		})
+		});
 	}
 
-	_fetchProductData() {
-		return new Promise(function runStage(resolve, reject) {		
-			if (!global.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
-				global.monitors.supreme.url[this._productUrl] = new URLMonitor(this._productUrl, this._proxyList);
+	_fetchProductData():Promise<any> {
+		return new Promise(function runStage(this:SupremeBase, resolve:any, reject:any) {		
+			if (!Worker.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
+				Worker.monitors.supreme.url[this._productUrl] = new SupremeUrlMonitor(this._productUrl, this._proxyList);
 			}
 			
 			
 			this.isMonitoring = true;
 			if (this.shouldStop) return this._stop();
-			this._setStatus('Fetching Product Data.', 'WARNING');
+			this.setStatus('Fetching Product Data.', 'WARNING');
 			let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
-			global.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
-			global.monitors.supreme.url[this._productUrl].add(this.id, (styles) => {
+			Worker.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
+			Worker.monitors.supreme.url[this._productUrl].add(this.id, (styles:any) => {
 				try {
 					if (this.shouldStop) return this._stop();
 
@@ -106,21 +138,21 @@ class SupremeBase extends Task {
 					for (let i = 0; i < styles.length; i++) {
 						if (this._keywordsMatch(styles[i].name.toLowerCase(), this._parseKeywords(this.products[0].style))) {
 							styleName = styles[i].name;
-							styleId = styles[i].id
+							styleId = styles[i].id;
 							imageUrl = 'https:' + styles[i].image_url;
 
 							switch (this.products[0].size) {
-								case "RANDOM":
+								case 'RANDOM':
 									sizeData = styles[i].sizes[Math.floor(Math.random() * styles[i].sizes.length)];
 									break;
-								case "SMALLEST":
+								case 'SMALLEST':
 									sizeData = styles[i].sizes[0];
 									break;
-								case "LARGEST":
+								case 'LARGEST':
 									sizeData = styles[i].sizes[styles[i].sizes.length - 1];
 									break;
 								default:
-									sizeData = styles[i].sizes.filter(size => size.name.toLowerCase().includes(this.products[0].size))[0] || null;
+									sizeData = styles[i].sizes.filter((size:any) => size.name.toLowerCase().includes(this.products[0].size))[0] || null;
 							}
 							break;
 						}
@@ -145,72 +177,72 @@ class SupremeBase extends Task {
 
 					if (this.taskData.setup.restockMode === 'stock' && !sizeData.stock_level) {
 						this.restockMode = true;
-						throw new Error('OOS')
+						throw new Error('OOS');
 					}
 
-					global.monitors.supreme.url[this._productUrl].remove(this.id);
+					Worker.monitors.supreme.url[this._productUrl].remove(this.id);
 					this.isMonitoring = false;
 					resolve();
 				}
 				catch (error) {
 					switch (error.message) {
 						case 'OOS':
-							this._setStatus('OOS. Retrying.', 'ERROR');
+							this.setStatus('OOS. Retrying.', 'ERROR');
 							logger.error(`[T:${this.id}] [${this.productName}] OOS`);
 							break;
 
 						case 'Style Not Found':
-							this._setStatus('Style Not Found', 'ERROR');
+							this.setStatus('Style Not Found', 'ERROR');
 							logger.error(`[T:${this.id}] Style Not Found`);
 							break;
 
 						case 'Size Not Found':
-							this._setStatus('Size Not Found', 'ERROR');
+							this.setStatus('Size Not Found', 'ERROR');
 							logger.error(`[T:${this.id}] [${this.productName}] Size Not Found`);
 							break;
 
 						default:
-							this._setStatus('Error. Retrying', 'ERROR');
+							this.setStatus('Error. Retrying', 'ERROR');
 							console.log(error);
 
 					}
-					let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
+					let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
 					return setTimeout(runStage.bind(this, resolve, reject), monitorDelay);
 				}
-			})
+			});
 
 
-		}.bind(this))
+		}.bind(this));
 	}
 
-	_parseCheckoutForm(checkoutTemplate) {
-		let formElements = [];
+	_parseCheckoutForm(checkoutTemplate:any):any {
+		let formElements:any = [];
 		let $ = cheerio.load(checkoutTemplate);
 		let checkoutForm = $('form[action="https://www.supremenewyork.com/checkout.json"]').html();
 		$ = cheerio.load(checkoutForm);
 
-		$(':input[type!="submit"]').each(function () {
+		$(':input[type!="submit"]').each(function (this:any) {
 			let formElement = $(this)[0].attribs;
 			let output = {};
-			let attributes = ["name", "id", "placeholder", "value", "style"]
+			let attributes = ['name', 'id', 'placeholder', 'value', 'style'];
 			attributes.forEach(attribute => {
 				if (Object.hasOwnProperty.bind(formElement)(attribute)) {
-					output[attribute] = formElement[attribute]
+					output[attribute] = formElement[attribute];
 				}
-			})
+			});
 			if (Object.keys(output).length > 0) {
 				//logger.verbose(`Parsed Form Element:\n${output.name}`)
 				formElements.push(output);
 			}
-		})
+		});
 		return formElements;
 	}
 
-	_pollStatus() {
+	_pollStatus():Promise<Request> {
 		let options = {
 			url: this.baseUrl + '/checkout/' + this.slug + '/status.json',
 			method: 'GET',
-			proxy: utilities.formatProxy(this._getProxy()),
+			proxy: this.proxy,
 			json: true,
 			jar: this.cookieJar,
 			headers: {
@@ -220,30 +252,30 @@ class SupremeBase extends Task {
 				'referer': this.baseUrl + '/mobile',
 				'user-agent': this.userAgent
 			}
-		}
+		};
 		return this.request(options);
 	}
 
-	_processStatus() {
+	_processStatus():Promise<any> {
 		return new Promise((resolve, reject) => {
 			let requestedAuth = false;
-			async function runStage(isCheckoutResponse = false) {
+			async function runStage(this: any, isCheckoutResponse = false):Promise<any> {
 				try {
 					if (!isCheckoutResponse) {
 						this._pollStatus()
-							.then(response => {
+							.then((response:any) => {
 								this.checkoutData = response.body;
 							})
-							.catch(error => {
+							.catch((error:any) => {
 								return setTimeout(runStage.bind(this), 1000);
-							})
+							});
 					}
-					let error;
+					let error:any;
 					logger.info(`Checkout Status:\n${JSON.stringify(this.checkoutData, null, ' ')}`);
 
 					switch (this.checkoutData.status) {
 						case 'queued':
-							this._setStatus('Processing...', 'WARNING');
+							this.setStatus('Processing...', 'WARNING');
 							logger.warn(this.slug ? `[T.${this.id}] Queued - ${this.slug}.` : `[T.${this.id}] Queued.`);
 							if (this.checkoutData.hasOwnProperty('slug')) this.slug = this.checkoutData.slug;
 							return setTimeout(runStage.bind(this, false), 1000);
@@ -255,74 +287,45 @@ class SupremeBase extends Task {
 								this.setStatus('Billing Error', 'ERROR');
 							}
 							else if(this.checkoutData.page) {
-								this.setStatus('High Traffic Decline')
+								this.setStatus('High Traffic Decline', 'ERROR');
 								logger.error(`[T.${this.id}] Payment Failed.`);
 								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
-									let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
+									let errorDelay = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
 									return setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
 								}
 								else {
 									error = new Error();
-									error.code = 'FAILED'
-									return resolve()
+									error.code = 'FAILED';
+									return resolve();
 								}
 							}
 							else {
-								this._setStatus('Payment Declined.', 'ERROR');
+								this.setStatus('Payment Declined.', 'ERROR');
 								logger.error(`[T.${this.id}] Payment Failed.`);
 								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
-									let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
+									let errorDelay = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
 									setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
 								}
 								else {
 									error = new Error();
-									error.code = 'FAILED'
-									return resolve()
+									error.code = 'FAILED';
+									return resolve();
 								}
 							}
 
 
 						case 'cca':
-							this._setStatus('CCA', 'WARNING')
+							this.setStatus('CCA', 'WARNING');
 							this.cardinal.tid = uuidv4();
 							this.cardinal.transactionId = this.checkoutData.transaction_id;
 							this.cardinal.authentication.url = this.checkoutData.acs_url;
 							this.cardinal.authentication.payload = this.checkoutData.payload;
 							this.cardinal.consumerData = this.checkoutData.consumer;
 
-							function authHandler() {
-								return new Promise((resolve, reject) => {
-									ipcWorker.once(`cardinal.validated(${this.id})`, (event, args) => {
-										console.log('[IPC', `cardinal.validated(${this.id})\n`, args);
-										if (args.responseJWT) {
-											logger.debug('Payment Success');
-											resolve();
-										}
-										else {
-											logger.debug('Payment Failure');
-											reject()
-										}
-									})
-									ipcWorker.send('cardinal.continue', {
-										taskId: this.id,
-										cardData: {
-											"AcsUrl": this.cardinal.authentication.url,
-											"Payload": this.cardinal.authentication.payload,
-										},
-										cardOData: {
-											"Consumer": this.cardinal.consumerData,
-											"OrderDetails": {
-												TransactionId: this.cardinal.transactionId
-											}
-										}
-									})
-
-								})
-
-							}
-							authHandler.bind(this)()
+							
+							this.authHandler()
 								.then(() => {
-									return checkout.submit.bind(this)('cardinal');
+									return this._submitCheckout('cardinal');
 								})
 
 								.then(response => {
@@ -337,12 +340,12 @@ class SupremeBase extends Task {
 								.catch(error => {
 									console.log(error);
 
-								})
+								});
 							break;
 
 
 						case 'cardinal_queued':
-							this._setStatus('Processing...', 'WARNING');
+							this.setStatus('Processing...', 'WARNING');
 							logger.warn(`[T.${this.id}] Cardinal Queued.`);
 							return setTimeout(runStage.bind(this, false), 1000);
 
@@ -356,7 +359,7 @@ class SupremeBase extends Task {
 
 
 						case 'dup':
-							this._setStatus('Duplicate Order.', 'ERROR');
+							this.setStatus('Duplicate Order.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -364,7 +367,7 @@ class SupremeBase extends Task {
 
 
 						case 'canada':
-							this._setStatus('Not Available in Canada.', 'ERROR');
+							this.setStatus('Not Available in Canada.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -372,7 +375,7 @@ class SupremeBase extends Task {
 
 
 						case 'blocked_country':
-							this._setStatus('N/A in Selected Country.', 'ERROR');
+							this.setStatus('N/A in Selected Country.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -380,7 +383,7 @@ class SupremeBase extends Task {
 
 
 						case 'blacklisted':
-							this._setStatus('Blacklisted.', 'ERROR');
+							this.setStatus('Blacklisted.', 'ERROR');
 							error = new Error();
 							error.code = 'FAILED';
 							reject(error);
@@ -388,27 +391,27 @@ class SupremeBase extends Task {
 
 
 						case 'outOfStock':
-							this._setStatus('Out of Stock.', 'ERROR');
+							this.setStatus('Out of Stock.', 'ERROR');
 							if (this.taskData.additional.monitorRestocks) {
 								this.restockMode = true;
 								error = new Error();
-								error.code = 'RESTOCKS'
+								error.code = 'RESTOCKS';
 							}
 							else {
 								error = new Error();
-								error.code = 'FAILED'
+								error.code = 'FAILED';
 							}
 							reject(error);
 							return;
 
 
 						case 'paypal':
-							this._setStatus('Checkout Status: Paypal.', 'INFO')
+							this.setStatus('Checkout Status: Paypal.', 'INFO');
 							return;
 
 						default:
-							console.log(this.checkoutData)
-							this._setStatus('Unexpected Error', 'ERROR');
+							console.log(this.checkoutData);
+							this.setStatus('Unexpected Error', 'ERROR');
 							error = new Error();
 							error.code = 'UNEXPECTED';
 							reject(error);
@@ -418,52 +421,52 @@ class SupremeBase extends Task {
 					switch (error.code) {
 						case 'UNEXPECTED':
 						default:
-							console.log(error)
-							this._setStatus('Error. Retrying.');
-							let errorDelay = settings.has('errorDelay') ? settings.get('errorDelay') : 1000;
+							console.log(error);
+							this.setStatus('Error. Retrying.', 'ERROR');
+							let errorDelay = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
 							setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
 					}
 				}
 			}
 			runStage.bind(this)(true);
-		})
+		});
 	}
 
-	_form(type) {
+	_form(this: SupremeRequest | SupremeSafe, type:string):Promise<any> {
 		let form;
 		switch (type) {
 			case 'cart-add':
 				if (this.region === 'US') {
 					form = {
-						"s": this.sizeId + "",
-						"st": this.styleId + "",
+						's': this.sizeId + '',
+						'st': this.styleId + '',
 						// "ds": 'bog',
 						// "ds1": 'bog2',
 						// "ns": ((+this.sizeId) + (+this.styleId)),
-						"qty": this.products[0].productQty || 1
-					}
+						'qty': this.products[0].productQty || 1
+					};
 				}
 				else {
 					form = {
-						"size": this.sizeId + "",
-						"style": this.styleId + "",
-						"qty": this.products[0].productQty || 1
-					}
+						'size': this.sizeId + '',
+						'style': this.styleId + '',
+						'qty': this.products[0].productQty || 1
+					};
 				}
 				break;
 
 			case 'mobile-totals':
 				form = {
-					"order[billing_country]": this.profile.billing.country,
-					"cookie-sub": this.cookieSub,
-					"mobile": true
-				}
+					'order[billing_country]': this.profile.billing.country,
+					'cookie-sub': this.cookieSub,
+					'mobile': true
+				};
 				break;
 
 			case 'parsed-checkout':
 				form = {
 					'g-recaptcha-response': this.captchaResponse
-				}
+				};
 				if (Math.floor(Math.random() * 2)) form['is_from_ios_native'] = '1';
 
 				for (let i = 0; i < this.formElements.length; i++) {
@@ -553,36 +556,138 @@ class SupremeBase extends Task {
 		return form;
 	}
 
-	_setCookie(name, value) {
-		let url = this.baseUrl.replace('https://', '')
+	private authHandler() {
+		return new Promise((resolve, reject) => {
+			ipcWorker.once(`cardinal.validated(${this.id})`, (event:any, args:any) => {
+				console.log('[IPC', `cardinal.validated(${this.id})\n`, args);
+				if (args.responseJWT) {
+					logger.debug('Payment Success');
+					resolve();
+				}
+				else {
+					logger.debug('Payment Failure');
+					reject();
+				}
+			});
+			ipcWorker.send('cardinal.continue', {
+				taskId: this.id,
+				cardData: {
+					'AcsUrl': this.cardinal.authentication.url,
+					'Payload': this.cardinal.authentication.payload,
+				},
+				cardOData: {
+					'Consumer': this.cardinal.consumerData,
+					'OrderDetails': {
+						TransactionId: this.cardinal.transactionId
+					}
+				}
+			});
+
+		});
+
+	}
+
+	_setCookie(name:string, value:string):void {
+		let url = this.baseUrl.replace('https://', '');
 		try {
 			if (this.cookieJar._jar.store.idx[url]){
 				delete this.cookieJar._jar.store.idx[url]['/']['' + name];
 		}
 			
 	
-		} catch (err) { console.log(err) }
+		} catch (err) { console.log(err); }
 		try {
 			let cookie = `${name}=${value}`;
 			
 			this.cookieJar.setCookie(cookie, this.baseUrl);
-		} catch (err) {console.log(err) }
-	};
+		} catch (err) {console.log(err); }
+	}
 
-	_deleteCookie(name) {
+	_deleteCookie(name:string):void {
 		try {
 			delete this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/']['' + name];
-		} catch (err) { console.log(err)}
-	};
+		} catch (err) { console.log(err);}
+	}
 
-	_getCookie(name) {
+	_getCookie(name:string):string {
 		try {
 			return this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/'][name].value;
 	
-		} catch (err) { console.error(err) }
-	};
+		} catch (err) { console.error(err); return ''; }
+	}
+
+	_postPublicWebhook(additonalFields = []) {
+		request({
+			url: process.env.SUCCESS_WEBHOOK_URL,
+			method: 'POST',
+			json: true,
+			body: discord.publicWebhook.bind(this)(additonalFields)
+		}, (error, response, body) => {	
+			if (error) {
+				console.log(error);
+			}
+			else {
+				switch (response.statusMessage) {
+					case 'NO CONTENT':
+						console.log('Sent Webhook.');
+						console.log('Remaining Requests:', response.headers['x-ratelimit-remaining']);
+						break;
+
+					case 'TOO MANY REQUESTS':
+						console.log('Reached Rate Limit.');
+						return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
+						break;
+
+					case 'BAD REQUEST':
+						console.log('Format Error');
+						console.log(JSON.stringify(response.body));
+						break;
+					
+					default:
+						console.log(response.statusCode, response.statusMessage);
+				}
+			}
+		});
+	}
+ 
+	_postPrivateWebhook(this: SupremeBase, additonalFields = []) {
+		if (settings.has('discord')) {
+			const webhookUrl = settings.get('discord');
+			this.request({
+				url: webhookUrl,
+				method: 'POST',
+				json: true,
+				body: discord.privateWebhook.bind(this)(additonalFields)
+			}, (error, response, body) => {	
+				if (error) {
+					console.log(error);
+				}
+				else {
+					switch (response.statusMessage) {
+						case 'NO CONTENT':
+							console.log('Sent Webhook.');
+							console.log('Remaining Requests:', response.headers['x-ratelimit-remaining']);
+							break;
+
+						case 'TOO MANY REQUESTS':
+							console.log('Reached Rate Limit.');
+							return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
+							break;
+
+						case 'BAD REQUEST':
+							console.log('Format Error');
+							console.log(JSON.stringify(response.body));
+							break;
+						
+						default:
+							console.log(response.statusCode, response.statusMessage);
+					}
+				}
+			});
+		}
+	}
 
 
 }
 
-module.exports = SupremeBase;
+export default SupremeBase;

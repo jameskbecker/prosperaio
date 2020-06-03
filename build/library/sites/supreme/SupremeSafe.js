@@ -12,6 +12,25 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -48,12 +67,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var Supreme = require("./SupremeBase");
-var settings = require("electron-settings");
-var puppeteer = require("puppeteer-extra");
-var pluginStealth = require("puppeteer-extra-plugin-stealth");
-var querystring = require('querystring');
+var SupremeBase_1 = __importDefault(require("./SupremeBase"));
+var settings = __importStar(require("electron-settings"));
+var puppeteer = __importStar(require("puppeteer"));
+var querystring = __importStar(require("querystring"));
 var SupremeSafe = (function (_super) {
     __extends(SupremeSafe, _super);
     function SupremeSafe(_taskData, _id) {
@@ -89,14 +110,14 @@ var SupremeSafe = (function (_super) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 8, , 9]);
-                        this._setStatus('Initialising.', 'INFO');
+                        this.setStatus('Initialising.', 'INFO');
                         return [4, this._setup()];
                     case 1:
                         _a.sent();
                         return [4, this._setTimer()];
                     case 2:
                         _a.sent();
-                        this._setStatus('Starting Task.', 'WARNING');
+                        this.setStatus('Starting Task.', 'WARNING');
                         return [4, this._fetchStockData()];
                     case 3:
                         _a.sent();
@@ -113,21 +134,21 @@ var SupremeSafe = (function (_super) {
                     case 7:
                         _a.sent();
                         if (this.successful) {
-                            this._setStatus('Success.', 'SUCCESS');
+                            this.setStatus('Success.', 'SUCCESS');
                             privateFields = [];
                             publicFields = [];
                             if (this._productStyleName) {
                                 field = {
-                                    name: "Style:",
+                                    name: 'Style:',
                                     value: this._productStyleName,
                                     inline: true
                                 };
                                 privateFields.push(field);
                                 publicFields.push(field);
                             }
-                            if (this.checkoutData.hasOwnProperty("status")) {
+                            if (this.checkoutData.hasOwnProperty('status')) {
                                 field = {
-                                    name: "Status:",
+                                    name: 'Status:',
                                     value: this.checkoutData.status.capitalise(),
                                     inline: true
                                 };
@@ -170,7 +191,6 @@ var SupremeSafe = (function (_super) {
                             }
                         }
                         try {
-                            puppeteer.use(pluginStealth());
                         }
                         catch (e) { }
                         _a = this;
@@ -221,7 +241,7 @@ var SupremeSafe = (function (_super) {
                                 })];
                         case 2:
                             _a.sent();
-                            this._setStatus('Adding to Cart', 'WARNING');
+                            this.setStatus('Adding to Cart', 'WARNING');
                             this.cartForm = {
                                 size: this.sizeId,
                                 style: this.styleId,
@@ -230,14 +250,14 @@ var SupremeSafe = (function (_super) {
                             if (this.shouldStop)
                                 return [2, this.stop()];
                             return [4, this._request(this._productUrl + "/add.json", {
-                                    method: "POST",
+                                    method: 'POST',
                                     credentials: 'include',
                                     headers: {
-                                        "accept": "application/json",
-                                        "accept-encoding": "gzip, deflate, br",
-                                        "accept-language": "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7",
-                                        "content-type": "application/x-www-form-urlencoded",
-                                        "x-requested-with": "XMLHttpRequest"
+                                        'accept': 'application/json',
+                                        'accept-encoding': 'gzip, deflate, br',
+                                        'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7',
+                                        'content-type': 'application/x-www-form-urlencoded',
+                                        'x-requested-with': 'XMLHttpRequest'
                                     },
                                     body: querystring.stringify(this.cartForm)
                                 })];
@@ -256,16 +276,16 @@ var SupremeSafe = (function (_super) {
                                 cookieValue = JSON.parse(decodeURIComponent(pureCart[0].value));
                                 delete cookieValue.cookie;
                                 this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
-                                this._setStatus('Added to Cart!', 'SUCCESS');
+                                this.setStatus('Added to Cart!', 'SUCCESS');
                                 console.log('cookie_sub:', this.cookieSub);
                                 resolve();
                             }
                             return [3, 6];
                         case 5:
                             error_2 = _a.sent();
-                            this._setStatus('ATC Error', 'ERROR');
+                            this.setStatus('ATC Error', 'ERROR');
                             console.log(error_2);
-                            errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+                            errorDelay = settings.has('globalErrorDelay') ? parseInt(settings.get('globalErrorDelay')) : 1000;
                             return [2, setTimeout(runProcess.bind(this, resolve), errorDelay)];
                         case 6: return [2];
                     }
@@ -289,15 +309,15 @@ var SupremeSafe = (function (_super) {
                             _b.sent();
                             if (this.shouldStop)
                                 return [2, this.stop()];
-                            this._setStatus('Parsing Checkout Form', 'WARNING');
-                            return [4, this.page.$eval("#checkoutViewTemplate", function (e) { return e.innerHTML; })];
+                            this.setStatus('Parsing Checkout Form', 'WARNING');
+                            return [4, this.page.$eval('#checkoutViewTemplate', function (e) { return e.innerHTML; })];
                         case 2:
                             checkoutTemplate = _b.sent();
                             this.formElements = this._parseCheckoutForm(checkoutTemplate);
                             if (this.shouldStop)
                                 return [2, this.stop()];
                             if (!this.hasCaptcha) return [3, 4];
-                            this._setStatus('Waiting for Captcha', 'WARNING');
+                            this.setStatus('Waiting for Captcha', 'WARNING');
                             return [4, this._requestCaptcha()];
                         case 3:
                             _b.sent();
@@ -305,18 +325,18 @@ var SupremeSafe = (function (_super) {
                         case 4:
                             if (this.shouldStop)
                                 return [2, this.stop()];
-                            this._setStatus('Submitting Checkout', 'WARNING');
+                            this.setStatus('Submitting Checkout', 'WARNING');
                             this.checkoutForm = this._form('parsed-checkout');
                             options = {
-                                method: "POST",
+                                method: 'POST',
                                 credentials: 'include',
                                 body: querystring.stringify(this.checkoutForm),
                                 headers: {
-                                    "accept": "application/json",
-                                    "accept-encoding": "gzip, deflate, br",
-                                    "accept-language": "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7",
-                                    "content-type": "application/x-www-form-urlencoded",
-                                    "x-requested-with": "XMLHttpRequest"
+                                    'accept': 'application/json',
+                                    'accept-encoding': 'gzip, deflate, br',
+                                    'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7',
+                                    'content-type': 'application/x-www-form-urlencoded',
+                                    'x-requested-with': 'XMLHttpRequest'
                                 }
                             };
                             _a = this;
@@ -327,9 +347,9 @@ var SupremeSafe = (function (_super) {
                             return [3, 7];
                         case 6:
                             error_3 = _b.sent();
-                            this._setStatus('Checkout Error', 'ERROR');
+                            this.setStatus('Checkout Error', 'ERROR');
                             console.log(error_3);
-                            errorDelay = settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000;
+                            errorDelay = settings.has('globalErrorDelay') ? parseInt(settings.get('globalErrorDelay')) : 1000;
                             return [2, setTimeout(runProcess.bind(this, resolve), errorDelay)];
                         case 7: return [2];
                     }
@@ -342,14 +362,14 @@ var SupremeSafe = (function (_super) {
         switch (this.region) {
             case 'JP':
                 rememberedFields = [
-                    "#order_billing_name",
-                    "#order_billing_last_name",
-                    "#order_email",
-                    "#order_tel",
-                    "#order_billing_address",
-                    "#order_billing_city",
-                    "#order_billing_state",
-                    "#order_billing_zip"
+                    '#order_billing_name',
+                    '#order_billing_last_name',
+                    '#order_email',
+                    '#order_tel',
+                    '#order_billing_address',
+                    '#order_billing_city',
+                    '#order_billing_state',
+                    '#order_billing_zip'
                 ];
             case 'EU':
                 rememberedFields = [
@@ -404,6 +424,6 @@ var SupremeSafe = (function (_super) {
         });
     };
     return SupremeSafe;
-}(Supreme));
-module.exports = SupremeSafe;
+}(SupremeBase_1.default));
+exports.default = SupremeSafe;
 //# sourceMappingURL=SupremeSafe.js.map

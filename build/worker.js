@@ -1,204 +1,207 @@
-var ipcWorker = require('electron').ipcRenderer;
-var puppeteer = require('puppeteer');
-var settings = require('electron-settings');
-var utilities = require('./library/other/index').utilities;
-var taskActions = require('./task-actions');
-var proxyActions = require('./library/proxies').proxyActions;
-var fs = require('fs');
-String.prototype.capitalise = function () {
-    return this.substring(0, 1).toUpperCase() + this.substring(1);
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
-global.activeProxyLists = {};
-global.activeTasks = {};
-global.monitors = {
-    'supreme': {
-        kw: null,
-        url: {}
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+require("./structure.extensions");
+var electron_1 = require("electron");
+var settings = __importStar(require("electron-settings"));
+var index_1 = require("./library/other/index");
+var task_actions_1 = __importDefault(require("./task-actions"));
+var proxies_1 = require("./library/proxies");
+var fs = __importStar(require("fs"));
+var Worker = (function () {
+    function Worker() {
     }
-};
-Object.prototype.contains = function (keyValuePair) {
-    var key = Object.keys(keyValuePair)[0];
-    if (this.hasOwnProperty(key) && this[key] === keyValuePair[key])
-        return true;
-    else
-        return false;
-};
-function init() {
-    ipcWorker.on('download browser exectutable', function (events, args) {
-        console.log('downloading');
-        var browserFetcher = puppeteer.createBrowserFetcher({
-            path: args.path
+    Worker.worker = function () {
+        electron_1.ipcRenderer.on('reset settings', function () {
+            var userKey = settings.has('userKey') ? settings.get('userKey') : '';
+            settings.deleteAll();
+            settings.set('profiles', {});
+            settings.set('tasks', {});
+            settings.set('proxies', {});
+            settings.set('browser-path', '');
+            settings.set('userKey', userKey);
+            settings.set('discord', '');
+            settings.set('captchaHarvesters', []);
+            settings.set('globalMonitorDelay', 1000);
+            settings.set('globalErrorDelay', 1000);
+            settings.set('globalTimeoutDelay', 5000, { prettify: true });
+            electron_1.ipcRenderer.send('reload window');
         });
-        browserFetcher.download('637110')
-            .then(function (browserExecutable) {
-            settings.set('browser-path', browserExecutable.executablePath, { prettify: true });
-            ipcWorker.send('check for browser executable');
-        });
-    });
-    ipcWorker.on('reset settings', function () {
-        var userKey = settings.has('userKey') ? settings.get('userKey') : '';
-        settings.deleteAll();
-        settings.set('profiles', {});
-        settings.set('tasks', {});
-        settings.set('proxies', {});
-        settings.set('browser-path', '');
-        settings.set('userKey', userKey);
-        settings.set('discord', '');
-        settings.set('captchaHarvesters', []);
-        settings.set('globalMonitorDelay', 1000);
-        settings.set('globalErrorDelay', 1000);
-        settings.set('globalTimeoutDelay', 5000, { prettify: true });
-        ipcWorker.send('reload window');
-    });
-    ipcWorker.on('import data', function (event, options) {
-        console.log(options);
-        fs.readFile(options.paths[0], 'utf8', function (error, data) {
-            if (error) {
-                alert('An Error Occured. Please Try Again. [1]');
-            }
-            else {
-                try {
-                    data = JSON.parse(data);
-                    switch (options.type) {
-                        case 'Tasks':
-                            var allTasks = settings.get('tasks');
-                            for (var i = 0; i < Object.keys(data).length; i++) {
-                                var taskId = Object.keys(data)[i];
-                                var newTaskId = void 0;
-                                if (!options.overwrite && allTasks.hasOwnProperty(taskId)) {
-                                    newTaskId = utilities.generateId(6);
+        electron_1.ipcRenderer.on('import data', function (_event, options) {
+            console.log(options);
+            fs.readFile(options.paths[0], 'utf8', function (error, data) {
+                if (error) {
+                    alert('An Error Occured. Please Try Again. [1]');
+                }
+                else {
+                    try {
+                        data = JSON.parse(data);
+                        switch (options.type) {
+                            case 'Tasks':
+                                var allTasks = settings.get('tasks');
+                                for (var i = 0; i < Object.keys(data).length; i++) {
+                                    var taskId = Object.keys(data)[i];
+                                    var newTaskId = void 0;
+                                    if (!options.overwrite && allTasks.hasOwnProperty(taskId)) {
+                                        newTaskId = index_1.utilities.generateId(6);
+                                    }
+                                    else {
+                                        newTaskId = taskId;
+                                    }
+                                    allTasks[newTaskId] = data[taskId];
                                 }
-                                else {
-                                    newTaskId = taskId;
+                                settings.set('tasks', allTasks, { prettify: true });
+                                electron_1.ipcRenderer.send('sync settings', 'task');
+                                break;
+                            case 'Profiles':
+                                var allProfiles = settings.has('profiles') ? settings.get('profiles') : {};
+                                for (var i = 0; i < Object.keys(data).length; i++) {
+                                    var profileName_1 = Object.keys(data)[i];
+                                    if (options.overwrite || !allProfiles.hasOwnProperty(profileName_1)) {
+                                        console.log('!');
+                                        allProfiles[profileName_1] = data[profileName_1];
+                                    }
                                 }
-                                allTasks[newTaskId] = data[taskId];
-                            }
-                            settings.set('tasks', allTasks, { prettify: true });
-                            ipcWorker.send('sync settings', 'task');
-                            break;
-                        case 'Profiles':
-                            var allProfiles = settings.has('profiles') ? settings.get('profiles') : {};
-                            for (var i = 0; i < Object.keys(data).length; i++) {
-                                var profileName_1 = Object.keys(data)[i];
-                                if (options.overwrite || !allProfiles.hasOwnProperty(profileName_1)) {
-                                    console.log('!');
-                                    allProfiles[profileName_1] = data[profileName_1];
-                                }
-                            }
-                            settings.set('profiles', allProfiles, { prettify: true });
-                            ipcWorker.send('sync settings', 'profiles');
-                            break;
-                        case 'Proxies':
-                            break;
+                                settings.set('profiles', allProfiles, { prettify: true });
+                                electron_1.ipcRenderer.send('sync settings', 'profiles');
+                                break;
+                            case 'Proxies':
+                                break;
+                        }
+                    }
+                    catch (error) {
+                        alert('An Error Occured. Please Try Again. [2]');
+                        console.log(error);
                     }
                 }
-                catch (error) {
-                    alert('An Error Occured. Please Try Again. [2]');
-                    console.log(error);
+            });
+        });
+        electron_1.ipcRenderer.on('export data', function (_event, options) {
+            var data;
+            switch (options.type) {
+                case 'Tasks':
+                    data = settings.has('tasks') ? settings.get('tasks') : {};
+                    break;
+                case 'Profiles':
+                    data = settings.has('profiles') ? settings.get('profiles') : {};
+                    break;
+                case 'Proxies':
+                    break;
+            }
+            if (data) {
+                fs.writeFile(options.path, JSON.stringify(data, null, '    '), function (error) {
+                    if (error)
+                        alert(error);
+                    else
+                        alert("Successfully exported " + options.type + ".");
+                });
+            }
+        });
+        electron_1.ipcRenderer.on('export tasks', function (_event, options) {
+            var data = settings.has('tasks') ? settings.get('tasks') : [];
+            fs.writeFile(options.path, JSON.stringify(data, null, '    '), function (error) {
+                if (error) {
+                    alert(error);
+                }
+                else {
+                    alert('Successfully Exported Tasks.');
+                }
+            });
+        });
+        electron_1.ipcRenderer.on('import profiles', function (_event, path) {
+            console.log(path);
+        });
+        electron_1.ipcRenderer.on('export profiles', function (_event, options) {
+            var data = settings.has('profiles') ? settings.get('profiles') : {};
+            fs.writeFile(options.path, JSON.stringify(data, null, '    '), function (error) {
+                if (error) {
+                    alert(error);
+                }
+                else {
+                    alert('Successfully Exported Profiles.');
+                }
+            });
+        });
+        electron_1.ipcRenderer.on('delete all profiles', function () {
+            settings.set('profiles', {}, { prettify: true });
+            electron_1.ipcRenderer.send('sync settings', 'profiles');
+        });
+        electron_1.ipcRenderer.on('save task', function (_event, args) {
+            for (var i = 0; i < args.quantity; i++) {
+                var taskData = args.data;
+                var allTasks = settings.has('tasks') ? settings.get('tasks') : {};
+                var taskId = index_1.utilities.generateId(6);
+                allTasks[taskId] = taskData;
+                settings.set('tasks', allTasks, { prettify: true });
+                electron_1.ipcRenderer.send('sync settings', 'task');
+            }
+        });
+        electron_1.ipcRenderer.on('run task', function (_event, id) {
+            task_actions_1.default.run(id);
+        });
+        electron_1.ipcRenderer.on('stop task', function (_event, id) {
+            task_actions_1.default.stop(id);
+        });
+        electron_1.ipcRenderer.on('duplicate task', function (_event, id) {
+            task_actions_1.default.duplicate(id);
+            electron_1.ipcRenderer.send('sync settings', 'task');
+        });
+        electron_1.ipcRenderer.on('delete task', function (_event, id) {
+            task_actions_1.default.delete(id);
+            electron_1.ipcRenderer.send('sync settings', 'task');
+        });
+        electron_1.ipcRenderer.on('run all tasks', function () {
+            task_actions_1.default.runAll();
+        });
+        electron_1.ipcRenderer.on('stop all tasks', function () {
+            task_actions_1.default.stopAll();
+        });
+        electron_1.ipcRenderer.on('delete all tasks', function () {
+            task_actions_1.default.deleteAll();
+            electron_1.ipcRenderer.send('sync settings', 'task');
+        });
+        electron_1.ipcRenderer.on('proxyList.test', function (_event, options) {
+            proxies_1.proxyActions.run(options);
+        });
+        electron_1.ipcRenderer.on('proxyList.testAll', function (_event, options) {
+            var allProxies = settings.has('proxies') ? settings.get('proxies') : {};
+            if (allProxies.hasOwnProperty(options.listName)) {
+                for (var i = 0; i < Object.keys(allProxies[options.listName]).length; i++) {
+                    var id = Object.keys(allProxies[options.listName])[i];
+                    proxies_1.proxyActions.run({
+                        baseUrl: options.baseUrl,
+                        id: id,
+                        input: allProxies[options.listName][id]
+                    });
                 }
             }
         });
-    });
-    ipcWorker.on('export data', function (event, options) {
-        var data;
-        switch (options.type) {
-            case 'Tasks':
-                data = settings.has('tasks') ? settings.get('tasks') : {};
-                break;
-            case 'Profiles':
-                data = settings.has('profiles') ? settings.get('profiles') : {};
-                break;
-            case 'Proxies':
-                break;
-        }
-        if (data) {
-            fs.writeFile(options.path, JSON.stringify(data, null, '    '), function (error) {
-                if (error)
-                    alert(error);
-                else
-                    alert("Successfully exported " + options.type + ".");
-            });
-        }
-    });
-    ipcWorker.on('export tasks', function (event, options) {
-        var data = settings.has('tasks') ? settings.get('tasks') : [];
-        fs.writeFile(options.path, JSON.stringify(data, null, '    '), function (error) {
-            if (error) {
-                alert(error);
-            }
-            else {
-                alert('Successfully Exported Tasks.');
-            }
-        });
-    });
-    ipcWorker.on('import profiles', function (event, path) {
-        console.log(path);
-    });
-    ipcWorker.on('export profiles', function (event, options) {
-        var data = settings.has('profiles') ? settings.get('profiles') : {};
-        fs.writeFile(options.path, JSON.stringify(data, null, '    '), function (error) {
-            if (error) {
-                alert(error);
-            }
-            else {
-                alert('Successfully Exported Profiles.');
-            }
-        });
-    });
-    ipcWorker.on('delete all profiles', function () {
-        settings.set('profiles', {}, { prettify: true });
-        ipcWorker.send('sync settings', 'profiles');
-    });
-    ipcWorker.on('save task', function (event, args) {
-        for (var i = 0; i < args.quantity; i++) {
-            var taskData = args.data;
-            var allTasks = settings.has('tasks') ? settings.get('tasks') : {};
-            var taskId = utilities.generateId(6);
-            allTasks[taskId] = taskData;
-            settings.set('tasks', allTasks, { prettify: true });
-            ipcWorker.send('sync settings', 'task');
-        }
-    });
-    ipcWorker.on('run task', function (event, id) {
-        taskActions.run(id);
-    });
-    ipcWorker.on('stop task', function (event, id) {
-        taskActions.stop(id);
-    });
-    ipcWorker.on('duplicate task', function (event, id) {
-        taskActions.duplicate(id);
-        ipcWorker.send('sync settings', 'task');
-    });
-    ipcWorker.on('delete task', function (event, id) {
-        taskActions.delete(id);
-        ipcWorker.send('sync settings', 'task');
-    });
-    ipcWorker.on('run all tasks', function () {
-        taskActions.runAll();
-    });
-    ipcWorker.on('stop all tasks', function () {
-        taskActions.stopAll();
-    });
-    ipcWorker.on('delete all tasks', function () {
-        taskActions.deleteAll();
-        ipcWorker.send('sync settings', 'task');
-    });
-    ipcWorker.on('proxyList.test', function (event, options) {
-        proxyActions.run(options);
-    });
-    ipcWorker.on('proxyList.testAll', function (event, options) {
-        var allProxies = settings.has('proxies') ? settings.get('proxies') : {};
-        if (allProxies.hasOwnProperty(options.listName)) {
-            for (var i = 0; i < Object.keys(allProxies[options.listName]).length; i++) {
-                var id = Object.keys(allProxies[options.listName])[i];
-                proxyActions.run({
-                    baseUrl: options.baseUrl,
-                    id: id,
-                    input: allProxies[options.listName][id]
-                });
-            }
-        }
-    });
-}
-module.exports = init;
-//# sourceMappingURL=worker.js.map
+    };
+    Worker.activeProxyLists = {};
+    Worker.activeTasks = {};
+    Worker.monitors = { 'supreme': { kw: null, url: {} } };
+    return Worker;
+}());
+exports.default = Worker;
+//# sourceMappingURL=Worker.js.map
