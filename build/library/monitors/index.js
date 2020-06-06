@@ -19,6 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.supreme = void 0;
 var supreme = __importStar(require("./supreme"));
-exports.default = { supreme: supreme };
+exports.supreme = supreme;
 //# sourceMappingURL=index.js.map

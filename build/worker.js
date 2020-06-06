@@ -18,15 +18,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Worker = void 0;
 require("./structure.extensions");
 var electron_1 = require("electron");
 var settings = __importStar(require("electron-settings"));
 var index_1 = require("./library/other/index");
-var task_actions_1 = __importDefault(require("./task-actions"));
+var taskActions = __importStar(require("./task-actions"));
 var proxies_1 = require("./library/proxies");
 var fs = __importStar(require("fs"));
 var Worker = (function () {
@@ -77,10 +75,10 @@ var Worker = (function () {
                             case 'Profiles':
                                 var allProfiles = settings.has('profiles') ? settings.get('profiles') : {};
                                 for (var i = 0; i < Object.keys(data).length; i++) {
-                                    var profileName_1 = Object.keys(data)[i];
-                                    if (options.overwrite || !allProfiles.hasOwnProperty(profileName_1)) {
+                                    var profileName = Object.keys(data)[i];
+                                    if (options.overwrite || !allProfiles.hasOwnProperty(profileName)) {
                                         console.log('!');
-                                        allProfiles[profileName_1] = data[profileName_1];
+                                        allProfiles[profileName] = data[profileName];
                                     }
                                 }
                                 settings.set('profiles', allProfiles, { prettify: true });
@@ -158,27 +156,27 @@ var Worker = (function () {
             }
         });
         electron_1.ipcRenderer.on('run task', function (_event, id) {
-            task_actions_1.default.run(id);
+            taskActions.runTask(id);
         });
         electron_1.ipcRenderer.on('stop task', function (_event, id) {
-            task_actions_1.default.stop(id);
+            taskActions.stopTask(id);
         });
         electron_1.ipcRenderer.on('duplicate task', function (_event, id) {
-            task_actions_1.default.duplicate(id);
+            taskActions.duplicateTask(id);
             electron_1.ipcRenderer.send('sync settings', 'task');
         });
         electron_1.ipcRenderer.on('delete task', function (_event, id) {
-            task_actions_1.default.delete(id);
+            taskActions.deleteTask(id);
             electron_1.ipcRenderer.send('sync settings', 'task');
         });
         electron_1.ipcRenderer.on('run all tasks', function () {
-            task_actions_1.default.runAll();
+            taskActions.runAll();
         });
         electron_1.ipcRenderer.on('stop all tasks', function () {
-            task_actions_1.default.stopAll();
+            taskActions.stopAll();
         });
         electron_1.ipcRenderer.on('delete all tasks', function () {
-            task_actions_1.default.deleteAll();
+            taskActions.deleteAll();
             electron_1.ipcRenderer.send('sync settings', 'task');
         });
         electron_1.ipcRenderer.on('proxyList.test', function (_event, options) {
@@ -203,5 +201,5 @@ var Worker = (function () {
     Worker.monitors = { 'supreme': { kw: null, url: {} } };
     return Worker;
 }());
-exports.default = Worker;
+exports.Worker = Worker;
 //# sourceMappingURL=Worker.js.map

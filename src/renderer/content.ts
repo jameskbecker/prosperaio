@@ -365,7 +365,7 @@ function renderSites():void {
 
 					newTask_Style[0].parentElement.style.display = 'flex';
 					newTask_Category[0].parentElement.style.display = 'flex';
-					newTask_SearchInput[0].placeholder = 'Enter Keywords.';
+					newTask_SearchInput[0].placeholder = 'Eg: +tagless,-tank';
 
 					requestMode.label = 'Fast';
 					requestMode.value = 'supreme-request';

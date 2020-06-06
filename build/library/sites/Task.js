@@ -18,13 +18,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var settings = __importStar(require("electron-settings"));
-var Worker_1 = __importDefault(require("../../Worker"));
+var Worker_1 = require("../../Worker");
 var configuration_1 = require("../configuration");
 var other_1 = require("../other");
 require('dotenv').config();
@@ -55,21 +52,21 @@ var Task = (function () {
         this.captchaTS = null;
         this.startTime = 0;
         this.checkoutTime = 0;
-        if (this._proxyList && this._proxyList !== '' && !Worker_1.default.activeProxyLists.hasOwnProperty(this._proxyList)) {
+        if (this._proxyList && this._proxyList !== '' && !Worker_1.Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
             var proxies = settings.has('proxies') ? settings.get('proxies') : {};
             if (proxies.hasOwnProperty(this._proxyList)) {
-                Worker_1.default.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+                Worker_1.Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
             }
         }
         if (!this._proxyList) {
             this._proxy = null;
         }
-        else if (Worker_1.default.activeProxyLists[this._proxyList].length < 1) {
+        else if (Worker_1.Worker.activeProxyLists[this._proxyList].length < 1) {
             this._proxy = null;
         }
         else {
-            this._proxy = Worker_1.default.activeProxyLists[this._proxyList][0];
-            Worker_1.default.activeProxyLists[this._proxyList].push(Worker_1.default.activeProxyLists[this._proxyList].shift());
+            this._proxy = Worker_1.Worker.activeProxyLists[this._proxyList][0];
+            Worker_1.Worker.activeProxyLists[this._proxyList].push(Worker_1.Worker.activeProxyLists[this._proxyList].shift());
         }
     }
     Object.defineProperty(Task.prototype, "taskData", {
@@ -128,7 +125,7 @@ var Task = (function () {
             this.shouldStop = true;
             if (this.isMonitoringKW) {
                 try {
-                    Worker_1.default.monitors.supreme.kw.remove(this.id);
+                    Worker_1.Worker.monitors.supreme.kw.remove(this.id);
                     this._stop();
                 }
                 catch (err) {
@@ -143,7 +140,7 @@ var Task = (function () {
         console.log('RUNNING STOP()');
         if (this.isMonitoring) {
             try {
-                Worker_1.default.monitors.supreme.url[this._productUrl].remove(this.id);
+                Worker_1.Worker.monitors.supreme.url[this._productUrl].remove(this.id);
             }
             catch (err) {
                 console.log(err);
@@ -157,9 +154,9 @@ var Task = (function () {
         this.sizeName = this.taskData.products[0].size;
         this.setStatus('Stopped.', 'ERROR');
         other_1.logger.error("[T:" + this.id + "] Stopped Task.");
-        if (Worker_1.default.activeTasks[this.id])
-            delete Worker_1.default.activeTasks[this.id];
-        delete Worker_1.default.activeTasks[this.id];
+        if (Worker_1.Worker.activeTasks[this.id])
+            delete Worker_1.Worker.activeTasks[this.id];
+        delete Worker_1.Worker.activeTasks[this.id];
     };
     Task.prototype.setStatus = function (message, type) {
         var colors = {

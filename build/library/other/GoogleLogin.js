@@ -1,3 +1,4 @@
+var Main = require('../../Main').Main;
 var GoogleWindow = require('../../main/windows').GoogleWindow;
 var GoogleLogin = (function () {
     function GoogleLogin(_name, _type) {
@@ -10,8 +11,9 @@ var GoogleLogin = (function () {
         GoogleWindow.create(this.name);
         GoogleWindow.load();
         GoogleWindow.window.once('closed', function () {
+            var _a;
             GoogleWindow.window = null;
-            mainWindow.webContents.send('logged into GoogleWindow', {
+            (_a = Main.mainWindow) === null || _a === void 0 ? void 0 : _a.webContents.send('logged into GoogleWindow', {
                 type: _this.type
             });
         });

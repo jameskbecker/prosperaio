@@ -1,9 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var Worker_1 = __importDefault(require("../../../Worker"));
+var Worker_1 = require("../../../Worker");
 var request = require('request-promise-native');
 var settings = require('electron-settings');
 var ipcWorker = require('electron').ipcRenderer;
@@ -14,10 +11,10 @@ var SupremeKWMonitor = (function () {
         logger.info('[Monitor] [' + _options.proxyList + '] Inititalising KW Monitor.');
         this.baseUrl = _options.baseUrl;
         this._proxyList = _options.proxyList;
-        if (this._proxyList && this._proxyList !== '' && !Worker_1.default.activeProxyLists.hasOwnProperty(this._proxyList)) {
+        if (this._proxyList && this._proxyList !== '' && !Worker_1.Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
             var proxies = settings.has('proxies') ? settings.get('proxies') : {};
             if (proxies.hasOwnProperty(this._proxyList)) {
-                Worker_1.default.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
+                Worker_1.Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
             }
         }
         this.inputData = {};
@@ -87,11 +84,11 @@ var SupremeKWMonitor = (function () {
         if (!this._proxyList) {
             return null;
         }
-        else if (Worker_1.default.activeProxyLists[this._proxyList].length < 1) {
+        else if (Worker_1.Worker.activeProxyLists[this._proxyList].length < 1) {
             return null;
         }
-        var proxy = Worker_1.default.activeProxyLists[this._proxyList][0];
-        Worker_1.default.activeProxyLists[this._proxyList].push(Worker_1.default.activeProxyLists[this._proxyList].shift());
+        var proxy = Worker_1.Worker.activeProxyLists[this._proxyList][0];
+        Worker_1.Worker.activeProxyLists[this._proxyList].push(Worker_1.Worker.activeProxyLists[this._proxyList].shift());
         return proxy;
     };
     SupremeKWMonitor.prototype._hasMatchingsKeywords = function (data, positive, negative) {

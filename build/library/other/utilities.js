@@ -1,18 +1,25 @@
-var request = require('request');
-var settings = require('electron-settings');
-exports.generateId = function (length) {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sendTestWebhook = exports.formatProxy = exports.generateId = void 0;
+var request_1 = __importDefault(require("request"));
+var electron_settings_1 = __importDefault(require("electron-settings"));
+function generateId(length) {
     var idFormat = 'ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvxyz1234567890';
     var id = '';
     while (id.length < length) {
         id += idFormat[Math.floor(Math.random() * idFormat.length)];
     }
     return id;
-};
-exports.formatProxy = function (input) {
+}
+exports.generateId = generateId;
+function formatProxy(input) {
     if (!input) {
         return null;
     }
-    else if (typeof input === 'string' && ['localhost', '', ' '].indexOf(input) != -1) {
+    else if (typeof input == 'string' && ['localhost', '', ' '].indexOf(input) != -1) {
         console.log('no proxy');
         return null;
     }
@@ -23,15 +30,16 @@ exports.formatProxy = function (input) {
         var user = proxyComponents[2];
         var pass = proxyComponents[3];
         if (!user || !pass)
-            return "http://" + ip + ":" + port;
+            return 'http://' + ip + ':' + port;
         else
-            return "http://" + user + ":" + pass + "@" + ip + ":" + port;
+            return 'http://' + user + ':' + pass + '@' + ip + ':' + port;
     }
-};
-exports.sendTestWebhook = function () {
-    if (settings.has('discord')) {
-        var webhookUrl = settings.get('discord');
-        request({
+}
+exports.formatProxy = formatProxy;
+function sendTestWebhook() {
+    if (electron_settings_1.default.has('discord')) {
+        var webhookUrl = electron_settings_1.default.get('discord');
+        request_1.default({
             url: webhookUrl,
             method: 'POST',
             json: true,
@@ -90,5 +98,6 @@ exports.sendTestWebhook = function () {
     else {
         console.log('no custom webhook');
     }
-};
+}
+exports.sendTestWebhook = sendTestWebhook;
 //# sourceMappingURL=utilities.js.map

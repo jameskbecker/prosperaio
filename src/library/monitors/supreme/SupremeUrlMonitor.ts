@@ -1,4 +1,4 @@
-import Worker from '../../../Worker';
+import { Worker } from '../../../Worker';
 const request = require('request-promise-native');
 const settings = require('electron-settings');
 const ipcWorker = require('electron').ipcRenderer;
@@ -30,11 +30,11 @@ class SupremeUrlMonitor {
 		this._isRunning = false;
 	}
 
-	get monitorDelay() {
+	get monitorDelay():number {
 		return this._monitorDelay;
 	}
 	
-	set monitorDelay(delay) {
+	set monitorDelay(delay:number) {
 		if (delay < 0) {
 			this._monitorDelay = 1000;
 		}
@@ -43,31 +43,31 @@ class SupremeUrlMonitor {
 		}
 	}
 
-	get timeoutDelay() {
+	get timeoutDelay():number {
 		return this._timeoutDelay;
 	}
 
-	set timeoutDelay(delay) {
+	set timeoutDelay(delay:number) {
 		this._timeoutDelay = delay;
 	}
 
-	public run() {
+	run():void {
 		if (!this._isRunning && Object.keys(this.callbacks).length > 0) {	
 			this._isRunning = true;
 			setTimeout(this._fetchProductData.bind(this), this.monitorDelay);
 		}
 	}
 
-	public add(id, callback) {
+	add(id:any, callback:any):void {
 		this.callbacks[id] = callback;
 		this.run();
 	}
 
-	public remove(id) {
+	remove(id:any):void {
 		delete this.callbacks[id];
 	}
 
-	private _getProxy() {
+	private _getProxy():string {
 		if (!this._proxyList) {
 			return null;
 		}
@@ -79,7 +79,7 @@ class SupremeUrlMonitor {
 		return proxy;
 	}
 
-	private setStatus(message, type, ids) {
+	private setStatus(message:any, type:any, ids:any):void {
 		let colors = {
 			DEFAULT: '#8c8f93',
 			INFO: '#4286f4',
@@ -109,7 +109,7 @@ class SupremeUrlMonitor {
 		}
 	}
 
-	private _fetchProductData() {
+	private _fetchProductData():void {
 		this.setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks));
 		logger.info(`[Monitor] [${this._productUrl}] Fetching Product Data.`);
 		let options = {
@@ -147,7 +147,7 @@ class SupremeUrlMonitor {
 		});
 	}
 
-	private _returnData(styles) {
+	private _returnData(styles:any):void {
 		for (let i = 0; i < Object.keys(this.callbacks).length; i++) {
 			let id = Object.keys(this.callbacks)[i];
 			this.callbacks[id](styles);

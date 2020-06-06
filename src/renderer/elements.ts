@@ -1,175 +1,176 @@
-//General
-var checkboxes:NodeListOf<HTMLInputElement> = document.querySelectorAll('.checkbox-label');
-var profileSelector:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.profile-selector');
-var accountSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.captchaAccount-selector');
-var countrySelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.country-selector');
-var proxyListSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.proxylist-selector');
-var siteSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.site-selector');
-var navigationSelectors:NodeListOf<HTMLElement> = document.querySelectorAll('.nav');
-var reloadBtn:any = document.getElementById('reloadApp');
-var minimizeBtn:any = document.getElementById('minimizeApp');
-var closeBtn:any = document.getElementById('closeApp');
- 
-//Dashboard
-var tasksHeader:any = document.getElementById('tasksHeader');
-//var importTaskBtn:HTMLButtonElement = document.getElementById('importTasks');
-//var exportTaskBtn:HTMLButtonElement = document.getElementById('exportTasks');
-var globalMonitorDelay:any = document.getElementById('globalMonitor');
-var globalErrorDelay:any = document.getElementById('globalError');
-var globalTimeoutDelay:any = document.getElementById('globalTimeout');
+export let elements = {
+	//General
+	checkboxes: document.querySelectorAll('.checkbox-label'),
+	profileSelector: document.querySelectorAll('.profile-selector'),
+	accountSelectors: document.querySelectorAll('.captchaAccount-selector'),
+	countrySelectors: document.querySelectorAll('.country-selector'),
+	proxyListSelectors: document.querySelectorAll('.proxylist-selector'),
+	siteSelectors: document.querySelectorAll('.site-selector'),
+	navigationSelectors: document.querySelectorAll('.nav'),
+	reloadBtn: document.getElementById('reloadApp'),
+	minimizeBtn: document.getElementById('minimizeApp'),
+	closeBtn: document.getElementById('closeApp'),
+
+	//Dashboard
+	tasksHeader: document.getElementById('tasksHeader'),
+	//importTaskBtn: document.getElementById('importTasks'),
+	//exportTaskBtn: document.getElementById('exportTasks'),
+	globalMonitorDelay: document.getElementById('globalMonitor'),
+	globalErrorDelay: document.getElementById('globalError'),
+	globalTimeoutDelay: document.getElementById('globalTimeout'),
 
 
-var taskTable:any = document.getElementById('taskTable');
-var taskTableBody:any = document.getElementById('taskTableBody');
+	taskTable: document.getElementById('taskTable'),
+	taskTableBody: document.getElementById('taskTableBody'),
 
-var runAllBtn:any = document.getElementById('runAll');
-var stopAllBtn:any = document.getElementById('stopAll');
-var clearTasksBtn:any = document.getElementById('clearTasks');
+	runAllBtn: document.getElementById('runAll'),
+	stopAllBtn: document.getElementById('stopAll'),
+	clearTasksBtn: document.getElementById('clearTasks'),
 
-//Task Creator
-var newTask_Site:any = document.getElementById('taskSite');
-var newTask_Profile:any = document.getElementById('taskProfile');
-var newTask_Mode:any = document.getElementById('taskMode');
-var newTask_RestockMode:any = document.getElementById('newTaskMonitorMode');
-var newTask_CheckoutAttempts:any = document.getElementById('taskCheckoutAttempts');
-var newTask_Quantity:any = document.getElementById('taskQuantity');
+	//Task Creator
+	newTask_Site: document.getElementById('taskSite'),
+	newTask_Profile: document.getElementById('taskProfile'),
+	newTask_Mode: document.getElementById('taskMode'),
+	newTask_RestockMode: document.getElementById('newTaskMonitorMode'),
+	newTask_CheckoutAttempts: document.getElementById('taskCheckoutAttempts'),
+	newTask_Quantity: document.getElementById('taskQuantity'),
 
-var newTask_CartDelay:any = document.getElementById('taskCartDelay');
-var newTask_CheckoutDelay:any = document.getElementById('taskCheckoutDelay');
-var newTask_MonitorDelay:any = document.getElementById('taskMonitorDelay');
-var newTask_ErrorDelay:any = document.getElementById('taskErrorDelay');
-var newTask_Timeout:any = document.getElementById('taskTimeoutDelay');
+	newTask_CartDelay: document.getElementById('taskCartDelay'),
+	newTask_CheckoutDelay: document.getElementById('taskCheckoutDelay'),
+	newTask_MonitorDelay: document.getElementById('taskMonitorDelay'),
+	newTask_ErrorDelay: document.getElementById('taskErrorDelay'),
+	newTask_Timeout: document.getElementById('taskTimeoutDelay'),
 
-var newTask_ProxyList:any = document.getElementById('taskProxyList');
-var newTask_PriceLimit:any = document.getElementById('taskMaxPrice');
-var newTask_StartDate:any = document.getElementById('taskStartDate');
-var newTask_StartTime:any = document.getElementById('taskStartTime');
+	newTask_ProxyList: document.getElementById('taskProxyList'),
+	newTask_PriceLimit: document.getElementById('taskMaxPrice'),
+	newTask_StartDate: document.getElementById('taskStartDate'),
+	newTask_StartTime: document.getElementById('taskStartTime'),
 
-var newTask_Restocks:any = document.getElementById('newTaskRestocks');
-var newTask_SkipCaptcha:any = document.getElementById('captchaCheckbox');
-var newTask_threeD:any = document.getElementById('threeDCheckbox');
+	newTask_Restocks: document.getElementById('newTaskRestocks'),
+	newTask_SkipCaptcha: document.getElementById('captchaCheckbox'),
+	newTask_threeD: document.getElementById('threeDCheckbox'),
 
-var newTask_products:any = document.getElementById("newTaskProducts");
-var newTask_styles:any = document.getElementById("newTaskStyles");
-var newTask_sizes:any = document.getElementById('newTaskSizes');
+	newTask_products: document.getElementById('newTaskProducts'),
+	newTask_styles: document.getElementById('newTaskStyles'),
+	newTask_sizes: document.getElementById('newTaskSizes'),
 
-var newTask_SearchInput:any = document.querySelectorAll('input[name="taskSearchInput"]');
-var newTask_Category:any = document.querySelectorAll('input[name="taskCategory"]');
-var newTask_Size:any = document.querySelectorAll('input[name="taskSize"]');
-var newTask_Style:any = document.querySelectorAll('input[name="taskVariant"]');
-var newTask_ProductQty:any = document.querySelectorAll('input[name="taskProductQty"]');
+	newTask_SearchInput: document.querySelectorAll('input[name="taskSearchInput"]'),
+	newTask_Category: document.querySelectorAll('input[name="taskCategory"]'),
+	newTask_Size: document.querySelectorAll('input[name="taskSize"]'),
+	newTask_Style: document.querySelectorAll('input[name="taskVariant"]'),
+	newTask_ProductQty: document.querySelectorAll('input[name="taskProductQty"]'),
+	newTask_saveBtn: document.getElementById('taskSaveButton'),
 
-var newTask_saveBtn:any = document.getElementById('taskSaveButton');
+	//Profile Creator
+	profilesWrapper: document.getElementById('profilesWrapper'),
+	billingFirst: document.getElementById('profileBillingFirst'),
+	billingLast: document.getElementById('profileBillingLast'),
+	billingEmail: document.getElementById('profileBillingEmail'),
+	billingTelephone: document.getElementById('profileBillingTelephone'),
+	billingAddress1: document.getElementById('profileBillingAddress1'),
+	billingAddress2: document.getElementById('profileBillingAddress2'),
+	billingCity: document.getElementById('profileBillingCity'),
+	billingZip: document.getElementById('profileBillingZip'),
+	billingCountry: document.getElementById('profileBillingCountry'),
+	billingState: document.getElementById('profileBillingState'),
 
-//Profile Creator
-var profilesWrapper:any = document.getElementById('profilesWrapper');
-var billingFirst:any = document.getElementById('profileBillingFirst');
-var billingLast:any = document.getElementById('profileBillingLast');
-var billingEmail:any = document.getElementById('profileBillingEmail');
-var billingTelephone:any = document.getElementById('profileBillingTelephone');
-var billingAddress1:any = document.getElementById('profileBillingAddress1');
-var billingAddress2:any = document.getElementById('profileBillingAddress2');
-var billingCity:any = document.getElementById('profileBillingCity');
-var billingZip:any = document.getElementById('profileBillingZip');
-var billingCountry:any = document.getElementById('profileBillingCountry');
-var billingState:any = document.getElementById('profileBillingState'); 
+	useSameShippingAddress: document.getElementById('sameShippingCheckbox'),
 
-var useSameShippingAddress:any = document.getElementById('sameShippingCheckbox');
+	shippingFirst: document.getElementById('profileShippingFirst'),
+	shippingLast: document.getElementById('profileShippingLast'),
+	shippingEmail: document.getElementById('profileShippingEmail'),
+	shippingTelephone: document.getElementById('profileShippingTelephone'),
+	shippingAddress1: document.getElementById('profileShippingAddress1'),
+	shippingAddress2: document.getElementById('profileShippingAddress2'),
+	shippingCity: document.getElementById('profileShippingCity'),
+	shippingZip: document.getElementById('profileShippingZip'),
+	shippingCountry: document.getElementById('profileShippingCountry'),
+	shippingState: document.getElementById('profileShippingState'),
 
-var shippingFirst:any = document.getElementById('profileShippingFirst');
-var shippingLast:any = document.getElementById('profileShippingLast');
-var shippingEmail:any = document.getElementById('profileShippingEmail');
-var shippingTelephone:any = document.getElementById('profileShippingTelephone');
-var shippingAddress1:any = document.getElementById('profileShippingAddress1');
-var shippingAddress2:any = document.getElementById('profileShippingAddress2');
-var shippingCity:any = document.getElementById('profileShippingCity');
-var shippingZip:any = document.getElementById('profileShippingZip');
-var shippingCountry:any = document.getElementById('profileShippingCountry');
-var shippingState:any = document.getElementById('profileShippingState');
+	paymentType: document.getElementById('profilePaymentType'),
+	cardNumber: document.getElementById('profileCardNumber'),
+	cardExpiryMonth: document.getElementById('profileExpiryMonth'),
+	cardExpiryYear: document.getElementById('profileExpiryYear'),
+	cardCvv: document.getElementById('profileCvv'),
 
-var paymentType:any = document.getElementById('profilePaymentType');
-var cardNumber:any = document.getElementById('profileCardNumber');
-var cardExpiryMonth:any = document.getElementById('profileExpiryMonth');
-var cardExpiryYear:any = document.getElementById('profileExpiryYear');
-var cardCvv:any = document.getElementById('profileCvv');
+	_profileId: document.getElementById('profileId'),
+	profileName: document.getElementById('profileName'),
+	saveProfileBtn: document.getElementById('profileSaveButton'),
+	profileLoader: document.getElementById('profileLoader'),
 
-var _profileId:any = document.getElementById('profileId');
-var profileName:any = document.getElementById('profileName');
-var saveProfileBtn:any = document.getElementById('profileSaveButton');
-var profileLoader:any = document.getElementById('profileLoader');
+	//importProfileBtn: document.getElementById('importProfiles'),
+	//exportProfileBtn: document.getElementById('exportProfiles'),
+	deleteProfileBtn: document.getElementById('profileDeleteButton'),
+	clearProfilesBtn: document.getElementById('deleteAllProfiles'),
 
-//var importProfileBtn:any = document.getElementById('importProfiles');
-//var exportProfileBtn:any = document.getElementById('exportProfiles');
-var deleteProfileBtn:any = document.getElementById('profileDeleteButton');
-var clearProfilesBtn:any = document.getElementById('deleteAllProfiles');
+	// profileElements: [
+	// 	document.getElementById('profileId'),
+	// 	elements.billingFirst,
+	// 	elements.billingLast,
+	// 	elements.billingEmail,
+	// 	elements.billingTelephone,
+	// 	elements.billingAddress1,
+	// 	elements.billingAddress2,
+	// 	elements.	billingCity,
+	// 	elements.billingZip,
+	// 	elements.billingCountry,
+	// 	elements.billingState,
 
-var profileElements:any = [
-	document.getElementById('profileId'),
-	billingFirst, 
-	billingLast, 
-	billingEmail, 
-	billingTelephone,
-	billingAddress1,
-	billingAddress2,
-	billingCity,
-	billingZip,
-	billingCountry,
-	billingState,
+	// 	elements.shippingFirst,
+	// 	elements.shippingLast,
+	// 	elements.shippingEmail,
+	// 	elements.shippingTelephone,
+	// 	elements.shippingAddress1,
+	// 	elements.shippingAddress2,
+	// 	elements.shippingCity,
+	// 	elements.shippingZip,
+	// 	elements.shippingCountry,
+	// 	elements.shippingState,
 
-	shippingFirst,
-	shippingLast,
-	shippingEmail,
-	shippingTelephone,
-	shippingAddress1,
-	shippingAddress2,
-	shippingCity,
-	shippingZip,
-	shippingCountry,
-	shippingState,
+	// 	elements.paymentType,
+	// 	elements.cardNumber,
+	// 	elements.cardExpiryMonth,
+	// 	elements.cardExpiryYear,
+	// 	elements.cardCvv,
 
-	paymentType,
-	cardNumber,
-	cardExpiryMonth,
-	cardExpiryYear,
-	cardCvv,
+	// 	elements.profileName
+	// ],
+	//Proxies
+	// importProxyBtn: document.getElementById('importProxies'),
+	// exportProxyBtn: document.getElementById('exportProxies'),
 
-	profileName
-];
-//Proxies
-// var importProxyBtn:any = document.getElementById('importProxies');
-// var exportProxyBtn:any = document.getElementById('exportProxies');
+	proxyHeader: document.getElementById('proxy-header'),
 
-var proxyHeader:any = document.getElementById('proxy-header');
+	proxyListName: document.getElementById('proxyListName'),
+	massProxyInput: document.getElementById('proxyInput'),
+	saveProxyList: document.getElementById('saveProxyListBtn'),
 
-var proxyListName:any = document.getElementById('proxyListName');
-var massProxyInput:any = document.getElementById('proxyInput');
-var saveProxyList:any = document.getElementById('saveProxyListBtn');
+	proxyListSelectorMain: document.getElementById('proxyListSelectorMain'),
+	proxyTableName: document.getElementById('proxyTableName'),
+	proxyTestSite: document.getElementById('proxySiteSelector'),
+	proxyTestTable: document.getElementById('proxyTestResults'),
+	proxyTestAll: document.getElementById('proxyTestAll'),
+	proxyDeleteList: document.getElementById('proxyDeleteList'),
 
-var proxyListSelectorMain:any = document.getElementById('proxyListSelectorMain');
-var proxyTableName:any = document.getElementById('proxyTableName');
-var proxyTestSite:any = document.getElementById('proxySiteSelector');
-var proxyTestTable:any = document.getElementById('proxyTestResults');
-var proxyTestAll:any = document.getElementById('proxyTestAll');
-var proxyDeleteList:any = document.getElementById('proxyDeleteList');
+	//Harvesters
+	harverster_Name: document.getElementById('harvesterName'),
+	harvester_SaveBtn: document.getElementById('saveHarvesterBtn'),
+	harvesterTable: document.getElementById('harvesterTable'),
+	harvester_ClearBtn: document.getElementById('clearCaptchaAccounts'),
 
-//Harvesters
-var harverster_Name:any = document.getElementById('harvesterName');
-var harvester_SaveBtn:any = document.getElementById('saveHarvesterBtn');
-var harvesterTable:any = document.getElementById('harvesterTable');
-var harvester_ClearBtn:any = document.getElementById('clearCaptchaAccounts');
+	//Analytics
+	orderTableBody: document.getElementById('orderTableBody'),
+	clearAnalyticsBtn: document.getElementById('clearAnalytics'),
 
-//Analytics
-var orderTableBody:any = document.getElementById('orderTableBody');
-var clearAnalyticsBtn:any = document.getElementById('clearAnalytics');
+	//Settings
+	// monitorProxyList: document.getElementById('monitorProxyList'),
+	currentBrowserPath: document.getElementById('currentBrowserPath'),
+	installBrowserBtn: document.getElementById('browserSetup'),
+	resetBtn: document.getElementById('resetAllSettings'),
+	signoutBtn: document.getElementById('signout'),
+	customDiscord: document.getElementById('discordWebhook'),
+	testDiscordBtn: document.getElementById('testDiscordWebhook'),
 
-//Settings
-// var monitorProxyList:any = document.getElementById('monitorProxyList');
-var currentBrowserPath:any = document.getElementById('currentBrowserPath');
-var installBrowserBtn:any = document.getElementById('browserSetup');
-var resetBtn:any = document.getElementById('resetAllSettings');
-var signoutBtn:any = document.getElementById('signout');
-var customDiscord:any = document.getElementById('discordWebhook');
-var testDiscordBtn:any = document.getElementById('testDiscordWebhook');
-
-//Footer
-var version:any = document.getElementById('version');
+	//Footer
+	version: document.getElementById('version')
+};

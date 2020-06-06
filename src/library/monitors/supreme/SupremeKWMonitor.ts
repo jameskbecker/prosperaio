@@ -1,4 +1,4 @@
-import Worker from '../../../Worker';
+import { Worker } from '../../../Worker';
 const request = require('request-promise-native');
 const settings = require('electron-settings');
 const ipcWorker = require('electron').ipcRenderer;
@@ -34,7 +34,7 @@ class SupremeKWMonitor {
 
 	}
 
-	public run() {
+	run():void {
 		if (!this._isRunning && !this._shouldStop) {
 			this._isRunning = true;
 			this._fetchStockData('shop');
@@ -43,7 +43,7 @@ class SupremeKWMonitor {
 		}
 	}
 
-	public add(taskId, name = '', category = '', callback) {
+	add(taskId:string, name:string = '', category:string = '', callback:Function):void {
 		let input;
 		if (typeof callback !== 'function') {
 			return console.log('No Callback Given.');
@@ -72,7 +72,7 @@ class SupremeKWMonitor {
 		this.run();
 	}
 
-	public remove(id) {
+	remove(id:string):void {
 		console.log('REMOVING FROM KW MONITOR');
 		for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 			let property = Object.keys(this.inputData)[i];
@@ -93,7 +93,7 @@ class SupremeKWMonitor {
 
 	} 
 
-	private _getProxy() {
+	private _getProxy():any {
 		if (!this._proxyList) {
 			return null;
 		}
@@ -105,7 +105,7 @@ class SupremeKWMonitor {
 		return proxy;
 	}
 
-	private _hasMatchingsKeywords(data, positive, negative) {
+	private _hasMatchingsKeywords(data:string, positive:string[], negative:string[]):boolean {
 		for (let i = 0; i < positive.length; i++) {
 			if (!data.toLowerCase().includes(positive[i].toLowerCase())) {
 				return false;
@@ -119,7 +119,7 @@ class SupremeKWMonitor {
 		return true;
 	}
 
-	private _parseCategory(key) {
+	private _parseCategory(key:any):any {
 		return key;
 		// const categories = {
 		// 	"new": "New",
@@ -139,7 +139,7 @@ class SupremeKWMonitor {
 		// return categories[key];
 	}
 
-	private setStatus(message:string, type:string, ids?:Array<string>) {
+	private setStatus(message:string, type:string, ids?:Array<string>):void {
 		let colors = {
 			DEFAULT: '#8c8f93',
 			INFO: '#4286f4',
@@ -169,7 +169,7 @@ class SupremeKWMonitor {
 		}
 	}
 
-	private _fetchStockData(endpoint) {
+	private _fetchStockData(endpoint:string):void {
 		logger.info('[Monitor] ['+endpoint+'] Polling Supreme Stock Data.');
 		this.setStatus('Searching for Product.', 'WARNING');
 		let options = {
@@ -265,7 +265,7 @@ class SupremeKWMonitor {
 		});
 	}
 
-	private _returnData(propName, name, id, price) {
+	private _returnData(propName:string, name:string, id:number, price:number):void {
 		let callbacks = this.inputData[propName]['CALLBACKS'];
 		for (let i = 0; i < callbacks.length; i++) {
 			callbacks[i](name, id, price);

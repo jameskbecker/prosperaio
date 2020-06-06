@@ -1,132 +1,108 @@
-var checkboxes = document.querySelectorAll('.checkbox-label');
-var profileSelector = document.querySelectorAll('.profile-selector');
-var accountSelectors = document.querySelectorAll('.captchaAccount-selector');
-var countrySelectors = document.querySelectorAll('.country-selector');
-var proxyListSelectors = document.querySelectorAll('.proxylist-selector');
-var siteSelectors = document.querySelectorAll('.site-selector');
-var navigationSelectors = document.querySelectorAll('.nav');
-var reloadBtn = document.getElementById('reloadApp');
-var minimizeBtn = document.getElementById('minimizeApp');
-var closeBtn = document.getElementById('closeApp');
-var tasksHeader = document.getElementById('tasksHeader');
-var globalMonitorDelay = document.getElementById('globalMonitor');
-var globalErrorDelay = document.getElementById('globalError');
-var globalTimeoutDelay = document.getElementById('globalTimeout');
-var taskTable = document.getElementById('taskTable');
-var taskTableBody = document.getElementById('taskTableBody');
-var runAllBtn = document.getElementById('runAll');
-var stopAllBtn = document.getElementById('stopAll');
-var clearTasksBtn = document.getElementById('clearTasks');
-var newTask_Site = document.getElementById('taskSite');
-var newTask_Profile = document.getElementById('taskProfile');
-var newTask_Mode = document.getElementById('taskMode');
-var newTask_RestockMode = document.getElementById('newTaskMonitorMode');
-var newTask_CheckoutAttempts = document.getElementById('taskCheckoutAttempts');
-var newTask_Quantity = document.getElementById('taskQuantity');
-var newTask_CartDelay = document.getElementById('taskCartDelay');
-var newTask_CheckoutDelay = document.getElementById('taskCheckoutDelay');
-var newTask_MonitorDelay = document.getElementById('taskMonitorDelay');
-var newTask_ErrorDelay = document.getElementById('taskErrorDelay');
-var newTask_Timeout = document.getElementById('taskTimeoutDelay');
-var newTask_ProxyList = document.getElementById('taskProxyList');
-var newTask_PriceLimit = document.getElementById('taskMaxPrice');
-var newTask_StartDate = document.getElementById('taskStartDate');
-var newTask_StartTime = document.getElementById('taskStartTime');
-var newTask_Restocks = document.getElementById('newTaskRestocks');
-var newTask_SkipCaptcha = document.getElementById('captchaCheckbox');
-var newTask_threeD = document.getElementById('threeDCheckbox');
-var newTask_products = document.getElementById("newTaskProducts");
-var newTask_styles = document.getElementById("newTaskStyles");
-var newTask_sizes = document.getElementById('newTaskSizes');
-var newTask_SearchInput = document.querySelectorAll('input[name="taskSearchInput"]');
-var newTask_Category = document.querySelectorAll('input[name="taskCategory"]');
-var newTask_Size = document.querySelectorAll('input[name="taskSize"]');
-var newTask_Style = document.querySelectorAll('input[name="taskVariant"]');
-var newTask_ProductQty = document.querySelectorAll('input[name="taskProductQty"]');
-var newTask_saveBtn = document.getElementById('taskSaveButton');
-var profilesWrapper = document.getElementById('profilesWrapper');
-var billingFirst = document.getElementById('profileBillingFirst');
-var billingLast = document.getElementById('profileBillingLast');
-var billingEmail = document.getElementById('profileBillingEmail');
-var billingTelephone = document.getElementById('profileBillingTelephone');
-var billingAddress1 = document.getElementById('profileBillingAddress1');
-var billingAddress2 = document.getElementById('profileBillingAddress2');
-var billingCity = document.getElementById('profileBillingCity');
-var billingZip = document.getElementById('profileBillingZip');
-var billingCountry = document.getElementById('profileBillingCountry');
-var billingState = document.getElementById('profileBillingState');
-var useSameShippingAddress = document.getElementById('sameShippingCheckbox');
-var shippingFirst = document.getElementById('profileShippingFirst');
-var shippingLast = document.getElementById('profileShippingLast');
-var shippingEmail = document.getElementById('profileShippingEmail');
-var shippingTelephone = document.getElementById('profileShippingTelephone');
-var shippingAddress1 = document.getElementById('profileShippingAddress1');
-var shippingAddress2 = document.getElementById('profileShippingAddress2');
-var shippingCity = document.getElementById('profileShippingCity');
-var shippingZip = document.getElementById('profileShippingZip');
-var shippingCountry = document.getElementById('profileShippingCountry');
-var shippingState = document.getElementById('profileShippingState');
-var paymentType = document.getElementById('profilePaymentType');
-var cardNumber = document.getElementById('profileCardNumber');
-var cardExpiryMonth = document.getElementById('profileExpiryMonth');
-var cardExpiryYear = document.getElementById('profileExpiryYear');
-var cardCvv = document.getElementById('profileCvv');
-var _profileId = document.getElementById('profileId');
-var profileName = document.getElementById('profileName');
-var saveProfileBtn = document.getElementById('profileSaveButton');
-var profileLoader = document.getElementById('profileLoader');
-var deleteProfileBtn = document.getElementById('profileDeleteButton');
-var clearProfilesBtn = document.getElementById('deleteAllProfiles');
-var profileElements = [
-    document.getElementById('profileId'),
-    billingFirst,
-    billingLast,
-    billingEmail,
-    billingTelephone,
-    billingAddress1,
-    billingAddress2,
-    billingCity,
-    billingZip,
-    billingCountry,
-    billingState,
-    shippingFirst,
-    shippingLast,
-    shippingEmail,
-    shippingTelephone,
-    shippingAddress1,
-    shippingAddress2,
-    shippingCity,
-    shippingZip,
-    shippingCountry,
-    shippingState,
-    paymentType,
-    cardNumber,
-    cardExpiryMonth,
-    cardExpiryYear,
-    cardCvv,
-    profileName
-];
-var proxyHeader = document.getElementById('proxy-header');
-var proxyListName = document.getElementById('proxyListName');
-var massProxyInput = document.getElementById('proxyInput');
-var saveProxyList = document.getElementById('saveProxyListBtn');
-var proxyListSelectorMain = document.getElementById('proxyListSelectorMain');
-var proxyTableName = document.getElementById('proxyTableName');
-var proxyTestSite = document.getElementById('proxySiteSelector');
-var proxyTestTable = document.getElementById('proxyTestResults');
-var proxyTestAll = document.getElementById('proxyTestAll');
-var proxyDeleteList = document.getElementById('proxyDeleteList');
-var harverster_Name = document.getElementById('harvesterName');
-var harvester_SaveBtn = document.getElementById('saveHarvesterBtn');
-var harvesterTable = document.getElementById('harvesterTable');
-var harvester_ClearBtn = document.getElementById('clearCaptchaAccounts');
-var orderTableBody = document.getElementById('orderTableBody');
-var clearAnalyticsBtn = document.getElementById('clearAnalytics');
-var currentBrowserPath = document.getElementById('currentBrowserPath');
-var installBrowserBtn = document.getElementById('browserSetup');
-var resetBtn = document.getElementById('resetAllSettings');
-var signoutBtn = document.getElementById('signout');
-var customDiscord = document.getElementById('discordWebhook');
-var testDiscordBtn = document.getElementById('testDiscordWebhook');
-var version = document.getElementById('version');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.elements = void 0;
+exports.elements = {
+    checkboxes: document.querySelectorAll('.checkbox-label'),
+    profileSelector: document.querySelectorAll('.profile-selector'),
+    accountSelectors: document.querySelectorAll('.captchaAccount-selector'),
+    countrySelectors: document.querySelectorAll('.country-selector'),
+    proxyListSelectors: document.querySelectorAll('.proxylist-selector'),
+    siteSelectors: document.querySelectorAll('.site-selector'),
+    navigationSelectors: document.querySelectorAll('.nav'),
+    reloadBtn: document.getElementById('reloadApp'),
+    minimizeBtn: document.getElementById('minimizeApp'),
+    closeBtn: document.getElementById('closeApp'),
+    tasksHeader: document.getElementById('tasksHeader'),
+    globalMonitorDelay: document.getElementById('globalMonitor'),
+    globalErrorDelay: document.getElementById('globalError'),
+    globalTimeoutDelay: document.getElementById('globalTimeout'),
+    taskTable: document.getElementById('taskTable'),
+    taskTableBody: document.getElementById('taskTableBody'),
+    runAllBtn: document.getElementById('runAll'),
+    stopAllBtn: document.getElementById('stopAll'),
+    clearTasksBtn: document.getElementById('clearTasks'),
+    newTask_Site: document.getElementById('taskSite'),
+    newTask_Profile: document.getElementById('taskProfile'),
+    newTask_Mode: document.getElementById('taskMode'),
+    newTask_RestockMode: document.getElementById('newTaskMonitorMode'),
+    newTask_CheckoutAttempts: document.getElementById('taskCheckoutAttempts'),
+    newTask_Quantity: document.getElementById('taskQuantity'),
+    newTask_CartDelay: document.getElementById('taskCartDelay'),
+    newTask_CheckoutDelay: document.getElementById('taskCheckoutDelay'),
+    newTask_MonitorDelay: document.getElementById('taskMonitorDelay'),
+    newTask_ErrorDelay: document.getElementById('taskErrorDelay'),
+    newTask_Timeout: document.getElementById('taskTimeoutDelay'),
+    newTask_ProxyList: document.getElementById('taskProxyList'),
+    newTask_PriceLimit: document.getElementById('taskMaxPrice'),
+    newTask_StartDate: document.getElementById('taskStartDate'),
+    newTask_StartTime: document.getElementById('taskStartTime'),
+    newTask_Restocks: document.getElementById('newTaskRestocks'),
+    newTask_SkipCaptcha: document.getElementById('captchaCheckbox'),
+    newTask_threeD: document.getElementById('threeDCheckbox'),
+    newTask_products: document.getElementById('newTaskProducts'),
+    newTask_styles: document.getElementById('newTaskStyles'),
+    newTask_sizes: document.getElementById('newTaskSizes'),
+    newTask_SearchInput: document.querySelectorAll('input[name="taskSearchInput"]'),
+    newTask_Category: document.querySelectorAll('input[name="taskCategory"]'),
+    newTask_Size: document.querySelectorAll('input[name="taskSize"]'),
+    newTask_Style: document.querySelectorAll('input[name="taskVariant"]'),
+    newTask_ProductQty: document.querySelectorAll('input[name="taskProductQty"]'),
+    newTask_saveBtn: document.getElementById('taskSaveButton'),
+    profilesWrapper: document.getElementById('profilesWrapper'),
+    billingFirst: document.getElementById('profileBillingFirst'),
+    billingLast: document.getElementById('profileBillingLast'),
+    billingEmail: document.getElementById('profileBillingEmail'),
+    billingTelephone: document.getElementById('profileBillingTelephone'),
+    billingAddress1: document.getElementById('profileBillingAddress1'),
+    billingAddress2: document.getElementById('profileBillingAddress2'),
+    billingCity: document.getElementById('profileBillingCity'),
+    billingZip: document.getElementById('profileBillingZip'),
+    billingCountry: document.getElementById('profileBillingCountry'),
+    billingState: document.getElementById('profileBillingState'),
+    useSameShippingAddress: document.getElementById('sameShippingCheckbox'),
+    shippingFirst: document.getElementById('profileShippingFirst'),
+    shippingLast: document.getElementById('profileShippingLast'),
+    shippingEmail: document.getElementById('profileShippingEmail'),
+    shippingTelephone: document.getElementById('profileShippingTelephone'),
+    shippingAddress1: document.getElementById('profileShippingAddress1'),
+    shippingAddress2: document.getElementById('profileShippingAddress2'),
+    shippingCity: document.getElementById('profileShippingCity'),
+    shippingZip: document.getElementById('profileShippingZip'),
+    shippingCountry: document.getElementById('profileShippingCountry'),
+    shippingState: document.getElementById('profileShippingState'),
+    paymentType: document.getElementById('profilePaymentType'),
+    cardNumber: document.getElementById('profileCardNumber'),
+    cardExpiryMonth: document.getElementById('profileExpiryMonth'),
+    cardExpiryYear: document.getElementById('profileExpiryYear'),
+    cardCvv: document.getElementById('profileCvv'),
+    _profileId: document.getElementById('profileId'),
+    profileName: document.getElementById('profileName'),
+    saveProfileBtn: document.getElementById('profileSaveButton'),
+    profileLoader: document.getElementById('profileLoader'),
+    deleteProfileBtn: document.getElementById('profileDeleteButton'),
+    clearProfilesBtn: document.getElementById('deleteAllProfiles'),
+    proxyHeader: document.getElementById('proxy-header'),
+    proxyListName: document.getElementById('proxyListName'),
+    massProxyInput: document.getElementById('proxyInput'),
+    saveProxyList: document.getElementById('saveProxyListBtn'),
+    proxyListSelectorMain: document.getElementById('proxyListSelectorMain'),
+    proxyTableName: document.getElementById('proxyTableName'),
+    proxyTestSite: document.getElementById('proxySiteSelector'),
+    proxyTestTable: document.getElementById('proxyTestResults'),
+    proxyTestAll: document.getElementById('proxyTestAll'),
+    proxyDeleteList: document.getElementById('proxyDeleteList'),
+    harverster_Name: document.getElementById('harvesterName'),
+    harvester_SaveBtn: document.getElementById('saveHarvesterBtn'),
+    harvesterTable: document.getElementById('harvesterTable'),
+    harvester_ClearBtn: document.getElementById('clearCaptchaAccounts'),
+    orderTableBody: document.getElementById('orderTableBody'),
+    clearAnalyticsBtn: document.getElementById('clearAnalytics'),
+    currentBrowserPath: document.getElementById('currentBrowserPath'),
+    installBrowserBtn: document.getElementById('browserSetup'),
+    resetBtn: document.getElementById('resetAllSettings'),
+    signoutBtn: document.getElementById('signout'),
+    customDiscord: document.getElementById('discordWebhook'),
+    testDiscordBtn: document.getElementById('testDiscordWebhook'),
+    version: document.getElementById('version')
+};
 //# sourceMappingURL=elements.js.map

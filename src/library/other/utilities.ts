@@ -1,5 +1,5 @@
-import * as request from 'request';
-import * as settings from 'electron-settings';
+import request from 'request';
+import settings from 'electron-settings';
 
 export function generateId (length: number): string {
 	const idFormat = 'ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvxyz1234567890';

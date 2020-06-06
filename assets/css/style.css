@@ -96,7 +96,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	height: 100%;
-	font-family: "Montserrat Bold";
+	font-family: "Open Sans Bold";
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-size: 70%;
@@ -150,10 +150,9 @@ body {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	flex: 1;
-	font-family: "Montserrat Bold";
-	font-size: 2.5vmax;
+	font-family: "Open Sans Bold";
+	font-size: 28px;
 	height: 6vh;
-	font-weight: 500 !important;
 	color: white;
 	align-self: center;
 	white-space: nowrap;
@@ -182,7 +181,7 @@ body {
 }
 
 .header-extra-text {
-	font-family: "Montserrat Medium";
+	font-family: "Open Sans";
 	color: white;
 	font-size: 1.6vh;
 	text-align: right;
@@ -197,7 +196,7 @@ body {
 	justify-content: space-evenly;
 	background-color: var(--primary-grey);
 	box-shadow: 0.25em 0.25em 1em var(--secondary-grey), inset 0.25em 0.25em 1em var(--tertiary-grey);
-	border-radius: 0.75vh !important;
+	border-radius: 1vh !important;
 	margin: 1vmax;
 	
 }
@@ -234,10 +233,10 @@ body {
 	display: flex;
 	flex-direction: row;
 	flex: 0 0 100% !important;
-	font-family: "Montserrat Bold";
-	height: 3.5vh;
-	padding: 1vh 0;
-	font-size: 2vmax;
+	font-family: "Open Sans Bold";
+	height: 30px;
+	padding: 5px 0;
+	font-size: 28px;
 	color: var(--text-grey);
 	justify-content: flex-start;
 	overflow: hidden;
@@ -276,7 +275,7 @@ body {
 }
 
 .container-element {
-	display: flex;
+	display: inline-flex;
 	flex-direction: row;
 	flex-wrap: wrap !important;
 	flex: 1 1 0;
@@ -290,7 +289,7 @@ body {
 
 
 .container-element-sm {
-	max-width: 15vw;
+	max-width: 12.5vw;
 }
 
 .container-element-md {
@@ -326,13 +325,12 @@ input[type=date]::-webkit-outer-spin-button
 	
 	flex-direction: row;
 	flex-wrap: nowrap;
-	flex: 1 1 0;
-	align-self: center;
-	align-items: center;
+	
+	align-content: center;
 	justify-content: center;
 	
-	font-family: "Montserrat Medium";
-	font-size: 1.5vh;
+	font-family: "Open Sans";
+	font-size: 12px;
 	background-color: var(--secondary-grey);
 	margin: 0; 
 	opacity: 0.85;
@@ -340,7 +338,7 @@ input[type=date]::-webkit-outer-spin-button
 	overflow: hidden;
 
 	border: 1px solid transparent;
-	border-radius: 0.75vh;
+	border-radius: 1vh;
 	box-sizing: border-box;
 	
 	-webkit-appearance: none; 
@@ -364,9 +362,11 @@ input[type=date]::-webkit-outer-spin-button
 
 
 .input {
-	
+	display: flex;
+	flex: 1 1 0;
 	color: var(--text-grey);
 	text-indent: 0.5vw;
+	margin: 1vh;
 	box-shadow: 1vh 1vh 1vh var(--tertiary-grey);
 	background-color: var(--primary-grey);
 	margin: 0.1em;
@@ -414,21 +414,25 @@ input[type=date]::-webkit-outer-spin-button
 }	
 
 .btn {
+		
+	padding: 1% 15%;
 	align-content: center;
-	font-family: "Montserrat Bold";
-	background-color: transparent;
+	opacity: 0.7;
+	background-color: var(--primary-grey);
 	color: white;
-	border: 0.2vh solid var(--secondary-color);
-	
 }
-
 
 .btn:hover {
-	transition: 0.5s;
-	background-color: var(--primary-color);
-	color: whitesmoke;
+	transition: 0.25s;
 	opacity: 1;
 }
+
+.btn-secondary {
+	background-color: var(--secondary-grey);
+}
+
+
+
 
 .btn-transparent {
 	background-image: none;
@@ -509,8 +513,9 @@ label, .label {
 	flex-direction: row;
 	
 	flex: 0 0 100%;
-	font-family: "Montserrat Medium";
+	font-family: "Open Sans";
 	font-size: 0.8vmax;
+	height: 1.2vmax;
 	text-align: left;
 	color: var(--text-grey);
 	align-content: center;
@@ -549,7 +554,7 @@ label, .label {
 .table-header {
 	align-content: center;
 	height: 5vh;
-	font-family: "Montserrat Bold";
+	font-family: "Open Sans Bold";
 
 	font-size: 1vw;
 	background-image: transparent;
@@ -559,10 +564,10 @@ label, .label {
 .table-body {
 	align-content: flex-start;
 	height: 62vh;
-	font-family: sans-serif;
+	font-family: "Open Sans";
 	font-weight: 600;
 	font-size: 0.8vw;
-	color: whitesmoke;
+	color: white;
 	background-color: transparent;
 	overflow-y: auto;
 }
@@ -584,9 +589,15 @@ label, .label {
 	height: 3vw;
 }
 
+.table-body .row {
+	opacity: 0.65;
+}
+
 .table-body .row:hover {
 	opacity: 1;
 }
+
+
 
 
 .cell {
@@ -874,7 +885,8 @@ i {
   position: relative;
   width: 90vw;
   margin: 2vw;
-  pointer-events: none;
+	pointer-events: none;
+	border-radius: 1vh;
 }
 
 .modal.fade .modal-dialog {
@@ -913,7 +925,7 @@ i {
   pointer-events: auto;
   background-color: var(--secondary-grey);
   background-clip: padding-box;
-  border-radius: 0.3rem;
+  border-radius: 1vh;
   outline: 0;
 }
 

@@ -1,4 +1,4 @@
-import Worker from '../../../Worker';
+import { Worker } from '../../../Worker';
 import Task from '../Task';
 import SupremeRequest from './SupremeRequest';
 import SupremeSafe from './SupremeSafe';

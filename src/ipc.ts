@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, session } from 'electron';
-import Main from '../Main';
-import { HarvesterWindow, GoogleWindow } from './windows/index';
-import { logger } from '../library/other';
+//import { Main } from './app';
+import { HarvesterWindow, GoogleWindow } from './main/windows/index';
+import { logger } from './library/other';
 import * as settings from 'electron-settings';
 
 var CARDINAL_SOLVERS:any = {};
@@ -22,8 +22,8 @@ function init():void {
 
 	ipcMain.on('window.reload',  ():void => {
 		logger.debug('[MAIN] [IPC] window.reload');
-		Main.workerWindow?.webContents.reload();
-		Main.mainWindow.webContents.reload();
+		this.workerWindow?.webContents.reload();
+		this.mainWindow.webContents.reload();
 	});
 
 	ipcMain.on('window.minimize', ():void => {
@@ -74,7 +74,7 @@ function init():void {
 	GoogleWindow.load();
 	GoogleWindow.window?.once('closed', ():void => {
 		GoogleWindow.window = null;
-		Main.mainWindow.webContents.send('logged into GoogleWindow', {
+		this.mainWindow.webContents.send('logged into GoogleWindow', {
 			type: args.type
 		});
 	});
@@ -84,7 +84,7 @@ function init():void {
 		logger.debug('[MAIN] [IPC] captcha.signOut');
 		let sessionName:string = args.name;
 		session.fromPartition(`persist:${sessionName}`).clearStorageData();
-		Main.mainWindow.webContents.send('remove session', sessionName);
+		this.mainWindow.webContents.send('remove session', sessionName);
 	});
 
 	ipcMain.on('captcha.request', (event, args):void => {
@@ -105,7 +105,7 @@ function init():void {
 
 	ipcMain.on('captcha.response', (event, args):void => {
 		logger.debug('[MAIN] [IPC] captcha.response');
-		Main.workerWindow?.webContents.send('captcha response', {
+		this.workerWindow?.webContents.send('captcha response', {
 			id: args.id,
 			ts: args.ts,
 			token: args.token
@@ -150,7 +150,7 @@ function init():void {
 	// ipcMain.on('cardinal.setupComplete', (event, args) => {
 	// 	logger.debug('[MAIN] [IPC] cardinal.setupComplete');
 	// 	CARDINAL_SOLVERS[args.taskId].hide();
-	// 	Main.workerWindow?.webContents.send(`cardinal.setupComplete(${args.taskId})`, {
+	// 	this.workerWindow?.webContents.send(`cardinal.setupComplete(${args.taskId})`, {
 	// 		cardinalId: args.cardinalId
 	// 	});
 	// });
@@ -163,7 +163,7 @@ function init():void {
 
 	// ipcMain.on('cardinal.validated', (event, args) => {
 	// 	logger.debug('[MAIN] [IPC] cardinal.validated');
-	// 	Main.workerWindow?.webContents.send(`cardinal.validated(${args.taskId})`, {
+	// 	this.workerWindow?.webContents.send(`cardinal.validated(${args.taskId})`, {
 	// 		data: args.data,
 	// 		responseJWT: args.responseJWT
 	// 	});
@@ -174,7 +174,7 @@ function init():void {
 	/* ----------------------------------------------------------------------------------- */
 
 	ipcMain.on('import data', async (event, args):Promise<any> => {
-		let paths:any = await dialog.showOpenDialog(Main.mainWindow, {
+		let paths:any = await dialog.showOpenDialog(this.mainWindow, {
 			message: `Import ${args.type}`,
 			buttonLabel: 'Import',
 			properties: ['multiSelections'],
@@ -191,13 +191,13 @@ function init():void {
 
 		});
 		if (paths.filePaths.constructor === Array && paths.filePaths.length >= 1) {
-			let shouldOverwrite:boolean = Boolean(dialog.showMessageBox(Main.mainWindow, {
+			let shouldOverwrite:boolean = Boolean(dialog.showMessageBox(this.mainWindow, {
 				type: 'question',
 				buttons: ['No', 'Yes'],
 				defaultId: 0,
 				message: 'Would you like to Overwrite your Current Data?'
 			}));
-			Main.workerWindow?.webContents.send('import data', {
+			this.workerWindow?.webContents.send('import data', {
 				'type': args.type,
 				'paths': paths,
 				'overwrite': shouldOverwrite
@@ -206,7 +206,7 @@ function init():void {
 	});
 
 	ipcMain.on('export data', (event, args):void => {
-		let path:any = dialog.showSaveDialog(Main.mainWindow, {
+		let path:any = dialog.showSaveDialog(this.mainWindow, {
 			message: `Export ${args.type}`,
 			defaultPath: `${args.type}.prosper`,
 			buttonLabel: 'Export',
@@ -218,7 +218,7 @@ function init():void {
 				}
 			]
 		});
-		Main.workerWindow?.webContents.send('export data', {
+		this.workerWindow?.webContents.send('export data', {
 			path: path,
 			type: args.type
 		});
@@ -227,75 +227,75 @@ function init():void {
 	/* --------------------------------------------------------------------------------------- */
 
 	ipcMain.on('task.save', (event, args):void => {
-		Main.workerWindow?.webContents.send('save task', args);
+		this.workerWindow?.webContents.send('save task', args);
 	});
 
 	ipcMain.on('task.run', (event, id):void => {
-		Main.workerWindow?.webContents.send('run task', id);
+		this.workerWindow?.webContents.send('run task', id);
 	});
 
 	ipcMain.on('task.stop', (event, id):void => {
-		Main.workerWindow?.webContents.send('stop task', id);
+		this.workerWindow?.webContents.send('stop task', id);
 	});
 
 	ipcMain.on('task.duplicate', (event, id):void => {
-		Main.workerWindow?.webContents.send('duplicate task', id);
+		this.workerWindow?.webContents.send('duplicate task', id);
 	});
 
 	ipcMain.on('task.delete', (event, id):void => {
-		Main.workerWindow?.webContents.send('delete task', id);
+		this.workerWindow?.webContents.send('delete task', id);
 	});
 
 	ipcMain.on('task.runAll', ():void => {
-		Main.workerWindow?.webContents.send('run all tasks');
+		this.workerWindow?.webContents.send('run all tasks');
 	});
 
 	ipcMain.on('task.stopAll', ():void => {
-		Main.workerWindow?.webContents.send('stop all tasks');
+		this.workerWindow?.webContents.send('stop all tasks');
 	});
 
 	ipcMain.on('task.deleteAll', ():void => {
-		Main.workerWindow?.webContents.send('delete all tasks');
+		this.workerWindow?.webContents.send('delete all tasks');
 	});
 
 	ipcMain.on('task.setStatus', (event, args):void => {
-		Main.mainWindow.webContents.send('task.setStatus', args);
+		this.mainWindow.webContents.send('task.setStatus', args);
 	});
 
 	ipcMain.on('task.setProductName', (event, args):void => {
-		Main.mainWindow.webContents.send('task.setProductName', args);
+		this.mainWindow.webContents.send('task.setProductName', args);
 	});
 
 	ipcMain.on('task.setSizeName', (event, args):void => {
-		Main.mainWindow.webContents.send('task.setSizeName', args);
+		this.mainWindow.webContents.send('task.setSizeName', args);
 	});
 
 	/* --------------------------------------------------------------------------------- */
 
 	ipcMain.on('delete all profiles', ():void => {
-		Main.workerWindow?.webContents.send('delete all profiles');
+		this.workerWindow?.webContents.send('delete all profiles');
 	});
 
 	/* --------------------------------------------------------------------------------- */
 
 	ipcMain.on('proxyList.test', (event, args):void => {
-		Main.workerWindow?.webContents.send('proxyList.test', args);
+		this.workerWindow?.webContents.send('proxyList.test', args);
 	});
 
 	ipcMain.on('proxyList.testAll', (event, args):void => {
-		Main.workerWindow?.webContents.send('proxyList.testAll', args);
+		this.workerWindow?.webContents.send('proxyList.testAll', args);
 	});
 
 	ipcMain.on('proxyList.setStatus', (event, args):void => {
-		Main.mainWindow.webContents.send('proxyList.setStatus', args);
+		this.mainWindow.webContents.send('proxyList.setStatus', args);
 	});
 
 	ipcMain.on('proxyList.removeItem', (event, args):void => {
-		Main.workerWindow?.webContents.send('proxyList.removeItem', args);
+		this.workerWindow?.webContents.send('proxyList.removeItem', args);
 	});
 
 	ipcMain.on('proxyList.delete', (event, args):void => {
-		Main.workerWindow?.webContents.send('proxyList.delete', args);
+		this.workerWindow?.webContents.send('proxyList.delete', args);
 	});
 
 	ipcMain.on('proxyList.edit', ():void => {
@@ -305,24 +305,24 @@ function init():void {
 	/* --------------------------------------------------------------------------------- */
 
 	ipcMain.on('setup browser mode', ():void => {
-		Main.mainWindow.webContents.send('installing browser mode');
-		Main.workerWindow?.webContents.send('download browser exectutable', {
+		this.mainWindow.webContents.send('installing browser mode');
+		this.workerWindow?.webContents.send('download browser exectutable', {
 			path: app.getPath('appData') + '/ProsperAIO'
 		});
 	});
 
 	ipcMain.on('check for browser executable', ():void => {
-		Main.mainWindow.webContents.send('check for browser executable');
+		this.mainWindow.webContents.send('check for browser executable');
 	});
 
 	/* --------------------------------------------------------------------------------------- */
 
 	ipcMain.on('sync settings', (event, type):void => {
-		Main.mainWindow.webContents.send('sync settings', type);
+		this.mainWindow.webContents.send('sync settings', type);
 	});
 
 	ipcMain.on('reset settings', async ():Promise<any> => {
-		let box:any = await dialog.showMessageBox(Main.mainWindow, {
+		let box:any = await dialog.showMessageBox(this.mainWindow, {
 			type: 'warning',
 			buttons: ['Yes', 'No'],
 			defaultId: 1,
@@ -332,7 +332,7 @@ function init():void {
 		});
 		switch (box.response) {
 			case 0:
-				Main.workerWindow?.webContents.send('reset settings');
+				this.workerWindow?.webContents.send('reset settings');
 				break;
 			case 1:
 				logger.debug('NO');

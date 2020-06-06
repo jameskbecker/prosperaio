@@ -71,7 +71,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Worker_1 = __importDefault(require("../../../Worker"));
+var Worker_1 = require("../../../Worker");
 var Task_1 = __importDefault(require("../Task"));
 var electron_1 = require("electron");
 var other_1 = require("../../other");
@@ -130,8 +130,8 @@ var SupremeBase = (function (_super) {
                     var searchInput, category, maxPrice;
                     var _this = this;
                     return __generator(this, function (_a) {
-                        if (!Worker_1.default.monitors.supreme.kw) {
-                            Worker_1.default.monitors.supreme.kw = new supreme_1.SupremeKWMonitor({
+                        if (!Worker_1.Worker.monitors.supreme.kw) {
+                            Worker_1.Worker.monitors.supreme.kw = new supreme_1.SupremeKWMonitor({
                                 baseUrl: this.baseUrl,
                                 proxyList: this._proxyList
                             });
@@ -149,7 +149,7 @@ var SupremeBase = (function (_super) {
                         this.isMonitoringKW = true;
                         if (this.shouldStop)
                             return [2, this._stop()];
-                        Worker_1.default.monitors.supreme.kw.add(this.id, searchInput, category, function (name, id, price) {
+                        Worker_1.Worker.monitors.supreme.kw.add(this.id, searchInput, category, function (name, id, price) {
                             _this.isMonitoringKW = false;
                             if (maxPrice > 0 && (price / 100) > maxPrice) {
                                 _this.setStatus('Price Exceeds Limit.', 'ERROR');
@@ -174,16 +174,16 @@ var SupremeBase = (function (_super) {
     SupremeBase.prototype._fetchProductData = function () {
         return new Promise(function runStage(resolve, reject) {
             var _this = this;
-            if (!Worker_1.default.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
-                Worker_1.default.monitors.supreme.url[this._productUrl] = new supreme_1.SupremeUrlMonitor(this._productUrl, this._proxyList);
+            if (!Worker_1.Worker.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
+                Worker_1.Worker.monitors.supreme.url[this._productUrl] = new supreme_1.SupremeUrlMonitor(this._productUrl, this._proxyList);
             }
             this.isMonitoring = true;
             if (this.shouldStop)
                 return this._stop();
             this.setStatus('Fetching Product Data.', 'WARNING');
             var monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
-            Worker_1.default.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
-            Worker_1.default.monitors.supreme.url[this._productUrl].add(this.id, function (styles) {
+            Worker_1.Worker.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
+            Worker_1.Worker.monitors.supreme.url[this._productUrl].add(this.id, function (styles) {
                 try {
                     if (_this.shouldStop)
                         return _this._stop();
@@ -229,7 +229,7 @@ var SupremeBase = (function (_super) {
                         _this.restockMode = true;
                         throw new Error('OOS');
                     }
-                    Worker_1.default.monitors.supreme.url[_this._productUrl].remove(_this.id);
+                    Worker_1.Worker.monitors.supreme.url[_this._productUrl].remove(_this.id);
                     _this.isMonitoring = false;
                     resolve();
                 }

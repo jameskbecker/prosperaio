@@ -1,4 +1,4 @@
-const winston = require('winston');
+import * as winston from 'winston';
 
 const format = winston.format.combine(
   winston.format.colorize(),
@@ -12,13 +12,11 @@ const format = winston.format.combine(
   })
 );
 
-const logger = winston.createLogger({
+export const logger = winston.createLogger({
 	format,
-	level: process.env["LOG_LEVEL"] || "debug",
+	level: process.env['LOG_LEVEL'] || 'debug',
   transports: [
     new winston.transports.Console()
     // new winston.transports.File({ filename: 'combined.log' })
   ]
 });
-//module.exports = console;
-module.exports = logger;

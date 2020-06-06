@@ -7,25 +7,29 @@ interface harvesterProps {
   supreme: Array<typeof HarvesterWindow>;
 }
 
+// interface Main {
+// 	BrowserWindow: typeof BrowserWindow;
+//   application: Electron.App;
+// 	isDev: boolean;
+// 	isMac:boolean;
 
-
-export class Main {
-  static BrowserWindow: typeof BrowserWindow;
-  static application: Electron.App;
-	static isDev: boolean;
-	static isMac:boolean;
-
-  static mainWindow: Electron.BrowserWindow;
-  static loginWindow: Electron.BrowserWindow | null;
-  static workerWindow: Electron.BrowserWindow;
+//   mainWindow: Electron.BrowserWindow;
+//   loginWindow: Electron.BrowserWindow | null;
+//   workerWindow: Electron.BrowserWindow;
   
-  static HARVESTERS: harvesterProps = { 'supreme': [] };
-  static HARVESTER_QUEUES: harvesterProps = { 'supreme': [] };
-  static CARDINAL_SOLVERS: any = {};
-  
-  
+//   HARVESTERS: harvesterProps;
+//   HARVESTER_QUEUES: harvesterProps;
+//   CARDINAL_SOLVERS: any;
+// }
 
-  static main(app: Electron.App, browserWindow: typeof BrowserWindow, isDev: boolean):void {
+/*
+function Main(app: Electron.App, browserWindow: typeof BrowserWindow, isDev: boolean) {
+	this.isDev = isDev;
+	this.isMac = process.platform === 'darwin';
+	this.app = app;
+
+
+  main():void {
 		Main.isDev = isDev;
 		Main.isMac = process.platform === 'darwin';
 		Main.BrowserWindow = browserWindow;
@@ -37,7 +41,7 @@ export class Main {
     Main.application.on('ready', Main.onReady);
   }
 
-  private static onReady():void {
+  onReady():void {
     Main.mainWindow = new Main.BrowserWindow({
       'width': 1250,
       'height': 750,
@@ -90,15 +94,15 @@ export class Main {
     }
   }
 
-  private static mainOnClose():void {
+  mainOnClose():void {
     
   }
 
-  private static workerOnClose():void {
+  workerOnClose():void {
     
   }
 
-  private static readyToShow():void {
+  readyToShow():void {
     Main.mainWindow?.show();
 
     if (Main.isDev) {
@@ -106,13 +110,13 @@ export class Main {
     }
   }
 
-  private static workerReady():void {
+  workerReady():void {
     if (Main.isDev) {
       Main.workerWindow?.webContents.openDevTools({ mode: 'detach' });
     }
 	}
 	
-	private static buildMenu():any {
+	buildMenu():any {
 		[
 			// { role: 'appMenu' }
 			...(Main.isMac ? [{
@@ -224,3 +228,7 @@ export class Main {
 		];
 	}
 }
+
+export { Main };*/
+class Main {}
+export { Main};

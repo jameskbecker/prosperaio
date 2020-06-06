@@ -5,8 +5,7 @@
 		"strict-boolean-expressions":false,
     "quotemark": [true, "single"],
     "member-access": [true, "no-public"],
-    "no-default-export": true,
-    "no-default-import": true,
+ 
     "no-unused-variable": true,
 		"no-var-requires": false,
 		"typedef": [true, "call-signature", "parameter", "member-variable-declaration"],

@@ -2,7 +2,7 @@ import { ipcRenderer as ipcWorker } from 'electron';
 import * as request from 'request';
 import * as settings from 'electron-settings';
 
-import Worker from '../../Worker';
+import { Worker } from '../../Worker';
 import { discord, sites } from '../configuration';
 import { logger, utilities } from '../other';
 import { SupremeSafe, SupremeRequest } from './supreme';
@@ -49,35 +49,35 @@ interface taskDataProps {
 
 class Task {
 	private _taskData: taskDataProps;
-	public baseUrl: string;
-	public products: Array<productProps>;
-	public _profileId: string;
-	public _profile: any;
-	public profileName: string;
-	public id: string;
-	public _proxyList: string;
-	public _proxy: string | null;
-	public browser: any;
-	public isActive: boolean;
-	public isMonitoring: boolean;
-	public isMonitoringKW:boolean;
-	public shouldStop: boolean;
-	public successful: boolean;
+	baseUrl: string;
+	products: Array<productProps>;
+	_profileId: string;
+	_profile: any;
+	profileName: string;
+	id: string;
+	_proxyList: string;
+	_proxy: string | null;
+	browser: any;
+	isActive: boolean;
+	isMonitoring: boolean;
+	isMonitoringKW:boolean;
+	shouldStop: boolean;
+	successful: boolean;
 	
-	public hasCaptcha: boolean;
-	public captchaResponse: string;
+	hasCaptcha: boolean;
+	captchaResponse: string;
 	
-	public captchaTime: number;
-	public captchaTS: number;
-	public startTime: number;
-	public checkoutTime: number;
+	captchaTime: number;
+	captchaTS: number;
+	startTime: number;
+	checkoutTime: number;
 
-	public _productUrl: string ;
-	public _productImageUrl: string;
-	public _productName: string;
-	public _productStyleName: string;
-	public _productSizeName: string;
-	public orderNumber: string;
+	_productUrl: string ;
+	_productImageUrl: string;
+	_productName: string;
+	_productStyleName: string;
+	_productSizeName: string;
+	orderNumber: string;
 
 	constructor(taskData:taskDataProps, _id:string) {
 		this._taskData = taskData;
@@ -144,7 +144,7 @@ class Task {
 
 	
 
-	set productName(value) {
+	set productName(value:string) {
 		ipcWorker.send('task.setProductName', {
 			id: this.id,
 			name: value
@@ -152,11 +152,11 @@ class Task {
 		this._productName = value;
 	}
 
-	get productName() {
+	get productName():string {
 		return this._productName;
 	}
 
-	set sizeName(value) {
+	set sizeName(value:string) {
 		ipcWorker.send('task.setSizeName', {
 			id: this.id,
 			name: value
@@ -164,15 +164,15 @@ class Task {
 		this._productSizeName = value;
 	}
 
-	get sizeName() {
+	get sizeName():string {
 		return this._productSizeName;
 	}
 
-	get proxy() {
+	get proxy():string {
 		return utilities.formatProxy(this._proxy);
 	}
 	
-	public callStop() {
+	callStop():void {
 		if (this.isActive) {
 			logger.warn(`[T:${this.id}] Stopping Task.`);
 			this.setStatus('Stopping.', 'WARNING');
@@ -189,7 +189,7 @@ class Task {
 	}
 
 
-	public _stop() {	
+	_stop():void {	
 		console.log('RUNNING STOP()');
 		if (this.isMonitoring) {
 			
@@ -214,7 +214,7 @@ class Task {
 		delete Worker.activeTasks[this.id];
 	}
 
-	public setStatus(message, type) {
+	setStatus(message:any, type:any):void {
 		let colors = {
 			DEFAULT: '#8c8f93',
 			INFO: '#4286f4',
@@ -230,7 +230,7 @@ class Task {
 		});
 	}
 	
-	public _requestCaptcha() {
+	_requestCaptcha():Promise<any> {
 		return new Promise((resolve) => {
 			this.captchaTS = Date.now();
 			this.setStatus('Waiting for Captcha.', 'WARNING');
@@ -253,7 +253,7 @@ class Task {
 
 
 
-	public _addToAnalystics() {
+	_addToAnalystics():void {
 		let exportData = {
 			date: new Date().toLocaleString(),
 			site: sites.def[this.taskData.site].label,
@@ -266,7 +266,7 @@ class Task {
 		ipcWorker.send('sync settings', 'orders');
 	}
 
-	public _setTimer() {
+	_setTimer():Promise<any> {
 		return new Promise(( resolve) => {
 			let timerInput:string = this.taskData.additional.timer;
 			if ((timerInput !== ' ')) {
@@ -287,13 +287,13 @@ class Task {
 		});
 	}
 
-	public _sleep(delay) {
+	_sleep(delay:any):Promise<any> {
 		return new Promise((resolve) => {
 			setTimeout(resolve, delay);
 		});
 	}
 
-	public _parseKeywords(input) {
+	_parseKeywords(input:any):any {
 		//if(!input) return '';
 		if (input === '') return 'ANY';
 		else {
@@ -315,7 +315,7 @@ class Task {
 		}	
 	}
 
-	public _keywordsMatch(productName, keywordSet) {
+	_keywordsMatch(productName:any, keywordSet:any):boolean {
 		if (!productName || !keywordSet) {
 			return false;
 		}

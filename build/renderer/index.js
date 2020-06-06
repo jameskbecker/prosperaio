@@ -29,6 +29,8 @@ var content_1 = __importDefault(require("./content"));
 var profile = __importStar(require("./profiles"));
 var ipc_1 = __importDefault(require("./ipc"));
 var other_1 = require("../library/other");
+var elements_1 = require("./elements");
+console.log(elements_1.elements);
 var checkboxes = document.querySelectorAll('.checkbox-label');
 var profileSelector = document.querySelectorAll('.profile-selector');
 var accountSelectors = document.querySelectorAll('.captchaAccount-selector');

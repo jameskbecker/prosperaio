@@ -8,7 +8,8 @@ import { default as ipc } from './ipc';
 import { utilities } from '../library/other';
 //import { sites } from '../library/configuration';
 
-
+import { elements } from './elements';
+console.log(elements);
 //General
 var checkboxes:NodeListOf<HTMLInputElement> = document.querySelectorAll('.checkbox-label');
 var profileSelector:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.profile-selector');
