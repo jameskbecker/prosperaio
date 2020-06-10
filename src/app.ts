@@ -36,7 +36,6 @@ function Main():void {
 		'height': 750,
 		'backgroundColor': '#1a1919',
 		'frame': false,
-		'titleBarStyle': 'hidden',
 		'show': false,
 		'resizable': true,
 		'webPreferences': {
