@@ -1,12 +1,31 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./elements");
-var electron_1 = require("electron");
-var electron_settings_1 = __importDefault(require("electron-settings"));
-var content_1 = __importDefault(require("./content"));
+const electron_1 = require("electron");
+const electron_settings_1 = __importDefault(require("electron-settings"));
+const content = __importStar(require("./content"));
 var checkboxes = document.querySelectorAll('.checkbox-label');
 var profileSelector = document.querySelectorAll('.profile-selector');
 var accountSelectors = document.querySelectorAll('.captchaAccount-selector');
@@ -139,58 +158,58 @@ var customDiscord = document.getElementById('discordWebhook');
 var testDiscordBtn = document.getElementById('testDiscordWebhook');
 var version = document.getElementById('version');
 function init() {
-    electron_1.ipcRenderer.on('installing browser mode', function () {
+    electron_1.ipcRenderer.on('installing browser mode', () => {
         installBrowserBtn.disabled = true;
         installBrowserBtn.innerHTML = 'Installing Browser Mode...';
     });
-    electron_1.ipcRenderer.on('check for browser executable', function () {
-        var browserPath = electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : [];
+    electron_1.ipcRenderer.on('check for browser executable', () => {
+        let browserPath = electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : [];
         if (browserPath.length > 0) {
             installBrowserBtn.innerHTML = 'Installed Browser Mode';
             currentBrowserPath.value = electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : '';
         }
     });
-    electron_1.ipcRenderer.on('task.setStatus', function (event, args) {
-        var statusCell = document.querySelector(".col-status[data-taskId=\"" + args.id + "\"");
+    electron_1.ipcRenderer.on('task.setStatus', (event, args) => {
+        let statusCell = document.querySelector(`.col-status[data-taskId="${args.id}"`);
         statusCell.innerHTML = args.message;
         statusCell.style.color = args.color;
     });
-    electron_1.ipcRenderer.on('task.setProductName', function (event, args) {
-        var productCell = ".col-products[data-id=\"" + args.id + "\"]";
+    electron_1.ipcRenderer.on('task.setProductName', (event, args) => {
+        let productCell = `.col-products[data-id="${args.id}"]`;
         document.querySelector(productCell).innerHTML = args.name;
     });
-    electron_1.ipcRenderer.on('task.setSizeName', function (event, args) {
-        var productCell = ".col-size[data-id=\"" + args.id + "\"]";
+    electron_1.ipcRenderer.on('task.setSizeName', (event, args) => {
+        let productCell = `.col-size[data-id="${args.id}"]`;
         document.querySelector(productCell).innerHTML = args.name;
     });
-    electron_1.ipcRenderer.on('proxyList.setStatus', function (event, args) {
-        var statusCell = document.querySelector(".col-status[data-proxyId=\"" + args.id + "\"");
+    electron_1.ipcRenderer.on('proxyList.setStatus', (event, args) => {
+        let statusCell = document.querySelector(`.col-status[data-proxyId="${args.id}"`);
         statusCell.innerHTML = args.message;
         statusCell.style.color = args.type;
     });
-    electron_1.ipcRenderer.on('sync settings', function (event, type) {
+    electron_1.ipcRenderer.on('sync settings', (event, type) => {
         console.log(type);
         switch (type) {
             case 'task':
-                content_1.default.tasks();
+                content.tasks();
                 break;
             case 'profiles':
-                content_1.default.profiles();
+                content.profiles();
                 break;
             case 'proxies':
-                content_1.default.proxySelectors();
+                content.proxySelectors();
                 break;
             case 'orders':
-                content_1.default.orders();
+                content.orders();
                 break;
         }
     });
-    electron_1.ipcRenderer.on('remove session', function (event, args) {
-        var allSessions = electron_settings_1.default.get('captcha-sessions');
+    electron_1.ipcRenderer.on('remove session', (event, args) => {
+        let allSessions = electron_settings_1.default.get('captcha-sessions');
         allSessions.splice(allSessions.indexOf(args), 1);
         electron_settings_1.default.set('captcha-sessions', allSessions);
-        content_1.default.harvesters();
+        content.harvesters();
     });
 }
-exports.default = { init: init };
+exports.default = { init };
 //# sourceMappingURL=ipc.js.map

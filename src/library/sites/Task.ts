@@ -1,11 +1,11 @@
 import { ipcRenderer as ipcWorker } from 'electron';
-import * as request from 'request';
-import * as settings from 'electron-settings';
+import request from 'request';
+import settings from 'electron-settings';
 
 import { Worker } from '../../Worker';
-import { discord, sites } from '../configuration';
+import {default as config} from '../configuration';
 import { logger, utilities } from '../other';
-import { SupremeSafe, SupremeRequest } from './supreme';
+import { SupremeRequest, SupremeSafe } from './supreme';
 require('dotenv').config();
 
 
@@ -81,7 +81,7 @@ class Task {
 
 	constructor(taskData:taskDataProps, _id:string) {
 		this._taskData = taskData;
-		this.baseUrl = sites.def[taskData.site].baseUrl;
+		this.baseUrl = config.sites.def[taskData.site].baseUrl;
 		this.products = taskData.products;
 		this._profileId = taskData.setup.profile;
 		this._profile = settings.get(`profiles.${this._profileId}`);
@@ -116,7 +116,7 @@ class Task {
 		
 			
 		if (this._proxyList && this._proxyList !== '' && !Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
-			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
+			let proxies:any = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
 				Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
 			}
@@ -215,18 +215,19 @@ class Task {
 	}
 
 	setStatus(message:any, type:any):void {
-		let colors = {
-			DEFAULT: '#8c8f93',
-			INFO: '#4286f4',
-			ERROR: '#f44253',
-			WARNING: '#f48641',
-			SUCCESS: '#2ed347'
-		};
+		let color: string; 
+		switch (type.toLowerCase()) {
+			case 'info': color = '#4286f4'; break;
+			case 'error': color = '#f44253'; break;
+			case 'warning': color = '#f48641'; break;
+			case 'success': color = '#2ed347'; break;
+			default: color = '#8c8f93';
+		}
 		//log.debug(`[ ${this.id} ] [ ${type} ] ${message}`);
 		ipcWorker.send('task.setStatus', {
 			id: this.id,
 			message: message,
-			color: colors[type]
+			color
 		});
 	}
 	
@@ -236,7 +237,7 @@ class Task {
 			this.setStatus('Waiting for Captcha.', 'WARNING');
 			ipcWorker.send('captcha.request', {
 				id: this.id,
-				type: sites.def[this.taskData.site].type
+				type: config.sites.def[this.taskData.site].type
 			});
 			logger.debug('Requested Captcha Token.');
 			//memory leak
@@ -256,7 +257,7 @@ class Task {
 	_addToAnalystics():void {
 		let exportData = {
 			date: new Date().toLocaleString(),
-			site: sites.def[this.taskData.site].label,
+			site: config.sites.def[this.taskData.site].label,
 			product: this.productName,
 			orderNumber: this.orderNumber
 		};
@@ -266,22 +267,38 @@ class Task {
 		ipcWorker.send('sync settings', 'orders');
 	}
 
-	_setTimer():Promise<any> {
-		return new Promise(( resolve) => {
+	_setTimer():Promise<void> {
+		return new Promise((resolve: Function) => {
 			let timerInput:string = this.taskData.additional.timer;
-			if ((timerInput !== ' ')) {
+			console.log(timerInput);
+			if (timerInput !== ' ') {
+				console.log('setting time');
 				let dateInput:string = timerInput.split(' ')[0];
 				let timeInput:string = timerInput.split(' ')[1];
 				let scheduledTime = new Date();
-				scheduledTime.setFullYear(parseInt(dateInput.split('-')[0]), parseInt(dateInput.split('-')[1]), parseInt(dateInput.split('-')[2]));
-				scheduledTime.setHours(parseInt(timeInput.split(':', 1)[0]));
-				scheduledTime.setMinutes(parseInt(timeInput.split(':', 1)[1]));
-				scheduledTime.setSeconds(parseInt(timeInput.split(':')[2]));
-				let remainingTime = scheduledTime.getTime() - Date.now();
+
+				let year:number = parseInt(dateInput.split('-')[0]);
+				let month:number = parseInt(dateInput.split('-')[1]);
+				let day:number = parseInt(dateInput.split('-')[2]);
+				let hour:number = parseInt(timeInput.split(':')[0]);
+				let minute:number = parseInt(timeInput.split(':')[1]);
+				let second:number = parseInt(timeInput.split(':')[2]);
+
+				console.log({
+					year, month, day, hour, minute, second
+				});
+				scheduledTime.setFullYear(year, month - 1, day);
+				scheduledTime.setHours(hour);
+				scheduledTime.setMinutes(minute);
+				scheduledTime.setSeconds(second);
+
+				let remainingTime:number = (scheduledTime.getTime() - Date.now());
+				console.log(scheduledTime);
 				setTimeout(resolve, remainingTime);
 				this.setStatus('Timer Set.', 'INFO');
 			}
 			else {
+				console.log('not setting timer');
 				resolve();
 			}
 		});
@@ -297,7 +314,7 @@ class Task {
 		//if(!input) return '';
 		if (input === '') return 'ANY';
 		else {
-			let output = {
+			let output:any = {
 				positive: [],
 				negative: []
 			};

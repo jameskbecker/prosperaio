@@ -1,8 +1,8 @@
-var electron = require('electron');
-var app = electron.app, BrowserWindow = electron.BrowserWindow;
-var isDev = require('electron-is-dev');
+const electron = require('electron');
+const { app, BrowserWindow } = electron;
+const isDev = require('electron-is-dev');
 function createWindow(taskId) {
-    var threeDSWindow = new BrowserWindow({
+    const threeDSWindow = new BrowserWindow({
         width: 450,
         height: 555,
         frame: false,
@@ -15,8 +15,8 @@ function createWindow(taskId) {
     global['CARDINAL_SOLVERS'][taskId] = threeDSWindow;
 }
 function loadWindow(id, callback) {
-    var window = global['CARDINAL_SOLVERS'][id];
-    window.loadFile(app.getAppPath() + "/assets/3d-secure.html");
+    const window = global['CARDINAL_SOLVERS'][id];
+    window.loadFile(`${app.getAppPath()}/assets/3d-secure.html`);
     window.webContents.once('dom-ready', function () {
         if (isDev) {
         }

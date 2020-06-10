@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,600&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,700;1,600&display=swap');
+
 * {
 	--primary-color: #3794ff !important;
 	--secondary-color: #2576d3 !important;
@@ -37,6 +41,7 @@ body {
 }
 #banner {
 	flex: 0 0 5%;
+	min-height: 35px;
 	max-height: 50px;
 	width: 100vw;
 }
@@ -55,7 +60,7 @@ body {
 }
 
 .banner-logo {
-	flex: 1;
+	flex: 1 1 0;
 	height: 100%;
 	background-image: url(../img/prosperaio_logo.png);
 	background-color: transparent;
@@ -68,19 +73,21 @@ body {
 
 .banner-draggable {
 	height: 100%;
-	flex: 6.5 6.5 0;
+	flex: 9 9 0;
 	-webkit-app-region: drag;
 }
 
 .banner-nav {
-	flex: 15 15 0;
+	flex: 13 13 0;
 	height: 100%;
 	justify-content: flex-start;
 	overflow: hidden;
 }
 
 .banner-controls {
-	flex: 2.3;
+	display: flex;
+	flex-direction: row;
+	flex: 2.3 0 0;
 	height: 100%;
 	justify-content: space-evenly
 }
@@ -90,7 +97,7 @@ body {
 .nav, 
 .control {
 	display: flex;
-	flex: 1;
+	flex: 1 0 0;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: center;
@@ -105,7 +112,7 @@ body {
 }
 
 .control {
-	flex: 0 0 10%;
+	flex: 1 1 0;
 	justify-content: center;
 
 }
@@ -134,27 +141,17 @@ body {
 	display: none !important;
 }
 
-.header-container {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	flex: 0 0 100%;
-	max-height: 10vh;
-	align-items: center;
-	justify-content: space-between;
-	background-color: var(--secondary-grey);
-}
 
 .header-title {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	flex: 1;
+	flex: 5 3 0;
 	font-family: "Open Sans Bold";
 	font-size: 28px;
-	height: 6vh;
+	height: 100%;
 	color: white;
-	align-self: center;
+	align-items: center;
 	white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,6 +163,7 @@ body {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
+
 	flex: 1;
 	padding-right: 2.5vw;
 	justify-content: flex-end;
@@ -195,28 +193,25 @@ body {
 	flex: 1 1 0;
 	justify-content: space-evenly;
 	background-color: var(--primary-grey);
-	box-shadow: 0.25em 0.25em 1em var(--secondary-grey), inset 0.25em 0.25em 1em var(--tertiary-grey);
-	border-radius: 1vh !important;
+	border-radius: 1vh;
 	margin: 1vmax;
 	
 }
 
 .panel-main {
 	background-color: var(--primary-grey) !important;
-	flex: 1 0 95%;
-	min-height: 80vh;
+	margin: 0 1%;
+	min-height: calc(90vh - 60px);
 	align-content: flex-start;
 	align-self: flex-start;
-	max-height: 80vh;
+	max-height: calc(90vh - 60px);
 	
 	overflow-y: auto;
-	border-radius: 0 !important;
 }
 
 .panel-light {
 	background-color: var(--secondary-grey);
 	align-content: flex-start;
-	box-shadow: 0.5vmax 0.5vmax 0.1vmax var(--tertiary-grey), inset 0.25vmax 0.25vmax 0  var(--secondary-grey);
 }
 
 .panel-invisible {
@@ -254,10 +249,18 @@ body {
 	height: inherit;
 	min-height: 0;
 	padding: 2.5px 0;
-	
-	
 }
 
+.header-container {
+	margin: 0 1%;
+	max-height: 10vh;
+	align-self: center;
+	align-content: center;
+	align-items: center;
+	justify-self: center;
+	justify-content: space-between;
+	background-color: var(--secondary-grey);
+}
 /* .padding-vertical {
 	padding: 1vh 0;
 } */
@@ -322,7 +325,7 @@ input[type=date]::-webkit-outer-spin-button
 .input, .btn {
 	display: flex;
 	min-height: 4vh;
-	
+	flex: 1 1 0;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	
@@ -362,12 +365,10 @@ input[type=date]::-webkit-outer-spin-button
 
 
 .input {
-	display: flex;
-	flex: 1 1 0;
+
 	color: var(--text-grey);
 	text-indent: 0.5vw;
 	margin: 1vh;
-	box-shadow: 1vh 1vh 1vh var(--tertiary-grey);
 	background-color: var(--primary-grey);
 	margin: 0.1em;
 }
@@ -414,10 +415,12 @@ input[type=date]::-webkit-outer-spin-button
 }	
 
 .btn {
-		
-	padding: 1% 15%;
+	flex-wrap: nowrap;
+	word-wrap: normal;	
+	padding: 0.75vh 1vw;
 	align-content: center;
 	opacity: 0.7;
+	overflow: hidden;
 	background-color: var(--primary-grey);
 	color: white;
 }
@@ -439,11 +442,6 @@ input[type=date]::-webkit-outer-spin-button
 	background-color: transparent;
 	border-color: transparent;
 	color: var(--text-grey);
-}
-
-.btn-transparent:hover {
-	background-color: transparent;
-	background-image: none;
 }
 
 .btn-square {
@@ -538,7 +536,6 @@ label, .label {
 	color: white;
 	table-layout: fixed;
 	padding: 1.5%;
-	box-shadow: 0.25em 0.25em 0.25em var(--tertiary-grey);
 }
 
 .table-header, 
@@ -595,6 +592,7 @@ label, .label {
 
 .table-body .row:hover {
 	opacity: 1;
+	cursor: pointer;
 }
 
 
@@ -636,7 +634,6 @@ tbody .row {
 	margin: 0.5vh 1vh;
 	background-color: var(--secondary-grey);
 	opacity: 0.9;
-	box-shadow: 1px 1px 1px var(--tertiary-grey);
 	
 }
 
@@ -659,10 +656,13 @@ tbody .row:nth-child(odd) {
 
 
 .action-button {
+	width: 1.5vw;
 	font-size: 0.8vw;
 	color: var(--primary-color);
 	cursor: pointer;
 	opacity: 0.5;
+	background: none;
+	border: none;
 }
 
 .action-button[disabled="true"] {
@@ -672,6 +672,10 @@ tbody .row:nth-child(odd) {
 .action-button:hover {
 	transition: 0.25s;
 	opacity: 1;
+}
+
+.action-button:focus {
+	outline: 0;
 }
 
 .col-id {
@@ -711,11 +715,13 @@ tbody .row:nth-child(odd) {
 
 .col-status {
 	flex: 3;
-
 }
 
 .col-actions {
 	flex: 2.25;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
 	border-right-width: 0 !important;
 }
 
@@ -914,13 +920,9 @@ i {
 
 .modal-content {
   position: relative;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: column;
-  flex-direction: column;
+	flex-direction: row;
+	flex-wrap: wrap;
   width: 90vw;
   pointer-events: auto;
   background-color: var(--secondary-grey);

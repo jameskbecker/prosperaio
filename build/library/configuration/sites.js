@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.captcha = exports.def = void 0;
-var def = {
+exports.def = {
     'kickz': {
         enabled: false,
         type: 'kickz',
@@ -51,12 +51,10 @@ var def = {
         baseUrl: 'https://www.off---white.com/'
     }
 };
-exports.def = def;
-var captcha = [
+exports.captcha = [
     {
         label: 'Supreme',
         value: 'supreme'
     }
 ];
-exports.captcha = captcha;
 //# sourceMappingURL=sites.js.map

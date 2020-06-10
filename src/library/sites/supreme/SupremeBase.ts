@@ -5,12 +5,11 @@ import SupremeSafe from './SupremeSafe';
 import { ipcRenderer as ipcWorker } from 'electron';
 import { utilities, logger } from '../../other';
 import { SupremeUrlMonitor, SupremeKWMonitor } from '../../monitors/supreme';
-import { discord, sites } from '../../configuration';
-import * as  settings from 'electron-settings';
+import config from '../../configuration';
+import settings from 'electron-settings';
 import request from 'request-promise-native';
-import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 import { v4 as uuidv4 } from 'uuid'; 
-
 
 class SupremeBase extends Task {
 	restockMode: boolean;
@@ -36,7 +35,19 @@ class SupremeBase extends Task {
 	constructor(_taskData:any, _id:any) {
 		super(_taskData, _id);
 		this.restockMode = false;
-		
+		this.cardinal = {
+			id: '',
+			tid: '',
+			transactionId: '',
+			transactionToken: '',
+			serverJWT: '',
+			responsePayload: '',
+			consumerData: {},
+			authentication: {
+				url: '',
+				payload: ''
+			}
+		};
 		this.request = request.defaults({
 			
 			gzip: true,
@@ -78,7 +89,7 @@ class SupremeBase extends Task {
 				if (!Worker.monitors.supreme.kw) {
 					Worker.monitors.supreme.kw = new SupremeKWMonitor({
 						baseUrl: this.baseUrl,
-						proxyList: this._proxyList
+						proxy: this.proxy
 					});
 				}
 				let searchInput = this.products[0].searchInput;
@@ -116,9 +127,9 @@ class SupremeBase extends Task {
 	}
 
 	_fetchProductData():Promise<any> {
-		return new Promise(function runStage(this:SupremeBase, resolve:any, reject:any) {		
+		return new Promise(function runStage(this:SupremeBase, resolve:any, reject:any):any {		
 			if (!Worker.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
-				Worker.monitors.supreme.url[this._productUrl] = new SupremeUrlMonitor(this._productUrl, this._proxyList);
+				Worker.monitors.supreme.url[this._productUrl] = new SupremeUrlMonitor(this._productUrl, this.proxy);
 			}
 			
 			
@@ -217,13 +228,14 @@ class SupremeBase extends Task {
 
 	_parseCheckoutForm(checkoutTemplate:any):any {
 		let formElements:any = [];
+		
 		let $ = cheerio.load(checkoutTemplate);
 		let checkoutForm = $('form[action="https://www.supremenewyork.com/checkout.json"]').html();
 		$ = cheerio.load(checkoutForm);
 
-		$(':input[type!="submit"]').each(function (this:any) {
+		$(':input[type!="submit"]').each(function (this:any):any {
 			let formElement = $(this)[0].attribs;
-			let output = {};
+			let output:any = {};
 			let attributes = ['name', 'id', 'placeholder', 'value', 'style'];
 			attributes.forEach(attribute => {
 				if (Object.hasOwnProperty.bind(formElement)(attribute)) {
@@ -259,7 +271,7 @@ class SupremeBase extends Task {
 	_processStatus():Promise<any> {
 		return new Promise((resolve, reject) => {
 			let requestedAuth = false;
-			async function runStage(this: any, isCheckoutResponse = false):Promise<any> {
+			async function runStage(this: any, isCheckoutResponse:boolean = false):Promise<any> {
 				try {
 					if (!isCheckoutResponse) {
 						this._pollStatus()
@@ -285,6 +297,7 @@ class SupremeBase extends Task {
 							if (this.checkoutData.hasOwnProperty('id')) this.orderNumber = this.checkoutData.id;
 							if (this.checkoutData.errors) {
 								this.setStatus('Billing Error', 'ERROR');
+								return;
 							}
 							else if(this.checkoutData.page) {
 								this.setStatus('High Traffic Decline', 'ERROR');
@@ -312,7 +325,7 @@ class SupremeBase extends Task {
 									return resolve();
 								}
 							}
-
+							break;
 
 						case 'cca':
 							this.setStatus('CCA', 'WARNING');
@@ -328,7 +341,7 @@ class SupremeBase extends Task {
 									return this._submitCheckout('cardinal');
 								})
 
-								.then(response => {
+								.then((response: any) => {
 									console.log(response.body);
 									this.checkoutData = response.body;
 									return Promise.resolve();
@@ -337,7 +350,7 @@ class SupremeBase extends Task {
 									setTimeout(runStage.bind(this, false), 1000);
 									return Promise.resolve();
 								})
-								.catch(error => {
+								.catch((error: any) => {
 									console.log(error);
 
 								});
@@ -433,7 +446,7 @@ class SupremeBase extends Task {
 	}
 
 	_form(this: SupremeRequest | SupremeSafe, type:string):Promise<any> {
-		let form;
+		let form: any;
 		switch (type) {
 			case 'cart-add':
 				if (this.region === 'US') {
@@ -556,7 +569,7 @@ class SupremeBase extends Task {
 		return form;
 	}
 
-	private authHandler() {
+ 	authHandler():Promise<any> {
 		return new Promise((resolve, reject) => {
 			ipcWorker.once(`cardinal.validated(${this.id})`, (event:any, args:any) => {
 				console.log('[IPC', `cardinal.validated(${this.id})\n`, args);
@@ -616,12 +629,12 @@ class SupremeBase extends Task {
 		} catch (err) { console.error(err); return ''; }
 	}
 
-	_postPublicWebhook(additonalFields = []) {
+	_postPublicWebhook(additonalFields:any = []):void {
 		request({
 			url: process.env.SUCCESS_WEBHOOK_URL,
 			method: 'POST',
 			json: true,
-			body: discord.publicWebhook.bind(this)(additonalFields)
+			body: config.discord.publicWebhook.bind(this)(additonalFields)
 		}, (error, response, body) => {	
 			if (error) {
 				console.log(error);
@@ -650,15 +663,15 @@ class SupremeBase extends Task {
 		});
 	}
  
-	_postPrivateWebhook(this: SupremeBase, additonalFields = []) {
+	_postPrivateWebhook(this: SupremeBase, additonalFields:any = []):void {
 		if (settings.has('discord')) {
 			const webhookUrl = settings.get('discord');
 			this.request({
 				url: webhookUrl,
 				method: 'POST',
 				json: true,
-				body: discord.privateWebhook.bind(this)(additonalFields)
-			}, (error, response, body) => {	
+				body: config.discord.privateWebhook.bind(this)(additonalFields)
+			}, (error:Error, response:any) => {	
 				if (error) {
 					console.log(error);
 				}

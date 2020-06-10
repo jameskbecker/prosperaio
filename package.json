@@ -1,19 +1,19 @@
 {
 	"name": "ProsperAIO",
-	"version": "2.7.1",
-	"main": "./build/app.js",
+	"version": "3.0.0",
+	"main": "build/app.js",
 	"description": "Simple Design. Easy to Use. Insane Functionality.",
 	"author": "ProsperSoftware",
 	"keywords": [],
 	"license": "MIT",
 	"scripts": {
 		"start": "nodemon -e js,ts --watch src --exec \"npm run dev:compile\"",
-		"dev:compile": "tsc -p src/main && npm run dev:start",
+		"dev:compile": "tsc -p src && npm run dev:start",
 		"dev:start": "electron .",
-		"ts:watch": "tsc -p src/main -w",
+		"ts:watch": "tsc -p src -w",
 		"pack": "electron-builder --dir",
-		"package-mac": "electron-builder --mac",
-		"package-win": "electron-builder --win",
+		"package-mac": "tsc -p src && electron-builder --mac",
+		"package-win": "tsc -p src && electron-builder --win",
 		"package-all": "electron-builder --mac --win",
 		"release": "build --all --x64",
 		"pkg": "rm -rf ./pkg && pkg -t node8-macos-x64 --out-path pkg .",
@@ -21,12 +21,18 @@
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^5.13.0",
+		"@types/body-parser": "^1.19.0",
+		"@types/cheerio": "^0.22.18",
 		"@types/discord-rpc": "^3.0.4",
 		"@types/electron-settings": "^3.1.1",
+		"@types/express": "^4.17.6",
 		"@types/jquery": "^3.3.38",
 		"@types/mousetrap": "^1.6.3",
-		"@types/node": "^14.0.6",
+		"@types/node": "^14.0.11",
+		"@types/puppeteer-core": "^2.0.0",
+		"@types/request": "^2.48.5",
 		"@types/request-promise-native": "^1.0.17",
+		"@types/uuid": "^8.0.0",
 		"body-parser": "^1.18.3",
 		"bootstrap": "^4.3.1",
 		"btoa": "^1.2.1",
@@ -35,11 +41,11 @@
 		"discord-rpc": "^3.1.1",
 		"discord.js": "^11.6.4",
 		"dotenv": "^8.2.0",
-		"electron": "^8.3.0",
 		"electron-is-dev": "^1.2.0",
 		"electron-reload": "^1.5.0",
 		"electron-settings": "^3.2.0",
 		"express": "^4.16.4",
+		"extra": "^0.2.1",
 		"font-awesome": "^4.7.0",
 		"jquery": "^3.5.1",
 		"jsencrypt": "^3.0.0-rc.1",
@@ -51,9 +57,8 @@
 		"os": "^0.1.1",
 		"popper.js": "^1.15.0",
 		"ps-list": "^7.0.0",
-		"puppeteer": "^3.0.4",
-		"puppeteer-core": "^3.0.4",
-		"puppeteer-extra": "^2.1.3",
+		"puppeteer-core": "^3.3.0",
+		"puppeteer-extra": "^3.1.9",
 		"puppeteer-extra-plugin-stealth": "^2.4.9",
 		"querystring": "^0.2.0",
 		"request": "^2.88.0",
@@ -65,12 +70,12 @@
 		"xml2js": "^0.4.19"
 	},
 	"devDependencies": {
+		"electron": "^9.0.3",
 		"electron-builder": "^22.6.0",
 		"electron-packager": "^13.0.1",
-		"electron-prebuilt": "^1.4.13",
 		"js-beautify": "^1.11.0",
 		"nodemon": "^2.0.4",
-		"typescript": "^3.9.3",
+		"typescript": "^3.9.5",
 		"watch": "^1.0.2"
 	},
 	"build": {
@@ -100,19 +105,19 @@
 					"target": "NSIS"
 				}
 			],
-			"icon": "assets/img/Icon_Win.ico"
+			"icon": "assets/img/prosper-icon.ico"
 		},
 		"nsis": {
 			"oneClick": true,
 			"perMachine": false,
-			"installerIcon": "",
+			"installerIcon": "assets/img/prosperaio-ico.ico",
 			"installerHeaderIcon": "",
 			"createDesktopShortcut": true,
 			"createStartMenuShortcut": true,
 			"shortcutName": "ProsperAIO"
 		},
 		"files": [
-			"src/**",
+			"build/**",
 			"assets/**"
 		]
 	}

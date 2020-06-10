@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticate = void 0;
-var machineIdSync = require('node-machine-id').machineIdSync;
-var request = require('request');
+const { machineIdSync } = require('node-machine-id');
+const request = require('request');
 function authenticate(userKey, callback) {
     request({
         url: 'https://q7y84200yh.execute-api.eu-central-1.amazonaws.com/v1/authenticate',
@@ -15,7 +15,7 @@ function authenticate(userKey, callback) {
             'userKey': userKey,
             'device': machineIdSync()
         }
-    }, function (error, response, body) {
+    }, (error, response, body) => {
         if (error) {
             callback('Unable to connect to ProsperAIO servers. Please try again.');
             return;

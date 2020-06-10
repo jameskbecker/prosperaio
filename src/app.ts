@@ -1,9 +1,12 @@
+
 import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 //import { Main } from './Main';
-import isDev from 'electron-is-dev';
+import * as isDev from 'electron-is-dev';
 import { HarvesterWindow } from './main/windows/index';
+import * as auth from './main/authentication';
 import * as ipc from './ipc';
 import * as path from 'path';
+import * as discord from './main/discord';
 
 interface harvesterProps {
   supreme: Array<typeof HarvesterWindow>;
@@ -24,16 +27,17 @@ interface MainProps {
 
 
 function Main():void {
-	this.isDev = isDev;
+	const settings = require('electron-settings');
+	console.log({isDev})
 	this.isMac = process.platform === 'darwin';
 	this.app = app;
 	this.mainWindow = new BrowserWindow({
-		'width': 1250,
+		'width': 1400,
 		'height': 750,
 		'backgroundColor': '#1a1919',
-		'frame': !this.isMac,
-		'show': true,
-		
+		'frame': false,
+		'titleBarStyle': 'hidden',
+		'show': false,
 		'resizable': true,
 		'webPreferences': {
 			nodeIntegration: true
@@ -61,26 +65,119 @@ function Main():void {
 		}
 	});
 
-	this.mainWindow.webContents.once('did-finish-load', () => {});
-  this.workerWindow.webContents.once('did-finish-load', () => {});
+	this.mainWindow.webContents.once('did-finish-load', () => {
+		// if (isDev) {
+		// 	this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+		// }
+		
+		this.mainWindow.show();
+	});
 
-	this.mainWindow.on('closed', () => {});
+	this.loginWindow.webContents.once('did-finish-load', () => {
+		this.loginWindow.show();
+	});
+
+  this.workerWindow.webContents.once('did-finish-load', () => {
+		// if (isDev) {
+		// 	this.workerWindow.webContents.openDevTools({ mode: 'detach' });
+			
+		// 	console.log('loaded worker');
+		// }
+		ipc.init.bind(this)();
+	});
+
+	this.mainWindow.on('closed', () => {
+		app.quit();
+	});
 	this.workerWindow.on('closed', () => {});
 
-	if (isDev) {
-		this.mainWindow.loadURL(`file:///${app.getAppPath()}/assets/index.html`);
-		this.workerWindow.loadURL(`file:///${app.getAppPath()}/assets/worker.html`);
 
-		ipc.init.bind(this)();
+	if (isDev) {
+		this.mainWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'index.html'));
+		this.workerWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'worker.html'));
+
+		discord.setPresence();
+		
+	}
+	else if (settings.has('userKey')) {
+		auth.authenticate(settings.get('userKey'), async (error:any) => {
+			if (error) {				
+				this.loginWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'authenticator.html'));
+				ipcMain.on('authenticate', async (event, args) => {
+					auth.authenticate(args.key, async (error:any) => {
+						if (error) {				
+							this.loginWindow.webContents.send('authentication error', error);
+						}
+						else {
+							this.loginWindow.hide();
+							settings.set('userKey', args.key, {prettify: true});
+							this.mainWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'index.html'));
+							this.workerWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'worker.html'));
+							
+							discord.setPresence();
+						}
+					});
+				});
+			}
+			else {
+				this.mainWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'index.html'));
+				this.workerWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'worker.html'));
+				discord.setPresence();
+			}
+		});
 	}
 	else {
-		this.loginWindow.loadURL(`file:///${app.getAppPath()}/assets/authenticator.html`);
-		this.loginWindow.show();
+		this.loginWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'authenticator.html'));
+		ipcMain.on('authenticate', async (event, args) => {
+			auth.authenticate(args.key, async (error:any) => {
+				if (error) {				
+					this.loginWindow.webContents.send('authentication error', error);
+				}
+				else {
+					this.loginWindow.hide();
+					settings.set('userKey', args.key, {prettify: true});
+					this.mainWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'index.html'));
+					this.workerWindow.loadURL(path.join('file:///',app.getAppPath(), 'assets', 'worker.html'));
+					
+					discord.setPresence();
+				}
+			});
+		});
 	}
+// 	// else {
+// 	// 	loginWindow = new BotWindow(config.loginWindowPath, {
+// 	// 		width: 700,
+// 	// 		height: 400
+// 	// 	})
+// 	// }
+// 	// ipcMain.on('authenticate', async (event, args) => {
+// 	// 	auth.authenticate(args.key,async (error) => {
+// 	// 		if (error) {
+// 	// 			loginWindow.webContents.send('authentication error', error);
+// 	// 		}
+// 	// 		else {
+// 	// 			settings.set('userKey', args.key);
+// 	// 			//LoginWindow.window.close();
+// 	// 			//if (!WorkerWindow.window)	WorkerWindow.create();
+// 	// 			//await WorkerWindow.load();
+// 	// 			ipc.init();
+// 	// 			discord.setPresence();
+// 	// 			mainWindow = new BotWindow(config.mainWindowPath, {
+// 	// 				"width": 1250,
+// 	// 				 "height": 750,
+// 	// 			});
+// 	// 		}
+// 	// 	})
+// 	// })
+// }
+
+
+
 
 }
 
 
+app.allowRendererProcessReuse = true;
 app.on('ready', Main);
 
 

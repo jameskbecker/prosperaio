@@ -1,4 +1,5 @@
-import { HarvesterWindow } from './HarvesterWindow';
-import * as GoogleWindow from './GoogleWindow';
-export { HarvesterWindow, GoogleWindow };
+import HarvesterWindow from './HarvesterWindow';
+import GoogleWindow = require('./GoogleWindow');
+import threeDS = require('./ThreeDSWindow');
+export { HarvesterWindow, GoogleWindow, threeDS };
 // exports.threeDS = require('./ThreeDSWindow')

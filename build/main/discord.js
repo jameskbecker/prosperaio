@@ -14,28 +14,28 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setPresence = void 0;
-var electron_1 = require("electron");
-var DiscordRPC = __importStar(require("discord-rpc"));
+const electron_1 = require("electron");
+const DiscordRPC = __importStar(require("discord-rpc"));
 function setPresence() {
-    var rpc = new DiscordRPC.Client({
+    const rpc = new DiscordRPC.Client({
         transport: 'ipc'
     });
-    rpc.on('ready', function () {
+    rpc.on('ready', () => {
         rpc.setActivity({
-            details: "Version " + electron_1.app.getVersion(),
+            details: `Version ${electron_1.app.getVersion()}`,
             startTimestamp: new Date(),
             instance: false,
             largeImageKey: 'prosperaio_logo'
         });
     });
-    var clientId = '648966990400061451';
-    rpc.login({ clientId: clientId }).catch(function (e) { console.log(e); });
+    let clientId = '648966990400061451';
+    rpc.login({ clientId }).catch((e) => { console.log(e); });
 }
 exports.setPresence = setPresence;
 //# sourceMappingURL=discord.js.map

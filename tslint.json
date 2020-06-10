@@ -1,11 +1,11 @@
 {
   "rules": {
     "semicolon":true,
-    "strict-type-predicates":false,
+    "strict-type-predicates":true,
 		"strict-boolean-expressions":false,
     "quotemark": [true, "single"],
     "member-access": [true, "no-public"],
- 
+    "no-any": [false, {"ignore-rest-args": true}],
     "no-unused-variable": true,
 		"no-var-requires": false,
 		"typedef": [true, "call-signature", "parameter", "member-variable-declaration"],

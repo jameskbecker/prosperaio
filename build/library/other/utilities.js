@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendTestWebhook = exports.formatProxy = exports.generateId = void 0;
-var request_1 = __importDefault(require("request"));
-var electron_settings_1 = __importDefault(require("electron-settings"));
+const request_1 = __importDefault(require("request"));
+const electron_settings_1 = __importDefault(require("electron-settings"));
 function generateId(length) {
-    var idFormat = 'ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvxyz1234567890';
-    var id = '';
+    const idFormat = 'ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvxyz1234567890';
+    let id = '';
     while (id.length < length) {
         id += idFormat[Math.floor(Math.random() * idFormat.length)];
     }
@@ -24,11 +24,11 @@ function formatProxy(input) {
         return null;
     }
     else {
-        var proxyComponents = input.split(':');
-        var ip = proxyComponents[0];
-        var port = proxyComponents[1];
-        var user = proxyComponents[2];
-        var pass = proxyComponents[3];
+        let proxyComponents = input.split(':');
+        let ip = proxyComponents[0];
+        let port = proxyComponents[1];
+        let user = proxyComponents[2];
+        let pass = proxyComponents[3];
         if (!user || !pass)
             return 'http://' + ip + ':' + port;
         else
@@ -38,7 +38,7 @@ function formatProxy(input) {
 exports.formatProxy = formatProxy;
 function sendTestWebhook() {
     if (electron_settings_1.default.has('discord')) {
-        var webhookUrl = electron_settings_1.default.get('discord');
+        let webhookUrl = electron_settings_1.default.get('discord');
         request_1.default({
             url: webhookUrl,
             method: 'POST',
@@ -81,12 +81,12 @@ function sendTestWebhook() {
                             }
                         ],
                         footer: {
-                            text: "ProsperAIO Success Monitor \u2022 " + new Date().toUTCString(),
+                            text: `ProsperAIO Success Monitor • ${new Date().toUTCString()}`,
                             icon_url: 'https://i.imgur.com/NGGew9J.png'
                         }
                     }]
             }
-        }, function (error, response, body) {
+        }, (error, response, body) => {
             if (error) {
                 console.log(error);
             }

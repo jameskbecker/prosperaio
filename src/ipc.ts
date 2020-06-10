@@ -2,9 +2,9 @@ import { app, BrowserWindow, dialog, ipcMain, session } from 'electron';
 //import { Main } from './app';
 import { HarvesterWindow, GoogleWindow } from './main/windows/index';
 import { logger } from './library/other';
-import * as settings from 'electron-settings';
+import settings from 'electron-settings';
 
-var CARDINAL_SOLVERS:any = {};
+var cardinal_solvers:any = {};
 
 var HARVESTERS:any = {
 	'supreme': [],
@@ -26,6 +26,11 @@ function init():void {
 		this.mainWindow.webContents.reload();
 	});
 
+	ipcMain.on('window.maximize', ():void => {
+		logger.debug('[MAIN] [IPC] window.maximize');
+		this.mainWindow.isMaximized() ? this.mainWindow.unmaximize() : this.mainWindow.maximize();
+	});
+
 	ipcMain.on('window.minimize', ():void => {
 		logger.debug('[MAIN] [IPC] window.minimize');
 		BrowserWindow.getFocusedWindow()?.minimize();
@@ -39,9 +44,16 @@ function init():void {
 	/* ---------------------------------- CAPTCHA ------------------------------------- */
 	ipcMain.on('captcha.launch', (event, args):void => {
 		logger.debug('[MAIN] [IPC] captcha.launch');
-		let harvester:any = new HarvesterWindow(args.sessionName, args.site);
-		harvester.spawn();
-		HARVESTERS[args.site].push(harvester);
+		try {
+			let harvester:HarvesterWindow = new HarvesterWindow(args.sessionName, args.site);
+			harvester.spawn();
+			HARVESTERS[args.site].push(harvester);
+		}
+		catch(error) {
+			console.log(error);
+		}
+	
+	
 	});
 
 	ipcMain.on('captcha.ready', (event, args):void => {
@@ -139,37 +151,48 @@ function init():void {
 
 	/* ---------------------------------- CARDINAL ------------------------------------- */
 
-	// ipcMain.on('cardinal.setup', (event, args) => {
-	// 	logger.debug('[MAIN] [IPC] cardinal.setup');
-	// 	ThreeDSWindow.create(args.taskId);
-	// 	ThreeDSWindow.load(args.taskId, () => {
-	// 		CARDINAL_SOLVERS[args.taskId].webContents.send('cardinal.setup', args);
-	// 	});
-	// });
+	ipcMain.on('cardinal.setup', (event, args) => {
+		logger.debug('[MAIN] [IPC] cardinal.setup');
+		cardinal_solvers[args.taskId] = new BrowserWindow({
+			width: 450,
+			height: 555,
+			frame: false,
+			show: false,
+			alwaysOnTop: true,
+			webPreferences: {
+				nodeIntegration: true
+			}
+		});
+		cardinal_solvers[args.taskId].loadFile(`${app.getAppPath()}/assets/3d-secure.html`);
+		cardinal_solvers[args.taskId].webContents.once('dom-ready', function():void {
+			cardinal_solvers[args.taskId].show();
+			cardinal_solvers[args.taskId].webContents.send('cardinal.setup', args);
+		});
+	});
 
-	// ipcMain.on('cardinal.setupComplete', (event, args) => {
-	// 	logger.debug('[MAIN] [IPC] cardinal.setupComplete');
-	// 	CARDINAL_SOLVERS[args.taskId].hide();
-	// 	this.workerWindow?.webContents.send(`cardinal.setupComplete(${args.taskId})`, {
-	// 		cardinalId: args.cardinalId
-	// 	});
-	// });
+	ipcMain.on('cardinal.setupComplete', (event, args) => {
+		logger.debug('[MAIN] [IPC] cardinal.setupComplete');
+		cardinal_solvers[args.taskId].hide();
+		this.workerWindow?.webContents.send(`cardinal.setupComplete(${args.taskId})`, {
+			cardinalId: args.cardinalId
+		});
+	});
 
-	// ipcMain.on('cardinal.continue', (event, args) => {
-	// 	logger.debug('[MAIN] [IPC] cardinal.continue');
-	// 	CARDINAL_SOLVERS[args.taskId].show();
-	// 	CARDINAL_SOLVERS[args.taskId].webContents.send('cardinal.continue', args);
-	// });
+	ipcMain.on('cardinal.continue', (event, args) => {
+		logger.debug('[MAIN] [IPC] cardinal.continue');
+		cardinal_solvers[args.taskId].show();
+		cardinal_solvers[args.taskId].webContents.send('cardinal.continue', args);
+	});
 
-	// ipcMain.on('cardinal.validated', (event, args) => {
-	// 	logger.debug('[MAIN] [IPC] cardinal.validated');
-	// 	this.workerWindow?.webContents.send(`cardinal.validated(${args.taskId})`, {
-	// 		data: args.data,
-	// 		responseJWT: args.responseJWT
-	// 	});
-	// 	CARDINAL_SOLVERS[args.taskId].close();
-	// 	delete CARDINAL_SOLVERS[args.taskId];
-	// });
+	ipcMain.on('cardinal.validated', (event, args) => {
+		logger.debug('[MAIN] [IPC] cardinal.validated');
+		this.workerWindow?.webContents.send(`cardinal.validated(${args.taskId})`, {
+			data: args.data,
+			responseJWT: args.responseJWT
+		});
+		cardinal_solvers[args.taskId].close();
+		delete cardinal_solvers[args.taskId];
+	});
 
 	/* ----------------------------------------------------------------------------------- */
 

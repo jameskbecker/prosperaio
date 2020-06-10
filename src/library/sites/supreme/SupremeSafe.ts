@@ -1,16 +1,18 @@
-import Supreme from './SupremeBase';
-import * as settings from 'electron-settings';
-import * as puppeteer from 'puppeteer';
-import pluginStealth from 'puppeteer-extra-plugin-stealth';
-import * as querystring from 'querystring';
+import { default as Supreme } from './SupremeBase';
+import settings from 'electron-settings';
+import puppeteer from 'puppeteer-core';
+//import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import querystring from 'querystring';
+import { RequestPromiseAPI } from 'request-promise-native';
 
+//puppeteer.use(StealthPlugin());
 
 class SupremeSafe extends Supreme {
 	private config: any;
 	//private browser: any;
 	private page: any;
 
-	constructor(_taskData, _id) {
+	constructor(_taskData:any, _id:any) {
 		super(_taskData, _id);
 		this.config = {
 			launch: {
@@ -36,7 +38,7 @@ class SupremeSafe extends Supreme {
 		this.page;
 	}
 
-	public async run() {
+	async run():Promise<any> {
 		try {
 			this.setStatus('Initialising.', 'INFO');
 			await this._setup();
@@ -83,7 +85,7 @@ class SupremeSafe extends Supreme {
 		}
 	}
 
-	public _setup() {
+	_setup():Promise<any> {
 		return new Promise(async (resolve) => {
 			if (this.proxy) {
 				let splitProxy = this.proxy.replace('http://', '').split('@');
@@ -98,9 +100,7 @@ class SupremeSafe extends Supreme {
 					
 				}
 			}
-			try {
-				//puppeteer.use(pluginStealth());
-			} catch(e) {}
+		
 			
 			this.browser = await puppeteer.launch(this.config.launch);
 			this.page = await this.browser.newPage();
@@ -114,8 +114,8 @@ class SupremeSafe extends Supreme {
 
 	}
 
-	public _atcProcess() {
-		return new Promise(async function runProcess (resolve) {
+	_atcProcess():any {
+		return new Promise(async function runProcess (resolve: Function):Promise<NodeJS.Timeout | void> {
 			try {
 				this.startTime = (new Date).getTime();
 				if (this.shouldStop) return this.stop();
@@ -159,7 +159,7 @@ class SupremeSafe extends Supreme {
 				
 				let cookies = await this.page.cookies();
 
-				let pureCart = cookies.filter(cookie => cookie.name === 'pure_cart');
+				let pureCart = cookies.filter((cookie:any) => cookie.name === 'pure_cart');
 				if (pureCart.length > 0) {
 					let cookieValue = JSON.parse(decodeURIComponent(pureCart[0].value));
 					delete cookieValue.cookie;
@@ -180,8 +180,8 @@ class SupremeSafe extends Supreme {
 		}.bind(this));
 	}
 
-	public _checkoutProcess() {
-		return new Promise(async function runProcess (resolve) {
+	_checkoutProcess(): Promise<void> {
+		return new Promise(async function runProcess (resolve: Function):Promise<NodeJS.Timeout | void> {
 			try {
 				await this.page.setCookie({
 					name: 'lastVisitedFragment',
@@ -189,7 +189,7 @@ class SupremeSafe extends Supreme {
 				});
 				if (this.shouldStop) return this.stop();
 				this.setStatus('Parsing Checkout Form', 'WARNING');
-				let checkoutTemplate = await this.page.$eval('#checkoutViewTemplate', (e) => e.innerHTML);
+				let checkoutTemplate = await this.page.$eval('#checkoutViewTemplate', (e:HTMLElement) => e.innerHTML);
 				this.formElements = this._parseCheckoutForm(checkoutTemplate);
 				if (this.shouldStop) return this.stop();
 				if (this.hasCaptcha) {
@@ -227,8 +227,8 @@ class SupremeSafe extends Supreme {
 		}.bind(this));
 	}
 
-	public _buildJSAddress() {
-		let rememberedFields = [];
+	_buildJSAddress():string {
+		let rememberedFields:any = [];
 		switch (this.region) {
 			case 'JP':
 				rememberedFields = [
@@ -269,9 +269,9 @@ class SupremeSafe extends Supreme {
 		return encodeURIComponent(rememberedFields.join('|'));
 	}
 
-	public async _request(url, options) {
+	async _request(url:string, options:any):Promise<any> {
 		try {
-			return await this.page.evaluate(async (url, options) => (
+			return await this.page.evaluate(async (url:string, options:any) => (
 				(await window.fetch(url, options)).json()
 			), url, options);
 		}

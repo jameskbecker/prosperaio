@@ -14,21 +14,21 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logger = void 0;
-var winston = __importStar(require("winston"));
-var format = winston.format.combine(winston.format.colorize(), winston.format.timestamp(), winston.format.align(), winston.format.printf(function (info) {
-    var timestamp = info.timestamp, level = info.level, message = info.message;
-    var ts = timestamp.slice(0, 23).replace('T', ' ');
+const winston = __importStar(require("winston"));
+const format = winston.format.combine(winston.format.colorize(), winston.format.timestamp(), winston.format.align(), winston.format.printf((info) => {
+    let { timestamp, level, message } = info;
+    const ts = timestamp.slice(0, 23).replace('T', ' ');
     message = message.replace(/\t/g, '');
-    return ts + " [" + level + "] " + message;
+    return `${ts} [${level}] ${message}`;
 }));
 exports.logger = winston.createLogger({
-    format: format,
+    format,
     level: process.env['LOG_LEVEL'] || 'debug',
     transports: [
         new winston.transports.Console()

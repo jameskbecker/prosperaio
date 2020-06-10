@@ -1,7 +1,7 @@
 import './structure.extensions';
 import { ipcRenderer as ipcWorker } from 'electron';
-//import * as puppeteer from 'puppeteer';
-import * as settings from 'electron-settings';
+import  puppeteer from 'puppeteer-core';
+import settings from 'electron-settings';
 import { utilities } from './library/other/index';
 import * as taskActions from './task-actions';
 import { proxyActions } from './library/proxies';
@@ -13,18 +13,18 @@ export class Worker {
 	static monitors: any = { 'supreme': { kw: null, url: {} } };
 
 	static worker(): void {
-		// ipcWorker.on('download browser exectutable', function (_events: any, args: any): void {
-		// 	console.log('downloading');
-		// 	const browserFetcher: any = puppeteer.createBrowserFetcher({
-		// 		path: args.path
-		// 	});
-		// 	browserFetcher.download('637110')
-		// 		.then((browserExecutable: any): void => {
-		// 			settings.set('browser-path', browserExecutable.executablePath, { prettify: true });
-		// 			ipcWorker.send('check for browser executable');
-		// 		});
+		ipcWorker.on('download browser exectutable', function (_events: any, args: any): void {
+			console.log('downloading');
+			const browserFetcher: any = puppeteer.createBrowserFetcher({
+				path: args.path
+			});
+			browserFetcher.download('637110')
+				.then((browserExecutable: any): void => {
+					settings.set('browser-path', browserExecutable.executablePath, { prettify: true });
+					ipcWorker.send('check for browser executable');
+				});
 
-		// });
+		});
 
 		ipcWorker.on('reset settings', (): void => {
 			let userKey: any = settings.has('userKey') ? settings.get('userKey') : '';

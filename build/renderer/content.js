@@ -14,7 +14,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -22,72 +22,82 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var electron_settings_1 = __importDefault(require("electron-settings"));
-var electron_1 = require("electron");
-var configuration_1 = require("../library/configuration");
-var profileActions = __importStar(require("./profiles"));
-var $ = require('jquery');
-var droplist_1 = __importDefault(require("./droplist"));
-var selectedItem;
+exports.harvesters = exports.orders = exports.states = exports.countries = exports.sites = exports.proxySelectors = exports.proxies = exports.profiles = exports.tasks = void 0;
+const electron_settings_1 = __importDefault(require("electron-settings"));
+const electron_1 = require("electron");
+const configuration_1 = __importDefault(require("../library/configuration"));
+const profileActions = __importStar(require("./profiles"));
+const $ = require('jquery');
+const droplist_1 = __importDefault(require("./droplist"));
+var newTask_products = document.getElementById('newTaskProducts');
+var newTask_styles = document.getElementById('newTaskStyles');
+var newTask_sizes = document.getElementById('newTaskSizes');
+var newTask_SearchInput = document.querySelectorAll('input[name="taskSearchInput"]');
+var newTask_Category = document.querySelectorAll('input[name="taskCategory"]');
+var newTask_Size = document.querySelectorAll('input[name="taskSize"]');
+var newTask_Style = document.querySelectorAll('input[name="taskVariant"]');
+var newTask_ProductQty = document.querySelectorAll('input[name="taskProductQty"]');
 function convertMode(id) {
-    var modes = {
-        'supreme-request': 'Fast',
-        'supreme-browser': 'Safe',
-        'kickz-wire': 'Wire Transfer',
-        'kickz-paypal': 'Paypal'
-    };
-    return modes.hasOwnProperty(id) ? modes[id] : null;
+    switch (id) {
+        case 'supreme-request': return 'Fast';
+        case 'supreme-browser': return 'Safe';
+        case 'kickz-wire': return 'Wire Transfer';
+        case 'kickz-paypal': return 'Paypal';
+        default: return '';
+    }
 }
 function renderTaskTable() {
-    var tasks = electron_settings_1.default.has('tasks') ? electron_settings_1.default.get('tasks') : {};
-    var profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
-    tasksHeader.innerHTML = "Tasks (" + Object.keys(tasks).length + " Total)";
+    let tasks = electron_settings_1.default.has('tasks') ? electron_settings_1.default.get('tasks') : {};
+    let profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
+    var tasksHeader = document.getElementById('tasksHeader');
+    var taskTableBody = document.getElementById('taskTableBody');
+    tasksHeader.innerHTML = `Tasks (${Object.keys(tasks).length} Total)`;
     taskTableBody.innerHTML = '';
     try {
-        var _loop_1 = function (i) {
-            var taskRow = document.createElement('tr');
+        for (let i = 0; i < Object.keys(tasks).length; i++) {
+            let taskRow = document.createElement('tr');
             taskRow.className = 'row';
-            var taskId = Object.keys(tasks)[i];
-            var siteCell = document.createElement('td');
-            var defaultSiteData = configuration_1.sites.def;
-            var siteData = defaultSiteData[tasks[taskId].site];
+            let taskId = Object.keys(tasks)[i];
+            let siteCell = document.createElement('td');
+            let defaultSiteData = configuration_1.default.sites.def;
+            let siteData = defaultSiteData[tasks[taskId].site];
             siteCell.innerHTML = siteData.label;
             siteCell.className = 'cell cell-body col-site';
             taskRow.appendChild(siteCell);
-            var modeCell = document.createElement('td');
+            let modeCell = document.createElement('td');
             modeCell.innerHTML = convertMode(tasks[taskId].setup.mode);
             modeCell.className = 'cell cell-body col-mode';
             taskRow.appendChild(modeCell);
-            var searchInputCell = document.createElement('td');
-            searchInputCell.innerHTML = tasks[taskId].products[0].searchInput;
-            searchInputCell.className = 'cell cell-body col-products';
-            searchInputCell.setAttribute('data-id', taskId);
-            taskRow.appendChild(searchInputCell);
-            var sizeCell = document.createElement('td');
+            let productCell = document.createElement('td');
+            productCell.innerHTML = tasks[taskId].products[0].searchInput;
+            productCell.className = 'cell cell-body col-products';
+            productCell.setAttribute('data-id', taskId);
+            taskRow.appendChild(productCell);
+            let sizeCell = document.createElement('td');
             sizeCell.innerHTML = tasks[taskId].products[0].size;
             sizeCell.className = 'cell cell-body col-size';
             sizeCell.setAttribute('data-id', taskId);
             taskRow.appendChild(sizeCell);
-            var profileCell = document.createElement('td');
+            let profileCell = document.createElement('td');
             profileCell.innerHTML = profiles[tasks[taskId].setup.profile] && profiles[tasks[taskId].setup.profile].profileName ? profiles[tasks[taskId].setup.profile].profileName : '';
             profileCell.className = 'cell cell-body col-profile';
             taskRow.appendChild(profileCell);
-            var proxyCell = document.createElement('td');
+            let proxyCell = document.createElement('td');
             proxyCell.innerHTML = tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
             proxyCell.className = 'cell cell-body col-task-proxy';
             taskRow.appendChild(proxyCell);
-            var timerCell = document.createElement('td');
+            let timerCell = document.createElement('td');
             timerCell.innerHTML = tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
             timerCell.className = 'cell cell-body col-timer';
             taskRow.appendChild(timerCell);
-            var statusCell = document.createElement('td');
+            let statusCell = document.createElement('td');
             statusCell.innerHTML = 'Idle.';
             statusCell.className = 'cell cell-body col-status';
             statusCell.setAttribute('data-taskId', taskId);
             taskRow.appendChild(statusCell);
-            var actionsCell = document.createElement('td');
+            let actionsCell = document.createElement('td');
             actionsCell.className = 'cell cell-body table-row col-actions';
-            var startButton = document.createElement('div');
+            let startButton = document.createElement('button');
             startButton.innerHTML = '<i class="fas fa-play"></i>';
             startButton.className = 'action-button';
             startButton.setAttribute('data-taskId', taskId);
@@ -95,7 +105,7 @@ function renderTaskTable() {
                 electron_1.ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
             };
             actionsCell.appendChild(startButton);
-            var stopButton = document.createElement('div');
+            let stopButton = document.createElement('button');
             stopButton.innerHTML = '<i class="fas fa-stop"></i>';
             stopButton.className = 'action-button';
             stopButton.setAttribute('data-taskId', taskId);
@@ -103,7 +113,7 @@ function renderTaskTable() {
                 electron_1.ipcRenderer.send('task.stop', taskId);
             };
             actionsCell.appendChild(stopButton);
-            var duplicateButton = document.createElement('div');
+            let duplicateButton = document.createElement('button');
             duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
             duplicateButton.className = 'action-button';
             duplicateButton.setAttribute('data-taskId', taskId);
@@ -111,7 +121,7 @@ function renderTaskTable() {
                 electron_1.ipcRenderer.send('task.duplicate', taskId);
             };
             actionsCell.appendChild(duplicateButton);
-            var deleteButton = document.createElement('div');
+            let deleteButton = document.createElement('button');
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'action-button';
             deleteButton.setAttribute('data-taskId', taskId);
@@ -121,9 +131,6 @@ function renderTaskTable() {
             actionsCell.appendChild(deleteButton);
             taskRow.appendChild(actionsCell);
             taskTableBody.appendChild(taskRow);
-        };
-        for (var i = 0; i < Object.keys(tasks).length; i++) {
-            _loop_1(i);
         }
     }
     catch (err) {
@@ -132,49 +139,50 @@ function renderTaskTable() {
 }
 function renderProxyTable(name) {
     try {
-        var proxyLists_1 = electron_settings_1.default.has('proxies') ? electron_settings_1.default.get('proxies') : {};
-        var list_1 = proxyLists_1[name];
-        if (list_1) {
+        var proxyTestTable = document.getElementById('proxyTestResults');
+        let proxyLists = electron_settings_1.default.has('proxies') ? electron_settings_1.default.get('proxies') : {};
+        let list = proxyLists[name];
+        if (list) {
             proxyTestTable.innerHTML = '';
-            var _loop_2 = function (i) {
-                var proxyId = Object.keys(list_1)[i];
-                var proxyRow = document.createElement('tr');
+            for (let i = 0; i < Object.keys(list).length; i++) {
+                let proxyId = Object.keys(list)[i];
+                let proxyRow = document.createElement('tr');
                 proxyRow.className = 'row';
                 proxyRow.setAttribute('data-row-id', proxyId);
-                var splitProxy = list_1[proxyId].split(':');
-                var ipCell = document.createElement('td');
+                let ipCell = document.createElement('td');
+                let splitProxy = list[proxyId].split(':');
                 ipCell.innerHTML = splitProxy[0] ? splitProxy[0] : 'localhost';
                 ipCell.className = 'cell cell-body col-proxy';
                 proxyRow.appendChild(ipCell);
-                var portCell = document.createElement('td');
+                let portCell = document.createElement('td');
                 if (splitProxy.length > 1)
                     portCell.innerHTML = splitProxy[1];
                 else
                     portCell.innerHTML = 'None';
                 portCell.className = 'cell cell-body col-proxyPort';
                 proxyRow.appendChild(portCell);
-                var userCell = document.createElement('td');
+                let userCell = document.createElement('td');
                 if (splitProxy.length > 3)
                     userCell.innerHTML = splitProxy[2];
                 else
                     userCell.innerHTML = 'None';
                 userCell.className = 'cell cell-body col-proxyUser';
                 proxyRow.appendChild(userCell);
-                var passCell = document.createElement('td');
+                let passCell = document.createElement('td');
                 if (splitProxy.length > 3)
                     passCell.innerHTML = splitProxy[3];
                 else
                     passCell.innerHTML = 'None';
                 passCell.className = 'cell cell-body col-proxy';
                 proxyRow.appendChild(passCell);
-                var statusCell = document.createElement('td');
+                let statusCell = document.createElement('td');
                 statusCell.className = 'cell cell-body col-status col-proxy';
                 statusCell.innerHTML = 'Idle.';
                 statusCell.setAttribute('data-proxyId', proxyId);
                 proxyRow.appendChild(statusCell);
-                var actionsCell = document.createElement('td');
+                let actionsCell = document.createElement('td');
                 actionsCell.className = 'cell cell-body col-proxy';
-                var startButton = document.createElement('div');
+                let startButton = document.createElement('div');
                 startButton.innerHTML = '<i class="fas fa-vial"></i>';
                 startButton.className = 'action-button';
                 startButton.setAttribute('data-proxyId', proxyId);
@@ -182,25 +190,22 @@ function renderProxyTable(name) {
                     electron_1.ipcRenderer.send('proxyList.test', {
                         baseUrl: proxyTestSite.value,
                         id: proxyId,
-                        input: list_1[proxyId],
+                        input: list[proxyId],
                     });
                 };
                 actionsCell.appendChild(startButton);
-                var deleteButton = document.createElement('div');
+                let deleteButton = document.createElement('div');
                 deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                 deleteButton.className = 'action-button';
                 deleteButton.onclick = function () {
-                    delete list_1[proxyId];
-                    electron_settings_1.default.set('proxies', proxyLists_1, { prettify: true });
-                    var row = this.parentNode.parentNode;
+                    delete list[proxyId];
+                    electron_settings_1.default.set('proxies', proxyLists, { prettify: true });
+                    let row = this.parentNode.parentNode;
                     row.parentNode.removeChild(row);
                 };
                 actionsCell.appendChild(deleteButton);
                 proxyRow.appendChild(actionsCell);
                 proxyTestTable.appendChild(proxyRow);
-            };
-            for (var i = 0; i < Object.keys(list_1).length; i++) {
-                _loop_2(i);
             }
         }
     }
@@ -208,13 +213,13 @@ function renderProxyTable(name) {
     }
 }
 function renderSites() {
-    var siteKeys = Object.keys(configuration_1.sites.def);
-    for (var i = 0; i < siteKeys.length; i++) {
-        var defaultSiteData = configuration_1.sites.def;
-        var site = defaultSiteData[siteKeys[i]];
+    const siteKeys = Object.keys(configuration_1.default.sites.def);
+    for (let i = 0; i < siteKeys.length; i++) {
+        let defaultSiteData = configuration_1.default.sites.def;
+        let site = defaultSiteData[siteKeys[i]];
         if (site.enabled) {
-            for (var j = 0; j < siteSelectors.length; j++) {
-                var siteOption = document.createElement('option');
+            for (let j = 0; j < siteSelectors.length; j++) {
+                let siteOption = document.createElement('option');
                 siteOption.value = siteKeys[i];
                 siteOption.label = site.label;
                 siteSelectors[j].add(siteOption);
@@ -224,15 +229,15 @@ function renderSites() {
     newTask_Site.onchange = function () {
         newTask_Mode.disabled = false;
         newTask_RestockMode.disabled = false;
-        var defaultSiteData = configuration_1.sites.def;
-        var selectedSite = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
+        let defaultSiteData = configuration_1.default.sites.def;
+        let selectedSite = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
         if (selectedSite) {
             newTask_Mode.onchange = function () {
                 newTask_RestockMode.options.length = 0;
-                var stockMode = document.createElement('option');
+                let stockMode = document.createElement('option');
                 stockMode.label = 'Stock (Recommended)';
                 stockMode.value = 'stock';
-                var cartMode = document.createElement('option');
+                let cartMode = document.createElement('option');
                 cartMode.label = 'Cart';
                 cartMode.value = 'cart';
                 switch (this.value) {
@@ -260,17 +265,17 @@ function renderSites() {
             newTask_ProductQty[0].disabled = false;
             newTask_SearchInput[0].disabled = false;
             newTask_Mode.options.length = 0;
-            var requestMode = document.createElement('option');
+            let requestMode = document.createElement('option');
             switch (selectedSite.type) {
                 case 'kickz':
                     newTask_Style[0].parentElement.style.display = 'none';
                     newTask_Category[0].parentElement.style.display = 'none';
                     newTask_SearchInput[0].placeholder = 'Enter Product Url.';
-                    var wireMode = document.createElement('option');
+                    let wireMode = document.createElement('option');
                     wireMode.label = 'Request - Wire Transfer';
                     wireMode.value = 'kickz-wire';
                     newTask_Mode.add(wireMode);
-                    var paypalMode = document.createElement('option');
+                    let paypalMode = document.createElement('option');
                     paypalMode.label = 'Request - PayPal';
                     paypalMode.value = 'kickz-paypal';
                     newTask_Mode.add(paypalMode);
@@ -282,7 +287,7 @@ function renderSites() {
                     requestMode.label = 'Fast';
                     requestMode.value = 'supreme-request';
                     newTask_Mode.add(requestMode);
-                    var browserMode = document.createElement('option');
+                    let browserMode = document.createElement('option');
                     browserMode.label = 'Safe';
                     browserMode.value = 'supreme-browser';
                     newTask_Mode.add(browserMode);
@@ -291,11 +296,11 @@ function renderSites() {
                     newTask_Style[0].parentElement.style.display = 'none';
                     newTask_Category[0].parentElement.style.display = 'none';
                     newTask_SearchInput[0].placeholder = 'Enter Keywords or Product Url.';
-                    var fastMode = document.createElement('option');
+                    let fastMode = document.createElement('option');
                     fastMode.label = 'API (Fast)';
                     fastMode.value = 'shopify-api';
                     newTask_Mode.add(fastMode);
-                    var safeMode = document.createElement('option');
+                    let safeMode = document.createElement('option');
                     safeMode.label = 'Frontend (Safe)';
                     safeMode.value = 'shopify-frontend';
                     newTask_Mode.add(safeMode);
@@ -307,25 +312,25 @@ function renderSites() {
             }
             catch (err) { }
             droplist_1.default()
-                .then(function (dropData) {
+                .then((dropData) => {
                 if (dropData[selectedSite.type]) {
                     newTask_products.options.length = 1;
-                    var data_1 = dropData[selectedSite.type];
-                    var itemNames = Object.keys(data_1);
-                    for (var i = 0; i < itemNames.length; i++) {
-                        var option = document.createElement('option');
+                    let data = dropData[selectedSite.type];
+                    let itemNames = Object.keys(data);
+                    for (let i = 0; i < itemNames.length; i++) {
+                        let option = document.createElement('option');
                         option.label = itemNames[i];
                         option.value = itemNames[i];
                         newTask_products.options.add(option);
                     }
                     newTask_products.onchange = function () {
                         newTask_Size[0].value = '';
-                        selectedItem = data_1[this.value] ? data_1[this.value] : {};
+                        let selectedItem = data[this.value] ? data[this.value] : {};
                         newTask_SearchInput[0].value = selectedItem.keywords;
                         newTask_Category[0].value = selectedItem.category;
                         newTask_styles.options.length = 0;
-                        for (var i = 0; i < selectedItem.styles.length; i++) {
-                            var option = document.createElement('option');
+                        for (let i = 0; i < selectedItem.styles.length; i++) {
+                            let option = document.createElement('option');
                             option.label = selectedItem.styles[i].name;
                             option.value = selectedItem.styles[i].keywords;
                             newTask_styles.options.add(option);
@@ -340,8 +345,8 @@ function renderSites() {
                             console.log(err);
                         }
                         newTask_sizes.options.length = 4;
-                        for (var i = 0; i < selectedItem.sizes.length; i++) {
-                            var option = document.createElement('option');
+                        for (let i = 0; i < selectedItem.sizes.length; i++) {
+                            let option = document.createElement('option');
                             option.label = selectedItem.sizes[i].name;
                             option.value = selectedItem.sizes[i].keywords;
                             newTask_sizes.options.add(option);
@@ -359,29 +364,30 @@ function renderSites() {
     };
 }
 function renderCountries() {
-    for (var i = 0; i < configuration_1.countries.length; i++) {
-        for (var j = 0; j < countrySelectors.length; j++) {
-            var option = document.createElement('option');
-            option.label = configuration_1.countries[i].label;
-            option.value = configuration_1.countries[i].value;
+    var countrySelectors = document.querySelectorAll('.country-selector');
+    for (let i = 0; i < configuration_1.default.countries.length; i++) {
+        for (let j = 0; j < countrySelectors.length; j++) {
+            let option = document.createElement('option');
+            option.label = configuration_1.default.countries[i].label;
+            option.value = configuration_1.default.countries[i].value;
             countrySelectors[j].add(option);
         }
     }
-    for (var i = 0; i < countrySelectors.length; i++) {
+    for (let i = 0; i < countrySelectors.length; i++) {
         countrySelectors[i].value = 'gb';
     }
     renderStates('profileBillingState', 'GB');
     renderStates('profileShippingState', 'GB');
 }
 function renderStates(selector, value) {
-    var selectedCountry = configuration_1.countries.filter(function (country) { return country.value === value; })[0];
-    var hasStates = selectedCountry.hasOwnProperty('states');
-    var stateElement = document.getElementById(selector);
+    let selectedCountry = configuration_1.default.countries.find((country) => { return country.value === value; });
+    let hasStates = selectedCountry.hasOwnProperty('states');
+    let stateElement = document.getElementById(selector);
     stateElement.options.length = 0;
     if (hasStates) {
         stateElement.disabled = false;
-        for (var i = 0; i < selectedCountry.states.length; i++) {
-            var option = document.createElement('option');
+        for (let i = 0; i < selectedCountry.states.length; i++) {
+            let option = document.createElement('option');
             option.label = selectedCountry.states[i].label;
             option.value = selectedCountry.states[i].value;
             stateElement.add(option);
@@ -392,46 +398,44 @@ function renderStates(selector, value) {
     }
 }
 function renderProxyListSelectors() {
-    var proxyLists = electron_settings_1.default.has('proxies') ? electron_settings_1.default.get('proxies') : {};
+    let proxyLists = electron_settings_1.default.has('proxies') ? electron_settings_1.default.get('proxies') : {};
     document.querySelectorAll('.proxylist-selector').forEach(function (element) {
         element.options.length = 1;
     });
-    var _loop_3 = function (i) {
-        var name_1 = Object.keys(proxyLists)[i];
+    for (let i = 0; i < Object.keys(proxyLists).length; i++) {
+        let name = Object.keys(proxyLists)[i];
         document.querySelectorAll('.proxylist-selector').forEach(function (element) {
-            var option = document.createElement('option');
-            option.label = name_1;
-            option.value = name_1;
+            let option = document.createElement('option');
+            option.label = name;
+            option.value = name;
             element.options.add(option);
         });
-    };
-    for (var i = 0; i < Object.keys(proxyLists).length; i++) {
-        _loop_3(i);
     }
 }
 function renderHarvesters() {
+    var harvesterTable = document.getElementById('harvesterTable');
     harvesterTable.innerHTML = '';
-    var existingHarvesters = electron_settings_1.default.has('captchaHarvesters') ? electron_settings_1.default.get('captchaHarvesters') : [];
-    var _loop_4 = function (i) {
-        var harvesterRow = document.createElement('tr');
+    let existingHarvesters = electron_settings_1.default.has('captchaHarvesters') ? electron_settings_1.default.get('captchaHarvesters') : [];
+    for (let i = 0; i < existingHarvesters.length; i++) {
+        let harvesterRow = document.createElement('tr');
         harvesterRow.className = 'row';
-        var nameCell = document.createElement('td');
+        let nameCell = document.createElement('td');
         nameCell.innerHTML = existingHarvesters[i].name;
         nameCell.className = 'cell cell-body col-profile';
-        var siteCell = document.createElement('td');
+        let siteCell = document.createElement('td');
         siteCell.className = 'cell cell-body col-site';
-        var siteSelector = document.createElement('select');
+        let siteSelector = document.createElement('select');
         siteSelector.setAttribute('class', 'input');
-        configuration_1.sites.captcha.forEach(function (site) {
-            var option = document.createElement('option');
+        configuration_1.default.sites.captcha.forEach((site) => {
+            let option = document.createElement('option');
             option.label = site.label;
             option.value = site.value;
             siteSelector.add(option);
         });
         siteCell.appendChild(siteSelector);
-        var actionsCell = document.createElement('td');
+        let actionsCell = document.createElement('td');
         actionsCell.className = 'cell cell-body table-row col-actions';
-        var launchButton = document.createElement('div');
+        let launchButton = document.createElement('div');
         launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i>';
         launchButton.className = 'action-button';
         launchButton.onclick = function () {
@@ -440,7 +444,7 @@ function renderHarvesters() {
                 'site': siteSelector.value
             });
         };
-        var loginButton = document.createElement('div');
+        let loginButton = document.createElement('div');
         loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
         loginButton.className = 'action-button';
         loginButton.onclick = function () {
@@ -449,13 +453,13 @@ function renderHarvesters() {
                 'type': 'renew'
             });
         };
-        var deleteButton = document.createElement('div');
+        let deleteButton = document.createElement('div');
         deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
         deleteButton.className = 'action-button';
         deleteButton.onclick = function () {
             try {
-                var existingHarvesters2 = electron_settings_1.default.get('captchaHarvesters');
-                var newHarvestrerArray = existingHarvesters2.filter(function (harvester) {
+                let existingHarvesters2 = electron_settings_1.default.get('captchaHarvesters');
+                let newHarvestrerArray = existingHarvesters2.filter((harvester) => {
                     return harvester.name !== existingHarvesters[i].name;
                 });
                 electron_settings_1.default.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
@@ -470,44 +474,48 @@ function renderHarvesters() {
         harvesterRow.appendChild(siteCell);
         harvesterRow.appendChild(actionsCell);
         harvesterTable.appendChild(harvesterRow);
-    };
-    for (var i = 0; i < existingHarvesters.length; i++) {
-        _loop_4(i);
     }
 }
 function renderProfileSelectors() {
-    var existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
-    document.getElementById('profileTableBody').innerHTML = '';
-    var _loop_5 = function (i) {
-        var profileId = Object.keys(existingProfiles)[i];
-        var profileRow = document.createElement('tr');
+    let existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
+    let profileTableBody = document.getElementById('profileTableBody');
+    profileTableBody.innerHTML = '';
+    for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
+        let profileId = Object.keys(existingProfiles)[i];
+        let profileRow = document.createElement('tr');
         profileRow.className = 'row';
-        var profileCell = document.createElement('td');
-        profileCell.innerHTML = existingProfiles[profileId].profileName ? existingProfiles[profileId].profileName : '';
-        profileCell.className = 'cell cell-body col-profile';
-        profileRow.appendChild(profileCell);
-        var nameCell = document.createElement('td');
-        nameCell.innerHTML = existingProfiles[profileId].billing.first + " " + existingProfiles[profileId].billing.last;
-        nameCell.className = 'cell cell-body col-site';
-        profileRow.appendChild(nameCell);
-        var addressCell = document.createElement('td');
-        addressCell.innerHTML = existingProfiles[profileId].billing.address1 + " " + existingProfiles[profileId].billing.address2;
-        addressCell.className = 'cell cell-body col-products';
-        profileRow.appendChild(addressCell);
-        var cardCell = document.createElement('td');
-        cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
-        cardCell.className = 'cell cell-body col-status';
-        profileRow.appendChild(cardCell);
-        var actionsCell = document.createElement('td');
-        actionsCell.className = 'cell cell-body table-row col-actions';
-        var editButton = document.createElement('div');
-        editButton.innerHTML = '<i class="fas fa-edit"></i>';
-        editButton.className = 'action-button';
-        editButton.setAttribute('data-id', (profileId ? profileId : ''));
-        editButton.onclick = function () {
-            var profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
-            var profileData = profiles[this.dataset.id];
-            _profileId.value = this.dataset.id ? this.dataset.id : '';
+        profileRow.setAttribute('data-id', (profileId ? profileId : ''));
+        profileRow.onclick = function (event) {
+            var billingFirst = document.getElementById('profileBillingFirst');
+            var billingLast = document.getElementById('profileBillingLast');
+            var billingEmail = document.getElementById('profileBillingEmail');
+            var billingTelephone = document.getElementById('profileBillingTelephone');
+            var billingAddress1 = document.getElementById('profileBillingAddress1');
+            var billingAddress2 = document.getElementById('profileBillingAddress2');
+            var billingCity = document.getElementById('profileBillingCity');
+            var billingZip = document.getElementById('profileBillingZip');
+            var billingCountry = document.getElementById('profileBillingCountry');
+            var billingState = document.getElementById('profileBillingState');
+            var shippingFirst = document.getElementById('profileShippingFirst');
+            var shippingLast = document.getElementById('profileShippingLast');
+            var shippingEmail = document.getElementById('profileShippingEmail');
+            var shippingTelephone = document.getElementById('profileShippingTelephone');
+            var shippingAddress1 = document.getElementById('profileShippingAddress1');
+            var shippingAddress2 = document.getElementById('profileShippingAddress2');
+            var shippingCity = document.getElementById('profileShippingCity');
+            var shippingZip = document.getElementById('profileShippingZip');
+            var shippingCountry = document.getElementById('profileShippingCountry');
+            var shippingState = document.getElementById('profileShippingState');
+            var paymentType = document.getElementById('profilePaymentType');
+            var cardNumber = document.getElementById('profileCardNumber');
+            var cardExpiryMonth = document.getElementById('profileExpiryMonth');
+            var cardExpiryYear = document.getElementById('profileExpiryYear');
+            var cardCvv = document.getElementById('profileCvv');
+            var profileId = document.getElementById('profileId');
+            var profileName = document.getElementById('profileName');
+            let profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
+            const profileData = profiles[this.dataset.id];
+            profileId.value = this.dataset.id ? this.dataset.id : '';
             profileName.value = profileData.profileName ? profileData.profileName : '';
             try {
                 billingFirst.value = profileData.billing.first;
@@ -541,23 +549,49 @@ function renderProfileSelectors() {
                 console.error(error);
             }
         };
-        actionsCell.appendChild(editButton);
-        var duplicateButton = document.createElement('div');
+        let profileCell = document.createElement('td');
+        profileCell.innerHTML = existingProfiles[profileId].profileName ? existingProfiles[profileId].profileName : '';
+        profileCell.className = 'cell cell-body col-profile';
+        profileRow.appendChild(profileCell);
+        let nameCell = document.createElement('td');
+        nameCell.innerHTML = `${existingProfiles[profileId].billing.first} ${existingProfiles[profileId].billing.last}`;
+        nameCell.className = 'cell cell-body col-site';
+        profileRow.appendChild(nameCell);
+        let addressCell = document.createElement('td');
+        addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
+        addressCell.className = 'cell cell-body col-products';
+        profileRow.appendChild(addressCell);
+        let cardCell = document.createElement('td');
+        cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
+        cardCell.className = 'cell cell-body col-status';
+        profileRow.appendChild(cardCell);
+        let actionsCell = document.createElement('td');
+        actionsCell.className = 'cell cell-body table-row col-actions';
+        let editButton = document.createElement('div');
+        editButton.innerHTML = '<i class="fas fa-edit"></i>';
+        editButton.className = 'action-button';
+        editButton.setAttribute('data-id', (profileId ? profileId : ''));
+        editButton.onclick = function (event) {
+            event.stopImmediatePropagation();
+        };
+        let duplicateButton = document.createElement('div');
         duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
         duplicateButton.className = 'action-button';
         duplicateButton.setAttribute('data-id', profileId ? profileId : '');
-        duplicateButton.onclick = function () {
-            var profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
-            var profileData = profiles[this.dataset.id];
+        duplicateButton.onclick = function (event) {
+            event.stopImmediatePropagation();
+            let profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
+            const profileData = profiles[this.dataset.id];
             profileActions.save(null, profileData);
             renderProfileSelectors();
         };
         actionsCell.appendChild(duplicateButton);
-        var deleteButton = document.createElement('div');
+        let deleteButton = document.createElement('div');
         deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
         deleteButton.className = 'action-button';
-        deleteButton.onclick = function () {
-            var existingProfiles2 = electron_settings_1.default.get('profiles');
+        deleteButton.onclick = function (event) {
+            event.stopImmediatePropagation();
+            let existingProfiles2 = electron_settings_1.default.get('profiles');
             delete existingProfiles2[profileId];
             electron_settings_1.default.set('profiles', existingProfiles2, { prettify: true });
             renderProfileSelectors();
@@ -565,16 +599,13 @@ function renderProfileSelectors() {
         actionsCell.appendChild(deleteButton);
         profileRow.appendChild(actionsCell);
         document.getElementById('profileTableBody').appendChild(profileRow);
-    };
-    for (var i = 0; i < Object.keys(existingProfiles).length; i++) {
-        _loop_5(i);
     }
-    profileSelector.forEach(function (element) {
+    profileSelector.forEach((element) => {
         element.options.length = 0;
-        var existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
-        for (var i = 0; i < Object.keys(existingProfiles).length; i++) {
-            var profileId = Object.keys(existingProfiles)[i];
-            var option = document.createElement('option');
+        let existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
+        for (let i = 0; i < Object.keys(existingProfiles).length; i++) {
+            let profileId = Object.keys(existingProfiles)[i];
+            let option = document.createElement('option');
             option.value = profileId;
             option.label = existingProfiles[profileId].profileName || 'Nameless Profile';
             element.options.add(option);
@@ -582,32 +613,33 @@ function renderProfileSelectors() {
     });
 }
 function renderOrderTable() {
-    var orders = electron_settings_1.default.has('orders') ? electron_settings_1.default.get('orders') : [];
+    var orderTableBody = document.getElementById('orderTableBody');
+    let orders = electron_settings_1.default.has('orders') ? electron_settings_1.default.get('orders') : [];
     orderTableBody.innerHTML = '';
     try {
-        for (var i = 0; i < orders.length; i++) {
-            var orderRow = document.createElement('tr');
+        for (let i = 0; i < orders.length; i++) {
+            let orderRow = document.createElement('tr');
             orderRow.className = 'row';
-            var dateCell = document.createElement('td');
+            let dateCell = document.createElement('td');
             dateCell.innerHTML = orders[i].date;
             dateCell.className = 'cell cell-body col-id';
             orderRow.appendChild(dateCell);
-            var storeCell = document.createElement('td');
+            let storeCell = document.createElement('td');
             storeCell.innerHTML = orders[i].site;
             storeCell.className = 'cell cell-body col-site';
             orderRow.appendChild(storeCell);
-            var productCell = document.createElement('td');
+            let productCell = document.createElement('td');
             productCell.innerHTML = orders[i].product;
             productCell.className = 'cell cell-body col-products';
             productCell.style.justifyContent = 'center';
             orderRow.appendChild(productCell);
-            var orderNumberCell = document.createElement('td');
+            let orderNumberCell = document.createElement('td');
             orderNumberCell.innerHTML = orders[i].orderNumber;
             orderNumberCell.className = 'cell cell-body col-order';
             orderRow.appendChild(orderNumberCell);
-            var actionsCell = document.createElement('td');
+            let actionsCell = document.createElement('td');
             actionsCell.className = 'cell cell-body table-row col-actions-sm';
-            var deleteButton = document.createElement('div');
+            let deleteButton = document.createElement('div');
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'action-button';
             actionsCell.appendChild(deleteButton);
@@ -619,146 +651,19 @@ function renderOrderTable() {
         console.log(err);
     }
 }
-exports.default = {
-    'tasks': renderTaskTable,
-    'profiles': renderProfileSelectors,
-    'proxies': renderProxyTable,
-    'proxySelectors': renderProxyListSelectors,
-    'sites': renderSites,
-    'countries': renderCountries,
-    'states': renderStates,
-    'orders': renderOrderTable,
-    'harvesters': renderHarvesters
-};
-var checkboxes = document.querySelectorAll('.checkbox-label');
+exports.tasks = renderTaskTable;
+exports.profiles = renderProfileSelectors;
+exports.proxies = renderProxyTable;
+exports.proxySelectors = renderProxyListSelectors;
+exports.sites = renderSites;
+exports.countries = renderCountries;
+exports.states = renderStates;
+exports.orders = renderOrderTable;
+exports.harvesters = renderHarvesters;
 var profileSelector = document.querySelectorAll('.profile-selector');
-var accountSelectors = document.querySelectorAll('.captchaAccount-selector');
-var countrySelectors = document.querySelectorAll('.country-selector');
-var proxyListSelectors = document.querySelectorAll('.proxylist-selector');
 var siteSelectors = document.querySelectorAll('.site-selector');
-var navigationSelectors = document.querySelectorAll('.nav');
-var reloadBtn = document.getElementById('reloadApp');
-var minimizeBtn = document.getElementById('minimizeApp');
-var closeBtn = document.getElementById('closeApp');
-var tasksHeader = document.getElementById('tasksHeader');
-var globalMonitorDelay = document.getElementById('globalMonitor');
-var globalErrorDelay = document.getElementById('globalError');
-var globalTimeoutDelay = document.getElementById('globalTimeout');
-var taskTable = document.getElementById('taskTable');
-var taskTableBody = document.getElementById('taskTableBody');
-var runAllBtn = document.getElementById('runAll');
-var stopAllBtn = document.getElementById('stopAll');
-var clearTasksBtn = document.getElementById('clearTasks');
 var newTask_Site = document.getElementById('taskSite');
-var newTask_Profile = document.getElementById('taskProfile');
 var newTask_Mode = document.getElementById('taskMode');
 var newTask_RestockMode = document.getElementById('newTaskMonitorMode');
-var newTask_CheckoutAttempts = document.getElementById('taskCheckoutAttempts');
-var newTask_Quantity = document.getElementById('taskQuantity');
-var newTask_CartDelay = document.getElementById('taskCartDelay');
-var newTask_CheckoutDelay = document.getElementById('taskCheckoutDelay');
-var newTask_MonitorDelay = document.getElementById('taskMonitorDelay');
-var newTask_ErrorDelay = document.getElementById('taskErrorDelay');
-var newTask_Timeout = document.getElementById('taskTimeoutDelay');
-var newTask_ProxyList = document.getElementById('taskProxyList');
-var newTask_PriceLimit = document.getElementById('taskMaxPrice');
-var newTask_StartDate = document.getElementById('taskStartDate');
-var newTask_StartTime = document.getElementById('taskStartTime');
-var newTask_Restocks = document.getElementById('newTaskRestocks');
-var newTask_SkipCaptcha = document.getElementById('captchaCheckbox');
-var newTask_threeD = document.getElementById('threeDCheckbox');
-var newTask_products = document.getElementById('newTaskProducts');
-var newTask_styles = document.getElementById('newTaskStyles');
-var newTask_sizes = document.getElementById('newTaskSizes');
-var newTask_SearchInput = document.querySelectorAll('input[name="taskSearchInput"]');
-var newTask_Category = document.querySelectorAll('input[name="taskCategory"]');
-var newTask_Size = document.querySelectorAll('input[name="taskSize"]');
-var newTask_Style = document.querySelectorAll('input[name="taskVariant"]');
-var newTask_ProductQty = document.querySelectorAll('input[name="taskProductQty"]');
-var newTask_saveBtn = document.getElementById('taskSaveButton');
-var profilesWrapper = document.getElementById('profilesWrapper');
-var billingFirst = document.getElementById('profileBillingFirst');
-var billingLast = document.getElementById('profileBillingLast');
-var billingEmail = document.getElementById('profileBillingEmail');
-var billingTelephone = document.getElementById('profileBillingTelephone');
-var billingAddress1 = document.getElementById('profileBillingAddress1');
-var billingAddress2 = document.getElementById('profileBillingAddress2');
-var billingCity = document.getElementById('profileBillingCity');
-var billingZip = document.getElementById('profileBillingZip');
-var billingCountry = document.getElementById('profileBillingCountry');
-var billingState = document.getElementById('profileBillingState');
-var useSameShippingAddress = document.getElementById('sameShippingCheckbox');
-var shippingFirst = document.getElementById('profileShippingFirst');
-var shippingLast = document.getElementById('profileShippingLast');
-var shippingEmail = document.getElementById('profileShippingEmail');
-var shippingTelephone = document.getElementById('profileShippingTelephone');
-var shippingAddress1 = document.getElementById('profileShippingAddress1');
-var shippingAddress2 = document.getElementById('profileShippingAddress2');
-var shippingCity = document.getElementById('profileShippingCity');
-var shippingZip = document.getElementById('profileShippingZip');
-var shippingCountry = document.getElementById('profileShippingCountry');
-var shippingState = document.getElementById('profileShippingState');
-var paymentType = document.getElementById('profilePaymentType');
-var cardNumber = document.getElementById('profileCardNumber');
-var cardExpiryMonth = document.getElementById('profileExpiryMonth');
-var cardExpiryYear = document.getElementById('profileExpiryYear');
-var cardCvv = document.getElementById('profileCvv');
-var _profileId = document.getElementById('profileId');
-var profileName = document.getElementById('profileName');
-var saveProfileBtn = document.getElementById('profileSaveButton');
-var profileLoader = document.getElementById('profileLoader');
-var deleteProfileBtn = document.getElementById('profileDeleteButton');
-var clearProfilesBtn = document.getElementById('deleteAllProfiles');
-var profileElements = [
-    document.getElementById('profileId'),
-    billingFirst,
-    billingLast,
-    billingEmail,
-    billingTelephone,
-    billingAddress1,
-    billingAddress2,
-    billingCity,
-    billingZip,
-    billingCountry,
-    billingState,
-    shippingFirst,
-    shippingLast,
-    shippingEmail,
-    shippingTelephone,
-    shippingAddress1,
-    shippingAddress2,
-    shippingCity,
-    shippingZip,
-    shippingCountry,
-    shippingState,
-    paymentType,
-    cardNumber,
-    cardExpiryMonth,
-    cardExpiryYear,
-    cardCvv,
-    profileName
-];
-var proxyHeader = document.getElementById('proxy-header');
-var proxyListName = document.getElementById('proxyListName');
-var massProxyInput = document.getElementById('proxyInput');
-var saveProxyList = document.getElementById('saveProxyListBtn');
-var proxyListSelectorMain = document.getElementById('proxyListSelectorMain');
-var proxyTableName = document.getElementById('proxyTableName');
 var proxyTestSite = document.getElementById('proxySiteSelector');
-var proxyTestTable = document.getElementById('proxyTestResults');
-var proxyTestAll = document.getElementById('proxyTestAll');
-var proxyDeleteList = document.getElementById('proxyDeleteList');
-var harverster_Name = document.getElementById('harvesterName');
-var harvester_SaveBtn = document.getElementById('saveHarvesterBtn');
-var harvesterTable = document.getElementById('harvesterTable');
-var harvester_ClearBtn = document.getElementById('clearCaptchaAccounts');
-var orderTableBody = document.getElementById('orderTableBody');
-var clearAnalyticsBtn = document.getElementById('clearAnalytics');
-var currentBrowserPath = document.getElementById('currentBrowserPath');
-var installBrowserBtn = document.getElementById('browserSetup');
-var resetBtn = document.getElementById('resetAllSettings');
-var signoutBtn = document.getElementById('signout');
-var customDiscord = document.getElementById('discordWebhook');
-var testDiscordBtn = document.getElementById('testDiscordWebhook');
-var version = document.getElementById('version');
 //# sourceMappingURL=content.js.map

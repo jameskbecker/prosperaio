@@ -56,51 +56,47 @@
 				<div>Settings</div>
 			</div>
 		</div>
+
 		<div class="banner banner-draggable"></div>
+
 		<div class="banner banner-controls">
-			<div style="display:none" id="reloadApp" class="control">
-				<i class="fas fa-sync-alt"></i>
-			</div>
-			<div id="minimizeApp" class="control">
-				<i class="fas fa-window-minimize"></i>
-			</div>
-			<div id="closeApp" class="control">
-				<i class="fas fa-times"></i>
-			</div>
+			<div id="minimizeApp" class="control"><i class="fas fa-window-minimize"></i></div>
+			<div id="maximizeApp" class="control"><i class="far fa-square"></i></div>
+			<div id="closeApp" class="control"><i class="fas fa-times"></i></div>
 		</div>
+
 	</div>
 
 	<div class="container container-pages">
 		<!-- Tasks -->
 		<div class="page" id="tasks">
-			<div class="header-container">
-				<h1 id="tasksHeader" class="header-title">Dashboard</h1>
-				<div class="header-extra">
-					<div class="container">
-						<div class="container-element">
-							<label></label>
-							<button class="btn" data-toggle="modal" data-target="#newTaskModal">
-								<i class="fas fa-plus icon"></i>
-								<div>New Task</div>
-							</button>
-						</div>
+			<div class="container header-container">
+				<h1 id="tasksHeader" class="header-title">Tasks</h1>
 
-
-
-						<div class="container-element">
-							<label class="label">Monitor Delay</label>
-							<input id="globalMonitor" type="number" class="input" value="1000" step="10">
-						</div>
-						<div class="container-element">
-							<label class="label">Error Delay</label>
-							<input id="globalError" type="number" class="input" value="1000" step="10">
-						</div>
-						<div class="container-element">
-							<label class="label">Timeout Delay</label>
-							<input id="globalTimeout" type="number" class="input" value="5000" step="10">
-						</div>
-					</div>
+				<!-- New Task Button Container -->
+				<div class="container-element">
+					<label></label>
+					<button id="newTaskButton" class="btn"><i class="fas fa-plus icon"></i>New Task</button>
 				</div>
+
+				<!-- Monitor Delay Container -->
+				<div class="container-element">
+					<label>Monitor Delay</label>
+					<input id="globalMonitor" type="number" class="input" value="1000" step="10">
+				</div>
+
+				<!-- Error Delay Container -->
+				<div class="container-element">
+					<label class="label">Error Delay</label>
+					<input id="globalError" type="number" class="input" value="1000" step="10">
+				</div>
+
+				<!-- Timeout Delay Container -->
+				<div class="container-element">
+					<label class="label">Timeout Delay</label>
+					<input id="globalTimeout" type="number" class="input" value="5000" step="10">
+				</div>
+
 			</div>
 
 			<div class="panel panel-main">
@@ -168,22 +164,17 @@
 				<div id="newTaskModal" class="modal fade" tabindex="-1" role="dialog">
 					<div class="modal-dialog" role="document">
 						<div class="modal-content">
-							<div class="header-container">
+							<div class="container header-container">
 								<h1 class="header-title">Task Editor</h1>
+								
 								<div class="container-element">
 									<label>Product Status</label> 
 									<input id="productApiStatus" class="input" disabled value="None Loaded"/>
 								</div>
-								<div class="header-extra">
-									
-									<div class="container-element container-element-sm">
-										<button id="taskSaveButton" class="btn">
-											<i class="fas fa-save"></i>
-											<div>Save Task</div>
-										</button>
-									</div>
 
-								</div>
+								<div class="container-element">
+									<button id="taskSaveButton" class="btn"><i class="fas fa-save"></i>Save Task</button>
+								</div>							
 							</div>
 							<div class="panel panel-main">
 								<div class="container">
@@ -382,17 +373,13 @@
 
 		<!-- Profiles -->
 		<div class="page page-hidden" id="newProfile">
-			<div class="header-container">
+			<div class="container header-container">
 				<h1 class="header-title">Profiles</h1>
-				<div class="header-extra">
-
-					<div class="container-element container-element-sm">
-						<button class="btn" data-toggle="modal" data-target="#profileModal">
-							<i class="fas fa-plus icon"></i>
-							<div>New Profile</div>
-						</button>
-					</div>
-					
+				<div class="container-element">
+				 <button id="newProfileBtn" class="btn">
+						<i class="fas fa-plus icon"></i>
+						<span>New Profile</span>
+					</button>
 				</div>
 			</div>
 
@@ -443,30 +430,28 @@
 			<div id="profileModal" class="modal fade" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="header-container">
+						<div class="container header-container">
 							<h2 class="header-title">Profile Editor</h2>
-							<div class="header-extra">
-								<input type="hidden" id="profileId" class="input">
-								<div class="container-element container-element-sm">
-									<label for="profileName" class="f-95">Profile Name</label>
-									<input type="text" id="profileName" class="input">
-								</div>
+							<input type="hidden" id="profileId" class="input">
+							<div class="container-element container-element-sm">
+								<label for="profileName" class="f-95">Profile Name</label>
+								<input type="text" id="profileName" class="input">
+							</div>
 
-								<div class="container-element container-element-sm">
-									<label for="profileName" class="f-95" style="opacity:0;">.</label>
-									<button id="profileSaveButton" class="btn">
-										<i class="fas fa-save"></i>
-										Save Profile
-									</button>
-								</div>
+							<div class="container-element container-element-sm">
+								<label for="profileName" class="f-95" style="opacity:0;">.</label>
+								<button id="profileSaveButton" class="btn">
+									<i class="fas fa-save"></i>
+									Save Profile
+								</button>
+							</div>
 
-								<div class="container-element container-element-sm">
-									<label for="profileName" style="opacity:0;">.</label>
-									<button id="profileClearFieldButton" class="btn">
-										<i class="fas fa-broom"></i>
-										Clear Fields
-									</button>
-								</div>
+							<div class="container-element container-element-sm">
+								<label for="profileName" style="opacity:0;">.</label>
+								<button id="profileClearFieldButton" class="btn">
+									<i class="fas fa-broom"></i>
+									Clear Fields
+								</button>
 							</div>
 						</div>
 						<div class="panel panel-main">
@@ -698,34 +683,28 @@
 
 		<!-- Proxies -->
 		<div class="page page-hidden" id="proxies">
-			<div class="header-container">
+			<div class="container header-container">
 				<h1 id="proxy-header" class="header-title">Proxies</h1>
-				<div class="header-extra">
+				<div class="container-element">
+					<label class="label"> </label>
+					<button class="btn" data-toggle="modal" data-target="#proxyModal">
+						<i class="fas fa-plus"></i><span>New Proxy List</span></button>
+				</div>
 
+				<div class="container-element container-element-md">
+					<label class="label">Proxy List</label>
+					<select id="proxyListSelectorMain" class="input proxylist-selector">
+						<option value="">None Selected</option>
+					</select>
+				</div>
 
-					<div class="container-element">
-						<label class="label"> </label>
-						<button class="btn" data-toggle="modal" data-target="#proxyModal">
-							<i class="fas fa-plus"></i>
-							New Proxy List
-						</button>
-					</div>
-
-					<div class="container-element container-element-md">
-						<label class="label">Proxy List</label>
-						<select id="proxyListSelectorMain" class="input proxylist-selector">
-							<option value="">None Selected</option>
-						</select>
-					</div>
-
-					<div class="container-element container-element-md">
-						<label class="label">Test Store</label>
-						<select id="proxySiteSelector" class="input">
-							<option label="Kickz" value="www.kickz.com"></option>
-							<option label="Kickz Premium" value="www.kickzpremium.com"></option>
-							<option label="Supreme" value="www.supremenewyork.com" selected></option>
-						</select>
-					</div>
+				<div class="container-element container-element-md">
+					<label class="label">Test Store</label>
+					<select id="proxySiteSelector" class="input">
+						<option label="Kickz" value="www.kickz.com"></option>
+						<option label="Kickz Premium" value="www.kickzpremium.com"></option>
+						<option label="Supreme" value="www.supremenewyork.com" selected></option>
+					</select>
 				</div>
 			</div>
 
@@ -754,46 +733,42 @@
 				<div class="container">
 					<!-- <div class="container-element container-element-sm">
 						<button id="importProxies" class="btn">
-							<i class="fas fa-file-import"></i>
-							<div>Import</div>
+							<i class="fas fa-file-import"></i>Import
+						</button>
+					</div> -->
+
+					<!-- <div class="container-element container-element-sm">
+						<button id="exportProxies" class="btn">
+							<i class="fas fa-file-export"></i>Export
+						</button>
+					</div> -->
+
+					<div class="container-element container-element-sm">
+						<button id="proxyTestAll" class="btn btn-secondary">
+							<i class="fas fa-play-circle"></i>Test Proxies
 						</button>
 					</div>
 
 					<div class="container-element container-element-sm">
-						<button id="exportProxies" class="btn">
-							<i class="fas fa-file-export"></i>
-							<div>Export</div>
-						</button>
-					</div> -->
-					<div class="container-element container-element-sm">
-						<button id="proxyTestAll" class="btn btn-secondary">
-							<i class="fas fa-play-circle"></i>
-							Test Proxies
-						</button>
-					</div>
-					<!-- <div class="container-element container-element-md">
-									<button id="" class="btn">
-										<i class="fas fa-stop-circle"></i>
-										<div>Stop All Tasks</div>
-									</button>
-								</div> -->
-					<div class="container-element container-element-sm">
 						<button id="proxyDeleteList" class="btn btn-secondary">
-							<i class="fas fa-trash"></i>
-							Delete List
+							<i class="fas fa-trash"></i>Delete List
 						</button>
 					</div>
+
 				</div>
 			</div>
 
 			<div id="proxyModal" class="modal fade" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="header-container modal-header">
-							<h2 class="panel-title modal-title" id="exampleModalLabel">
-								<i></i>
-								New Proxy List
-							</h2>
+						<div class="container header-container">
+							<h2 class="header-title">New Proxy List</h2>
+							<div class="container-element">
+								<button id="saveProxyListBtn" class="btn">
+									<i class="fas fa-save"></i>
+									<div>Save List</div>
+								</button>
+							</div>
 						</div>
 						<div class="modal-body panel">
 							<div class="container">
@@ -807,14 +782,6 @@
 									<textarea id="proxyInput" class="input"></textarea>
 								</div>
 							</div>
-							<div class="container">
-								<div class="container-element container-element-md">
-									<button id="saveProxyListBtn" class="btn">
-										<i class="fas fa-save"></i>
-										<div>Save List</div>
-									</button>
-								</div>
-							</div>
 						</div>
 
 					</div>
@@ -824,14 +791,14 @@
 
 		<!-- Harvesters -->
 		<div class="page page-hidden" id="harvesters">
-			<div class="modal fade" id="harvesterModal" tabindex="-1" role="dialog">
+			<div id="harvesterModal" class="modal fade" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="header-container modal-header">
-							<h2 class="panel-title modal-title" id="exampleModalLabel">
-								<i></i>
-								<div>New Harvester</div>
-							</h2>
+						<div class="container header-container">
+							<h1 class="header-title">New Harvester</h1>
+							<div class="container-element">
+								<button id="saveHarvesterBtn" class="btn">Save</button>
+							</div>
 						</div>
 						<div class="modal-body panel">
 							<div class="container">
@@ -839,32 +806,25 @@
 									<label class="label">Name</label>
 									<input id="harvesterName" type="text" class="input"></div>
 							</div>
-							<div class="container">
-								<div class="container-element">
-									<button id="saveHarvesterBtn" class="btn">Save changes</button>
-								</div>
-							</div>
 						</div>
 
 					</div>
 				</div>
 			</div>
-			<div class="header-container">
+			<div class="container header-container">
 				<h1 class="header-title">Harvesters</h1>
-				<div class="header-extra">
-					<div class="container-element container-element-sm">
-						<button class="btn" data-toggle="modal" data-target="#harvesterModal">
-							<i class="fas fa-plus icon"></i>
-							New Harvester
-						</button>
-					</div>
-					<!-- <div class="container-element container-element-sm">
-						<button class="btn">
-							<i class="fas fa-trash icon"></i>
-							Delete All
-						</button>
-					</div> -->
+				<div class="container-element container-element-sm">
+					<button class="btn" data-toggle="modal" data-target="#harvesterModal">
+						<i class="fas fa-plus icon"></i>
+						New Harvester
+					</button>
 				</div>
+				<!-- <div class="container-element container-element-sm">
+					<button class="btn">
+						<i class="fas fa-trash icon"></i>
+						Delete All
+					</button>
+				</div> -->
 			</div>
 
 			<div class="panel panel-main">
@@ -889,15 +849,13 @@
 
 		<!-- Analytics -->
 		<div class="page page-hidden" id="analytics">
-			<div class="header-container">
+			<div class="container header-container">
 				<h1 class="header-title">Analytics</h1>
-				<div class="header-extra">
-					<div class="container-element container-element-sm">
-						<button id="clearAnalytics" class="btn">
-							<i class="fas fa-broom"></i>
-							Clear
-						</button>
-					</div>
+				<div class="container-element container-element-sm">
+					<button id="clearAnalytics" class="btn">
+						<i class="fas fa-broom"></i>
+						Clear
+					</button>
 				</div>
 			</div>
 			<div class="panel panel-main">
@@ -924,7 +882,7 @@
 
 		<!-- Settings -->
 		<div class="page page-hidden" id="settings">
-			<div class="header-container">
+			<div class="container header-container">
 				<h2 class="header-title">Settings</h2>
 			</div>
 			<div class="panel panel-main">

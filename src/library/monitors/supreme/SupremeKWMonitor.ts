@@ -1,28 +1,26 @@
 import { Worker } from '../../../Worker';
+import { RequestPromiseAPI } from 'request-promise-native';
 const request = require('request-promise-native');
 const settings = require('electron-settings');
 const ipcWorker = require('electron').ipcRenderer;
 const { logger, utilities } = require('../../other');
 
-class SupremeKWMonitor {
-	private baseUrl: string;
-	private inputData: any;
-	private userAgent: string;
-	private timeout: number;
-	private _isRunning: boolean;
-	private _shouldStop: boolean;
-	private _proxyList: string;
+interface SupremeKWMonitor {
+	baseUrl: string;
+	inputData: any;
+	userAgent: string;
+	timeout: number;
+	_isRunning: boolean;
+	_shouldStop: boolean;
+	proxy: string;
+}
 
+class SupremeKWMonitor {
 	constructor(_options:any = {}) {
 		logger.info('[Monitor] ['+_options.proxyList+'] Inititalising KW Monitor.');
 		this.baseUrl = _options.baseUrl;
-		this._proxyList = _options.proxyList;
-		if (this._proxyList && this._proxyList !== '' && !Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
-			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
-			if (proxies.hasOwnProperty(this._proxyList)) {
-				Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
-			}
-		}
+		this.proxy = _options.proxy ? _options.proxy : null;
+	
 		
 		
 		this.inputData = {};
@@ -93,19 +91,7 @@ class SupremeKWMonitor {
 
 	} 
 
-	private _getProxy():any {
-		if (!this._proxyList) {
-			return null;
-		}
-		else if (Worker.activeProxyLists[this._proxyList].length < 1) {
-			return null;
-		}
-		let proxy = Worker.activeProxyLists[this._proxyList][0];
-		Worker.activeProxyLists[this._proxyList].push(Worker.activeProxyLists[this._proxyList].shift());
-		return proxy;
-	}
-
-	private _hasMatchingsKeywords(data:string, positive:string[], negative:string[]):boolean {
+	_hasMatchingsKeywords(data:string, positive:string[], negative:string[]):boolean {
 		for (let i = 0; i < positive.length; i++) {
 			if (!data.toLowerCase().includes(positive[i].toLowerCase())) {
 				return false;
@@ -119,7 +105,7 @@ class SupremeKWMonitor {
 		return true;
 	}
 
-	private _parseCategory(key:any):any {
+	_parseCategory(key:any):any {
 		return key;
 		// const categories = {
 		// 	"new": "New",
@@ -139,21 +125,22 @@ class SupremeKWMonitor {
 		// return categories[key];
 	}
 
-	private setStatus(message:string, type:string, ids?:Array<string>):void {
-		let colors = {
-			DEFAULT: '#8c8f93',
-			INFO: '#4286f4',
-			ERROR: '#f44253',
-			WARNING: '#f48641',
-			SUCCESS: '#2ed347'
-		};
+	setStatus(message:string, type:string, ids?:Array<string>):void {
+		let color: string; 
+		switch (type.toLowerCase()) {
+			case 'info': color = '#4286f4'; break;
+			case 'error': color = '#f44253'; break;
+			case 'warning': color = '#f48641'; break;
+			case 'success': color = '#2ed347'; break;
+			default: color = '#8c8f93';
+		}
 		if (!ids) {
 			for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 				for (let j = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
 					ipcWorker.send('task.setStatus', {
 						id: this.inputData[Object.keys(this.inputData)[i]]['IDS'][j],
 						message: message,
-						color: colors[type]
+						color
 					});
 				}
 			}
@@ -163,19 +150,19 @@ class SupremeKWMonitor {
 				ipcWorker.send('task.setStatus', {
 					id: ids[i],
 					message: message,
-					color: colors[type]
+					color
 				});
 			}
 		}
 	}
 
-	private _fetchStockData(endpoint:string):void {
+	_fetchStockData(endpoint:string):void {
 		logger.info('[Monitor] ['+endpoint+'] Polling Supreme Stock Data.');
 		this.setStatus('Searching for Product.', 'WARNING');
 		let options = {
 			url: this.baseUrl + '/' + endpoint + '.json',
 			method: 'GET',
-			proxy: utilities.formatProxy(this._getProxy()),
+			proxy: this.proxy,
 			json: true,
 			gzip: true,
 			time: true,
@@ -192,7 +179,7 @@ class SupremeKWMonitor {
 		};
 		console.log(options);
 		request(options)
-		.then(response => {
+		.then((response: any) => {
 			let body = response.body;
 			console.log(Object.keys(body));
 			let categories = body.products_and_categories;
@@ -242,7 +229,7 @@ class SupremeKWMonitor {
 				}
 			});
 		})
-		.catch(error => {
+		.catch((error: any) => {
 			Object.keys(this.inputData).forEach(propName => {
 				let data = this.inputData[propName];
 				let message;
@@ -265,7 +252,7 @@ class SupremeKWMonitor {
 		});
 	}
 
-	private _returnData(propName:string, name:string, id:number, price:number):void {
+	_returnData(propName:string, name:string, id:number, price:number):void {
 		let callbacks = this.inputData[propName]['CALLBACKS'];
 		for (let i = 0; i < callbacks.length; i++) {
 			callbacks[i](name, id, price);

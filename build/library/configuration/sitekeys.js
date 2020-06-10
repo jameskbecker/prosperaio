@@ -1,5 +1,7 @@
-module.exports = function (site) {
-    var siteData;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function default_1(site) {
+    let siteData;
     switch (site) {
         case 'kickz':
             siteData = {
@@ -29,5 +31,7 @@ module.exports = function (site) {
             };
             return siteData;
     }
-};
+}
+exports.default = default_1;
+;
 //# sourceMappingURL=sitekeys.js.map

@@ -1,24 +1,22 @@
-var Main = require('../../Main').Main;
-var GoogleWindow = require('../../main/windows').GoogleWindow;
-var GoogleLogin = (function () {
-    function GoogleLogin(_name, _type) {
+const { Main } = require('../../Main');
+const { GoogleWindow } = require('../../main/windows');
+class GoogleLogin {
+    constructor(_name, _type) {
         this.name = _name;
         this.type = _type;
         this.spawn();
     }
-    GoogleLogin.prototype.spawn = function () {
-        var _this = this;
+    spawn() {
         GoogleWindow.create(this.name);
         GoogleWindow.load();
-        GoogleWindow.window.once('closed', function () {
+        GoogleWindow.window.once('closed', () => {
             var _a;
             GoogleWindow.window = null;
             (_a = Main.mainWindow) === null || _a === void 0 ? void 0 : _a.webContents.send('logged into GoogleWindow', {
-                type: _this.type
+                type: this.type
             });
         });
-    };
-    return GoogleLogin;
-}());
+    }
+}
 module.exports = GoogleLogin;
 //# sourceMappingURL=GoogleLogin.js.map

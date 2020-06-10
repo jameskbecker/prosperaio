@@ -1,4 +1,4 @@
-module.exports = function (site:string):any {
+export default function (site:string):any {
 	let siteData;
 	switch (site) {
 		case 'kickz':

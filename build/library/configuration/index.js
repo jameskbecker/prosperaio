@@ -14,19 +14,13 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sites = exports.discord = exports.countries = void 0;
-var countries_1 = __importDefault(require("./countries"));
-Object.defineProperty(exports, "countries", { enumerable: true, get: function () { return countries_1.default; } });
-var discord = __importStar(require("./discord"));
-exports.discord = discord;
-var sites = __importStar(require("./sites"));
-exports.sites = sites;
+const countries_1 = require("./countries");
+const discord = __importStar(require("./discord"));
+const sites = __importStar(require("./sites"));
+exports.default = { countries: countries_1.countries, discord, sites };
 //# sourceMappingURL=index.js.map

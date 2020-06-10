@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./elements");
-var request_promise_native_1 = __importDefault(require("request-promise-native"));
+const request_promise_native_1 = __importDefault(require("request-promise-native"));
 function getProducts() {
-    return new Promise(function (resolve) {
-        var productApiStatus = document.getElementById('productApiStatus');
+    return new Promise((resolve) => {
+        let productApiStatus = document.getElementById('productApiStatus');
         productApiStatus.value = 'Fetching Products';
         request_promise_native_1.default({
             url: 'http://prosper-products-eu.herokuapp.com/supreme/latest',
@@ -18,12 +18,12 @@ function getProducts() {
                 accept: 'application/json'
             }
         })
-            .then(function (response) {
-            var body = response.body;
+            .then((response) => {
+            let body = response.body;
             productApiStatus.value = 'Loaded Products';
             resolve(body);
         })
-            .catch(function (error) {
+            .catch((error) => {
             productApiStatus.value = 'Error Fetching Products';
             console.log(error);
             resolve({});

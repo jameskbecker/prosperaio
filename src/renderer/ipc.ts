@@ -1,14 +1,13 @@
 import './elements';
 import { ipcRenderer } from 'electron';
 import settings from 'electron-settings';
-import content from './content';
+import * as content from './content';
 //const { logger } = require('../library/other');
 //const $ = require('jquery');
 
 // declare const installBrowserBtn:any;
 // declare const googleAccountLoginBtn:any;
 // declare const currentBrowserPath;
-
 
 //General
 var checkboxes:NodeListOf<HTMLInputElement> = document.querySelectorAll('.checkbox-label');

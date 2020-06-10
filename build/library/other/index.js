@@ -14,14 +14,14 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.utilities = exports.logger = void 0;
-var utilities = __importStar(require("./utilities"));
+const utilities = __importStar(require("./utilities"));
 exports.utilities = utilities;
-var logger_1 = require("./logger");
+const logger_1 = require("./logger");
 Object.defineProperty(exports, "logger", { enumerable: true, get: function () { return logger_1.logger; } });
 //# sourceMappingURL=index.js.map

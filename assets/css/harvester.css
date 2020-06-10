@@ -1,24 +1,5 @@
  /*     Font Imports     */
 
-@font-face {
-    font-family: "Montserrat Bold";
-    src: url(/assets/fonts/Montserrat-Bold.otf)
-}
-
-@font-face {
-    font-family: "Montserrat Medium";
-    src: url(/assets/fonts/Montserrat-Medium.otf);
-}
-
-@font-face {
-    font-family: "Montserrat Extra Light";
-    src: url(/assets/fonts/Montserrat-ExtraLight.otf);
-}
-
-@font-face {
-    font-family: "Montserrat Light";
-    src: url(/assets/fonts/Montserrat-Light.otf);
-}
 
 #panel-renderer {
 	display: flex;

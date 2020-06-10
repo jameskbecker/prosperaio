@@ -1,137 +1,121 @@
 //import './elements';
 import settings from 'electron-settings';
 import { ipcRenderer } from 'electron';
-import { countries, sites } from '../library/configuration';
+import { default as config } from '../library/configuration';
 import * as profileActions from './profiles';
 const $:Function = require('jquery');
 //const dropData = require('../mock-drop');
 import {default as dropList} from './droplist';
+import { siteDataProps, profileDataProps } from '../data-types';
 
 
 
 
-let selectedItem:any;
-function convertMode(id:any):any {
-	let modes:any = {
-		'supreme-request': 'Fast',
-		'supreme-browser': 'Safe',
-		'kickz-wire': 'Wire Transfer',
-		'kickz-paypal': 'Paypal'
-	};
-	return modes.hasOwnProperty(id) ? modes[id] : null;
+var newTask_products:HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskProducts');
+var newTask_styles:HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskStyles');
+var newTask_sizes:HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskSizes');
+
+var newTask_SearchInput: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskSearchInput"]');
+var newTask_Category: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskCategory"]');
+var newTask_Size: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskSize"]');
+var newTask_Style: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskVariant"]');
+var newTask_ProductQty: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskProductQty"]');
+
+function convertMode(id:string):string {
+	switch (id) {
+		case 'supreme-request': return 'Fast';
+		case 'supreme-browser': return 'Safe';
+		case 'kickz-wire': return 'Wire Transfer';
+		case 'kickz-paypal': return 'Paypal';
+		default: return '';
+	}
 }
 
 function renderTaskTable():void {
 	let tasks:any = settings.has('tasks') ? settings.get('tasks') : {};
 	let profiles:any = settings.has('profiles') ? settings.get('profiles') : {};
+
+	var tasksHeader:HTMLElement = document.getElementById('tasksHeader');
+	var taskTableBody:HTMLElement = document.getElementById('taskTableBody');
+	
 	tasksHeader.innerHTML = `Tasks (${Object.keys(tasks).length} Total)`;
 	taskTableBody.innerHTML = '';
 
 	try {
-		for (let i:any = 0; i < Object.keys(tasks).length; i++) {
-			let taskRow:any = document.createElement('tr');
+		for (let i: number = 0; i < Object.keys(tasks).length; i++) {
+			let taskRow:HTMLTableRowElement = document.createElement('tr');
 			taskRow.className = 'row';
 
-			let taskId:any = Object.keys(tasks)[i];
+			let taskId:string = Object.keys(tasks)[i];
 			// let idCell = document.createElement('td');
 			// idCell.innerHTML = taskId;
 			// idCell.className = 'cell cell-body col-id';
 			// taskRow.appendChild(idCell);
 
-			let siteCell:any = document.createElement('td');
-			let defaultSiteData:any = sites.def;
-			let siteData:any = defaultSiteData[tasks[taskId].site];
+			let siteCell:HTMLTableCellElement = document.createElement('td');
+			let defaultSiteData:any = config.sites.def;
+			let siteData:siteDataProps = defaultSiteData[tasks[taskId].site];
 			siteCell.innerHTML = siteData.label;
 			siteCell.className = 'cell cell-body col-site';
 			taskRow.appendChild(siteCell);
 
-			let modeCell:any = document.createElement('td');
+			let modeCell: HTMLTableCellElement = document.createElement('td');
 			modeCell.innerHTML = convertMode(tasks[taskId].setup.mode);
 			modeCell.className = 'cell cell-body col-mode';
 			taskRow.appendChild(modeCell);
 
-			let searchInputCell:any = document.createElement('td');
-			searchInputCell.innerHTML = tasks[taskId].products[0].searchInput;
-			searchInputCell.className = 'cell cell-body col-products';
-			searchInputCell.setAttribute('data-id', taskId);
-			taskRow.appendChild(searchInputCell);
+			let productCell: HTMLTableCellElement = document.createElement('td');
+			productCell.innerHTML = tasks[taskId].products[0].searchInput;
+			productCell.className = 'cell cell-body col-products';
+			productCell.setAttribute('data-id', taskId);
+			taskRow.appendChild(productCell);
 
-
-
-
-
-
-			let sizeCell:any = document.createElement('td');
+			let sizeCell: HTMLTableCellElement = document.createElement('td');
 			sizeCell.innerHTML = tasks[taskId].products[0].size;
 			sizeCell.className = 'cell cell-body col-size';
 			sizeCell.setAttribute('data-id', taskId);
 			taskRow.appendChild(sizeCell);
 
-			let profileCell:any = document.createElement('td');
+			let profileCell: HTMLTableCellElement = document.createElement('td');
 			profileCell.innerHTML = profiles[tasks[taskId].setup.profile] && profiles[tasks[taskId].setup.profile].profileName ? profiles[tasks[taskId].setup.profile].profileName : '';
 			profileCell.className = 'cell cell-body col-profile';
 			taskRow.appendChild(profileCell);
 
-			let proxyCell:any = document.createElement('td');
+			let proxyCell: HTMLTableCellElement = document.createElement('td');
 			proxyCell.innerHTML = tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
 			proxyCell.className = 'cell cell-body col-task-proxy';
 			taskRow.appendChild(proxyCell);
 
 
 
-			let timerCell:any = document.createElement('td');
+			let timerCell: HTMLTableCellElement = document.createElement('td');
 			timerCell.innerHTML = tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
 			timerCell.className = 'cell cell-body col-timer';
 			taskRow.appendChild(timerCell);
 
-			let statusCell:any = document.createElement('td');
+			let statusCell: HTMLTableCellElement = document.createElement('td');
 			statusCell.innerHTML = 'Idle.';
 			statusCell.className = 'cell cell-body col-status';
 			statusCell.setAttribute('data-taskId', taskId);
 			taskRow.appendChild(statusCell);
 
-			let actionsCell:any = document.createElement('td');
+			let actionsCell: HTMLTableCellElement = document.createElement('td');
 			actionsCell.className = 'cell cell-body table-row col-actions';
 
-			let startButton:any = document.createElement('div');
+			let startButton: HTMLButtonElement = document.createElement('button');
 			startButton.innerHTML = '<i class="fas fa-play"></i>';
 			startButton.className = 'action-button';
 			startButton.setAttribute('data-taskId', taskId);
-			startButton.onclick = function ():void {
-				// stopButton.style.color = 'var(--primary-color)';
-				// startButton.style.color = 'var(--secondary-color)';
-				
-				// startButton.setAttribute('disabled', true);
-				// stopButton.setAttribute('disabled', false);
-				
-				// startButton.style.opacity = 0.2;
-				// stopButton.style.opacity = 0.5;
-				
+			startButton.onclick = function ():void {				
 				ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
 			};
 			actionsCell.appendChild(startButton);
 
-			let stopButton:any = document.createElement('div');
+			let stopButton: HTMLButtonElement = document.createElement('button');
 			stopButton.innerHTML = '<i class="fas fa-stop"></i>';
 			stopButton.className = 'action-button';
-			
-			// stopButton.style.color = 'var(--secondary-color)';
-			// stopButton.setAttribute('disabled', true);
-			// stopButton.style.opacity = 0.2;
-
-			
 			stopButton.setAttribute('data-taskId', taskId);
 			stopButton.onclick = function ():void {
-				// startButton.style.color = 'var(--primary-color)';
-				// stopButton.style.color = 'var(--secondary-color)';
-				
-				// stopButton.setAttribute('disabled', true);
-				// startButton.setAttribute('disabled', false);
-				
-				// startButton.style.opacity = 0.5;
-				// stopButton.style.opacity = 0.2;
-			
-				
 				ipcRenderer.send('task.stop', taskId);
 			};
 			actionsCell.appendChild(stopButton);
@@ -171,7 +155,7 @@ function renderTaskTable():void {
 			// };
 			//actionsCell.appendChild(editButton);
 
-			let duplicateButton:any = document.createElement('div');
+			let duplicateButton: HTMLButtonElement = document.createElement('button');
 			duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 			duplicateButton.className = 'action-button';
 			duplicateButton.setAttribute('data-taskId', taskId);
@@ -180,7 +164,7 @@ function renderTaskTable():void {
 			};
 			actionsCell.appendChild(duplicateButton);
 
-			let deleteButton:any = document.createElement('div');
+			let deleteButton: HTMLButtonElement = document.createElement('button');
 			deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 			deleteButton.className = 'action-button';
 			deleteButton.setAttribute('data-taskId', taskId);
@@ -204,55 +188,57 @@ function renderTaskTable():void {
 	} catch (err) { console.log(err);}
 }
 
-function renderProxyTable(name:any):void {
+function renderProxyTable(name:string):void {
 	try {
+		var proxyTestTable:HTMLElement = document.getElementById('proxyTestResults');
 		let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
 		let list:any = proxyLists[name];
 		if (list) {
 			// document.getElementById('proxy-header').innerHTML = '';
 			// document.getElementById('proxy-header').innerHTML = `Proxies (${Object.keys(list).length} Total)`;
 			proxyTestTable.innerHTML = '';
-			for (let i:any = 0; i < Object.keys(list).length; i++) {
-				let proxyId:any = Object.keys(list)[i];
-				let proxyRow:any = document.createElement('tr');
+			for (let i: number = 0; i < Object.keys(list).length; i++) {
+				let proxyId: string = Object.keys(list)[i];
+				let proxyRow: HTMLTableRowElement = document.createElement('tr');
 				proxyRow.className = 'row';
 				proxyRow.setAttribute('data-row-id', proxyId);
 
-				let splitProxy:any = list[proxyId].split(':');
-				let ipCell:any = document.createElement('td');
+				
+				let ipCell: HTMLTableCellElement = document.createElement('td');
+				let splitProxy:string[] = list[proxyId].split(':');
 				ipCell.innerHTML = splitProxy[0] ? splitProxy[0] : 'localhost';
 				ipCell.className = 'cell cell-body col-proxy';
 				proxyRow.appendChild(ipCell);
 
-				let portCell:any = document.createElement('td');
+				let portCell: HTMLTableCellElement = document.createElement('td');
 				if (splitProxy.length > 1) portCell.innerHTML = splitProxy[1];
 				else portCell.innerHTML = 'None';
 				portCell.className = 'cell cell-body col-proxyPort';
 				proxyRow.appendChild(portCell);
 
 
-				let userCell:any = document.createElement('td');
+				let userCell: HTMLTableCellElement = document.createElement('td');
 				if (splitProxy.length > 3) userCell.innerHTML = splitProxy[2];
 				else userCell.innerHTML = 'None';
 				userCell.className = 'cell cell-body col-proxyUser';
 				proxyRow.appendChild(userCell);
 
-				let passCell:any = document.createElement('td');
+				let passCell: HTMLTableCellElement = document.createElement('td');
 				if (splitProxy.length > 3) passCell.innerHTML = splitProxy[3];
 				else passCell.innerHTML = 'None';
 				passCell.className = 'cell cell-body col-proxy';
 				proxyRow.appendChild(passCell);
 
-				let statusCell:any = document.createElement('td');
+				let statusCell: HTMLTableCellElement = document.createElement('td');
 				statusCell.className = 'cell cell-body col-status col-proxy';
 				statusCell.innerHTML = 'Idle.';
 				statusCell.setAttribute('data-proxyId', proxyId);
 				proxyRow.appendChild(statusCell);
 
-				let actionsCell:any = document.createElement('td');
+				let actionsCell: HTMLTableCellElement = document.createElement('td');
 				actionsCell.className = 'cell cell-body col-proxy';
 
-				let startButton:any = document.createElement('div');
+				let startButton:HTMLElement = document.createElement('div');
 				startButton.innerHTML = '<i class="fas fa-vial"></i>';
 				startButton.className = 'action-button';
 				startButton.setAttribute('data-proxyId', proxyId);
@@ -265,13 +251,13 @@ function renderProxyTable(name:any):void {
 				};
 				actionsCell.appendChild(startButton);
 
-				let deleteButton:any = document.createElement('div');
+				let deleteButton:HTMLElement = document.createElement('div');
 				deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 				deleteButton.className = 'action-button';
-				deleteButton.onclick = function ():void {
+				deleteButton.onclick = function (this: HTMLElement):void {
 					delete list[proxyId];
 					settings.set('proxies', proxyLists, { prettify: true });
-					let row:any = this.parentNode.parentNode;
+					let row:HTMLTableRowElement = <HTMLTableRowElement>this.parentNode.parentNode;
 					row.parentNode.removeChild(row);
 				};
 				actionsCell.appendChild(deleteButton);
@@ -287,13 +273,14 @@ function renderProxyTable(name:any):void {
 }
 
 function renderSites():void {
-	const siteKeys:any = Object.keys(sites.def);
-	for (let i:any = 0; i < siteKeys.length; i++) {
-		let defaultSiteData:any = sites.def;
+	const siteKeys:any = Object.keys(config.sites.def);
+	for (let i: number = 0; i < siteKeys.length; i++) {
+		
+		let defaultSiteData:any = config.sites.def;
 		let site:any = defaultSiteData[siteKeys[i]];
 		if (site.enabled) {
 			for (let j:any = 0; j < siteSelectors.length; j++) {
-				let siteOption:any = document.createElement('option');
+				let siteOption:HTMLOptionElement = document.createElement('option');
 				siteOption.value = siteKeys[i];
 				siteOption.label = site.label;
 				siteSelectors[j].add(siteOption);
@@ -303,17 +290,17 @@ function renderSites():void {
 	newTask_Site.onchange = function ():void {
 		newTask_Mode.disabled = false;
 		newTask_RestockMode.disabled = false;
-		let defaultSiteData:any = sites.def;
+		let defaultSiteData:any = config.sites.def;
 		let selectedSite:any = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
 		if (selectedSite) {
 			newTask_Mode.onchange = function ():void {
 				newTask_RestockMode.options.length = 0;
 
-				let stockMode:any = document.createElement('option');
+				let stockMode:HTMLOptionElement = document.createElement('option');
 				stockMode.label = 'Stock (Recommended)';
 				stockMode.value = 'stock';
 
-				let cartMode:any = document.createElement('option');
+				let cartMode:HTMLOptionElement = document.createElement('option');
 				cartMode.label = 'Cart';
 				cartMode.value = 'cart';
 
@@ -342,7 +329,7 @@ function renderSites():void {
 			newTask_ProductQty[0].disabled = false;
 			newTask_SearchInput[0].disabled = false;
 			newTask_Mode.options.length = 0;
-			let requestMode:any = document.createElement('option');
+			let requestMode:HTMLOptionElement = document.createElement('option');
 			
 			switch (selectedSite.type) {
 				case 'kickz':
@@ -350,12 +337,12 @@ function renderSites():void {
 					newTask_Category[0].parentElement.style.display = 'none';
 					newTask_SearchInput[0].placeholder = 'Enter Product Url.';
 
-					let wireMode:any = document.createElement('option');
+					let wireMode:HTMLOptionElement = document.createElement('option');
 					wireMode.label = 'Request - Wire Transfer';
 					wireMode.value = 'kickz-wire';
 					newTask_Mode.add(wireMode);
 
-					let paypalMode:any = document.createElement('option');
+					let paypalMode:HTMLOptionElement = document.createElement('option');
 					paypalMode.label = 'Request - PayPal';
 					paypalMode.value = 'kickz-paypal';
 					newTask_Mode.add(paypalMode);
@@ -371,7 +358,7 @@ function renderSites():void {
 					requestMode.value = 'supreme-request';
 					newTask_Mode.add(requestMode);
 
-					let browserMode:any = document.createElement('option');
+					let browserMode:HTMLOptionElement = document.createElement('option');
 					browserMode.label = 'Safe';
 					browserMode.value = 'supreme-browser';
 					newTask_Mode.add(browserMode);
@@ -382,12 +369,12 @@ function renderSites():void {
 					newTask_Category[0].parentElement.style.display = 'none';
 					newTask_SearchInput[0].placeholder = 'Enter Keywords or Product Url.';
 
-					let fastMode:any = document.createElement('option');
+					let fastMode:HTMLOptionElement = document.createElement('option');
 					fastMode.label = 'API (Fast)';
 					fastMode.value = 'shopify-api';
 					newTask_Mode.add(fastMode);
 
-					let safeMode:any = document.createElement('option');
+					let safeMode:HTMLOptionElement = document.createElement('option');
 					safeMode.label = 'Frontend (Safe)';
 					safeMode.value = 'shopify-frontend';
 					newTask_Mode.add(safeMode);
@@ -407,32 +394,31 @@ function renderSites():void {
 					let data:any = dropData[selectedSite.type];
 					let itemNames:any = Object.keys(data);
 	
-					for (let i:any = 0; i < itemNames.length; i++) {
-						let option:any = document.createElement('option');
+					for (let i: number = 0; i < itemNames.length; i++) {
+						let option:HTMLOptionElement = document.createElement('option');
 						option.label = itemNames[i];
 						option.value = itemNames[i];
 						newTask_products.options.add(option);
 					}
 	
-					newTask_products.onchange = function ():void {
+					newTask_products.onchange = function (this: HTMLSelectElement):void {
 						newTask_Size[0].value = '';
 						// if (!this.value) {
 						// 	return customRow.style.display = 'flex';
 						// }
 						//customRow.style.display = 'none';
-						selectedItem = data[this.value] ? data[this.value] : {};
+						let selectedItem:any = data[this.value] ? data[this.value] : {};
 						newTask_SearchInput[0].value = selectedItem.keywords;
 						newTask_Category[0].value = selectedItem.category;
 						newTask_styles.options.length = 0;
-						for (let i:any = 0; i < selectedItem.styles.length; i++) {
-							let option:any = document.createElement('option');
+						for (let i: number = 0; i < selectedItem.styles.length; i++) {
+							let option:HTMLOptionElement = document.createElement('option');
 							option.label = selectedItem.styles[i].name;
 							option.value = selectedItem.styles[i].keywords;
 							newTask_styles.options.add(option);
 						}
-						newTask_styles.onchange = function ():void {
+						newTask_styles.onchange = function (this: HTMLSelectElement):void {
 							newTask_Style[0].value = this.value;
-	
 						};
 						try { 
 							newTask_styles.onchange(new Event('')); 
@@ -440,13 +426,13 @@ function renderSites():void {
 						catch (err) { console.log(err); }
 						
 						newTask_sizes.options.length = 4;
-						for (let i:any = 0; i < selectedItem.sizes.length; i++) {
-							let option:any = document.createElement('option');
+						for (let i: number = 0; i < selectedItem.sizes.length; i++) {
+							let option:HTMLOptionElement = document.createElement('option');
 							option.label = selectedItem.sizes[i].name;
 							option.value = selectedItem.sizes[i].keywords;
 							newTask_sizes.options.add(option);
 						}
-						newTask_sizes.onchange = function ():void {
+						newTask_sizes.onchange = function (this: HTMLSelectElement):void {
 							newTask_Size[0].value = this.value;
 						};
 					};
@@ -462,31 +448,32 @@ function renderSites():void {
 }
 
 function renderCountries():void {
-	for (let i:any = 0; i < countries.length; i++) {
-		for (let j:any = 0; j < countrySelectors.length; j++) {
-			let option:any = document.createElement('option');
-			option.label = countries[i].label;
-			option.value = countries[i].value;
+	var countrySelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.country-selector');
+	for (let i: number = 0; i < config.countries.length; i++) {
+		for (let j:number = 0; j < countrySelectors.length; j++) {
+			let option:HTMLOptionElement = document.createElement('option');
+			option.label = config.countries[i].label;
+			option.value = config.countries[i].value;
 			countrySelectors[j].add(option);
 		}
 	}
-	for (let i:any = 0; i < countrySelectors.length; i++) {
+	for (let i: number = 0; i < countrySelectors.length; i++) {
 		countrySelectors[i].value = 'gb';
 	}
 	renderStates('profileBillingState', 'GB');
 	renderStates('profileShippingState', 'GB');
 }
 
-function renderStates(selector:any, value:any):void {
-	let selectedCountry:any = countries.filter((country):boolean => { return country.value === value; })[0];
-	let hasStates:any = selectedCountry.hasOwnProperty('states');
-	let stateElement:any = document.getElementById(selector);
+function renderStates(selector:string, value:string):void {
+	let selectedCountry:any = config.countries.find((country):boolean => { return country.value === value; });
+	let hasStates:boolean = selectedCountry.hasOwnProperty('states');
+	let stateElement:HTMLSelectElement = <HTMLSelectElement>document.getElementById(selector);
 	stateElement.options.length = 0;
 
 	if (hasStates) {
 		stateElement.disabled = false;
-		for (let i:any = 0; i < selectedCountry.states.length; i++) {
-			let option:any = document.createElement('option');
+		for (let i: number = 0; i < selectedCountry.states.length; i++) {
+			let option:HTMLOptionElement = document.createElement('option');
 			option.label = selectedCountry.states[i].label;
 			option.value = selectedCountry.states[i].value;
 			stateElement.add(option);
@@ -500,15 +487,15 @@ function renderStates(selector:any, value:any):void {
 function renderProxyListSelectors():void {
 	let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
 
-	document.querySelectorAll('.proxylist-selector').forEach(function (element:any):void {
+	document.querySelectorAll('.proxylist-selector').forEach(function (element:HTMLSelectElement):void {
 		element.options.length = 1;
 	});
 
-	for (let i:any = 0; i < Object.keys(proxyLists).length; i++) {
+	for (let i: number = 0; i < Object.keys(proxyLists).length; i++) {
 		let name:any = Object.keys(proxyLists)[i];
 
 		document.querySelectorAll('.proxylist-selector').forEach(function (element:any):void {
-			let option:any = document.createElement('option');
+			let option:HTMLOptionElement = document.createElement('option');
 			option.label = name;
 			option.value = name;
 			element.options.add(option);
@@ -517,24 +504,25 @@ function renderProxyListSelectors():void {
 }
 
 function renderHarvesters():void {
+	var harvesterTable:HTMLElement = document.getElementById('harvesterTable');
 	harvesterTable.innerHTML = '';
 	let existingHarvesters:any = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
-	for (let i:any = 0; i < existingHarvesters.length; i++) {
-		let harvesterRow:any = document.createElement('tr');
+	for (let i: number = 0; i < existingHarvesters.length; i++) {
+		let harvesterRow:HTMLTableRowElement = document.createElement('tr');
 		harvesterRow.className = 'row';
 
-		let nameCell:any = document.createElement('td');
+		let nameCell: HTMLTableCellElement = document.createElement('td');
 		nameCell.innerHTML = existingHarvesters[i].name;
 		nameCell.className = 'cell cell-body col-profile';
 		
 
-		let siteCell:any = document.createElement('td');
+		let siteCell: HTMLTableCellElement = document.createElement('td');
 		siteCell.className = 'cell cell-body col-site';
-		
-		let siteSelector:any = document.createElement('select');
+
+		let siteSelector:HTMLSelectElement = document.createElement('select');
 		siteSelector.setAttribute('class', 'input');
-		sites.captcha.forEach((site:any):void => {
-			let option:any = document.createElement('option');
+		config.sites.captcha.forEach((site:any):void => {
+			let option:HTMLOptionElement = document.createElement('option');
 			option.label = site.label;
 			option.value = site.value;
 			siteSelector.add(option);
@@ -543,10 +531,10 @@ function renderHarvesters():void {
 		siteCell.appendChild(siteSelector);
 		
 
-		let actionsCell:any = document.createElement('td');
+		let actionsCell: HTMLTableCellElement = document.createElement('td');
 		actionsCell.className = 'cell cell-body table-row col-actions';
 
-		let launchButton:any = document.createElement('div');
+		let launchButton:HTMLElement = document.createElement('div');
 		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i>';
 		launchButton.className = 'action-button';
 		launchButton.onclick = function ():void {
@@ -556,7 +544,7 @@ function renderHarvesters():void {
 			});
 		};
 	
-		let loginButton:any = document.createElement('div');
+		let loginButton:HTMLElement = document.createElement('div');
 		loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
 		loginButton.className = 'action-button';
 		loginButton.onclick = function ():void {
@@ -566,7 +554,7 @@ function renderHarvesters():void {
 			});
 		};
 
-		let deleteButton:any = document.createElement('div');
+		let deleteButton:HTMLElement = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
 		deleteButton.onclick = function ():void {
@@ -595,47 +583,52 @@ function renderHarvesters():void {
 
 function renderProfileSelectors():void {
 	let existingProfiles:any = settings.has('profiles') ? settings.get('profiles') : {};
-
-	(<any>document.getElementById('profileTableBody')).innerHTML = '';
-	for (let i:any = 0; i < Object.keys(existingProfiles).length; i++) {
+	let profileTableBody: HTMLTableElement = <HTMLTableElement>document.getElementById('profileTableBody');
+	profileTableBody.innerHTML = '';
+	for (let i: number = 0; i < Object.keys(existingProfiles).length; i++) {
 		let profileId:any = Object.keys(existingProfiles)[i];
-		let profileRow:any = document.createElement('tr');
+		let profileRow:HTMLTableRowElement = document.createElement('tr');
 		profileRow.className = 'row';
+		profileRow.setAttribute('data-id', (profileId ? profileId : ''));
+		profileRow.onclick = function (this: HTMLElement, event: MouseEvent):void {
+			
+			var billingFirst: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingFirst');
+			var billingLast: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingLast');
+			var billingEmail: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingEmail');
+			var billingTelephone: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingTelephone');
+			var billingAddress1: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingAddress1');
+			var billingAddress2: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingAddress2');
+			var billingCity: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingCity');
+			var billingZip: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingZip');
+			var billingCountry: HTMLSelectElement = <HTMLSelectElement>document.getElementById('profileBillingCountry');
+			var billingState: HTMLSelectElement = <HTMLSelectElement>document.getElementById('profileBillingState');
+
+			var shippingFirst: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingFirst');
+			var shippingLast: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingLast');
+			var shippingEmail: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingEmail');
+			var shippingTelephone: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingTelephone');
+			var shippingAddress1: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingAddress1');
+			var shippingAddress2: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingAddress2');
+			var shippingCity: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingCity');
+			var shippingZip: HTMLInputElement = <HTMLInputElement>document.getElementById('profileShippingZip');
+			var shippingCountry: HTMLSelectElement = <HTMLSelectElement>document.getElementById('profileShippingCountry');
+			var shippingState: HTMLSelectElement = <HTMLSelectElement>document.getElementById('profileShippingState');
+
+			var paymentType: HTMLInputElement = <HTMLInputElement>document.getElementById('profilePaymentType');
+			var cardNumber: HTMLInputElement = <HTMLInputElement>document.getElementById('profileCardNumber');
+			var cardExpiryMonth: HTMLInputElement = <HTMLInputElement>document.getElementById('profileExpiryMonth');
+			var cardExpiryYear: HTMLInputElement = <HTMLInputElement>document.getElementById('profileExpiryYear');
+			var cardCvv: HTMLInputElement = <HTMLInputElement>document.getElementById('profileCvv');
+
+			var profileId: HTMLInputElement = <HTMLInputElement>document.getElementById('profileId');
+			var profileName: HTMLInputElement = <HTMLInputElement>document.getElementById('profileName');
 
 
-		let profileCell:any = document.createElement('td');
-		profileCell.innerHTML = existingProfiles[profileId].profileName ? existingProfiles[profileId].profileName : '';
-		profileCell.className = 'cell cell-body col-profile';
-		profileRow.appendChild(profileCell);
-
-		let nameCell:any = document.createElement('td');
-		nameCell.innerHTML = `${existingProfiles[profileId].billing.first} ${existingProfiles[profileId].billing.last}`;
-		nameCell.className = 'cell cell-body col-site';
-		profileRow.appendChild(nameCell);
-
-		let addressCell:any = document.createElement('td');
-		addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
-		addressCell.className = 'cell cell-body col-products';
-		profileRow.appendChild(addressCell);
-
-		let cardCell:any = document.createElement('td');
-		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
-		cardCell.className = 'cell cell-body col-status';
-		profileRow.appendChild(cardCell);
-
-		let actionsCell:any = document.createElement('td');
-		actionsCell.className = 'cell cell-body table-row col-actions';
-
-
-		let editButton:any = document.createElement('div');
-		editButton.innerHTML = '<i class="fas fa-edit"></i>';
-		editButton.className = 'action-button';
-		editButton.setAttribute('data-id', (profileId ? profileId : ''));
-		editButton.onclick = function ():void {
 			let profiles: any = settings.has('profiles') ? settings.get('profiles') : {};
 			const profileData:any = profiles[this.dataset.id];
-			_profileId.value = this.dataset.id ? this.dataset.id : '';
+			profileId.value = this.dataset.id ? this.dataset.id : '';
 			profileName.value = profileData.profileName ? profileData.profileName : '';
+
 			try {
 				billingFirst.value = profileData.billing.first;
 				billingLast.value = profileData.billing.last;
@@ -671,24 +664,58 @@ function renderProfileSelectors():void {
 			catch (error) { console.error(error); }
 		};
 
-		actionsCell.appendChild(editButton);
+		let profileCell: HTMLTableCellElement = document.createElement('td');
+		profileCell.innerHTML = existingProfiles[profileId].profileName ? existingProfiles[profileId].profileName : '';
+		profileCell.className = 'cell cell-body col-profile';
+		profileRow.appendChild(profileCell);
 
-		let duplicateButton:any = document.createElement('div');
+		let nameCell: HTMLTableCellElement = document.createElement('td');
+		nameCell.innerHTML = `${existingProfiles[profileId].billing.first} ${existingProfiles[profileId].billing.last}`;
+		nameCell.className = 'cell cell-body col-site';
+		profileRow.appendChild(nameCell);
+
+		let addressCell: HTMLTableCellElement = document.createElement('td');
+		addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
+		addressCell.className = 'cell cell-body col-products';
+		profileRow.appendChild(addressCell);
+
+		let cardCell: HTMLTableCellElement = document.createElement('td');
+		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
+		cardCell.className = 'cell cell-body col-status';
+		profileRow.appendChild(cardCell);
+
+		let actionsCell: HTMLTableCellElement = document.createElement('td');
+		actionsCell.className = 'cell cell-body table-row col-actions';
+
+
+		let editButton:HTMLElement = document.createElement('div');
+		editButton.innerHTML = '<i class="fas fa-edit"></i>';
+		editButton.className = 'action-button';
+		editButton.setAttribute('data-id', (profileId ? profileId : ''));
+		editButton.onclick = function(event: MouseEvent):void {
+			event.stopImmediatePropagation();
+		};
+
+		//actionsCell.appendChild(editButton);
+
+		let duplicateButton:HTMLElement = document.createElement('div');
 		duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 		duplicateButton.className = 'action-button';
 		duplicateButton.setAttribute('data-id', profileId ? profileId : '');
-		duplicateButton.onclick = function ():void {
+		duplicateButton.onclick = function (this: HTMLElement, event: MouseEvent):void {
+			event.stopImmediatePropagation();
 			let profiles:any = settings.has('profiles') ? settings.get('profiles') : {};
-			const profileData:any = profiles[this.dataset.id];
+			const profileData:profileDataProps = profiles[this.dataset.id];
 			 profileActions.save(null, profileData);
 			renderProfileSelectors();
 		};
 		actionsCell.appendChild(duplicateButton);
 
-		let deleteButton:any = document.createElement('div');
+		let deleteButton:HTMLElement = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
-		deleteButton.onclick = function ():void {
+		deleteButton.onclick = function (event: MouseEvent):void {
+			event.stopImmediatePropagation();
 			let existingProfiles2:any = settings.get('profiles');
 			delete existingProfiles2[profileId];
 			settings.set('profiles', existingProfiles2, { prettify: true });
@@ -828,9 +855,9 @@ function renderProfileSelectors():void {
 	profileSelector.forEach((element):void => {
 		element.options.length = 0;
 		let existingProfiles:any = settings.has('profiles') ? settings.get('profiles') : {};
-		for (let i:any = 0; i < Object.keys(existingProfiles).length; i++) {
-			let profileId:any = Object.keys(existingProfiles)[i];
-			let option:any = document.createElement('option');
+		for (let i: number = 0; i < Object.keys(existingProfiles).length; i++) {
+			let profileId:string = Object.keys(existingProfiles)[i];
+			let option:HTMLOptionElement = document.createElement('option');
 			option.value = profileId;
 			option.label = existingProfiles[profileId].profileName || 'Nameless Profile';
 			element.options.add(option);
@@ -854,40 +881,41 @@ function renderProfileSelectors():void {
 // }
 
 function renderOrderTable():void {
+	var orderTableBody:HTMLElement = document.getElementById('orderTableBody');
 	let orders:any = settings.has('orders') ? settings.get('orders') : [];
 	orderTableBody.innerHTML = '';
 
 	try {
-		for (let i:any = 0; i < orders.length; i++) {
-			let orderRow:any = document.createElement('tr');
+		for (let i: number = 0; i < orders.length; i++) {
+			let orderRow:HTMLTableRowElement = document.createElement('tr');
 			orderRow.className = 'row';
 
 
-			let dateCell:any = document.createElement('td');
+			let dateCell: HTMLTableCellElement = document.createElement('td');
 			dateCell.innerHTML = orders[i].date;
 			dateCell.className = 'cell cell-body col-id';
 			orderRow.appendChild(dateCell);
 
-			let storeCell:any = document.createElement('td');
+			let storeCell: HTMLTableCellElement = document.createElement('td');
 			storeCell.innerHTML = orders[i].site;
 			storeCell.className = 'cell cell-body col-site';
 			orderRow.appendChild(storeCell);
 
-			let productCell:any = document.createElement('td');
+			let productCell: HTMLTableCellElement = document.createElement('td');
 			productCell.innerHTML = orders[i].product;
 			productCell.className = 'cell cell-body col-products';
 			productCell.style.justifyContent = 'center';
 			orderRow.appendChild(productCell);
 
-			let orderNumberCell:any = document.createElement('td');
+			let orderNumberCell: HTMLTableCellElement = document.createElement('td');
 			orderNumberCell.innerHTML = orders[i].orderNumber;
 			orderNumberCell.className = 'cell cell-body col-order';
 			orderRow.appendChild(orderNumberCell);
 
-			let actionsCell:any = document.createElement('td');
+			let actionsCell: HTMLTableCellElement = document.createElement('td');
 			actionsCell.className = 'cell cell-body table-row col-actions-sm';
 
-			let deleteButton:any = document.createElement('div');
+			let deleteButton:HTMLElement = document.createElement('div');
 			deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 			deleteButton.className = 'action-button';
 
@@ -904,190 +932,41 @@ function renderOrderTable():void {
 
 // }
 
-export default {
-	'tasks': renderTaskTable,
-	'profiles': renderProfileSelectors,
-	'proxies': renderProxyTable,
-	'proxySelectors': renderProxyListSelectors,
-	'sites': renderSites,
-	'countries': renderCountries,
-	'states': renderStates,
-	'orders': renderOrderTable,
-	'harvesters': renderHarvesters
-};
+
+	export const tasks = renderTaskTable;
+	export const	profiles = renderProfileSelectors;
+	export const	proxies = renderProxyTable;
+	export const	proxySelectors = renderProxyListSelectors;
+	export const	sites = renderSites;
+	export const countries = renderCountries;
+	export const	states = renderStates;
+	export const	orders = renderOrderTable;
+	export const	harvesters = renderHarvesters;
+
 
 //General
-var checkboxes:NodeListOf<HTMLInputElement> = document.querySelectorAll('.checkbox-label');
+
 var profileSelector:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.profile-selector');
-var accountSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.captchaAccount-selector');
-var countrySelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.country-selector');
-var proxyListSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.proxylist-selector');
+
 var siteSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.site-selector');
-var navigationSelectors:NodeListOf<HTMLElement> = document.querySelectorAll('.nav');
-var reloadBtn:any = document.getElementById('reloadApp');
-var minimizeBtn:any = document.getElementById('minimizeApp');
-var closeBtn:any = document.getElementById('closeApp');
  
 //Dashboard
-var tasksHeader:any = document.getElementById('tasksHeader');
-//var importTaskBtn:HTMLButtonElement = document.getElementById('importTasks');
-//var exportTaskBtn:HTMLButtonElement = document.getElementById('exportTasks');
-var globalMonitorDelay:any = document.getElementById('globalMonitor');
-var globalErrorDelay:any = document.getElementById('globalError');
-var globalTimeoutDelay:any = document.getElementById('globalTimeout');
 
 
-var taskTable:any = document.getElementById('taskTable');
-var taskTableBody:any = document.getElementById('taskTableBody');
 
-var runAllBtn:any = document.getElementById('runAll');
-var stopAllBtn:any = document.getElementById('stopAll');
-var clearTasksBtn:any = document.getElementById('clearTasks');
 
 //Task Creator
 var newTask_Site:any = document.getElementById('taskSite');
-var newTask_Profile:any = document.getElementById('taskProfile');
 var newTask_Mode:any = document.getElementById('taskMode');
 var newTask_RestockMode:any = document.getElementById('newTaskMonitorMode');
-var newTask_CheckoutAttempts:any = document.getElementById('taskCheckoutAttempts');
-var newTask_Quantity:any = document.getElementById('taskQuantity');
 
-var newTask_CartDelay:any = document.getElementById('taskCartDelay');
-var newTask_CheckoutDelay:any = document.getElementById('taskCheckoutDelay');
-var newTask_MonitorDelay:any = document.getElementById('taskMonitorDelay');
-var newTask_ErrorDelay:any = document.getElementById('taskErrorDelay');
-var newTask_Timeout:any = document.getElementById('taskTimeoutDelay');
-
-var newTask_ProxyList:any = document.getElementById('taskProxyList');
-var newTask_PriceLimit:any = document.getElementById('taskMaxPrice');
-var newTask_StartDate:any = document.getElementById('taskStartDate');
-var newTask_StartTime:any = document.getElementById('taskStartTime');
-
-var newTask_Restocks:any = document.getElementById('newTaskRestocks');
-var newTask_SkipCaptcha:any = document.getElementById('captchaCheckbox');
-var newTask_threeD:any = document.getElementById('threeDCheckbox');
-
-var newTask_products:any = document.getElementById('newTaskProducts');
-var newTask_styles:any = document.getElementById('newTaskStyles');
-var newTask_sizes:any = document.getElementById('newTaskSizes');
-
-var newTask_SearchInput:any = document.querySelectorAll('input[name="taskSearchInput"]');
-var newTask_Category:any = document.querySelectorAll('input[name="taskCategory"]');
-var newTask_Size:any = document.querySelectorAll('input[name="taskSize"]');
-var newTask_Style:any = document.querySelectorAll('input[name="taskVariant"]');
-var newTask_ProductQty:any = document.querySelectorAll('input[name="taskProductQty"]');
-
-var newTask_saveBtn:any = document.getElementById('taskSaveButton');
 
 //Profile Creator
-var profilesWrapper:any = document.getElementById('profilesWrapper');
-var billingFirst:any = document.getElementById('profileBillingFirst');
-var billingLast:any = document.getElementById('profileBillingLast');
-var billingEmail:any = document.getElementById('profileBillingEmail');
-var billingTelephone:any = document.getElementById('profileBillingTelephone');
-var billingAddress1:any = document.getElementById('profileBillingAddress1');
-var billingAddress2:any = document.getElementById('profileBillingAddress2');
-var billingCity:any = document.getElementById('profileBillingCity');
-var billingZip:any = document.getElementById('profileBillingZip');
-var billingCountry:any = document.getElementById('profileBillingCountry');
-var billingState:any = document.getElementById('profileBillingState'); 
 
-var useSameShippingAddress:any = document.getElementById('sameShippingCheckbox');
 
-var shippingFirst:any = document.getElementById('profileShippingFirst');
-var shippingLast:any = document.getElementById('profileShippingLast');
-var shippingEmail:any = document.getElementById('profileShippingEmail');
-var shippingTelephone:any = document.getElementById('profileShippingTelephone');
-var shippingAddress1:any = document.getElementById('profileShippingAddress1');
-var shippingAddress2:any = document.getElementById('profileShippingAddress2');
-var shippingCity:any = document.getElementById('profileShippingCity');
-var shippingZip:any = document.getElementById('profileShippingZip');
-var shippingCountry:any = document.getElementById('profileShippingCountry');
-var shippingState:any = document.getElementById('profileShippingState');
+var proxyTestSite:HTMLSelectElement = <HTMLSelectElement>document.getElementById('proxySiteSelector');
 
-var paymentType:any = document.getElementById('profilePaymentType');
-var cardNumber:any = document.getElementById('profileCardNumber');
-var cardExpiryMonth:any = document.getElementById('profileExpiryMonth');
-var cardExpiryYear:any = document.getElementById('profileExpiryYear');
-var cardCvv:any = document.getElementById('profileCvv');
 
-var _profileId:any = document.getElementById('profileId');
-var profileName:any = document.getElementById('profileName');
-var saveProfileBtn:any = document.getElementById('profileSaveButton');
-var profileLoader:any = document.getElementById('profileLoader');
 
-//var importProfileBtn:any = document.getElementById('importProfiles');
-//var exportProfileBtn:any = document.getElementById('exportProfiles');
-var deleteProfileBtn:any = document.getElementById('profileDeleteButton');
-var clearProfilesBtn:any = document.getElementById('deleteAllProfiles');
-
-var profileElements:any = [
-	document.getElementById('profileId'),
-	billingFirst, 
-	billingLast, 
-	billingEmail, 
-	billingTelephone,
-	billingAddress1,
-	billingAddress2,
-	billingCity,
-	billingZip,
-	billingCountry,
-	billingState,
-
-	shippingFirst,
-	shippingLast,
-	shippingEmail,
-	shippingTelephone,
-	shippingAddress1,
-	shippingAddress2,
-	shippingCity,
-	shippingZip,
-	shippingCountry,
-	shippingState,
-
-	paymentType,
-	cardNumber,
-	cardExpiryMonth,
-	cardExpiryYear,
-	cardCvv,
-
-	profileName
-];
-//Proxies
-// var importProxyBtn:any = document.getElementById('importProxies');
-// var exportProxyBtn:any = document.getElementById('exportProxies');
-
-var proxyHeader:any = document.getElementById('proxy-header');
-
-var proxyListName:any = document.getElementById('proxyListName');
-var massProxyInput:any = document.getElementById('proxyInput');
-var saveProxyList:any = document.getElementById('saveProxyListBtn');
-
-var proxyListSelectorMain:any = document.getElementById('proxyListSelectorMain');
-var proxyTableName:any = document.getElementById('proxyTableName');
-var proxyTestSite:any = document.getElementById('proxySiteSelector');
-var proxyTestTable:any = document.getElementById('proxyTestResults');
-var proxyTestAll:any = document.getElementById('proxyTestAll');
-var proxyDeleteList:any = document.getElementById('proxyDeleteList');
-
-//Harvesters
-var harverster_Name:any = document.getElementById('harvesterName');
-var harvester_SaveBtn:any = document.getElementById('saveHarvesterBtn');
-var harvesterTable:any = document.getElementById('harvesterTable');
-var harvester_ClearBtn:any = document.getElementById('clearCaptchaAccounts');
 
 //Analytics
-var orderTableBody:any = document.getElementById('orderTableBody');
-var clearAnalyticsBtn:any = document.getElementById('clearAnalytics');
-
-//Settings
-// var monitorProxyList:any = document.getElementById('monitorProxyList');
-var currentBrowserPath:any = document.getElementById('currentBrowserPath');
-var installBrowserBtn:any = document.getElementById('browserSetup');
-var resetBtn:any = document.getElementById('resetAllSettings');
-var signoutBtn:any = document.getElementById('signout');
-var customDiscord:any = document.getElementById('discordWebhook');
-var testDiscordBtn:any = document.getElementById('testDiscordWebhook');
-
-//Footer
-var version:any = document.getElementById('version');

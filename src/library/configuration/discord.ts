@@ -1,6 +1,6 @@
 import * as sites from './sites';
 
-function publicWebhook(this: any, additionalFields:any = []): void {
+export function publicWebhook(this: any, additionalFields:any = []): void {
 	let defaultSites:any = sites.def;
 	let siteData:any = defaultSites[this.taskData.site];
 	let content:any = {
@@ -49,7 +49,7 @@ function publicWebhook(this: any, additionalFields:any = []): void {
 	return content;
 }
 
-function privateWebhook(additionalFields:any = []):void {
+export function privateWebhook(additionalFields:any = []):void {
 	let content:any = {
 		embeds: [{
 			'title': 'Successfully Checked Out!',
@@ -108,5 +108,3 @@ function privateWebhook(additionalFields:any = []):void {
 	console.log(fields);
 	return content;
 }
-
-export { publicWebhook, privateWebhook };

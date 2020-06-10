@@ -14,18 +14,17 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.privateWebhook = exports.publicWebhook = void 0;
-var sites = __importStar(require("./sites"));
-function publicWebhook(additionalFields) {
-    if (additionalFields === void 0) { additionalFields = []; }
-    var defaultSites = sites.def;
-    var siteData = defaultSites[this.taskData.site];
-    var content = {
+const sites = __importStar(require("./sites"));
+function publicWebhook(additionalFields = []) {
+    let defaultSites = sites.def;
+    let siteData = defaultSites[this.taskData.site];
+    let content = {
         embeds: [{
                 'title': 'Successfully Checked Out!',
                 'type': 'rich',
@@ -36,12 +35,12 @@ function publicWebhook(additionalFields) {
                     width: 150
                 },
                 'footer': {
-                    text: "ProsperAIO Success \u2022 " + new Date().toUTCString(),
+                    text: `ProsperAIO Success • ${new Date().toUTCString()}`,
                     icon_url: 'https://i.imgur.com/NGGew9J.png'
                 }
             }]
     };
-    var fields = [
+    let fields = [
         {
             name: 'Product:',
             value: this.productName || 'Product Name N/A',
@@ -63,16 +62,15 @@ function publicWebhook(additionalFields) {
             inline: true
         }
     ];
-    for (var i = 0; i < additionalFields.length; i++) {
+    for (let i = 0; i < additionalFields.length; i++) {
         fields.push(additionalFields[i]);
     }
     content.embeds[0].fields = fields;
     return content;
 }
 exports.publicWebhook = publicWebhook;
-function privateWebhook(additionalFields) {
-    if (additionalFields === void 0) { additionalFields = []; }
-    var content = {
+function privateWebhook(additionalFields = []) {
+    let content = {
         embeds: [{
                 'title': 'Successfully Checked Out!',
                 'type': 'rich',
@@ -84,14 +82,14 @@ function privateWebhook(additionalFields) {
                     width: 150
                 },
                 'footer': {
-                    text: "ProsperAIO Success \u2022 " + new Date().toUTCString(),
+                    text: `ProsperAIO Success • ${new Date().toUTCString()}`,
                     icon_url: 'https://i.imgur.com/NGGew9J.png'
                 }
             }]
     };
     if (this.checkoutData.id)
         this.orderNumber = this.checkoutData.id;
-    var fields = [
+    let fields = [
         {
             name: 'Store:',
             value: this.taskData.site.label || 'N/A',
@@ -123,7 +121,7 @@ function privateWebhook(additionalFields) {
             inline: true
         }
     ];
-    for (var i = 0; i < additionalFields.length; i++) {
+    for (let i = 0; i < additionalFields.length; i++) {
         fields.push(additionalFields[i]);
     }
     content.embeds[0].fields = fields;

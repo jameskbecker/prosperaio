@@ -1,71 +1,80 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HarvesterWindow = void 0;
-var electron = require('electron');
-var app = electron.app, BrowserWindow = electron.BrowserWindow, session = electron.session;
-var bodyParser = require('body-parser');
-var express = require('express');
-var path = require('path');
-var isDev = require('electron-is-dev');
-var harvesterConfiguration = require('../../library/configuration/sitekeys');
-var HarvesterWindow = (function () {
-    function HarvesterWindow(_sessionName, _siteId) {
+const electron_1 = require("electron");
+const fs_1 = __importDefault(require("fs"));
+const express_1 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path"));
+const electron_is_dev_1 = __importDefault(require("electron-is-dev"));
+const sitekeys_1 = __importDefault(require("../../library/configuration/sitekeys"));
+class HarvesterWindow {
+    constructor(_sessionName, _siteId) {
         this.state = 'init';
         this.siteType = _siteId;
-        this.config = harvesterConfiguration(_siteId);
+        this.config = sitekeys_1.default(_siteId);
         this.sessionName = _sessionName;
-        this.server = express();
+        this.server = express_1.default();
         this.serverPort;
         this.window = null;
     }
-    HarvesterWindow.prototype.spawn = function () {
-        var _this = this;
-        this.server
-            .use(bodyParser.json())
-            .use(bodyParser.urlencoded({
-            extended: true
-        }))
-            .use('/assets', express.static(path.join(app.getAppPath(), 'assets')))
-            .use('/library', express.static(path.join(app.getAppPath(), 'src/library')))
-            .use('/assets/fontawesome', express.static(path.join(app.getAppPath(), 'node_modules/@fortawesome/fontawesome-free')))
-            .get('/', function (req, res) {
-            res.sendFile("file:///" + Main.application.getAppPath() + "/assets/renderer/index.html");
-        })
-            .get('/config', function (req, res) {
-            res.json({
-                sessionName: _this.sessionName,
-                site: _this.siteType
-            });
-        });
-        this.serverPort = Math.floor(Math.random() * 9999) + 1000;
-        this.server.listen(this.serverPort);
-        var captchaSession = session.fromPartition("persist:" + this.sessionName);
-        this.window = new BrowserWindow({
+    async spawn() {
+        let captchaSession = electron_1.session.fromPartition('persist:' + this.sessionName);
+        this.window = new electron_1.BrowserWindow({
             backgroundColor: '#202020',
             height: 600,
             width: 400,
             resizable: false,
             frame: false,
             show: true,
-            alwaysOnTop: true,
+            alwaysOnTop: false,
             webPreferences: {
                 'nodeIntegration': true,
                 'webSecurity': false,
                 'session': captchaSession
             }
         });
-        this.window.webContents.session.setProxy({
-            proxyRules: 'http=localhost:' + this.serverPort,
-            proxyBypassRules: '.google.com, .gstatic.com, .youtube.com'
-        })
-            .then(function () {
-            _this.window.loadURL("http://" + _this.config.domain + ":" + _this.serverPort, {});
-            _this.window.show();
-            if (isDev)
-                _this.window.webContents.openDevTools({ mode: 'undocked' });
+        this.window.webContents.session.protocol.interceptBufferProtocol('http', (request, callback) => {
+            if (request.url.includes(this.config.domain)) {
+                let reqPath = request.url.split('.com/')[1] === '' ? 'assets/harvester.html' : request.url.split('.com')[1];
+                if (reqPath === '/config') {
+                    callback(Buffer.from(JSON.stringify({ sessionName: this.sessionName,
+                        site: this.siteType
+                    })));
+                    return;
+                }
+                console.log(path_1.default.join(electron_1.app.getAppPath(), reqPath));
+                fs_1.default.readFile(path_1.default.join(electron_1.app.getAppPath(), reqPath), 'utf8', function (err, data) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    callback(Buffer.from(data));
+                });
+            }
+            else {
+                const req = electron_1.net.request(request);
+                req.on('response', res => {
+                    const chunks = [];
+                    res.on('data', chunk => {
+                        chunks.push(Buffer.from(chunk));
+                    });
+                    res.on('end', async () => {
+                        const file = Buffer.concat(chunks);
+                        callback(file);
+                    });
+                });
+                req.end();
+            }
         });
-    };
-    return HarvesterWindow;
-}());
-exports.HarvesterWindow = HarvesterWindow;
+        this.window.loadURL(`http://${this.config.domain}`, {});
+        if (electron_is_dev_1.default)
+            this.window.webContents.openDevTools({ mode: 'undocked' });
+        this.window.webContents.once('did-finish-load', () => {
+            this.window.show();
+        });
+    }
+}
+exports.default = HarvesterWindow;
 //# sourceMappingURL=HarvesterWindow.js.map

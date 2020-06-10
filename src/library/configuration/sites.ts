@@ -1,4 +1,4 @@
-const def:any = {
+export const def:any = { 
 	'kickz': {
 		enabled: false,
 		type: 'kickz',
@@ -54,7 +54,7 @@ const def:any = {
 		baseUrl: 'https://www.off---white.com/'
 	}
 };
-const captcha:any = [
+export const captcha:any = [
 	// {
 	// 	label: 'Kickz',
 	// 	value: 'kickz'
@@ -68,5 +68,3 @@ const captcha:any = [
 		value: 'supreme'
 	}
 ];
-
-export { def, captcha};

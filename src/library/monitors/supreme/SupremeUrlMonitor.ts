@@ -5,25 +5,19 @@ const ipcWorker = require('electron').ipcRenderer;
 const { logger, utilities } = require('../../other');
 
 class SupremeUrlMonitor {
-	private _productUrl: string;
-	private _proxyList: string;
-	private _monitorDelay: number;
-	private _timeoutDelay: number;
-	private _isRunning: boolean;
-	private inputData: any;
-	private callbacks: any;
+	_productUrl: string;
+	proxy: string;
+	_monitorDelay: number;
+	_timeoutDelay: number;
+	_isRunning: boolean;
+	inputData: any;
+	callbacks: any;
 	
 
-	constructor(_productUrl:string, proxyList:string) {
-		logger.info('[Monitor] ['+proxyList+'] Inititalising Url Monitor.');
+	constructor(_productUrl:string, proxy:string) {
+		logger.info('[Monitor] ['+this.proxy+'] Inititalising Url Monitor.');
 		this._productUrl = _productUrl;
-		this._proxyList = proxyList;
-		if (this._proxyList && this._proxyList !== '' && !Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
-			let proxies = settings.has('proxies') ? settings.get('proxies') : {}; 
-			if (proxies.hasOwnProperty(this._proxyList)) {
-				Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
-			}
-		}
+		this.proxy = proxy ? proxy : '';
 		this.callbacks = {};
 		this._monitorDelay = 1000;
 		this._timeoutDelay = 30000;
@@ -67,33 +61,22 @@ class SupremeUrlMonitor {
 		delete this.callbacks[id];
 	}
 
-	private _getProxy():string {
-		if (!this._proxyList) {
-			return null;
+	setStatus(message:any, type:any, ids:any):void {
+		let color: string; 
+		switch (type.toLowerCase()) {
+			case 'info': color = '#4286f4'; break;
+			case 'error': color = '#f44253'; break;
+			case 'warning': color = '#f48641'; break;
+			case 'success': color = '#2ed347'; break;
+			default: color = '#8c8f93';
 		}
-		else if (Worker.activeProxyLists[this._proxyList].length < 1) {
-			return null;
-		}
-		let proxy = Worker.activeProxyLists[this._proxyList][0];
-		Worker.activeProxyLists[this._proxyList].push(Worker.activeProxyLists[this._proxyList].shift());
-		return proxy;
-	}
-
-	private setStatus(message:any, type:any, ids:any):void {
-		let colors = {
-			DEFAULT: '#8c8f93',
-			INFO: '#4286f4',
-			ERROR: '#f44253',
-			WARNING: '#f48641',
-			SUCCESS: '#2ed347'
-		};
 		if (!ids) {
 			for (let i = 0; i < Object.keys(this.inputData).length; i++) {
 				for (let j = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
 					ipcWorker.send('task.setStatus', {
 						id: this.inputData[Object.keys(this.inputData)[i]]['IDS'][j],
-						message: message,
-						color: colors[type]
+						message,
+						color
 					});
 				}
 			}
@@ -102,20 +85,20 @@ class SupremeUrlMonitor {
 			for (let i = 0; i < ids.length; i++) {
 				ipcWorker.send('task.setStatus', {
 					id: ids[i],
-					message: message,
-					color: colors[type]
+					message,
+					color
 				});
 			}
 		}
 	}
 
-	private _fetchProductData():void {
+	_fetchProductData():void {
 		this.setStatus('Fetching Product Data', 'WARNING', Object.keys(this.callbacks));
 		logger.info(`[Monitor] [${this._productUrl}] Fetching Product Data.`);
 		let options = {
 			url: this._productUrl + '.json',
 			method: 'GET',
-			proxy: utilities.formatProxy(this._getProxy()),
+			proxy: this.proxy,
 			json: true,
 			gzip: true,
 			resolveWithFullResponse: true,
@@ -130,7 +113,7 @@ class SupremeUrlMonitor {
 		};
 		console.log({ proxy: options.proxy });
 		request(options)
-		.then(response => {
+		.then((response: any) => {
 			if (!response.body.hasOwnProperty('styles')) { 
 				logger.error(`[Monitor] [${this._productUrl}] No Style Data.`);
 				let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
@@ -139,7 +122,7 @@ class SupremeUrlMonitor {
 	
 			this._returnData(response.body.styles);
 		})
-		.catch(error => {
+		.catch((error: any) => {
 			logger.error(`[Monitor1] [${this._productUrl}] ${error.message}.`);
 			this.setStatus('Error', 'ERROR', Object.keys(this.callbacks));
 			this._isRunning = false;
@@ -147,7 +130,7 @@ class SupremeUrlMonitor {
 		});
 	}
 
-	private _returnData(styles:any):void {
+	_returnData(styles:any):void {
 		for (let i = 0; i < Object.keys(this.callbacks).length; i++) {
 			let id = Object.keys(this.callbacks)[i];
 			this.callbacks[id](styles);

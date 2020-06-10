@@ -1,9 +1,9 @@
 import { Worker } from './Worker';
-import * as settings from 'electron-settings';
+import settings from 'electron-settings';
 import { utilities } from './library/other';
 
 //Bot Module Imports
-import { SupremeSafe, SupremeRequest } from './library/sites/supreme';
+import { SupremeRequest, SupremeSafe } from './library/sites/supreme';
 
 export function runTask (id:any):void {
 	let allTasks:any = settings.get('tasks');

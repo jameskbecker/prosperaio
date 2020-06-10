@@ -13,29 +13,22 @@
 			min-height: 35px;
 		}
 
-		.input {
+		 .input {
 			height: 6vh;
 			font-size: 3vh;
 		}
 
 		.label {
+			height: 3vh;
 			font-size: 2vh;
 		}
 
-		.container-pages, .page {
-			max-height: calc(100vh - 50px);
-			margin: 0;
-			overflow: hidden;
-		}
+
 		.container {
-			margin: 7.5px 5px
+			margin: 7.5px 0
 		}
 		input[disabled="true"] {
 			opacity: 1 !important
-		}
-
-		.banner-logo {
-			background-size: 20px;
 		}
 	</style>
 	<script type="text/javascript" src="https://songbird.cardinalcommerce.com/edge/v1/songbird.js"></script>
@@ -43,7 +36,7 @@
 </head>
 
 <body>
-	<div class="banner">
+	<div id="banner" class="banner">
 		<div class="banner banner-logo"></div>
 		<div class="banner banner-draggable"></div>
 		<div class="banner banner-controls">
@@ -58,7 +51,7 @@
 	</div>
 	<div class="container container-pages">
 		<div class="page">
-			<div class="header-container">
+			<div class="container header-container">
 				<h1 class="header-title">3DS Solver</h1>
 			</div>
 		
@@ -75,7 +68,7 @@
 					<label for="cardinal_id" class="label">Transaction ID</label>
 					<input id="cardinal_id" class="input" type="text" value="" disabled="true"/>
 				</div>
-				<button id="manual">Click Here if Done</button>
+				<!-- <button id="manual">Click Here if Done</button> -->
 			</div>
 		</div>
 	</div>
@@ -135,7 +128,7 @@
 		})
 		
 		
-		document.getElementById('manual').onclick = setupCompleteHandler;
+		// document.getElementById('manual').onclick = setupCompleteHandler;
 
 	</script>
 </body>
