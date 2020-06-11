@@ -116,11 +116,7 @@ class SupremeSafe extends SupremeBase_1.default {
                     value: `products/${this.productId}/${this.styleId}`
                 });
                 this.setStatus('Adding to Cart', 'WARNING');
-                this.cartForm = {
-                    size: this.sizeId,
-                    style: this.styleId,
-                    qty: 1
-                };
+                this.cartForm = this._form('cart-add');
                 if (this.shouldStop)
                     return this.stop();
                 let body = await this._request(`${this._productUrl}/add.json`, {
@@ -152,8 +148,14 @@ class SupremeSafe extends SupremeBase_1.default {
                 }
             }
             catch (error) {
-                this.setStatus('ATC Error', 'ERROR');
-                console.log(error);
+                switch (error.message) {
+                    case 'OOS':
+                        this.setStatus('Out of Stock');
+                        break;
+                    default:
+                        this.setStatus('ATC Error', 'ERROR');
+                        console.log(error);
+                }
                 let errorDelay = electron_settings_1.default.has('globalErrorDelay') ? parseInt(electron_settings_1.default.get('globalErrorDelay')) : 1000;
                 return setTimeout(runProcess.bind(this, resolve), errorDelay);
             }

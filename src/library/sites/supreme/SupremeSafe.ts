@@ -131,11 +131,7 @@ class SupremeSafe extends Supreme {
 				
 				this.setStatus('Adding to Cart', 'WARNING');
 
-				this.cartForm = {
-					size: this.sizeId,
-					style: this.styleId,
-					qty: 1
-				};
+				this.cartForm = this._form('cart-add');
 				if (this.shouldStop) return this.stop();
 				let body = await this._request(`${this._productUrl}/add.json`, {
 					method: 'POST',
@@ -170,8 +166,16 @@ class SupremeSafe extends Supreme {
 				}
 			}
 			catch(error) {
-				this.setStatus('ATC Error', 'ERROR');
-				console.log(error);
+				switch(error.message) {
+					case 'OOS':
+						this.setStatus('Out of Stock');
+						break;
+
+					default:
+						this.setStatus('ATC Error', 'ERROR');
+						console.log(error);
+				}
+				
 				let errorDelay = settings.has('globalErrorDelay') ? parseInt(<string>settings.get('globalErrorDelay')) : 1000;
 				return setTimeout(runProcess.bind(this, resolve), errorDelay);
 			}
