@@ -55,7 +55,7 @@ function renderTaskTable():void {
 			let siteCell:HTMLTableCellElement = document.createElement('td');
 			let defaultSiteData:any = config.sites.def;
 			let siteData:siteDataProps = defaultSiteData[tasks[taskId].site];
-			siteCell.innerHTML = siteData.label;
+			siteCell.innerHTML = siteData ? siteData.label : '';
 			siteCell.className = 'cell cell-body col-site';
 			taskRow.appendChild(siteCell);
 
@@ -65,31 +65,31 @@ function renderTaskTable():void {
 			taskRow.appendChild(modeCell);
 
 			let productCell: HTMLTableCellElement = document.createElement('td');
-			productCell.innerHTML = tasks[taskId].products[0].searchInput;
+			productCell.innerHTML = '' + tasks[taskId].products[0].searchInput;
 			productCell.className = 'cell cell-body col-products';
 			productCell.setAttribute('data-id', taskId);
 			taskRow.appendChild(productCell);
 
 			let sizeCell: HTMLTableCellElement = document.createElement('td');
-			sizeCell.innerHTML = tasks[taskId].products[0].size;
+			sizeCell.innerHTML = '' + tasks[taskId].products[0].size;
 			sizeCell.className = 'cell cell-body col-size';
 			sizeCell.setAttribute('data-id', taskId);
 			taskRow.appendChild(sizeCell);
 
 			let profileCell: HTMLTableCellElement = document.createElement('td');
-			profileCell.innerHTML = profiles[tasks[taskId].setup.profile] && profiles[tasks[taskId].setup.profile].profileName ? profiles[tasks[taskId].setup.profile].profileName : '';
+			profileCell.innerHTML = '' + profiles[tasks[taskId].setup.profile] && profiles[tasks[taskId].setup.profile].profileName ? profiles[tasks[taskId].setup.profile].profileName : '';
 			profileCell.className = 'cell cell-body col-profile';
 			taskRow.appendChild(profileCell);
 
 			let proxyCell: HTMLTableCellElement = document.createElement('td');
-			proxyCell.innerHTML = tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
+			proxyCell.innerHTML = '' + tasks[taskId].additional.proxyList ? tasks[taskId].additional.proxyList : 'None';
 			proxyCell.className = 'cell cell-body col-task-proxy';
 			taskRow.appendChild(proxyCell);
 
 
 
 			let timerCell: HTMLTableCellElement = document.createElement('td');
-			timerCell.innerHTML = tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
+			timerCell.innerHTML = '' + tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
 			timerCell.className = 'cell cell-body col-timer';
 			taskRow.appendChild(timerCell);
 

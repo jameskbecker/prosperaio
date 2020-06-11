@@ -1,7 +1,7 @@
 
 import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 //import { Main } from './Main';
-import * as isDev from 'electron-is-dev';
+import isDev from 'electron-is-dev';
 import { HarvesterWindow } from './main/windows/index';
 import * as auth from './main/authentication';
 import * as ipc from './ipc';
@@ -25,10 +25,8 @@ interface MainProps {
   // CARDINAL_SOLVERS: any;
 }
 
-
 function Main():void {
 	const settings = require('electron-settings');
-	console.log({isDev})
 	this.isMac = process.platform === 'darwin';
 	this.app = app;
 	this.mainWindow = new BrowserWindow({
@@ -65,9 +63,9 @@ function Main():void {
 	});
 
 	this.mainWindow.webContents.once('did-finish-load', () => {
-		// if (isDev) {
-		// 	this.mainWindow.webContents.openDevTools({ mode: 'detach' });
-		// }
+		if (isDev) {
+			this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+		}
 		
 		this.mainWindow.show();
 	});
@@ -77,11 +75,11 @@ function Main():void {
 	});
 
   this.workerWindow.webContents.once('did-finish-load', () => {
-		// if (isDev) {
-		// 	this.workerWindow.webContents.openDevTools({ mode: 'detach' });
+		if (isDev) {
+			this.workerWindow.webContents.openDevTools({ mode: 'detach' });
 			
-		// 	console.log('loaded worker');
-		// }
+			console.log('loaded worker');
+		}
 		ipc.init.bind(this)();
 	});
 

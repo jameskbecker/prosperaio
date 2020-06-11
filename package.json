@@ -1,6 +1,6 @@
 {
 	"name": "ProsperAIO",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"main": "build/app.js",
 	"description": "Simple Design. Easy to Use. Insane Functionality.",
 	"author": "ProsperSoftware",
