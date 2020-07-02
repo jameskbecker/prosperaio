@@ -5,9 +5,9 @@ import { utilities } from './library/other';
 //Bot Module Imports
 import { SupremeRequest, SupremeSafe } from './library/sites/supreme';
 
-export function runTask (id:any):void {
-	let allTasks:any = settings.get('tasks');
-	const taskData:any = allTasks[id];
+export function runTask (id: any): void {
+	let allTasks: any = settings.get('tasks');
+	const taskData: any = allTasks[id];
 	if (!taskData) {
 		return console.log('task data undefined');
 	}
@@ -27,7 +27,7 @@ export function runTask (id:any):void {
 
 }
 
-export function stopTask (id:any):void {
+export function stopTask (id: any): void {
 	console.log('STOPPING', id);
 	if (Worker.activeTasks[id]) {
 		Worker.activeTasks[id].callStop();
@@ -38,12 +38,12 @@ export function stopTask (id:any):void {
 
 // }
 
-export function duplicateTask (parentId:any):void {
+export function duplicateTask (parentId: any): void {
 	try {
-		let tasks:any = settings.has('tasks') ? settings.get('tasks') : {};
-		let parentTask:any;
-		for (let i:any = 0; i < Object.keys(tasks).length; i++) {
-			let id:any = Object.keys(tasks)[i];
+		let tasks: any = settings.has('tasks') ? settings.get('tasks') : {};
+		let parentTask: any;
+		for (let i: any = 0; i < Object.keys(tasks).length; i++) {
+			let id: any = Object.keys(tasks)[i];
 			if (id === parentId) {
 				parentTask = tasks[id];
 				break;
@@ -55,23 +55,23 @@ export function duplicateTask (parentId:any):void {
 	} catch(error) { }
 }
 
-export function deleteTask(id:any):void {
-	let currentTasks:any = settings.get('tasks');
+export function deleteTask(id: any): void {
+	let currentTasks: any = settings.get('tasks');
 	delete currentTasks[id];
 	settings.set('tasks', currentTasks, { prettify: true });
 }
 
-export function runAll():void {
-	let taskData:any = settings.has('tasks') ? settings.get('tasks') : {};
-	for (let i:any = 0; i < Object.keys(taskData).length; i++) {
-		let id:any = Object.keys(taskData)[i];
+export function runAll(): void {
+	let taskData: any = settings.has('tasks') ? settings.get('tasks') : {};
+	for (let i: any = 0; i < Object.keys(taskData).length; i++) {
+		let id: any = Object.keys(taskData)[i];
 		runTask(id);
 	}
 }
 
-export function stopAll():void {
-	for (let i:any = 0; i < Object.keys(Worker.activeTasks).length; i++) {
-		let id:any = Object.keys(Worker.activeTasks)[i];
+export function stopAll(): void {
+	for (let i: any = 0; i < Object.keys(Worker.activeTasks).length; i++) {
+		let id: any = Object.keys(Worker.activeTasks)[i];
 		if (Worker.activeTasks[id]) {
 		 stopTask(id);
 		}
@@ -79,17 +79,17 @@ export function stopAll():void {
 	}
 }
 
-export function deleteAll():void {
-	let taskData:any = settings.has('tasks') ? settings.get('tasks') : {};
-	for (let i:any = 0; i < Object.keys(taskData).length; i++) {
-		let id:any = Object.keys(taskData)[i];
+export function deleteAll(): void {
+	let taskData: any = settings.has('tasks') ? settings.get('tasks') : {};
+	for (let i: any = 0; i < Object.keys(taskData).length; i++) {
+		let id: any = Object.keys(taskData)[i];
 		deleteTask(id);
 	}
 }
 
-export function save (options:any = {}):void {
-	let allTasks:any = settings.has('tasks') ? settings.get('tasks') : {};
-	let id:any = utilities.generateId(6);
+export function save (options: any = {}): void {
+	let allTasks: any = settings.has('tasks') ? settings.get('tasks') : {};
+	let id: any = utilities.generateId(6);
 	allTasks[id] = options;
 	settings.set('tasks', allTasks, { prettify: true });
 }

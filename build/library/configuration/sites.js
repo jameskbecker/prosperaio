@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.captcha = exports.def = void 0;
 exports.def = {
+    'footlocker-de': {
+        enabled: false,
+        type: 'footlocker-eu',
+        label: 'Footlocker DE',
+        baseUrl: 'https://www.footlocker.de'
+    },
     'kickz': {
         enabled: false,
         type: 'kickz',

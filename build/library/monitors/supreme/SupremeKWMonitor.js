@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const request = require('request-promise-native');
-const settings = require('electron-settings');
-const ipcWorker = require('electron').ipcRenderer;
-const { logger, utilities } = require('../../other');
+const request_promise_native_1 = __importDefault(require("request-promise-native"));
+const electron_settings_1 = __importDefault(require("electron-settings"));
+const electron_1 = require("electron");
+const other_1 = require("../../other");
 class SupremeKWMonitor {
     constructor(_options = {}) {
-        logger.info('[Monitor] [' + _options.proxyList + '] Inititalising KW Monitor.');
+        other_1.logger.info('[Monitor] [' + _options.proxyList + '] Inititalising KW Monitor.');
         this.baseUrl = _options.baseUrl;
         this.proxy = _options.proxy ? _options.proxy : null;
         this.inputData = {};
@@ -106,7 +109,7 @@ class SupremeKWMonitor {
         if (!ids) {
             for (let i = 0; i < Object.keys(this.inputData).length; i++) {
                 for (let j = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
-                    ipcWorker.send('task.setStatus', {
+                    electron_1.ipcRenderer.send('task.setStatus', {
                         id: this.inputData[Object.keys(this.inputData)[i]]['IDS'][j],
                         message: message,
                         color
@@ -116,7 +119,7 @@ class SupremeKWMonitor {
         }
         else {
             for (let i = 0; i < ids.length; i++) {
-                ipcWorker.send('task.setStatus', {
+                electron_1.ipcRenderer.send('task.setStatus', {
                     id: ids[i],
                     message: message,
                     color
@@ -125,7 +128,7 @@ class SupremeKWMonitor {
         }
     }
     _fetchStockData(endpoint) {
-        logger.info('[Monitor] [' + endpoint + '] Polling Supreme Stock Data.');
+        other_1.logger.info('[Monitor] [' + endpoint + '] Polling Supreme Stock Data.');
         this.setStatus('Searching for Product.', 'WARNING');
         let options = {
             url: this.baseUrl + '/' + endpoint + '.json',
@@ -135,7 +138,7 @@ class SupremeKWMonitor {
             gzip: true,
             time: true,
             resolveWithFullResponse: true,
-            timeout: settings.has('globalTimeoutDelay') ? parseInt(settings.get('globalTimeoutDelay')) : 5000,
+            timeout: electron_settings_1.default.has('globalTimeoutDelay') ? parseInt(electron_settings_1.default.get('globalTimeoutDelay')) : 5000,
             headers: {
                 'accept': 'application/json',
                 'accept-encoding': 'br, gzip, deflate',
@@ -146,30 +149,32 @@ class SupremeKWMonitor {
             }
         };
         console.log(options);
-        request(options)
+        request_promise_native_1.default(options)
             .then((response) => {
             let body = response.body;
             console.log(Object.keys(body));
             let categories = body.products_and_categories;
             if (Object.keys(categories).length === 0) {
                 this.setStatus('Webstore Closed.', 'ERROR');
-                let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
+                let monitorDelay = electron_settings_1.default.has('globalMonitorDelay') ? parseInt(electron_settings_1.default.get('globalMonitorDelay')) : 1000;
                 this._isRunning = false;
-                return setTimeout(this.run.bind(this), monitorDelay);
+                setTimeout(this.run.bind(this), monitorDelay);
+                return;
             }
-            Object.keys(this.inputData).forEach(propName => {
+            Object.keys(this.inputData).forEach((propName) => {
                 let data = this.inputData[propName];
                 this.setStatus('Searching for Product.', 'WARNING', data['IDS']);
                 let parsedCategory = this._parseCategory(data['CATEGORY']);
                 if (!categories.hasOwnProperty(parsedCategory)) {
-                    logger.error('[Monitor] Category Not Found.');
+                    other_1.logger.error('[Monitor] Category Not Found.');
                     this.setStatus('Category Not Found.', 'ERROR');
-                    let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
+                    let monitorDelay = electron_settings_1.default.has('globalMonitorDelay') ? parseInt(electron_settings_1.default.get('globalMonitorDelay')) : 1000;
                     this._isRunning = false;
-                    return setTimeout(this.run.bind(this), monitorDelay);
+                    setTimeout(this.run.bind(this), monitorDelay);
+                    return;
                 }
                 else {
-                    logger.verbose(`[Monitor] Matched Category: ${parsedCategory}`);
+                    other_1.logger.verbose(`[Monitor] Matched Category: ${parsedCategory}`);
                     let products = categories[parsedCategory];
                     let productName;
                     let productId;
@@ -183,21 +188,22 @@ class SupremeKWMonitor {
                         }
                     }
                     if (!productId) {
-                        logger.error('[Monitor] Product Not Found.');
+                        other_1.logger.error('[Monitor] Product Not Found.');
                         this.setStatus('Product Not Found.', 'ERROR', data['IDS']);
-                        let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
+                        let monitorDelay = electron_settings_1.default.has('globalMonitorDelay') ? parseInt(electron_settings_1.default.get('globalMonitorDelay')) : 1000;
                         this._isRunning = false;
-                        return setTimeout(this.run.bind(this), monitorDelay);
+                        setTimeout(this.run.bind(this), monitorDelay);
+                        return;
                     }
                     else {
-                        logger.verbose(`[Monitor] [${endpoint}] Matched Product: ${productName} (${productId}).`);
+                        other_1.logger.verbose(`[Monitor] [${endpoint}] Matched Product: ${productName} (${productId}).`);
                         this._returnData(propName, productName, productId, productPrice);
                     }
                 }
             });
         })
             .catch((error) => {
-            Object.keys(this.inputData).forEach(propName => {
+            Object.keys(this.inputData).forEach((propName) => {
                 let data = this.inputData[propName];
                 let message;
                 if (error && error.error) {
@@ -210,11 +216,13 @@ class SupremeKWMonitor {
                             message = 'Connection Error.';
                     }
                 }
-                logger.error(`[Monitor] ${error.message}.`);
+                other_1.logger.error(`[Monitor] ${error.message}.`);
                 this.setStatus(message, 'ERROR', data['IDS']);
             });
             this._isRunning = false;
-            return setTimeout(this.run.bind(this), settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000);
+            let errorDelay = electron_settings_1.default.has('globalErrorDelay') ? parseInt(electron_settings_1.default.get('globalErrorDelay')) : 1000;
+            setTimeout(this.run.bind(this), errorDelay);
+            return;
         });
     }
     _returnData(propName, name, id, price) {

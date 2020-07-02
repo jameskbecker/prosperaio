@@ -158,7 +158,9 @@ export class Worker {
 			for (let i: any = 0; i < args.quantity; i++) {
 				let taskData: any = args.data;
 				let allTasks: any = settings.has('tasks') ? settings.get('tasks') : {};
-				let taskId: any = utilities.generateId(6);
+				let taskId: string;
+				if (args.taskId) taskId = args.taskId;
+				else taskId =  utilities.generateId(6);
 				allTasks[taskId] = taskData;
 				settings.set('tasks', allTasks, { prettify: true });
 				ipcWorker.send('sync settings', 'task');

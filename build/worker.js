@@ -162,7 +162,11 @@ class Worker {
             for (let i = 0; i < args.quantity; i++) {
                 let taskData = args.data;
                 let allTasks = electron_settings_1.default.has('tasks') ? electron_settings_1.default.get('tasks') : {};
-                let taskId = index_1.utilities.generateId(6);
+                let taskId;
+                if (args.taskId)
+                    taskId = args.taskId;
+                else
+                    taskId = index_1.utilities.generateId(6);
                 allTasks[taskId] = taskData;
                 electron_settings_1.default.set('tasks', allTasks, { prettify: true });
                 electron_1.ipcRenderer.send('sync settings', 'task');

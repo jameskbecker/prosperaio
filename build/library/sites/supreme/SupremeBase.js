@@ -11,6 +11,7 @@ const supreme_1 = require("../../monitors/supreme");
 const configuration_1 = __importDefault(require("../../configuration"));
 const electron_settings_1 = __importDefault(require("electron-settings"));
 const request_promise_native_1 = __importDefault(require("request-promise-native"));
+const tough_cookie_1 = require("tough-cookie");
 const cheerio_1 = __importDefault(require("cheerio"));
 const uuid_1 = require("uuid");
 class SupremeBase extends Task_1.default {
@@ -35,13 +36,12 @@ class SupremeBase extends Task_1.default {
             timeout: electron_settings_1.default.has('globalTimeoutDelay') ? parseInt(electron_settings_1.default.get('globalTimeoutDelay')) : 5000,
             resolveWithFullResponse: true
         });
-        this.cookieJar = this.request.jar();
+        this.cookieJar = new tough_cookie_1.CookieJar();
         this.formElements = [];
         this.cookieSub = '';
         this.slug = '';
         this.checkoutAttempts = 0;
-        this.checkoutData = {};
-        this.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Snapchat/10.77.0.54 (like Safari/604.1)';
+        this.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
         switch (this.taskData.site) {
             case 'supreme-eu':
                 this.region = 'EU';
@@ -64,40 +64,44 @@ class SupremeBase extends Task_1.default {
     _fetchStockData() {
         return new Promise((resolve, reject) => {
             async function runStage() {
-                if (!Worker_1.Worker.monitors.supreme.kw) {
-                    Worker_1.Worker.monitors.supreme.kw = new supreme_1.SupremeKWMonitor({
-                        baseUrl: this.baseUrl,
-                        proxy: this.proxy
-                    });
-                }
-                let searchInput = this.products[0].searchInput;
-                let category = this.products[0].category;
-                let maxPrice = this.taskData.additional.maxPrice;
-                if (!searchInput.includes('+') && !searchInput.includes('-')) {
-                    this.setStatus('Invalid Search Input.', 'ERROR');
-                    reject(new Error('INVALID INPUT'));
-                    return;
-                }
-                other_1.logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
-                this.setStatus('Fetching Stock Data.', 'WARNING');
-                this.isMonitoringKW = true;
-                if (this.shouldStop)
-                    return this._stop();
-                Worker_1.Worker.monitors.supreme.kw.add(this.id, searchInput, category, (name, id, price) => {
-                    this.isMonitoringKW = false;
-                    if (maxPrice > 0 && (price / 100) > maxPrice) {
-                        this.setStatus('Price Exceeds Limit.', 'ERROR');
-                        reject(new Error('PRICE LIMIT'));
+                try {
+                    if (!Worker_1.Worker.monitors.supreme.kw) {
+                        Worker_1.Worker.monitors.supreme.kw = new supreme_1.SupremeKWMonitor({
+                            baseUrl: this.baseUrl,
+                            proxy: this.proxy
+                        });
+                    }
+                    let searchInput = this.products[0].searchInput;
+                    let category = this.products[0].category;
+                    let maxPrice = this.taskData.additional.maxPrice;
+                    if (!searchInput.includes('+') && !searchInput.includes('-')) {
+                        this.setStatus('Invalid Search Input.', 'ERROR');
+                        reject(new Error('INVALID INPUT'));
                         return;
                     }
-                    this.startTS = Date.now();
-                    this.productId = id;
-                    this.productName = name;
-                    this.mobileUrl = this.baseUrl + '/mobile#products/' + this.productId;
-                    this._productUrl = this.baseUrl + '/shop/' + this.productId;
-                    resolve();
-                    return;
-                });
+                    other_1.logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
+                    this.setStatus('Fetching Stock Data.', 'WARNING');
+                    this.isMonitoringKW = true;
+                    if (this.shouldStop)
+                        throw new Error('STOP');
+                    Worker_1.Worker.monitors.supreme.kw.add(this.id, searchInput, category, (name, id, price) => {
+                        this.isMonitoringKW = false;
+                        if (maxPrice > 0 && (price / 100) > maxPrice) {
+                            this.setStatus('Price Exceeds Limit.', 'ERROR');
+                            reject(new Error('PRICE LIMIT'));
+                            return;
+                        }
+                        this.startTS = Date.now();
+                        this.productId = id;
+                        this.productName = name;
+                        this.mobileUrl = this.baseUrl + '/mobile#products/' + this.productId;
+                        this._productUrl = this.baseUrl + '/shop/' + this.productId;
+                        resolve();
+                        return;
+                    });
+                }
+                catch (error) {
+                }
             }
             runStage.bind(this)();
         });
@@ -109,14 +113,14 @@ class SupremeBase extends Task_1.default {
             }
             this.isMonitoring = true;
             if (this.shouldStop)
-                return this._stop();
+                throw new Error('STOP');
             this.setStatus('Fetching Product Data.', 'WARNING');
-            let monitorDelay = electron_settings_1.default.has('globalMonitorDelay') ? electron_settings_1.default.get('globalMonitorDelay') : 1000;
+            let monitorDelay = electron_settings_1.default.has('globalMonitorDelay') ? parseInt(electron_settings_1.default.get('globalMonitorDelay')) : 1000;
             Worker_1.Worker.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
             Worker_1.Worker.monitors.supreme.url[this._productUrl].add(this.id, (styles) => {
                 try {
                     if (this.shouldStop)
-                        return this._stop();
+                        throw new Error('STOP');
                     let sizeData;
                     let styleName;
                     let styleId;
@@ -182,7 +186,8 @@ class SupremeBase extends Task_1.default {
                             console.log(error);
                     }
                     let monitorDelay = electron_settings_1.default.has('globalMonitorDelay') ? parseInt(electron_settings_1.default.get('globalMonitorDelay')) : 1000;
-                    return setTimeout(runStage.bind(this, resolve, reject), monitorDelay);
+                    setTimeout(runStage.bind(this, resolve, reject), monitorDelay);
+                    return;
                 }
             });
         }.bind(this));
@@ -196,7 +201,7 @@ class SupremeBase extends Task_1.default {
             let formElement = $(this)[0].attribs;
             let output = {};
             let attributes = ['name', 'id', 'placeholder', 'value', 'style'];
-            attributes.forEach(attribute => {
+            attributes.forEach((attribute) => {
                 if (Object.hasOwnProperty.bind(formElement)(attribute)) {
                     output[attribute] = formElement[attribute];
                 }
@@ -232,10 +237,13 @@ class SupremeBase extends Task_1.default {
                     if (!isCheckoutResponse) {
                         this._pollStatus()
                             .then((response) => {
+                            console.log(response.body);
                             this.checkoutData = response.body;
                         })
                             .catch((error) => {
-                            return setTimeout(runStage.bind(this), 1000);
+                            console.log(error);
+                            setTimeout(runStage.bind(this, false), 1000);
+                            return;
                         });
                     }
                     let error;
@@ -246,7 +254,8 @@ class SupremeBase extends Task_1.default {
                             other_1.logger.warn(this.slug ? `[T.${this.id}] Queued - ${this.slug}.` : `[T.${this.id}] Queued.`);
                             if (this.checkoutData.hasOwnProperty('slug'))
                                 this.slug = this.checkoutData.slug;
-                            return setTimeout(runStage.bind(this, false), 1000);
+                            setTimeout(runStage.bind(this, false), 1000);
+                            return;
                         case 'failed':
                             if (this.checkoutData.hasOwnProperty('id'))
                                 this.orderNumber = this.checkoutData.id;
@@ -259,7 +268,8 @@ class SupremeBase extends Task_1.default {
                                 other_1.logger.error(`[T.${this.id}] Payment Failed.`);
                                 if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
                                     let errorDelay = electron_settings_1.default.has('errorDelay') ? parseInt(electron_settings_1.default.get('errorDelay')) : 1000;
-                                    return setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
+                                    setTimeout(this._retryCheckout.bind(this), errorDelay);
+                                    return;
                                 }
                                 else {
                                     error = new Error();
@@ -272,7 +282,7 @@ class SupremeBase extends Task_1.default {
                                 other_1.logger.error(`[T.${this.id}] Payment Failed.`);
                                 if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
                                     let errorDelay = electron_settings_1.default.has('errorDelay') ? parseInt(electron_settings_1.default.get('errorDelay')) : 1000;
-                                    setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
+                                    setTimeout(this._retryCheckout.bind(this), errorDelay);
                                 }
                                 else {
                                     error = new Error();
@@ -290,7 +300,7 @@ class SupremeBase extends Task_1.default {
                             this.cardinal.consumerData = this.checkoutData.consumer;
                             this.authHandler()
                                 .then(() => {
-                                return this._submitCheckout('cardinal');
+                                return this._submitCheckout('checkout/' + this.slug + '/cardinal.json');
                             })
                                 .then((response) => {
                                 console.log(response.body);
@@ -308,7 +318,8 @@ class SupremeBase extends Task_1.default {
                         case 'cardinal_queued':
                             this.setStatus('Processing...', 'WARNING');
                             other_1.logger.warn(`[T.${this.id}] Cardinal Queued.`);
-                            return setTimeout(runStage.bind(this, false), 1000);
+                            setTimeout(runStage.bind(this, false), 1000);
+                            return;
                         case 'paid':
                             if (this.checkoutData.hasOwnProperty('id'))
                                 this.orderNumber = this.checkoutData.id;
@@ -518,9 +529,6 @@ class SupremeBase extends Task_1.default {
     _setCookie(name, value) {
         let url = this.baseUrl.replace('https://', '');
         try {
-            if (this.cookieJar._jar.store.idx[url]) {
-                delete this.cookieJar._jar.store.idx[url]['/']['' + name];
-            }
         }
         catch (err) {
             console.log(err);
@@ -533,13 +541,49 @@ class SupremeBase extends Task_1.default {
             console.log(err);
         }
     }
+    async _retryCheckout() {
+        await this._atcProcess();
+        await this._checkoutProcess();
+        await this._processStatus();
+        if (this.successful) {
+            this.setStatus('Success.', 'SUCCESS');
+            let privateFields = [];
+            let publicFields = [];
+            if (this._productStyleName) {
+                let field = {
+                    name: 'Colour:',
+                    value: this._productStyleName,
+                    inline: true
+                };
+                privateFields.push(field);
+                publicFields.push(field);
+            }
+            if (this.checkoutData.hasOwnProperty('status')) {
+                let field = {
+                    name: 'Status:',
+                    value: this.checkoutData.status.capitalise(),
+                    inline: true
+                };
+                privateFields.push(field);
+            }
+            if (this.cardinal.id) {
+                let field = {
+                    name: 'Transaction ID:',
+                    value: '||' + this.cardinal.id + '||',
+                    inline: true
+                };
+                privateFields.push(field);
+            }
+            this._postPublicWebhook(publicFields);
+            this._postPrivateWebhook(privateFields);
+            this._addToAnalystics();
+        }
+        else {
+            console.log('failed');
+        }
+        this.isActive = false;
+    }
     _deleteCookie(name) {
-        try {
-            delete this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/']['' + name];
-        }
-        catch (err) {
-            console.log(err);
-        }
     }
     _getCookie(name) {
         try {
@@ -568,16 +612,31 @@ class SupremeBase extends Task_1.default {
                         break;
                     case 'TOO MANY REQUESTS':
                         console.log('Reached Rate Limit.');
-                        return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
-                        break;
+                        setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 5000);
+                        return;
                     case 'BAD REQUEST':
                         console.log('Format Error');
                         console.log(JSON.stringify(response.body));
                         break;
                     default:
                         console.log(response.statusCode, response.statusMessage);
+                        setTimeout(this._postPrivateWebhook.bind(this, additonalFields));
                 }
             }
+        });
+    }
+    _setupThreeDS() {
+        return new Promise((resolve) => {
+            console.log('helklsj');
+            other_1.logger.debug('Submitting Initial JWT.', this);
+            electron_1.ipcRenderer.send('cardinal.setup', {
+                jwt: this.cardinal.serverJWT,
+                profile: this.profileName,
+                taskId: this.id
+            });
+            electron_1.ipcRenderer.once(`cardinal.setupComplete(${this.id})`, (event, args) => {
+                resolve(args.cardinalId);
+            });
         });
     }
     _postPrivateWebhook(additonalFields = []) {
@@ -600,8 +659,8 @@ class SupremeBase extends Task_1.default {
                             break;
                         case 'TOO MANY REQUESTS':
                             console.log('Reached Rate Limit.');
-                            return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
-                            break;
+                            setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
+                            return;
                         case 'BAD REQUEST':
                             console.log('Format Error');
                             console.log(JSON.stringify(response.body));

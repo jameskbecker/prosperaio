@@ -110,10 +110,6 @@ class Task {
                 console.log(err);
             }
         }
-        if (this.hasOwnProperty('browser')) {
-            other_1.logger.info(`[${this.id}] Closing Browser`);
-            this.browser.close();
-        }
         this.productName = this.taskData.products[0].searchInput;
         this.sizeName = this.taskData.products[0].size;
         this.setStatus('Stopped.', 'ERROR');
@@ -191,9 +187,6 @@ class Task {
                 let hour = parseInt(timeInput.split(':')[0]);
                 let minute = parseInt(timeInput.split(':')[1]);
                 let second = parseInt(timeInput.split(':')[2]);
-                console.log({
-                    year, month, day, hour, minute, second
-                });
                 scheduledTime.setFullYear(year, month - 1, day);
                 scheduledTime.setHours(hour);
                 scheduledTime.setMinutes(minute);

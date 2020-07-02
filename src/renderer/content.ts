@@ -3,17 +3,78 @@ import settings from 'electron-settings';
 import { ipcRenderer } from 'electron';
 import { default as config } from '../library/configuration';
 import * as profileActions from './profiles';
-const $:Function = require('jquery');
+const $: Function = require('jquery');
 //const dropData = require('../mock-drop');
-import {default as dropList} from './droplist';
-import { siteDataProps, profileDataProps } from '../data-types';
+import { default as dropList } from './droplist';
+import { siteDataProps, profileDataProps, UserData } from '../data-types';
+import { Mouse } from 'puppeteer-core';
+
+function populateTaskForm(taskData: UserData.task, taskId: string): void {
+	newTask_Site.value = taskData.site;
+	newTask_Site.onchange(new Event(''));
+	newTask_Profile.value = taskData.setup.profile;
+
+	newTask_Mode.value = taskData.setup.mode;
+	newTask_RestockMode.value = taskData.setup.restockMode;
+	newTask_CheckoutAttempts.value = taskData.setup.checkoutAttempts.toString();
+
+	newTask_CartDelay.value = taskData.delays.cart.toString();
+	newTask_CheckoutDelay.value = taskData.delays.checkout.toString();
+	newTask_ProxyList.value = taskData.additional.proxyList;
+	newTask_PriceLimit.value = taskData.additional.maxPrice.toString();
+	newTask_StartDate.value = taskData.additional.timer.split(' ')[0];
+	newTask_StartTime.value = taskData.additional.timer.split(' ')[1];
+
+	newTask_Restocks.checked = taskData.additional.monitorRestocks;
+	newTask_SkipCaptcha.checked = taskData.additional.skipCaptcha;
+	newTask_threeD.checked = taskData.additional.enableThreeDS;
+
+	newTask_SearchInput[0].value = taskData.products[0].searchInput;
+	newTask_Category[0].value = taskData.products[0].category;
+	newTask_Size[0].value = taskData.products[0].size;
+	newTask_Style[0].value = taskData.products[0].style;
+	newTask_ProductQty[0].value = taskData.products[0].productQty;
+
+	newTask_id.value = taskId;
+}
+
+export function resetTaskForm(): void {
+	newTask_Site.value = '';
+	newTask_Site.onchange(new Event(''));
+	newTask_Profile.value = '';
+
+	newTask_Mode.value = '';
+	newTask_RestockMode.value = '';
+	newTask_CheckoutAttempts.value = '';
+
+	newTask_CartDelay.value = '0';
+	newTask_CheckoutDelay.value = '0';
+	newTask_ProxyList.value = '';
+	newTask_PriceLimit.value = '0';
+	newTask_StartDate.value = '';
+	newTask_StartTime.value = '';
+
+	newTask_Restocks.checked = true;
+	newTask_SkipCaptcha.checked = false;
+	newTask_threeD.checked = false;
+
+	newTask_SearchInput[0].value = '';
+	newTask_Category[0].value = '';
+	newTask_Size[0].value = '';
+	newTask_Style[0].value = '';
+	newTask_ProductQty[0].value = '1';
+
+	newTask_id.value = '';
+	$('#newTaskModal').modal('hide');
+}
 
 
 
 
-var newTask_products:HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskProducts');
-var newTask_styles:HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskStyles');
-var newTask_sizes:HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskSizes');
+
+var newTask_products: HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskProducts');
+var newTask_styles: HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskStyles');
+var newTask_sizes: HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskSizes');
 
 var newTask_SearchInput: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskSearchInput"]');
 var newTask_Category: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskCategory"]');
@@ -21,7 +82,7 @@ var newTask_Size: NodeListOf<HTMLInputElement> = document.querySelectorAll('inpu
 var newTask_Style: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskVariant"]');
 var newTask_ProductQty: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskProductQty"]');
 
-function convertMode(id:string):string {
+function convertMode(id: string): string {
 	switch (id) {
 		case 'supreme-request': return 'Fast';
 		case 'supreme-browser': return 'Safe';
@@ -31,30 +92,42 @@ function convertMode(id:string):string {
 	}
 }
 
-function renderTaskTable():void {
-	let tasks:any = settings.has('tasks') ? settings.get('tasks') : {};
-	let profiles:any = settings.has('profiles') ? settings.get('profiles') : {};
+function renderTaskTable(): void {
+	var newTaskButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('newTaskButton');
+	newTaskButton.onclick = function(): void {
+		//resetTaskForm();
+		$('#newTaskModal').modal('show');
+	};
 
-	var tasksHeader:HTMLElement = document.getElementById('tasksHeader');
-	var taskTableBody:HTMLElement = document.getElementById('taskTableBody');
-	
+	let tasks: UserData.allTasks = settings.has('tasks') ? <UserData.allTasks><unknown>settings.get('tasks') : {};
+	let profiles: any = settings.has('profiles') ? settings.get('profiles') : {};
+
+	var tasksHeader: HTMLElement = document.getElementById('tasksHeader');
+	var taskTableBody: HTMLElement = document.getElementById('taskTableBody');
+
 	tasksHeader.innerHTML = `Tasks (${Object.keys(tasks).length} Total)`;
 	taskTableBody.innerHTML = '';
 
 	try {
 		for (let i: number = 0; i < Object.keys(tasks).length; i++) {
-			let taskRow:HTMLTableRowElement = document.createElement('tr');
+			let taskId: string = Object.keys(tasks)[i];
+			let taskRow: HTMLTableRowElement = document.createElement('tr');
 			taskRow.className = 'row';
 
-			let taskId:string = Object.keys(tasks)[i];
+			taskRow.onclick = function (): void {
+				populateTaskForm(tasks[taskId], taskId);
+				$('#newTaskModal').modal('show');
+			};
+
+			
 			// let idCell = document.createElement('td');
 			// idCell.innerHTML = taskId;
 			// idCell.className = 'cell cell-body col-id';
 			// taskRow.appendChild(idCell);
 
-			let siteCell:HTMLTableCellElement = document.createElement('td');
-			let defaultSiteData:any = config.sites.def;
-			let siteData:siteDataProps = defaultSiteData[tasks[taskId].site];
+			let siteCell: HTMLTableCellElement = document.createElement('td');
+			let defaultSiteData: any = config.sites.def;
+			let siteData: siteDataProps = defaultSiteData[tasks[taskId].site];
 			siteCell.innerHTML = siteData ? siteData.label : '';
 			siteCell.className = 'cell cell-body col-site';
 			taskRow.appendChild(siteCell);
@@ -86,8 +159,6 @@ function renderTaskTable():void {
 			proxyCell.className = 'cell cell-body col-task-proxy';
 			taskRow.appendChild(proxyCell);
 
-
-
 			let timerCell: HTMLTableCellElement = document.createElement('td');
 			timerCell.innerHTML = '' + tasks[taskId].additional.timer !== ' ' ? tasks[taskId].additional.timer : 'None';
 			timerCell.className = 'cell cell-body col-timer';
@@ -106,7 +177,8 @@ function renderTaskTable():void {
 			startButton.innerHTML = '<i class="fas fa-play"></i>';
 			startButton.className = 'action-button';
 			startButton.setAttribute('data-taskId', taskId);
-			startButton.onclick = function ():void {				
+			startButton.onclick = function (event: MouseEvent): void {
+				event.stopImmediatePropagation();
 				ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
 			};
 			actionsCell.appendChild(startButton);
@@ -115,51 +187,18 @@ function renderTaskTable():void {
 			stopButton.innerHTML = '<i class="fas fa-stop"></i>';
 			stopButton.className = 'action-button';
 			stopButton.setAttribute('data-taskId', taskId);
-			stopButton.onclick = function ():void {
+			stopButton.onclick = function (event: MouseEvent): void {
+				event.stopImmediatePropagation();
 				ipcRenderer.send('task.stop', taskId);
 			};
 			actionsCell.appendChild(stopButton);
-
-			// let editButton = document.createElement('div');
-			// editButton.innerHTML = '<i class="fas fa-edit"></i>';
-			// editButton.className = 'action-button';
-			// editButton.setAttribute('data-taskId', taskId);
-			// editButton.onclick = function () { 
-			// 	require('jquery')('#newTaskModal').modal('show');
-			// 	let tasks = settings.get('tasks');
-
-			// 	newTask_Site.value = tasks[taskId].site;
-			// 	newTask_Profile.value = tasks[taskId].setup.profile;
-			// 	newTask_CheckoutAttempts.value = tasks[taskId].setup.checkoutAttempts;
-			// 	newTask_Quantity.value = '1';
-			// 	newTask_Mode.value = tasks[taskId].setup.mode;
-			// 	newTask_RestockMode.value = tasks[taskId].setup.restockMode;
-
-			// 	newTask_CartDelay.value = tasks[taskId].delays.cart;
-			// 	newTask_CheckoutDelay.value = tasks[taskId].delays.checkout;
-
-			// 	newTask_ProxyList.value;
-			// 	newTask_PriceLimit.value;
-			// 	newTask_StartDate.value;
-			// 	newTask_StartTime.value;
-
-			// 	newTask_Restocks.checked = tasks[taskId].additional.monitorRestocks;
-			// 	newTask_SkipCaptcha.checked = tasks[taskId].additional.skipCaptcha;
-			// 	newTask_threeD.checked = tasks[taskId].additional.enableThreeDS;
-
-			// 	newTask_SearchInput[0].value = tasks[taskId].products[0].searchInput;
-			// 	newTask_Style[0].value = tasks[taskId].products[0].style;
-			// 	newTask_Category[0].value = tasks[taskId].products[0].category;
-			// 	newTask_Size[0].value = tasks[taskId].products[0].size;
-			// 	newTask_ProductQty[0].value = tasks[taskId].products[0].productQty;
-			// };
-			//actionsCell.appendChild(editButton);
 
 			let duplicateButton: HTMLButtonElement = document.createElement('button');
 			duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 			duplicateButton.className = 'action-button';
 			duplicateButton.setAttribute('data-taskId', taskId);
-			duplicateButton.onclick = function ():void {
+			duplicateButton.onclick = function (event: MouseEvent): void {
+				event.stopImmediatePropagation();
 				ipcRenderer.send('task.duplicate', taskId);
 			};
 			actionsCell.appendChild(duplicateButton);
@@ -168,7 +207,8 @@ function renderTaskTable():void {
 			deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 			deleteButton.className = 'action-button';
 			deleteButton.setAttribute('data-taskId', taskId);
-			deleteButton.onclick = function ():void {
+			deleteButton.onclick = function (event: MouseEvent): void {
+				event.stopImmediatePropagation();
 				ipcRenderer.send('task.delete', taskId);
 			};
 			actionsCell.appendChild(deleteButton);
@@ -185,14 +225,14 @@ function renderTaskTable():void {
 			taskTableBody.appendChild(taskRow);
 
 		}
-	} catch (err) { console.log(err);}
+	} catch (err) { console.log(err); }
 }
 
-function renderProxyTable(name:string):void {
+function renderProxyTable(name: string): void {
 	try {
-		var proxyTestTable:HTMLElement = document.getElementById('proxyTestResults');
-		let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
-		let list:any = proxyLists[name];
+		var proxyTestTable: HTMLElement = document.getElementById('proxyTestResults');
+		let proxyLists: any = settings.has('proxies') ? settings.get('proxies') : {};
+		let list: any = proxyLists[name];
 		if (list) {
 			// document.getElementById('proxy-header').innerHTML = '';
 			// document.getElementById('proxy-header').innerHTML = `Proxies (${Object.keys(list).length} Total)`;
@@ -203,9 +243,9 @@ function renderProxyTable(name:string):void {
 				proxyRow.className = 'row';
 				proxyRow.setAttribute('data-row-id', proxyId);
 
-				
+
 				let ipCell: HTMLTableCellElement = document.createElement('td');
-				let splitProxy:string[] = list[proxyId].split(':');
+				let splitProxy: string[] = list[proxyId].split(':');
 				ipCell.innerHTML = splitProxy[0] ? splitProxy[0] : 'localhost';
 				ipCell.className = 'cell cell-body col-proxy';
 				proxyRow.appendChild(ipCell);
@@ -238,11 +278,11 @@ function renderProxyTable(name:string):void {
 				let actionsCell: HTMLTableCellElement = document.createElement('td');
 				actionsCell.className = 'cell cell-body col-proxy';
 
-				let startButton:HTMLElement = document.createElement('div');
+				let startButton: HTMLElement = document.createElement('div');
 				startButton.innerHTML = '<i class="fas fa-vial"></i>';
 				startButton.className = 'action-button';
 				startButton.setAttribute('data-proxyId', proxyId);
-				startButton.onclick = function ():void {
+				startButton.onclick = function (): void {
 					ipcRenderer.send('proxyList.test', {
 						baseUrl: proxyTestSite.value,
 						id: proxyId,
@@ -251,13 +291,13 @@ function renderProxyTable(name:string):void {
 				};
 				actionsCell.appendChild(startButton);
 
-				let deleteButton:HTMLElement = document.createElement('div');
+				let deleteButton: HTMLElement = document.createElement('div');
 				deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 				deleteButton.className = 'action-button';
-				deleteButton.onclick = function (this: HTMLElement):void {
+				deleteButton.onclick = function (this: HTMLElement): void {
 					delete list[proxyId];
 					settings.set('proxies', proxyLists, { prettify: true });
-					let row:HTMLTableRowElement = <HTMLTableRowElement>this.parentNode.parentNode;
+					let row: HTMLTableRowElement = <HTMLTableRowElement>this.parentNode.parentNode;
 					row.parentNode.removeChild(row);
 				};
 				actionsCell.appendChild(deleteButton);
@@ -272,35 +312,35 @@ function renderProxyTable(name:string):void {
 	}
 }
 
-function renderSites():void {
-	const siteKeys:any = Object.keys(config.sites.def);
+function renderSites(): void {
+	const siteKeys: any = Object.keys(config.sites.def);
 	for (let i: number = 0; i < siteKeys.length; i++) {
-		
-		let defaultSiteData:any = config.sites.def;
-		let site:any = defaultSiteData[siteKeys[i]];
+
+		let defaultSiteData: any = config.sites.def;
+		let site: any = defaultSiteData[siteKeys[i]];
 		if (site.enabled) {
-			for (let j:any = 0; j < siteSelectors.length; j++) {
-				let siteOption:HTMLOptionElement = document.createElement('option');
+			for (let j: any = 0; j < siteSelectors.length; j++) {
+				let siteOption: HTMLOptionElement = document.createElement('option');
 				siteOption.value = siteKeys[i];
 				siteOption.label = site.label;
 				siteSelectors[j].add(siteOption);
 			}
 		}
 	}
-	newTask_Site.onchange = function ():void {
+	newTask_Site.onchange = function (this: HTMLSelectElement): void {
 		newTask_Mode.disabled = false;
 		newTask_RestockMode.disabled = false;
-		let defaultSiteData:any = config.sites.def;
-		let selectedSite:any = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
+		let defaultSiteData: any = config.sites.def;
+		let selectedSite: any = defaultSiteData[this.value] ? defaultSiteData[this.value] : null;
 		if (selectedSite) {
-			newTask_Mode.onchange = function ():void {
+			newTask_Mode.onchange = function (this: HTMLSelectElement): void {
 				newTask_RestockMode.options.length = 0;
 
-				let stockMode:HTMLOptionElement = document.createElement('option');
+				let stockMode: HTMLOptionElement = document.createElement('option');
 				stockMode.label = 'Stock (Recommended)';
 				stockMode.value = 'stock';
 
-				let cartMode:HTMLOptionElement = document.createElement('option');
+				let cartMode: HTMLOptionElement = document.createElement('option');
 				cartMode.label = 'Cart';
 				cartMode.value = 'cart';
 
@@ -329,20 +369,20 @@ function renderSites():void {
 			newTask_ProductQty[0].disabled = false;
 			newTask_SearchInput[0].disabled = false;
 			newTask_Mode.options.length = 0;
-			let requestMode:HTMLOptionElement = document.createElement('option');
-			
+			let requestMode: HTMLOptionElement = document.createElement('option');
+
 			switch (selectedSite.type) {
 				case 'kickz':
 					newTask_Style[0].parentElement.style.display = 'none';
 					newTask_Category[0].parentElement.style.display = 'none';
 					newTask_SearchInput[0].placeholder = 'Enter Product Url.';
 
-					let wireMode:HTMLOptionElement = document.createElement('option');
+					let wireMode: HTMLOptionElement = document.createElement('option');
 					wireMode.label = 'Request - Wire Transfer';
 					wireMode.value = 'kickz-wire';
 					newTask_Mode.add(wireMode);
 
-					let paypalMode:HTMLOptionElement = document.createElement('option');
+					let paypalMode: HTMLOptionElement = document.createElement('option');
 					paypalMode.label = 'Request - PayPal';
 					paypalMode.value = 'kickz-paypal';
 					newTask_Mode.add(paypalMode);
@@ -358,7 +398,7 @@ function renderSites():void {
 					requestMode.value = 'supreme-request';
 					newTask_Mode.add(requestMode);
 
-					let browserMode:HTMLOptionElement = document.createElement('option');
+					let browserMode: HTMLOptionElement = document.createElement('option');
 					browserMode.label = 'Safe';
 					browserMode.value = 'supreme-browser';
 					newTask_Mode.add(browserMode);
@@ -369,12 +409,12 @@ function renderSites():void {
 					newTask_Category[0].parentElement.style.display = 'none';
 					newTask_SearchInput[0].placeholder = 'Enter Keywords or Product Url.';
 
-					let fastMode:HTMLOptionElement = document.createElement('option');
+					let fastMode: HTMLOptionElement = document.createElement('option');
 					fastMode.label = 'API (Fast)';
 					fastMode.value = 'shopify-api';
 					newTask_Mode.add(fastMode);
 
-					let safeMode:HTMLOptionElement = document.createElement('option');
+					let safeMode: HTMLOptionElement = document.createElement('option');
 					safeMode.label = 'Frontend (Safe)';
 					safeMode.value = 'shopify-frontend';
 					newTask_Mode.add(safeMode);
@@ -387,71 +427,80 @@ function renderSites():void {
 			}
 			catch (err) { }
 
+			newTask_styles.onchange = function (this: HTMLSelectElement): void {
+				newTask_Style[0].value = this.value;
+			};
+
+			newTask_sizes.onchange = function (this: HTMLSelectElement): void {
+				newTask_Size[0].value = this.value;
+			};
+
+			newTask_sizes.onchange = function (this: HTMLSelectElement): void {
+				newTask_Size[0].value = this.value;
+			};
+
+
 			dropList()
-			.then((dropData):void => {
-				if (dropData[selectedSite.type]) {
-					newTask_products.options.length = 1;
-					let data:any = dropData[selectedSite.type];
-					let itemNames:any = Object.keys(data);
-	
-					for (let i: number = 0; i < itemNames.length; i++) {
-						let option:HTMLOptionElement = document.createElement('option');
-						option.label = itemNames[i];
-						option.value = itemNames[i];
-						newTask_products.options.add(option);
+				.then((dropData: any): void => {
+					if (dropData[selectedSite.type]) {
+						newTask_products.options.length = 1;
+						let data: any = dropData[selectedSite.type];
+						let itemNames: any = Object.keys(data);
+
+						for (let i: number = 0; i < itemNames.length; i++) {
+							let option: HTMLOptionElement = document.createElement('option');
+							option.label = itemNames[i];
+							option.value = itemNames[i];
+							newTask_products.options.add(option);
+						}
+
+						newTask_products.onchange = function (this: HTMLSelectElement): void {
+							newTask_Size[0].value = '';
+							// if (!this.value) {
+							// 	return customRow.style.display = 'flex';
+							// }
+							//customRow.style.display = 'none';
+							let selectedItem: any = data[this.value] ? data[this.value] : {};
+							newTask_SearchInput[0].value = selectedItem.keywords;
+							newTask_Category[0].value = selectedItem.category;
+							newTask_styles.options.length = 0;
+							for (let i: number = 0; i < selectedItem.styles.length; i++) {
+								let option: HTMLOptionElement = document.createElement('option');
+								option.label = selectedItem.styles[i].name;
+								option.value = selectedItem.styles[i].keywords;
+								newTask_styles.options.add(option);
+							}
+							
+							try {
+								newTask_styles.onchange(new Event(''));
+							}
+							catch (err) { console.log(err); }
+
+							newTask_sizes.options.length = 4;
+							for (let i: number = 0; i < selectedItem.sizes.length; i++) {
+								let option: HTMLOptionElement = document.createElement('option');
+								option.label = selectedItem.sizes[i].name;
+								option.value = selectedItem.sizes[i].keywords;
+								newTask_sizes.options.add(option);
+							}
+							
+						};
+
 					}
-	
-					newTask_products.onchange = function (this: HTMLSelectElement):void {
-						newTask_Size[0].value = '';
-						// if (!this.value) {
-						// 	return customRow.style.display = 'flex';
-						// }
-						//customRow.style.display = 'none';
-						let selectedItem:any = data[this.value] ? data[this.value] : {};
-						newTask_SearchInput[0].value = selectedItem.keywords;
-						newTask_Category[0].value = selectedItem.category;
-						newTask_styles.options.length = 0;
-						for (let i: number = 0; i < selectedItem.styles.length; i++) {
-							let option:HTMLOptionElement = document.createElement('option');
-							option.label = selectedItem.styles[i].name;
-							option.value = selectedItem.styles[i].keywords;
-							newTask_styles.options.add(option);
-						}
-						newTask_styles.onchange = function (this: HTMLSelectElement):void {
-							newTask_Style[0].value = this.value;
-						};
-						try { 
-							newTask_styles.onchange(new Event('')); 
-						} 
-						catch (err) { console.log(err); }
-						
-						newTask_sizes.options.length = 4;
-						for (let i: number = 0; i < selectedItem.sizes.length; i++) {
-							let option:HTMLOptionElement = document.createElement('option');
-							option.label = selectedItem.sizes[i].name;
-							option.value = selectedItem.sizes[i].keywords;
-							newTask_sizes.options.add(option);
-						}
-						newTask_sizes.onchange = function (this: HTMLSelectElement):void {
-							newTask_Size[0].value = this.value;
-						};
-					};
-	
-				}
-				else{
-					console.log(dropData);
-				}
-			});
-			
+					else {
+						console.log(dropData);
+					}
+				});
+
 		}
 	};
 }
 
-function renderCountries():void {
-	var countrySelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.country-selector');
+function renderCountries(): void {
+	var countrySelectors: NodeListOf<HTMLSelectElement> = document.querySelectorAll('.country-selector');
 	for (let i: number = 0; i < config.countries.length; i++) {
-		for (let j:number = 0; j < countrySelectors.length; j++) {
-			let option:HTMLOptionElement = document.createElement('option');
+		for (let j: number = 0; j < countrySelectors.length; j++) {
+			let option: HTMLOptionElement = document.createElement('option');
 			option.label = config.countries[i].label;
 			option.value = config.countries[i].value;
 			countrySelectors[j].add(option);
@@ -464,16 +513,16 @@ function renderCountries():void {
 	renderStates('profileShippingState', 'GB');
 }
 
-function renderStates(selector:string, value:string):void {
-	let selectedCountry:any = config.countries.find((country):boolean => { return country.value === value; });
-	let hasStates:boolean = selectedCountry.hasOwnProperty('states');
-	let stateElement:HTMLSelectElement = <HTMLSelectElement>document.getElementById(selector);
+function renderStates(selector: string, value: string): void {
+	let selectedCountry: any = config.countries.find((country: any): boolean => { return country.value === value; });
+	let hasStates: boolean = selectedCountry.hasOwnProperty('states');
+	let stateElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById(selector);
 	stateElement.options.length = 0;
 
 	if (hasStates) {
 		stateElement.disabled = false;
 		for (let i: number = 0; i < selectedCountry.states.length; i++) {
-			let option:HTMLOptionElement = document.createElement('option');
+			let option: HTMLOptionElement = document.createElement('option');
 			option.label = selectedCountry.states[i].label;
 			option.value = selectedCountry.states[i].value;
 			stateElement.add(option);
@@ -484,18 +533,18 @@ function renderStates(selector:string, value:string):void {
 	}
 }
 
-function renderProxyListSelectors():void {
-	let proxyLists:any = settings.has('proxies') ? settings.get('proxies') : {};
+function renderProxyListSelectors(): void {
+	let proxyLists: any = settings.has('proxies') ? settings.get('proxies') : {};
 
-	document.querySelectorAll('.proxylist-selector').forEach(function (element:HTMLSelectElement):void {
+	document.querySelectorAll('.proxylist-selector').forEach(function (element: HTMLSelectElement): void {
 		element.options.length = 1;
 	});
 
 	for (let i: number = 0; i < Object.keys(proxyLists).length; i++) {
-		let name:any = Object.keys(proxyLists)[i];
+		let name: any = Object.keys(proxyLists)[i];
 
-		document.querySelectorAll('.proxylist-selector').forEach(function (element:any):void {
-			let option:HTMLOptionElement = document.createElement('option');
+		document.querySelectorAll('.proxylist-selector').forEach(function (element: any): void {
+			let option: HTMLOptionElement = document.createElement('option');
 			option.label = name;
 			option.value = name;
 			element.options.add(option);
@@ -503,72 +552,72 @@ function renderProxyListSelectors():void {
 	}
 }
 
-function renderHarvesters():void {
-	var harvesterTable:HTMLElement = document.getElementById('harvesterTable');
+function renderHarvesters(): void {
+	var harvesterTable: HTMLElement = document.getElementById('harvesterTable');
 	harvesterTable.innerHTML = '';
-	let existingHarvesters:any = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
+	let existingHarvesters: any = settings.has('captchaHarvesters') ? settings.get('captchaHarvesters') : [];
 	for (let i: number = 0; i < existingHarvesters.length; i++) {
-		let harvesterRow:HTMLTableRowElement = document.createElement('tr');
+		let harvesterRow: HTMLTableRowElement = document.createElement('tr');
 		harvesterRow.className = 'row';
 
 		let nameCell: HTMLTableCellElement = document.createElement('td');
 		nameCell.innerHTML = existingHarvesters[i].name;
 		nameCell.className = 'cell cell-body col-profile';
-		
+
 
 		let siteCell: HTMLTableCellElement = document.createElement('td');
 		siteCell.className = 'cell cell-body col-site';
 
-		let siteSelector:HTMLSelectElement = document.createElement('select');
+		let siteSelector: HTMLSelectElement = document.createElement('select');
 		siteSelector.setAttribute('class', 'input');
-		config.sites.captcha.forEach((site:any):void => {
-			let option:HTMLOptionElement = document.createElement('option');
+		config.sites.captcha.forEach((site: any): void => {
+			let option: HTMLOptionElement = document.createElement('option');
 			option.label = site.label;
 			option.value = site.value;
 			siteSelector.add(option);
 		});
-		
+
 		siteCell.appendChild(siteSelector);
-		
+
 
 		let actionsCell: HTMLTableCellElement = document.createElement('td');
 		actionsCell.className = 'cell cell-body table-row col-actions';
 
-		let launchButton:HTMLElement = document.createElement('div');
+		let launchButton: HTMLElement = document.createElement('div');
 		launchButton.innerHTML = '<i class="fas fa-external-link-alt"></i>';
 		launchButton.className = 'action-button';
-		launchButton.onclick = function ():void {
+		launchButton.onclick = function (): void {
 			ipcRenderer.send('captcha.launch', {
 				'sessionName': existingHarvesters[i].name,
 				'site': siteSelector.value
 			});
 		};
-	
-		let loginButton:HTMLElement = document.createElement('div');
+
+		let loginButton: HTMLElement = document.createElement('div');
 		loginButton.innerHTML = '<i class="fab fa-youtube"></i>';
 		loginButton.className = 'action-button';
-		loginButton.onclick = function ():void {
+		loginButton.onclick = function (): void {
 			ipcRenderer.send('captcha.signIn', {
 				'sessionName': existingHarvesters[i].name,
 				'type': 'renew'
 			});
 		};
 
-		let deleteButton:HTMLElement = document.createElement('div');
+		let deleteButton: HTMLElement = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
-		deleteButton.onclick = function ():void {
+		deleteButton.onclick = function (): void {
 			try {
-				let existingHarvesters2:any = settings.get('captchaHarvesters');
-				let newHarvestrerArray:any = existingHarvesters2.filter((harvester:{name: string}):boolean => {
+				let existingHarvesters2: any = settings.get('captchaHarvesters');
+				let newHarvestrerArray: any = existingHarvesters2.filter((harvester: { name: string }): boolean => {
 					return harvester.name !== existingHarvesters[i].name;
 				});
 				settings.set('captchaHarvesters', newHarvestrerArray, { prettify: true });
 				renderHarvesters();
-			} 
+			}
 			catch (err) { }
 		};
-		
+
 		actionsCell.appendChild(launchButton);
 		actionsCell.appendChild(loginButton);
 		actionsCell.appendChild(deleteButton);
@@ -581,17 +630,31 @@ function renderHarvesters():void {
 	}
 }
 
-function renderProfileSelectors():void {
-	let existingProfiles:any = settings.has('profiles') ? settings.get('profiles') : {};
+
+function convertCardType(type: string): string {
+	switch(type) {
+		case 'visa':
+			return '<i class="fab fa-cc-visa fa-2x"></i> **** **** **** ';
+		case 'master':
+			return '<i class="fab fa-cc-mastercard fa-2x"></i> **** **** **** ';
+		case 'american_express':
+			return '<i class="fab fa-cc-amex fa-2x"></i> **** ****** *';
+		default:
+			return '';
+	}
+}
+
+function renderProfileSelectors(): void {
+	let existingProfiles: UserData.allProfiles = settings.has('profiles') ? <UserData.allProfiles><undefined>settings.get('profiles') : {};
 	let profileTableBody: HTMLTableElement = <HTMLTableElement>document.getElementById('profileTableBody');
 	profileTableBody.innerHTML = '';
 	for (let i: number = 0; i < Object.keys(existingProfiles).length; i++) {
-		let profileId:any = Object.keys(existingProfiles)[i];
-		let profileRow:HTMLTableRowElement = document.createElement('tr');
+		let profileId: string = Object.keys(existingProfiles)[i];
+		let profileRow: HTMLTableRowElement = document.createElement('tr');
 		profileRow.className = 'row';
 		profileRow.setAttribute('data-id', (profileId ? profileId : ''));
-		profileRow.onclick = function (this: HTMLElement, event: MouseEvent):void {
-			
+		profileRow.onclick = function (this: HTMLElement, event: MouseEvent): void {
+
 			var billingFirst: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingFirst');
 			var billingLast: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingLast');
 			var billingEmail: HTMLInputElement = <HTMLInputElement>document.getElementById('profileBillingEmail');
@@ -625,7 +688,7 @@ function renderProfileSelectors():void {
 
 
 			let profiles: any = settings.has('profiles') ? settings.get('profiles') : {};
-			const profileData:any = profiles[this.dataset.id];
+			const profileData: any = profiles[this.dataset.id];
 			profileId.value = this.dataset.id ? this.dataset.id : '';
 			profileName.value = profileData.profileName ? profileData.profileName : '';
 
@@ -657,8 +720,8 @@ function renderProfileSelectors():void {
 				cardExpiryMonth.value = profileData.payment.expiryMonth;
 				cardExpiryYear.value = profileData.payment.expiryYear;
 				cardCvv.value = profileData.payment.cvv;
-				
-				
+
+
 				(<any>$('#profileModal')).modal('show');
 			}
 			catch (error) { console.error(error); }
@@ -675,12 +738,12 @@ function renderProfileSelectors():void {
 		profileRow.appendChild(nameCell);
 
 		let addressCell: HTMLTableCellElement = document.createElement('td');
-		addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
+		addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2} ${existingProfiles[profileId].billing.country} ${existingProfiles[profileId].billing.state}`;
 		addressCell.className = 'cell cell-body col-products';
 		profileRow.appendChild(addressCell);
 
 		let cardCell: HTMLTableCellElement = document.createElement('td');
-		cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
+		cardCell.innerHTML = `${convertCardType(existingProfiles[profileId].payment.type)}${existingProfiles[profileId].payment.cardNumber.substr(-4)}`;
 		cardCell.className = 'cell cell-body col-status';
 		profileRow.appendChild(cardCell);
 
@@ -688,35 +751,35 @@ function renderProfileSelectors():void {
 		actionsCell.className = 'cell cell-body table-row col-actions';
 
 
-		let editButton:HTMLElement = document.createElement('div');
+		let editButton: HTMLElement = document.createElement('div');
 		editButton.innerHTML = '<i class="fas fa-edit"></i>';
 		editButton.className = 'action-button';
 		editButton.setAttribute('data-id', (profileId ? profileId : ''));
-		editButton.onclick = function(event: MouseEvent):void {
+		editButton.onclick = function (event: MouseEvent): void {
 			event.stopImmediatePropagation();
 		};
 
 		//actionsCell.appendChild(editButton);
 
-		let duplicateButton:HTMLElement = document.createElement('div');
+		let duplicateButton: HTMLElement = document.createElement('div');
 		duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
 		duplicateButton.className = 'action-button';
 		duplicateButton.setAttribute('data-id', profileId ? profileId : '');
-		duplicateButton.onclick = function (this: HTMLElement, event: MouseEvent):void {
+		duplicateButton.onclick = function (this: HTMLElement, event: MouseEvent): void {
 			event.stopImmediatePropagation();
-			let profiles:any = settings.has('profiles') ? settings.get('profiles') : {};
-			const profileData:profileDataProps = profiles[this.dataset.id];
-			 profileActions.save(null, profileData);
+			let profiles: any = settings.has('profiles') ? settings.get('profiles') : {};
+			const profileData: profileDataProps = profiles[this.dataset.id];
+			profileActions.save(null, profileData);
 			renderProfileSelectors();
 		};
 		actionsCell.appendChild(duplicateButton);
 
-		let deleteButton:HTMLElement = document.createElement('div');
+		let deleteButton: HTMLElement = document.createElement('div');
 		deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 		deleteButton.className = 'action-button';
-		deleteButton.onclick = function (event: MouseEvent):void {
+		deleteButton.onclick = function (event: MouseEvent): void {
 			event.stopImmediatePropagation();
-			let existingProfiles2:any = settings.get('profiles');
+			let existingProfiles2: any = settings.get('profiles');
 			delete existingProfiles2[profileId];
 			settings.set('profiles', existingProfiles2, { prettify: true });
 			renderProfileSelectors();
@@ -852,12 +915,12 @@ function renderProfileSelectors():void {
 		// 	profilesWrapper.appendChild(profileContainer);
 
 	}
-	profileSelector.forEach((element):void => {
+	profileSelector.forEach((element: HTMLSelectElement): void => {
 		element.options.length = 0;
-		let existingProfiles:any = settings.has('profiles') ? settings.get('profiles') : {};
+		let existingProfiles: any = settings.has('profiles') ? settings.get('profiles') : {};
 		for (let i: number = 0; i < Object.keys(existingProfiles).length; i++) {
-			let profileId:string = Object.keys(existingProfiles)[i];
-			let option:HTMLOptionElement = document.createElement('option');
+			let profileId: string = Object.keys(existingProfiles)[i];
+			let option: HTMLOptionElement = document.createElement('option');
 			option.value = profileId;
 			option.label = existingProfiles[profileId].profileName || 'Nameless Profile';
 			element.options.add(option);
@@ -880,14 +943,14 @@ function renderProfileSelectors():void {
 // 	table.appendChild(row);
 // }
 
-function renderOrderTable():void {
-	var orderTableBody:HTMLElement = document.getElementById('orderTableBody');
-	let orders:any = settings.has('orders') ? settings.get('orders') : [];
+function renderOrderTable(): void {
+	var orderTableBody: HTMLElement = document.getElementById('orderTableBody');
+	let orders: any = settings.has('orders') ? settings.get('orders') : [];
 	orderTableBody.innerHTML = '';
 
 	try {
 		for (let i: number = 0; i < orders.length; i++) {
-			let orderRow:HTMLTableRowElement = document.createElement('tr');
+			let orderRow: HTMLTableRowElement = document.createElement('tr');
 			orderRow.className = 'row';
 
 
@@ -915,7 +978,7 @@ function renderOrderTable():void {
 			let actionsCell: HTMLTableCellElement = document.createElement('td');
 			actionsCell.className = 'cell cell-body table-row col-actions-sm';
 
-			let deleteButton:HTMLElement = document.createElement('div');
+			let deleteButton: HTMLElement = document.createElement('div');
 			deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
 			deleteButton.className = 'action-button';
 
@@ -933,38 +996,59 @@ function renderOrderTable():void {
 // }
 
 
-	export const tasks = renderTaskTable;
-	export const	profiles = renderProfileSelectors;
-	export const	proxies = renderProxyTable;
-	export const	proxySelectors = renderProxyListSelectors;
-	export const	sites = renderSites;
-	export const countries = renderCountries;
-	export const	states = renderStates;
-	export const	orders = renderOrderTable;
-	export const	harvesters = renderHarvesters;
+export const tasks: Function = renderTaskTable;
+export const profiles: Function = renderProfileSelectors;
+export const proxies: Function = renderProxyTable;
+export const proxySelectors: Function = renderProxyListSelectors;
+export const sites: Function = renderSites;
+export const countries: Function = renderCountries;
+export const states: Function = renderStates;
+export const orders: Function = renderOrderTable;
+export const harvesters: Function = renderHarvesters;
 
 
 //General
 
-var profileSelector:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.profile-selector');
+var profileSelector: NodeListOf<HTMLSelectElement> = document.querySelectorAll('.profile-selector');
 
-var siteSelectors:NodeListOf<HTMLSelectElement> = document.querySelectorAll('.site-selector');
- 
+var siteSelectors: NodeListOf<HTMLSelectElement> = document.querySelectorAll('.site-selector');
+
 //Dashboard
 
 
 
 
 //Task Creator
-var newTask_Site:any = document.getElementById('taskSite');
-var newTask_Mode:any = document.getElementById('taskMode');
-var newTask_RestockMode:any = document.getElementById('newTaskMonitorMode');
+var newTask_Site: HTMLSelectElement = <HTMLSelectElement>document.getElementById('taskSite');
+var newTask_Profile: HTMLSelectElement = <HTMLSelectElement>document.getElementById('taskProfile');
+var newTask_Mode: HTMLSelectElement = <HTMLSelectElement>document.getElementById('taskMode');
+var newTask_RestockMode: HTMLSelectElement = <HTMLSelectElement>document.getElementById('newTaskMonitorMode');
+var newTask_CheckoutAttempts: HTMLInputElement = <HTMLInputElement>document.getElementById('taskCheckoutAttempts');
+var newTask_Quantity: HTMLInputElement = <HTMLInputElement>document.getElementById('taskQuantity');
 
+var newTask_CartDelay: HTMLInputElement = <HTMLInputElement>document.getElementById('taskCartDelay');
+var newTask_CheckoutDelay: HTMLInputElement = <HTMLInputElement>document.getElementById('taskCheckoutDelay');
+var newTask_ProxyList: HTMLInputElement = <HTMLInputElement>document.getElementById('taskProxyList');
+var newTask_PriceLimit: HTMLInputElement = <HTMLInputElement>document.getElementById('taskMaxPrice');
+var newTask_StartDate: HTMLInputElement = <HTMLInputElement>document.getElementById('taskStartDate');
+var newTask_StartTime: HTMLInputElement = <HTMLInputElement>document.getElementById('taskStartTime');
+
+var newTask_Restocks: HTMLInputElement = <HTMLInputElement>document.getElementById('newTaskRestocks');
+var newTask_SkipCaptcha: HTMLInputElement = <HTMLInputElement>document.getElementById('captchaCheckbox');
+var newTask_threeD: HTMLInputElement = <HTMLInputElement>document.getElementById('threeDCheckbox');
+
+var newTask_SearchInput: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskSearchInput"]');
+var newTask_Category: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskCategory"]');
+var newTask_Size: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskSize"]');
+var newTask_Style: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskVariant"]');
+var newTask_ProductQty: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name="taskProductQty"]');
+
+var newTask_id: HTMLInputElement = <HTMLInputElement>document.getElementById('taskId');
 
 //Profile Creator
 
 
-var proxyTestSite:HTMLSelectElement = <HTMLSelectElement>document.getElementById('proxySiteSelector');
+var proxyTestSite: HTMLSelectElement = <HTMLSelectElement>document.getElementById('proxySiteSelector');
 
 
 

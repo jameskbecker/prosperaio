@@ -1,4 +1,20 @@
-export const def:any = { 
+interface siteProps {
+	[key: string]: {
+		enabled: boolean;
+		type: string;
+		label: string;
+		baseUrl: string;
+	};
+}
+
+export const def: siteProps = { 
+	'footlocker-de': {
+		enabled: false,
+		type: 'footlocker-eu',
+		label: 'Footlocker DE',
+		baseUrl: 'https://www.footlocker.de'
+	},
+
 	'kickz': {
 		enabled: false,
 		type: 'kickz',
@@ -54,7 +70,7 @@ export const def:any = {
 		baseUrl: 'https://www.off---white.com/'
 	}
 };
-export const captcha:any = [
+export const captcha:object[] = [
 	// {
 	// 	label: 'Kickz',
 	// 	value: 'kickz'

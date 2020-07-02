@@ -1,28 +1,31 @@
 import { Worker } from '../../../Worker';
 import { RequestPromiseAPI } from 'request-promise-native';
-const request = require('request-promise-native');
-const settings = require('electron-settings');
-const ipcWorker = require('electron').ipcRenderer;
-const { logger, utilities } = require('../../other');
+import request from 'request-promise-native';
+import settings from 'electron-settings';
+import {ipcRenderer as ipcWorker } from 'electron';
+import { logger, utilities } from '../../other';
 
-interface SupremeKWMonitor {
+class SupremeKWMonitor {
 	baseUrl: string;
-	inputData: any;
+	inputData: {
+		[key: string]: {
+			NAME_POS: string[],
+			NAME_NEG: string[],
+			CATEGORY: string;
+			CALLBACKS: Function[];
+			IDS: string[];
+		}
+	};
 	userAgent: string;
 	timeout: number;
 	_isRunning: boolean;
 	_shouldStop: boolean;
 	proxy: string;
-}
 
-class SupremeKWMonitor {
-	constructor(_options:any = {}) {
+	constructor(_options: any = {}) {
 		logger.info('[Monitor] ['+_options.proxyList+'] Inititalising KW Monitor.');
 		this.baseUrl = _options.baseUrl;
 		this.proxy = _options.proxy ? _options.proxy : null;
-	
-		
-		
 		this.inputData = {};
 		this._isRunning = false;
 		this._shouldStop = false;
@@ -32,7 +35,7 @@ class SupremeKWMonitor {
 
 	}
 
-	run():void {
+	run(): void {
 		if (!this._isRunning && !this._shouldStop) {
 			this._isRunning = true;
 			this._fetchStockData('shop');
@@ -41,8 +44,8 @@ class SupremeKWMonitor {
 		}
 	}
 
-	add(taskId:string, name:string = '', category:string = '', callback:Function):void {
-		let input;
+	add(taskId: string, name: string = '', category: string = '', callback: Function): void {
+		let input: any;
 		if (typeof callback !== 'function') {
 			return console.log('No Callback Given.');
 		}
@@ -58,8 +61,8 @@ class SupremeKWMonitor {
 				'IDS': []
 			};
 		}
-		const nameKWs = name.split(',');
-		for (let i = 0; i < nameKWs.length; i++) {
+		const nameKWs: string[] = name.split(',');
+		for (let i: number = 0; i < nameKWs.length; i++) {
 			if (nameKWs[i].includes('+')) input['NAME_POS'].push(nameKWs[i].trim().substr(1).toLowerCase());
 			if (nameKWs[i].includes('-')) input['NAME_NEG'].push(nameKWs[i].trim().substr(1).toLowerCase());
 		}
@@ -70,10 +73,10 @@ class SupremeKWMonitor {
 		this.run();
 	}
 
-	remove(id:string):void {
+	remove(id: string): void {
 		console.log('REMOVING FROM KW MONITOR');
-		for (let i = 0; i < Object.keys(this.inputData).length; i++) {
-			let property = Object.keys(this.inputData)[i];
+		for (let i: number = 0; i < Object.keys(this.inputData).length; i++) {
+			let property: string = Object.keys(this.inputData)[i];
 			console.log(`if this.inputData[${property}]['IDS'] includes ${id}`);
 			if (this.inputData[property]['IDS'].includes(id)) {
 				this.inputData[property]['IDS'].splice(this.inputData[property]['IDS'].indexOf(id), 1);
@@ -91,13 +94,13 @@ class SupremeKWMonitor {
 
 	} 
 
-	_hasMatchingsKeywords(data:string, positive:string[], negative:string[]):boolean {
-		for (let i = 0; i < positive.length; i++) {
+	_hasMatchingsKeywords(data: string, positive: string[], negative: string[]): boolean {
+		for (let i: number = 0; i < positive.length; i++) {
 			if (!data.toLowerCase().includes(positive[i].toLowerCase())) {
 				return false;
 			}
 		}
-		for (let i = 0; i < negative.length; i++) {
+		for (let i: number = 0; i < negative.length; i++) {
 			if (data.toLowerCase().includes(negative[i].toLowerCase())) {
 				return false;
 			}
@@ -105,7 +108,7 @@ class SupremeKWMonitor {
 		return true;
 	}
 
-	_parseCategory(key:any):any {
+	_parseCategory(key: any): string {
 		return key;
 		// const categories = {
 		// 	"new": "New",
@@ -125,7 +128,7 @@ class SupremeKWMonitor {
 		// return categories[key];
 	}
 
-	setStatus(message:string, type:string, ids?:Array<string>):void {
+	setStatus(message: string, type: string, ids?: string[]): void {
 		let color: string; 
 		switch (type.toLowerCase()) {
 			case 'info': color = '#4286f4'; break;
@@ -135,8 +138,8 @@ class SupremeKWMonitor {
 			default: color = '#8c8f93';
 		}
 		if (!ids) {
-			for (let i = 0; i < Object.keys(this.inputData).length; i++) {
-				for (let j = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
+			for (let i: number = 0; i < Object.keys(this.inputData).length; i++) {
+				for (let j: number = 0; j < this.inputData[Object.keys(this.inputData)[i]]['IDS'].length; j++) {
 					ipcWorker.send('task.setStatus', {
 						id: this.inputData[Object.keys(this.inputData)[i]]['IDS'][j],
 						message: message,
@@ -146,7 +149,7 @@ class SupremeKWMonitor {
 			}
 		}
 		else {
-			for (let i = 0; i < ids.length; i++) {
+			for (let i: number = 0; i < ids.length; i++) {
 				ipcWorker.send('task.setStatus', {
 					id: ids[i],
 					message: message,
@@ -156,10 +159,10 @@ class SupremeKWMonitor {
 		}
 	}
 
-	_fetchStockData(endpoint:string):void {
+	_fetchStockData(endpoint: string): void {
 		logger.info('[Monitor] ['+endpoint+'] Polling Supreme Stock Data.');
 		this.setStatus('Searching for Product.', 'WARNING');
-		let options = {
+		let options: any = {
 			url: this.baseUrl + '/' + endpoint + '.json',
 			method: 'GET',
 			proxy: this.proxy,
@@ -167,7 +170,7 @@ class SupremeKWMonitor {
 			gzip: true,
 			time: true,
 			resolveWithFullResponse: true,
-			timeout: settings.has('globalTimeoutDelay') ? parseInt(settings.get('globalTimeoutDelay')) : 5000,
+			timeout: settings.has('globalTimeoutDelay') ? parseInt(<string>settings.get('globalTimeoutDelay')) : 5000,
 			headers: {
 				'accept': 'application/json',
 				'accept-encoding': 'br, gzip, deflate',
@@ -179,34 +182,36 @@ class SupremeKWMonitor {
 		};
 		console.log(options);
 		request(options)
-		.then((response: any) => {
-			let body = response.body;
+		.then((response: any): void => {
+			let body: any = response.body;
 			console.log(Object.keys(body));
-			let categories = body.products_and_categories;
+			let categories: any = body.products_and_categories;
 			if (Object.keys(categories).length === 0) {
 				this.setStatus('Webstore Closed.', 'ERROR');
-				let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
+				let monitorDelay: number = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
 				this._isRunning = false;
-				return setTimeout(this.run.bind(this), monitorDelay);
+				setTimeout(this.run.bind(this), monitorDelay);
+				return;
 			}
-			Object.keys(this.inputData).forEach(propName => {
-				let data = this.inputData[propName];
+			Object.keys(this.inputData).forEach((propName: string): void => {
+				let data: any = this.inputData[propName];
 				this.setStatus('Searching for Product.', 'WARNING', data['IDS']);
-				let parsedCategory = this._parseCategory(data['CATEGORY']);
+				let parsedCategory: string = this._parseCategory(data['CATEGORY']);
 				if (!categories.hasOwnProperty(parsedCategory)) {
 					logger.error('[Monitor] Category Not Found.');
 					this.setStatus('Category Not Found.', 'ERROR');
-					let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
+					let monitorDelay: number = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
 					this._isRunning = false;
-					return setTimeout(this.run.bind(this), monitorDelay);
+					setTimeout(this.run.bind(this), monitorDelay);
+					return;
 				}
 				else {
 					logger.verbose(`[Monitor] Matched Category: ${parsedCategory}`);
-					let products = categories[parsedCategory];
-					let productName;
-					let productId;
-					let productPrice;
-					for (let j = 0; j < products.length; j++) {
+					let products: any = categories[parsedCategory];
+					let productName: string;
+					let productId: number;
+					let productPrice: number;
+					for (let j: number = 0; j < products.length; j++) {
 						productName = products[j].name;
 						if (this._hasMatchingsKeywords(productName, data['NAME_POS'], data['NAME_NEG'])) {
 							productId = products[j].id;
@@ -217,9 +222,10 @@ class SupremeKWMonitor {
 					if (!productId) {
 						logger.error('[Monitor] Product Not Found.');
 						this.setStatus('Product Not Found.', 'ERROR', data['IDS']);
-						let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(settings.get('globalMonitorDelay')) : 1000;
+						let monitorDelay: number = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
 						this._isRunning = false;
-						return setTimeout(this.run.bind(this), monitorDelay);
+						setTimeout(this.run.bind(this), monitorDelay);
+						return;
 					}
 					else {
 						logger.verbose(`[Monitor] [${endpoint}] Matched Product: ${productName} (${productId}).`);
@@ -229,10 +235,10 @@ class SupremeKWMonitor {
 				}
 			});
 		})
-		.catch((error: any) => {
-			Object.keys(this.inputData).forEach(propName => {
-				let data = this.inputData[propName];
-				let message;
+		.catch((error: any): void => {
+			Object.keys(this.inputData).forEach((propName: string): void => {
+				let data: any = this.inputData[propName];
+				let message: string;
 				if (error && error.error) {
 					switch (error.error.code) {
 						case 'ESOCKETTIMEDOUT':
@@ -248,13 +254,15 @@ class SupremeKWMonitor {
 				this.setStatus(message, 'ERROR', data['IDS']);
 			});
 			this._isRunning = false;
-			return setTimeout(this.run.bind(this), settings.has('globalErrorDelay') ? settings.get('globalErrorDelay') : 1000);
+			let errorDelay: number = settings.has('globalErrorDelay') ? parseInt(<string>settings.get('globalErrorDelay')) : 1000;
+			setTimeout(this.run.bind(this), errorDelay);
+			return;
 		});
 	}
 
-	_returnData(propName:string, name:string, id:number, price:number):void {
-		let callbacks = this.inputData[propName]['CALLBACKS'];
-		for (let i = 0; i < callbacks.length; i++) {
+	_returnData(propName: string, name: string, id: number, price: number): void {
+		let callbacks: Function[] = this.inputData[propName]['CALLBACKS'];
+		for (let i: number = 0; i < callbacks.length; i++) {
 			callbacks[i](name, id, price);
 		}
 		delete this.inputData[propName];

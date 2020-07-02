@@ -4,10 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const SupremeBase_1 = __importDefault(require("./SupremeBase"));
-const other_1 = require("../../other");
 const cheerio_1 = __importDefault(require("cheerio"));
-const electron_1 = require("electron");
 const electron_settings_1 = __importDefault(require("electron-settings"));
+const other_1 = require("../../other");
 class SupremeRequest extends SupremeBase_1.default {
     constructor(_taskData, _id) {
         super(_taskData, _id);
@@ -18,16 +17,9 @@ class SupremeRequest extends SupremeBase_1.default {
             await this._setTimer();
             this.setStatus('Starting Task.', 'WARNING');
             other_1.logger.warn(`[Task ${this.id}] Starting.`);
-            console.log(this.profile);
             await this._fetchStockData();
-            if (this.shouldStop)
-                return this._stop();
             await this._fetchProductData();
-            if (this.shouldStop)
-                return this._stop();
             await this._atcProcess();
-            if (this.shouldStop)
-                return this._stop();
             await this._checkoutProcess();
             await this._processStatus();
             if (this.successful) {
@@ -192,9 +184,8 @@ class SupremeRequest extends SupremeBase_1.default {
                 this.checkoutTS = Date.now();
                 this.checkoutTime = this.checkoutTS - this.startTS;
                 this._setCookie('_ticket', this._generateTicket(2) || '');
-                let checkoutResponse = await this._submitCheckout();
-                body = checkoutResponse.body;
-                this.checkoutData = body;
+                let checkoutResponse = await this._submitCheckout('checkout.json');
+                this.checkoutData = checkoutResponse.body;
                 resolve();
             }
             catch (error) {
@@ -256,7 +247,7 @@ class SupremeRequest extends SupremeBase_1.default {
     }
     async _submitCheckout(endpoint) {
         let options = {
-            url: this.baseUrl + '/checkout.json',
+            url: this.baseUrl + endpoint === 'cardinal' ? 'cardinal.json' : '/checkout.json',
             method: 'POST',
             proxy: this.proxy,
             json: true,
@@ -271,29 +262,14 @@ class SupremeRequest extends SupremeBase_1.default {
                 'User-Agent': this.userAgent
             }
         };
-        return this.request(options);
-    }
-    _setupThreeDS() {
-        return new Promise(resolve => {
-            other_1.logger.debug('Submitting Initial JWT.');
-            electron_1.ipcRenderer.send('cardinal.setup', {
-                jwt: this.cardinal.serverJWT,
-                profile: this.profileName,
-                taskId: this.id
-            });
-            electron_1.ipcRenderer.once(`cardinal.setupComplete(${this.id})`, (event, args) => {
-                resolve(args.cardinalId);
-            });
-        });
+        return { body: this.request(options) };
     }
     _generateTicket(type) {
         let randomHex = [...Array(128)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
         let timeStamp = Math.floor(Date.now() / 1000);
         switch (type) {
-            case 1:
-                return `${randomHex}${timeStamp}`;
-            case 2:
-                return `${this.ticket}${randomHex}${timeStamp}`;
+            case 1: return `${randomHex}${timeStamp}`;
+            case 2: return `${this.ticket}${randomHex}${timeStamp}`;
         }
     }
 }

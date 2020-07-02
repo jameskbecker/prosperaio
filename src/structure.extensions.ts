@@ -3,7 +3,7 @@ interface String {
 }
 
 interface Object {
-  contains(this:any, keyValuePair:any): boolean;
+  contains(this:Object, keyValuePair:any): boolean;
 }
 
 String.prototype.capitalise = function ():string {

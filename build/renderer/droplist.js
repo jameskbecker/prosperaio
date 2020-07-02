@@ -10,7 +10,7 @@ function getProducts() {
         let productApiStatus = document.getElementById('productApiStatus');
         productApiStatus.value = 'Fetching Products';
         request_promise_native_1.default({
-            url: 'http://prosper-products-eu.herokuapp.com/supreme/latest',
+            url: 'http://prosper-products-eu.herokuapp.com/supreme',
             method: 'GET',
             json: true,
             resolveWithFullResponse: true,

@@ -4,12 +4,12 @@ import { RequestResponse } from 'request';
 
 
 
-export default function getProducts():Promise<any> {
-	return new Promise((resolve:Function):void => {
-		let productApiStatus:HTMLInputElement = <HTMLInputElement>document.getElementById('productApiStatus');
+export default function getProducts(): Promise<any> {
+	return new Promise((resolve: Function): void => {
+		let productApiStatus: HTMLInputElement = <HTMLInputElement>document.getElementById('productApiStatus');
 		productApiStatus.value = 'Fetching Products';
 		request({
-			url: 'http://prosper-products-eu.herokuapp.com/supreme/latest',
+			url: 'http://prosper-products-eu.herokuapp.com/supreme',
 			method: 'GET',
 			json: true,
 			resolveWithFullResponse: true,
@@ -17,12 +17,12 @@ export default function getProducts():Promise<any> {
 				accept: 'application/json'
 			}
 		})
-			.then((response:RequestResponse):void => {
-				let body:any = response.body;
+			.then((response: RequestResponse): void => {
+				let body: any = response.body;
 				productApiStatus.value = 'Loaded Products';
 				resolve(body);
 			})
-			.catch((error:Error):void => {
+			.catch((error: Error): void => {
 				productApiStatus.value = 'Error Fetching Products';
 				console.log(error);
 				resolve({});

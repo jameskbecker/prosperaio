@@ -2,6 +2,7 @@ import { ipcRenderer as ipcWorker } from 'electron';
 import request from 'request';
 import settings from 'electron-settings';
 
+
 import { Worker } from '../../Worker';
 import {default as config} from '../configuration';
 import { logger, utilities } from '../other';
@@ -48,7 +49,7 @@ interface taskDataProps {
 
 
 class Task {
-	private _taskData: taskDataProps;
+ 	_taskData: taskDataProps;
 	baseUrl: string;
 	products: Array<productProps>;
 	_profileId: string;
@@ -60,13 +61,13 @@ class Task {
 	browser: any;
 	isActive: boolean;
 	isMonitoring: boolean;
-	isMonitoringKW:boolean;
+	isMonitoringKW: boolean;
 	shouldStop: boolean;
 	successful: boolean;
 	
 	hasCaptcha: boolean;
 	captchaResponse: string;
-	
+	orderTotal: string;
 	captchaTime: number;
 	captchaTS: number;
 	startTime: number;
@@ -79,7 +80,7 @@ class Task {
 	_productSizeName: string;
 	orderNumber: string;
 
-	constructor(taskData:taskDataProps, _id:string) {
+	constructor(taskData: taskDataProps, _id: string) {
 		this._taskData = taskData;
 		this.baseUrl = config.sites.def[taskData.site].baseUrl;
 		this.products = taskData.products;
@@ -116,7 +117,7 @@ class Task {
 		
 			
 		if (this._proxyList && this._proxyList !== '' && !Worker.activeProxyLists.hasOwnProperty(this._proxyList)) {
-			let proxies:any = settings.has('proxies') ? settings.get('proxies') : {}; 
+			let proxies: any = settings.has('proxies') ? settings.get('proxies') : {}; 
 			if (proxies.hasOwnProperty(this._proxyList)) {
 				Worker.activeProxyLists[this._proxyList] = Object.values(proxies[this._proxyList]);
 			}
@@ -134,17 +135,17 @@ class Task {
 		}
 	}
 
-	get taskData():taskDataProps {
+	get taskData(): taskDataProps {
 		return this._taskData;
 	}
 
-	get profile():any {
+	get profile(): any {
 		return this._profile;
 	}
 
 	
 
-	set productName(value:string) {
+	set productName(value: string) {
 		ipcWorker.send('task.setProductName', {
 			id: this.id,
 			name: value
@@ -152,11 +153,11 @@ class Task {
 		this._productName = value;
 	}
 
-	get productName():string {
+	get productName(): string {
 		return this._productName;
 	}
 
-	set sizeName(value:string) {
+	set sizeName(value: string) {
 		ipcWorker.send('task.setSizeName', {
 			id: this.id,
 			name: value
@@ -164,15 +165,15 @@ class Task {
 		this._productSizeName = value;
 	}
 
-	get sizeName():string {
+	get sizeName(): string {
 		return this._productSizeName;
 	}
 
-	get proxy():string {
+	get proxy(): string {
 		return utilities.formatProxy(this._proxy);
 	}
 	
-	callStop():void {
+	callStop(): void {
 		if (this.isActive) {
 			logger.warn(`[T:${this.id}] Stopping Task.`);
 			this.setStatus('Stopping.', 'WARNING');
@@ -189,7 +190,7 @@ class Task {
 	}
 
 
-	_stop():void {	
+	_stop(): void {	
 		console.log('RUNNING STOP()');
 		if (this.isMonitoring) {
 			
@@ -199,10 +200,10 @@ class Task {
 			
 
 		}
-		if (this.hasOwnProperty('browser')) {
+		/* if (this.hasOwnProperty('browser')) {
 			logger.info(`[${this.id}] Closing Browser`);
 			this.browser!.close();
-		}
+		} */
 
 		this.productName = this.taskData.products[0].searchInput;
 		this.sizeName = this.taskData.products[0].size;
@@ -214,7 +215,7 @@ class Task {
 		delete Worker.activeTasks[this.id];
 	}
 
-	setStatus(message:any, type:any):void {
+	setStatus(message: string, type: string | null): void {
 		let color: string; 
 		switch (type.toLowerCase()) {
 			case 'info': color = '#4286f4'; break;
@@ -231,8 +232,8 @@ class Task {
 		});
 	}
 	
-	_requestCaptcha():Promise<any> {
-		return new Promise((resolve) => {
+	_requestCaptcha(): Promise<any> {
+		return new Promise((resolve: Function): void => {
 			this.captchaTS = Date.now();
 			this.setStatus('Waiting for Captcha.', 'WARNING');
 			ipcWorker.send('captcha.request', {
@@ -241,7 +242,7 @@ class Task {
 			});
 			logger.debug('Requested Captcha Token.');
 			//memory leak
-			ipcWorker.on('captcha response', (event, args) => {
+			ipcWorker.on('captcha response', (event: any, args: any): void => {
 				if (args.id === this.id) {
 					this.captchaResponse = args.token;
 					this.captchaTime = Date.now() - this.captchaTS;
@@ -254,45 +255,42 @@ class Task {
 
 
 
-	_addToAnalystics():void {
-		let exportData = {
+	_addToAnalystics(): void {
+		let exportData: any = {
 			date: new Date().toLocaleString(),
 			site: config.sites.def[this.taskData.site].label,
 			product: this.productName,
 			orderNumber: this.orderNumber
 		};
-		let currentOrders:Array<any> = settings.has('orders') ? (<Array<any>>settings.get('orders')) : [];
+		let currentOrders: Array<any> = settings.has('orders') ? (<Array<any>>settings.get('orders')) : [];
 		currentOrders.push(exportData);
 		settings.set('orders', currentOrders, {prettify:true});
 		ipcWorker.send('sync settings', 'orders');
 	}
 
-	_setTimer():Promise<void> {
-		return new Promise((resolve: Function) => {
-			let timerInput:string = this.taskData.additional.timer;
+	_setTimer(): Promise<void> {
+		return new Promise((resolve: Function): void => {
+			let timerInput: string = this.taskData.additional.timer;
 			console.log(timerInput);
 			if (timerInput !== ' ') {
 				console.log('setting time');
-				let dateInput:string = timerInput.split(' ')[0];
-				let timeInput:string = timerInput.split(' ')[1];
-				let scheduledTime = new Date();
+				let dateInput: string = timerInput.split(' ')[0];
+				let timeInput: string = timerInput.split(' ')[1];
+				let scheduledTime: Date = new Date();
 
-				let year:number = parseInt(dateInput.split('-')[0]);
-				let month:number = parseInt(dateInput.split('-')[1]);
-				let day:number = parseInt(dateInput.split('-')[2]);
-				let hour:number = parseInt(timeInput.split(':')[0]);
-				let minute:number = parseInt(timeInput.split(':')[1]);
-				let second:number = parseInt(timeInput.split(':')[2]);
+				let year: number = parseInt(dateInput.split('-')[0]);
+				let month: number = parseInt(dateInput.split('-')[1]);
+				let day: number = parseInt(dateInput.split('-')[2]);
+				let hour: number = parseInt(timeInput.split(':')[0]);
+				let minute: number = parseInt(timeInput.split(':')[1]);
+				let second: number = parseInt(timeInput.split(':')[2]);
 
-				console.log({
-					year, month, day, hour, minute, second
-				});
 				scheduledTime.setFullYear(year, month - 1, day);
 				scheduledTime.setHours(hour);
 				scheduledTime.setMinutes(minute);
 				scheduledTime.setSeconds(second);
 
-				let remainingTime:number = (scheduledTime.getTime() - Date.now());
+				let remainingTime: number = (scheduledTime.getTime() - Date.now());
 				console.log(scheduledTime);
 				setTimeout(resolve, remainingTime);
 				this.setStatus('Timer Set.', 'INFO');
@@ -304,22 +302,22 @@ class Task {
 		});
 	}
 
-	_sleep(delay:any):Promise<any> {
-		return new Promise((resolve) => {
+	_sleep(delay: number): Promise<any> {
+		return new Promise((resolve: Function): void => {
 			setTimeout(resolve, delay);
 		});
 	}
 
-	_parseKeywords(input:any):any {
+	_parseKeywords(input: any): any {
 		//if(!input) return '';
 		if (input === '') return 'ANY';
 		else {
-			let output:any = {
+			let output: any = {
 				positive: [],
 				negative: []
 			};
-				let indudvidalWords = input.split(',');
-				for (let j = 0; j < indudvidalWords.length; j++) {
+				let indudvidalWords: string[] = input.split(',');
+				for (let j: number = 0; j < indudvidalWords.length; j++) {
 					if (indudvidalWords[j].includes('+')) {
 						output.positive.push(indudvidalWords[j].trim().toLowerCase().substr(1));
 					}
@@ -332,7 +330,7 @@ class Task {
 		}	
 	}
 
-	_keywordsMatch(productName:any, keywordSet:any):boolean {
+	_keywordsMatch(productName: string, keywordSet: any): boolean {
 		if (!productName || !keywordSet) {
 			return false;
 		}
@@ -341,12 +339,12 @@ class Task {
 			return true;
 		}
 		else {
-			for (let i = 0; i < keywordSet.positive.length; i++) {
+			for (let i: number = 0; i < keywordSet.positive.length; i++) {
 				if (!productName.includes(keywordSet.positive[i])) {
 					return false;
 				}
 			}
-			for (let i = 0; i < keywordSet.negative.length; i++) {
+			for (let i: number = 0; i < keywordSet.negative.length; i++) {
 				if (productName.includes(keywordSet.negative[i])) {
 					return false;
 				}

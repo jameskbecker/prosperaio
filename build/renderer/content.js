@@ -22,13 +22,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.harvesters = exports.orders = exports.states = exports.countries = exports.sites = exports.proxySelectors = exports.proxies = exports.profiles = exports.tasks = void 0;
+exports.harvesters = exports.orders = exports.states = exports.countries = exports.sites = exports.proxySelectors = exports.proxies = exports.profiles = exports.tasks = exports.resetTaskForm = void 0;
 const electron_settings_1 = __importDefault(require("electron-settings"));
 const electron_1 = require("electron");
 const configuration_1 = __importDefault(require("../library/configuration"));
 const profileActions = __importStar(require("./profiles"));
 const $ = require('jquery');
 const droplist_1 = __importDefault(require("./droplist"));
+function populateTaskForm(taskData, taskId) {
+    newTask_Site.value = taskData.site;
+    newTask_Site.onchange(new Event(''));
+    newTask_Profile.value = taskData.setup.profile;
+    newTask_Mode.value = taskData.setup.mode;
+    newTask_RestockMode.value = taskData.setup.restockMode;
+    newTask_CheckoutAttempts.value = taskData.setup.checkoutAttempts.toString();
+    newTask_CartDelay.value = taskData.delays.cart.toString();
+    newTask_CheckoutDelay.value = taskData.delays.checkout.toString();
+    newTask_ProxyList.value = taskData.additional.proxyList;
+    newTask_PriceLimit.value = taskData.additional.maxPrice.toString();
+    newTask_StartDate.value = taskData.additional.timer.split(' ')[0];
+    newTask_StartTime.value = taskData.additional.timer.split(' ')[1];
+    newTask_Restocks.checked = taskData.additional.monitorRestocks;
+    newTask_SkipCaptcha.checked = taskData.additional.skipCaptcha;
+    newTask_threeD.checked = taskData.additional.enableThreeDS;
+    newTask_SearchInput[0].value = taskData.products[0].searchInput;
+    newTask_Category[0].value = taskData.products[0].category;
+    newTask_Size[0].value = taskData.products[0].size;
+    newTask_Style[0].value = taskData.products[0].style;
+    newTask_ProductQty[0].value = taskData.products[0].productQty;
+    newTask_id.value = taskId;
+}
+function resetTaskForm() {
+    newTask_Site.value = '';
+    newTask_Site.onchange(new Event(''));
+    newTask_Profile.value = '';
+    newTask_Mode.value = '';
+    newTask_RestockMode.value = '';
+    newTask_CheckoutAttempts.value = '';
+    newTask_CartDelay.value = '0';
+    newTask_CheckoutDelay.value = '0';
+    newTask_ProxyList.value = '';
+    newTask_PriceLimit.value = '0';
+    newTask_StartDate.value = '';
+    newTask_StartTime.value = '';
+    newTask_Restocks.checked = true;
+    newTask_SkipCaptcha.checked = false;
+    newTask_threeD.checked = false;
+    newTask_SearchInput[0].value = '';
+    newTask_Category[0].value = '';
+    newTask_Size[0].value = '';
+    newTask_Style[0].value = '';
+    newTask_ProductQty[0].value = '1';
+    newTask_id.value = '';
+    $('#newTaskModal').modal('hide');
+}
+exports.resetTaskForm = resetTaskForm;
 var newTask_products = document.getElementById('newTaskProducts');
 var newTask_styles = document.getElementById('newTaskStyles');
 var newTask_sizes = document.getElementById('newTaskSizes');
@@ -47,6 +95,10 @@ function convertMode(id) {
     }
 }
 function renderTaskTable() {
+    var newTaskButton = document.getElementById('newTaskButton');
+    newTaskButton.onclick = function () {
+        $('#newTaskModal').modal('show');
+    };
     let tasks = electron_settings_1.default.has('tasks') ? electron_settings_1.default.get('tasks') : {};
     let profiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
     var tasksHeader = document.getElementById('tasksHeader');
@@ -55,9 +107,13 @@ function renderTaskTable() {
     taskTableBody.innerHTML = '';
     try {
         for (let i = 0; i < Object.keys(tasks).length; i++) {
+            let taskId = Object.keys(tasks)[i];
             let taskRow = document.createElement('tr');
             taskRow.className = 'row';
-            let taskId = Object.keys(tasks)[i];
+            taskRow.onclick = function () {
+                populateTaskForm(tasks[taskId], taskId);
+                $('#newTaskModal').modal('show');
+            };
             let siteCell = document.createElement('td');
             let defaultSiteData = configuration_1.default.sites.def;
             let siteData = defaultSiteData[tasks[taskId].site];
@@ -101,7 +157,8 @@ function renderTaskTable() {
             startButton.innerHTML = '<i class="fas fa-play"></i>';
             startButton.className = 'action-button';
             startButton.setAttribute('data-taskId', taskId);
-            startButton.onclick = function () {
+            startButton.onclick = function (event) {
+                event.stopImmediatePropagation();
                 electron_1.ipcRenderer.send('task.run', startButton.getAttribute('data-taskId'));
             };
             actionsCell.appendChild(startButton);
@@ -109,7 +166,8 @@ function renderTaskTable() {
             stopButton.innerHTML = '<i class="fas fa-stop"></i>';
             stopButton.className = 'action-button';
             stopButton.setAttribute('data-taskId', taskId);
-            stopButton.onclick = function () {
+            stopButton.onclick = function (event) {
+                event.stopImmediatePropagation();
                 electron_1.ipcRenderer.send('task.stop', taskId);
             };
             actionsCell.appendChild(stopButton);
@@ -117,7 +175,8 @@ function renderTaskTable() {
             duplicateButton.innerHTML = '<i class="fas fa-clone"></i>';
             duplicateButton.className = 'action-button';
             duplicateButton.setAttribute('data-taskId', taskId);
-            duplicateButton.onclick = function () {
+            duplicateButton.onclick = function (event) {
+                event.stopImmediatePropagation();
                 electron_1.ipcRenderer.send('task.duplicate', taskId);
             };
             actionsCell.appendChild(duplicateButton);
@@ -125,7 +184,8 @@ function renderTaskTable() {
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'action-button';
             deleteButton.setAttribute('data-taskId', taskId);
-            deleteButton.onclick = function () {
+            deleteButton.onclick = function (event) {
+                event.stopImmediatePropagation();
                 electron_1.ipcRenderer.send('task.delete', taskId);
             };
             actionsCell.appendChild(deleteButton);
@@ -311,6 +371,15 @@ function renderSites() {
                 newTask_Mode.onchange(new Event(''));
             }
             catch (err) { }
+            newTask_styles.onchange = function () {
+                newTask_Style[0].value = this.value;
+            };
+            newTask_sizes.onchange = function () {
+                newTask_Size[0].value = this.value;
+            };
+            newTask_sizes.onchange = function () {
+                newTask_Size[0].value = this.value;
+            };
             droplist_1.default()
                 .then((dropData) => {
                 if (dropData[selectedSite.type]) {
@@ -335,9 +404,6 @@ function renderSites() {
                             option.value = selectedItem.styles[i].keywords;
                             newTask_styles.options.add(option);
                         }
-                        newTask_styles.onchange = function () {
-                            newTask_Style[0].value = this.value;
-                        };
                         try {
                             newTask_styles.onchange(new Event(''));
                         }
@@ -351,9 +417,6 @@ function renderSites() {
                             option.value = selectedItem.sizes[i].keywords;
                             newTask_sizes.options.add(option);
                         }
-                        newTask_sizes.onchange = function () {
-                            newTask_Size[0].value = this.value;
-                        };
                     };
                 }
                 else {
@@ -476,6 +539,18 @@ function renderHarvesters() {
         harvesterTable.appendChild(harvesterRow);
     }
 }
+function convertCardType(type) {
+    switch (type) {
+        case 'visa':
+            return '<i class="fab fa-cc-visa fa-2x"></i> **** **** **** ';
+        case 'master':
+            return '<i class="fab fa-cc-mastercard fa-2x"></i> **** **** **** ';
+        case 'american_express':
+            return '<i class="fab fa-cc-amex fa-2x"></i> **** ****** *';
+        default:
+            return '';
+    }
+}
 function renderProfileSelectors() {
     let existingProfiles = electron_settings_1.default.has('profiles') ? electron_settings_1.default.get('profiles') : {};
     let profileTableBody = document.getElementById('profileTableBody');
@@ -558,11 +633,11 @@ function renderProfileSelectors() {
         nameCell.className = 'cell cell-body col-site';
         profileRow.appendChild(nameCell);
         let addressCell = document.createElement('td');
-        addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2}`;
+        addressCell.innerHTML = `${existingProfiles[profileId].billing.address1} ${existingProfiles[profileId].billing.address2} ${existingProfiles[profileId].billing.country} ${existingProfiles[profileId].billing.state}`;
         addressCell.className = 'cell cell-body col-products';
         profileRow.appendChild(addressCell);
         let cardCell = document.createElement('td');
-        cardCell.innerHTML = '**** **** **** ' + existingProfiles[profileId].payment.cardNumber.substr(-4);
+        cardCell.innerHTML = `${convertCardType(existingProfiles[profileId].payment.type)}${existingProfiles[profileId].payment.cardNumber.substr(-4)}`;
         cardCell.className = 'cell cell-body col-status';
         profileRow.appendChild(cardCell);
         let actionsCell = document.createElement('td');
@@ -663,7 +738,25 @@ exports.harvesters = renderHarvesters;
 var profileSelector = document.querySelectorAll('.profile-selector');
 var siteSelectors = document.querySelectorAll('.site-selector');
 var newTask_Site = document.getElementById('taskSite');
+var newTask_Profile = document.getElementById('taskProfile');
 var newTask_Mode = document.getElementById('taskMode');
 var newTask_RestockMode = document.getElementById('newTaskMonitorMode');
+var newTask_CheckoutAttempts = document.getElementById('taskCheckoutAttempts');
+var newTask_Quantity = document.getElementById('taskQuantity');
+var newTask_CartDelay = document.getElementById('taskCartDelay');
+var newTask_CheckoutDelay = document.getElementById('taskCheckoutDelay');
+var newTask_ProxyList = document.getElementById('taskProxyList');
+var newTask_PriceLimit = document.getElementById('taskMaxPrice');
+var newTask_StartDate = document.getElementById('taskStartDate');
+var newTask_StartTime = document.getElementById('taskStartTime');
+var newTask_Restocks = document.getElementById('newTaskRestocks');
+var newTask_SkipCaptcha = document.getElementById('captchaCheckbox');
+var newTask_threeD = document.getElementById('threeDCheckbox');
+var newTask_SearchInput = document.querySelectorAll('input[name="taskSearchInput"]');
+var newTask_Category = document.querySelectorAll('input[name="taskCategory"]');
+var newTask_Size = document.querySelectorAll('input[name="taskSize"]');
+var newTask_Style = document.querySelectorAll('input[name="taskVariant"]');
+var newTask_ProductQty = document.querySelectorAll('input[name="taskProductQty"]');
+var newTask_id = document.getElementById('taskId');
 var proxyTestSite = document.getElementById('proxySiteSelector');
 //# sourceMappingURL=content.js.map

@@ -167,6 +167,7 @@
 							<div class="container header-container">
 								<h1 class="header-title">Task Editor</h1>
 								
+								<input type="text" id="taskId" class="input">
 								<div class="container-element">
 									<label>Product Status</label> 
 									<input id="productApiStatus" class="input" disabled value="None Loaded"/>
@@ -319,6 +320,7 @@
 											<div class="container-element">
 												<label class="label">Size</label>
 												<select id="newTaskSizes" class="input">
+													<option value="" label=""></option>
 													<option value="RANDOM" label="Random"></option>
 													<option value="SMALLEST" label="Smallest"></option>
 													<option value="LARGEST" label="Largest"></option>
@@ -392,7 +394,7 @@
 								<tr class="row">
 									<th class="cell cell-header col-profile">Profile Name</th>
 									<th class="cell cell-header col-site">Name</th>
-									<th class="cell cell-header col-products">Address</th>
+									<th class="cell cell-header col-products">Billing Address</th>
 									<th class="cell cell-header col-status">Card</th>
 									<th class="cell cell-header col-actions">Actions</th>
 								</tr>
@@ -906,7 +908,7 @@
 
 							<div class="container">
 								<div class="container-element">
-									<button id="browserSetup" class="btn">Install Browser Mode</button>
+									<button id="browserSetup" class="btn">Install Safe Mode</button>
 								</div>
 								<div class="container-element">
 									<label class="label">Custom Browser</label>

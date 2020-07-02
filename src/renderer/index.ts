@@ -6,7 +6,7 @@ import * as profile from './profiles';
 import ipc from './ipc';
 import { utilities } from '../library/other';
 //import { sites } from '../library/configuration';
-import { taskDataProps, productProps, profileDataProps } from '../data-types';
+import { taskDataProps, productProps, profileDataProps, UserData } from '../data-types';
 import $ from 'jquery';
 
 
@@ -14,7 +14,7 @@ import $ from 'jquery';
 ipc.init();
 ipcRenderer.send('check for browser executable');
 
-let tasks:any = settings.has('tasks') ? settings.get('tasks') : null;
+let tasks: any = settings.has('tasks') ? settings.get('tasks') : null;
 if (!tasks || tasks.constructor === []) settings.set('tasks', {});
 if (!settings.has('profiles')) settings.set('profiles', {});
 
@@ -38,7 +38,7 @@ maximizeBtn.onclick = function(): void { ipcRenderer.send('window.maximize'); };
 closeBtn.onclick = function (): void { ipcRenderer.send('window.close'); };
 
 var navigationSelectors: NodeListOf<HTMLElement> = document.querySelectorAll('.nav');
-navigationSelectors.forEach((page, i): void => {
+navigationSelectors.forEach((page: HTMLElement, i: number): void => {
 	function navigationHandler(): void {
 		let selectedPageId: string = page.getAttribute('data-page');
 		let selectedPage: HTMLElement = document.getElementById(selectedPageId);
@@ -83,23 +83,20 @@ if (!settings.has('globalTimeoutDelay')) {
 	globalTimeoutDelay.value = <string>settings.get('globalTimeoutDelay');
 }
 
-var newTaskButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('newTaskButton');
+
 var newProfileButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('newProfileBtn');
 
-newTaskButton.onclick = function():void {
-	(<any>$('#newTaskModal')).modal('show');
-};
-newProfileButton.onclick = function():void {
+newProfileButton.onclick = function(): void {
 	(<any>$('#profileModal')).modal('show');
 };
 
-globalMonitorDelay.onchange = function (this:HTMLInputElement): void {
+globalMonitorDelay.onchange = function (this: HTMLInputElement): void {
 	settings.set('globalMonitorDelay', this.value, { prettify: true });
 };
-globalErrorDelay.onchange = function (this:HTMLInputElement): void {
+globalErrorDelay.onchange = function (this: HTMLInputElement): void {
 	settings.set('globalErrorDelay', this.value, { prettify: true });
 };
-globalTimeoutDelay.onchange = function (this:HTMLInputElement): void {
+globalTimeoutDelay.onchange = function (this: HTMLInputElement): void {
 	settings.set('globalTimeoutDelay', this.value, { prettify: true });
 };
 
@@ -152,16 +149,30 @@ newTask_Size[0].disabled = true;
 newTask_ProductQty[0].disabled = true;
 newTask_SearchInput[0].disabled = true;
 
+function taskWithProfileExists(profileId: string): boolean {
+	let tasks: UserData.allTasks = settings.has('tasks') ? <UserData.allTasks><undefined>settings.get('tasks') : {};
+	for (let i: number = 0; i < Object.keys(tasks).length; i++) {
+		let id: string = Object.keys(tasks)[i];
+		if (tasks[id].setup.profile === profileId) return true;
+	}
+	return false;
+}
+
+
 var newTask_saveBtn: HTMLButtonElement = <HTMLButtonElement>document.getElementById('taskSaveButton');
 newTask_saveBtn.onclick = function (): void {
 	try {
+		if (newTask_Mode.value === 'supreme-browser' && !settings.has('browser-path')) {
+			alert('Browser Mode Not Installed.'); return;
+		}
 
-
-		if (newTask_Mode.value === 'browser' && !settings.has('browser-path')) {
-			alert('Browser Mode Not Installed.');
+		if ((<HTMLInputElement>document.getElementById('taskId')).value === '' && taskWithProfileExists(newTask_Profile.value)) {
+			alert('Task with current profile exits! Try using a different profile or deleting existing task.');
 			return;
 		}
+
 		let products: productProps[] = [];
+
 		for (let i: number = 0; i < newTask_SearchInput.length; i++) {
 			let product: productProps = {
 				'searchInput': newTask_SearchInput[i].value,
@@ -201,8 +212,10 @@ newTask_saveBtn.onclick = function (): void {
 
 		ipcRenderer.send('task.save', {
 			data: taskData,
-			quantity: parseInt(newTask_Quantity.value)
+			quantity: parseInt(newTask_Quantity.value),
+			taskId: (<HTMLInputElement>document.getElementById('taskId')).value
 		});
+		content.resetTaskForm();
 	} catch (err) { console.error(err); }
 };
 
@@ -518,7 +531,7 @@ signoutBtn.onclick = function (): void { ipcRenderer.send('signout'); };
 
 currentBrowserPath.value = settings.has('browser-path') ? <string>settings.get('browser-path') : '';
 
-currentBrowserPath.onchange = function (this:HTMLInputElement): void {
+currentBrowserPath.onchange = function (this: HTMLInputElement): void {
 	settings.set('browser-path', this.value, { prettify: true });
 };
 
@@ -536,7 +549,7 @@ resetBtn.onclick = function (): void { ipcRenderer.send('reset settings'); };
 version.innerHTML = `Version ${remote.app.getVersion()}`;
 
 customDiscord.value = settings.has('discord') ? <string>settings.get('discord') : '';
-customDiscord.onchange = function (this:HTMLInputElement): void {
+customDiscord.onchange = function (this: HTMLInputElement): void {
 	settings.set('discord', this.value, { prettify: true });
 };
 testDiscordBtn.onclick = function (): void {

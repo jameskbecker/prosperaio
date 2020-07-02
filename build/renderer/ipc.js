@@ -160,12 +160,12 @@ var version = document.getElementById('version');
 function init() {
     electron_1.ipcRenderer.on('installing browser mode', () => {
         installBrowserBtn.disabled = true;
-        installBrowserBtn.innerHTML = 'Installing Browser Mode...';
+        installBrowserBtn.innerHTML = 'Installing Safe Mode...';
     });
     electron_1.ipcRenderer.on('check for browser executable', () => {
-        let browserPath = electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : [];
+        let browserPath = electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : '';
         if (browserPath.length > 0) {
-            installBrowserBtn.innerHTML = 'Installed Browser Mode';
+            installBrowserBtn.innerHTML = 'Installed Safe Mode';
             currentBrowserPath.value = electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : '';
         }
     });

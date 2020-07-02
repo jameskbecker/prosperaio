@@ -94,11 +94,7 @@ if (!electron_settings_1.default.has('globalTimeoutDelay')) {
 else {
     globalTimeoutDelay.value = electron_settings_1.default.get('globalTimeoutDelay');
 }
-var newTaskButton = document.getElementById('newTaskButton');
 var newProfileButton = document.getElementById('newProfileBtn');
-newTaskButton.onclick = function () {
-    jquery_1.default('#newTaskModal').modal('show');
-};
 newProfileButton.onclick = function () {
     jquery_1.default('#profileModal').modal('show');
 };
@@ -145,11 +141,24 @@ newTask_Category[0].disabled = true;
 newTask_Size[0].disabled = true;
 newTask_ProductQty[0].disabled = true;
 newTask_SearchInput[0].disabled = true;
+function taskWithProfileExists(profileId) {
+    let tasks = electron_settings_1.default.has('tasks') ? electron_settings_1.default.get('tasks') : {};
+    for (let i = 0; i < Object.keys(tasks).length; i++) {
+        let id = Object.keys(tasks)[i];
+        if (tasks[id].setup.profile === profileId)
+            return true;
+    }
+    return false;
+}
 var newTask_saveBtn = document.getElementById('taskSaveButton');
 newTask_saveBtn.onclick = function () {
     try {
-        if (newTask_Mode.value === 'browser' && !electron_settings_1.default.has('browser-path')) {
+        if (newTask_Mode.value === 'supreme-browser' && !electron_settings_1.default.has('browser-path')) {
             alert('Browser Mode Not Installed.');
+            return;
+        }
+        if (document.getElementById('taskId').value === '' && taskWithProfileExists(newTask_Profile.value)) {
+            alert('Task with current profile exits! Try using a different profile or deleting existing task.');
             return;
         }
         let products = [];
@@ -189,8 +198,10 @@ newTask_saveBtn.onclick = function () {
         };
         electron_1.ipcRenderer.send('task.save', {
             data: taskData,
-            quantity: parseInt(newTask_Quantity.value)
+            quantity: parseInt(newTask_Quantity.value),
+            taskId: document.getElementById('taskId').value
         });
+        content.resetTaskForm();
     }
     catch (err) {
         console.error(err);

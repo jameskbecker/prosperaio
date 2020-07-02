@@ -8,31 +8,49 @@ import { SupremeUrlMonitor, SupremeKWMonitor } from '../../monitors/supreme';
 import config from '../../configuration';
 import settings from 'electron-settings';
 import request from 'request-promise-native';
+import { CookieJar } from 'tough-cookie';
 import cheerio from 'cheerio';
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from 'uuid';
+import { Supreme, UserData } from '../../../data-types';
+
+interface dynamicObject {
+	[key: string]: any;
+}
 
 class SupremeBase extends Task {
 	restockMode: boolean;
-	request: any;
-	cookieJar: any;
-	formElements: any;
+	request: Function;
+	cookieJar: dynamicObject;
+	formElements: Array<{ [key: string]: string; }>;
 	cookieSub: string;
 	slug: string;
 	checkoutAttempts: number;
-	checkoutData: any;
+	checkoutData: Supreme.statusProps;
 	userAgent: string;
 	region: string;
 	startTS: number;
-	
+	cartForm: any;
 	mobileUrl: string;
 	productId: number;
 	sizeId: number;
 	styleId: number;
-	cardinal: any;
+	cardinal: {
+		id: string;
+		tid: string;
+		transactionId: string;
+		transactionToken: string;
+		serverJWT: string;
+		responsePayload: string;
+		consumerData: {};
+		authentication: {
+			url: string;
+			payload: string;
+		};
+	};
 
 
 
-	constructor(_taskData:any, _id:any) {
+	constructor(_taskData: UserData.task, _id: string) {
 		super(_taskData, _id);
 		this.restockMode = false;
 		this.cardinal = {
@@ -49,133 +67,129 @@ class SupremeBase extends Task {
 			}
 		};
 		this.request = request.defaults({
-			
 			gzip: true,
 			timeout: settings.has('globalTimeoutDelay') ? parseInt((<string>settings.get('globalTimeoutDelay'))) : 5000,
 			resolveWithFullResponse: true
 		});
-		this.cookieJar = this.request.jar();
-		
+		this.cookieJar = new CookieJar();
+
 		this.formElements = [];
 		this.cookieSub = '';
 		this.slug = '';
 		this.checkoutAttempts = 0;
-		this.checkoutData = {};
-		this.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.5 Mobile/15E148 Snapchat/10.77.0.54 (like Safari/604.1)';
+		this.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
 		//Set Region
 		switch (this.taskData.site) {
 			case 'supreme-eu': this.region = 'EU';
 				break;
-			
+
 			case 'supreme-jp': this.region = 'JP';
 				break;
-				
-			case 'supreme-us': 
+
+			case 'supreme-us':
 			default:
 				this.region = 'US';
 				break;
 		}
 	}
 
-	set checkoutDelay(delay:any) {
+	set checkoutDelay(delay: number) {
 		if (delay <= 0) this.checkoutDelay = 0;
 		else this.checkoutDelay = delay;
 	}
 
-	_fetchStockData():Promise<any> {
-		return new Promise((resolve, reject) => {
-			async function runStage(this:SupremeBase):Promise<any> {
-				//Setup Keyword Monitor
-				if (!Worker.monitors.supreme.kw) {
-					Worker.monitors.supreme.kw = new SupremeKWMonitor({
-						baseUrl: this.baseUrl,
-						proxy: this.proxy
-					});
-				}
-				let searchInput = this.products[0].searchInput;
-				let category = this.products[0].category;
-				let maxPrice = this.taskData.additional.maxPrice;
+	_fetchStockData(): Promise<void> {
+		return new Promise((resolve: Function, reject: Function): void => {
+			async function runStage(this: SupremeBase): Promise<void> {
+				try {
+					//Setup Keyword Monitor
+					if (!Worker.monitors.supreme.kw) {
+						Worker.monitors.supreme.kw = new SupremeKWMonitor({
+							baseUrl: this.baseUrl,
+							proxy: this.proxy
+						});
+					}
+					let searchInput: string = this.products[0].searchInput;
+					let category: string = this.products[0].category;
+					let maxPrice: number = this.taskData.additional.maxPrice;
 
-				if (!searchInput.includes('+') && !searchInput.includes('-')) {
-					this.setStatus('Invalid Search Input.', 'ERROR');
-					reject(new Error('INVALID INPUT'));
-					return;
-				}
-
-				logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
-				this.setStatus('Fetching Stock Data.', 'WARNING');
-				this.isMonitoringKW = true;
-				if (this.shouldStop) return this._stop();
-				Worker.monitors.supreme.kw.add(this.id, searchInput, category, (name:any, id:any, price:any) => {
-					this.isMonitoringKW = false;
-					if (maxPrice > 0 && (price / 100) > maxPrice) {
-						this.setStatus('Price Exceeds Limit.', 'ERROR');
-						reject(new Error('PRICE LIMIT'));
+					if (!searchInput.includes('+') && !searchInput.includes('-')) {
+						this.setStatus('Invalid Search Input.', 'ERROR');
+						reject(new Error('INVALID INPUT'));
 						return;
 					}
-					this.startTS = Date.now();
-					this.productId = id;
-					this.productName = name;
-					this.mobileUrl = this.baseUrl + '/mobile#products/' + this.productId;
-					this._productUrl = this.baseUrl + '/shop/' + this.productId;
-					resolve();
-					return;
-				});
+
+					logger.warn(`[T:${this.id}] Adding Keywords to Monitor.`);
+					this.setStatus('Fetching Stock Data.', 'WARNING');
+					this.isMonitoringKW = true;
+					if (this.shouldStop) throw new Error('STOP');
+					Worker.monitors.supreme.kw.add(this.id, searchInput, category, (name: string, id: number, price: number): void => {
+						this.isMonitoringKW = false;
+						if (maxPrice > 0 && (price / 100) > maxPrice) {
+							this.setStatus('Price Exceeds Limit.', 'ERROR');
+							reject(new Error('PRICE LIMIT'));
+							return;
+						}
+						this.startTS = Date.now();
+						this.productId = id;
+						this.productName = name;
+						this.mobileUrl = this.baseUrl + '/mobile#products/' + this.productId;
+						this._productUrl = this.baseUrl + '/shop/' + this.productId;
+						resolve();
+						return;
+					});
+				}
+				catch (error) {
+
+				}
+
 			}
 			runStage.bind(this)();
 		});
 	}
 
-	_fetchProductData():Promise<any> {
-		return new Promise(function runStage(this:SupremeBase, resolve:any, reject:any):any {		
+	_fetchProductData(): Promise<void> {
+		return new Promise(function runStage(this: SupremeBase, resolve: Function, reject: Function): void {
 			if (!Worker.monitors.supreme.url.hasOwnProperty(this._productUrl)) {
 				Worker.monitors.supreme.url[this._productUrl] = new SupremeUrlMonitor(this._productUrl, this.proxy);
 			}
-			
-			
-			this.isMonitoring = true;
-			if (this.shouldStop) return this._stop();
-			this.setStatus('Fetching Product Data.', 'WARNING');
-			let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;
-			Worker.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
-			Worker.monitors.supreme.url[this._productUrl].add(this.id, (styles:any) => {
-				try {
-					if (this.shouldStop) return this._stop();
 
-					let sizeData;
-					let styleName;
-					let styleId;
-					let imageUrl;
-					for (let i = 0; i < styles.length; i++) {
+
+			this.isMonitoring = true;
+			if (this.shouldStop) throw new Error('STOP');
+			this.setStatus('Fetching Product Data.', 'WARNING');
+			let monitorDelay: number = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
+			Worker.monitors.supreme.url[this._productUrl].monitorDelay = monitorDelay;
+			Worker.monitors.supreme.url[this._productUrl].add(this.id, (styles: Supreme.styleDataProps[]): void => {
+				try {
+					if (this.shouldStop) throw new Error('STOP');
+
+					let sizeData: Supreme.sizeDataProps;
+					let styleName: string;
+					let styleId: number;
+					let imageUrl: string;
+					for (let i: number = 0; i < styles.length; i++) {
 						if (this._keywordsMatch(styles[i].name.toLowerCase(), this._parseKeywords(this.products[0].style))) {
 							styleName = styles[i].name;
 							styleId = styles[i].id;
 							imageUrl = 'https:' + styles[i].image_url;
 
 							switch (this.products[0].size) {
-								case 'RANDOM':
-									sizeData = styles[i].sizes[Math.floor(Math.random() * styles[i].sizes.length)];
+								case 'RANDOM': sizeData = styles[i].sizes[Math.floor(Math.random() * styles[i].sizes.length)];
 									break;
-								case 'SMALLEST':
-									sizeData = styles[i].sizes[0];
+								case 'SMALLEST': sizeData = styles[i].sizes[0];
 									break;
-								case 'LARGEST':
-									sizeData = styles[i].sizes[styles[i].sizes.length - 1];
+								case 'LARGEST': sizeData = styles[i].sizes[styles[i].sizes.length - 1];
 									break;
 								default:
-									sizeData = styles[i].sizes.filter((size:any) => size.name.toLowerCase().includes(this.products[0].size))[0] || null;
+									sizeData = styles[i].sizes.filter((size: Supreme.sizeDataProps): boolean => size.name.toLowerCase().includes(this.products[0].size))[0] || null;
 							}
 							break;
 						}
 					}
 
-					if (!styleName) {
-						throw new Error('Style Not Found');
-					}
-
-					if (!sizeData) {
-						throw new Error('Size Not Found');
-					}
+					if (!styleName) { throw new Error('Style Not Found'); }
+					if (!sizeData) { throw new Error('Size Not Found'); }
 
 					this.sizeName = sizeData.name;
 					this._productStyleName = styleName;
@@ -217,8 +231,9 @@ class SupremeBase extends Task {
 							console.log(error);
 
 					}
-					let monitorDelay = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
-					return setTimeout(runStage.bind(this, resolve, reject), monitorDelay);
+					let monitorDelay: number = settings.has('globalMonitorDelay') ? parseInt(<string>settings.get('globalMonitorDelay')) : 1000;
+					setTimeout(runStage.bind(this, resolve, reject), monitorDelay);
+					return;
 				}
 			});
 
@@ -226,18 +241,18 @@ class SupremeBase extends Task {
 		}.bind(this));
 	}
 
-	_parseCheckoutForm(checkoutTemplate:any):any {
-		let formElements:any = [];
-		
-		let $ = cheerio.load(checkoutTemplate);
-		let checkoutForm = $('form[action="https://www.supremenewyork.com/checkout.json"]').html();
+	_parseCheckoutForm(checkoutTemplate: string): Array<{ [key: string]: string; }> {
+		let formElements: Array<{ [key: string]: string; }> = [];
+
+		let $: Function = cheerio.load(checkoutTemplate);
+		let checkoutForm: string = $('form[action="https://www.supremenewyork.com/checkout.json"]').html();
 		$ = cheerio.load(checkoutForm);
 
-		$(':input[type!="submit"]').each(function (this:any):any {
-			let formElement = $(this)[0].attribs;
-			let output:any = {};
-			let attributes = ['name', 'id', 'placeholder', 'value', 'style'];
-			attributes.forEach(attribute => {
+		$(':input[type!="submit"]').each(function (this: string): void {
+			let formElement: any = $(this)[0].attribs;
+			let output: any = {};
+			let attributes: string[] = ['name', 'id', 'placeholder', 'value', 'style'];
+			attributes.forEach((attribute: string): void => {
 				if (Object.hasOwnProperty.bind(formElement)(attribute)) {
 					output[attribute] = formElement[attribute];
 				}
@@ -250,8 +265,8 @@ class SupremeBase extends Task {
 		return formElements;
 	}
 
-	_pollStatus():Promise<Request> {
-		let options = {
+	_pollStatus(): Promise<Request> {
+		let options: object = {
 			url: this.baseUrl + '/checkout/' + this.slug + '/status.json',
 			method: 'GET',
 			proxy: this.proxy,
@@ -268,21 +283,24 @@ class SupremeBase extends Task {
 		return this.request(options);
 	}
 
-	_processStatus():Promise<any> {
-		return new Promise((resolve, reject) => {
-			let requestedAuth = false;
-			async function runStage(this: any, isCheckoutResponse:boolean = false):Promise<any> {
+	_processStatus(): Promise<void> {
+		return new Promise((resolve: Function, reject: Function): void => {
+			let requestedAuth: boolean = false;
+			async function runStage(this: SupremeRequest | SupremeSafe, isCheckoutResponse: boolean = false): Promise<void> {
 				try {
 					if (!isCheckoutResponse) {
 						this._pollStatus()
-							.then((response:any) => {
+							.then((response: any): void => {
+								console.log(response.body);
 								this.checkoutData = response.body;
 							})
-							.catch((error:any) => {
-								return setTimeout(runStage.bind(this), 1000);
+							.catch((error: Error): void => {
+								console.log(error)
+								setTimeout(runStage.bind(this, false), 1000);
+								return;
 							});
 					}
-					let error:any;
+					let error: any;
 					logger.info(`Checkout Status:\n${JSON.stringify(this.checkoutData, null, ' ')}`);
 
 					switch (this.checkoutData.status) {
@@ -290,7 +308,8 @@ class SupremeBase extends Task {
 							this.setStatus('Processing...', 'WARNING');
 							logger.warn(this.slug ? `[T.${this.id}] Queued - ${this.slug}.` : `[T.${this.id}] Queued.`);
 							if (this.checkoutData.hasOwnProperty('slug')) this.slug = this.checkoutData.slug;
-							return setTimeout(runStage.bind(this, false), 1000);
+							setTimeout(runStage.bind(this, false), 1000);
+							return;
 
 
 						case 'failed':
@@ -299,12 +318,13 @@ class SupremeBase extends Task {
 								this.setStatus('Billing Error', 'ERROR');
 								return;
 							}
-							else if(this.checkoutData.page) {
+							else if (this.checkoutData.page) {
 								this.setStatus('High Traffic Decline', 'ERROR');
 								logger.error(`[T.${this.id}] Payment Failed.`);
 								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
-									let errorDelay = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
-									return setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
+									let errorDelay: number = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
+									setTimeout(this._retryCheckout.bind(this), errorDelay);
+									return;
 								}
 								else {
 									error = new Error();
@@ -316,8 +336,8 @@ class SupremeBase extends Task {
 								this.setStatus('Payment Declined.', 'ERROR');
 								logger.error(`[T.${this.id}] Payment Failed.`);
 								if (this.checkoutAttempts < this.taskData.setup.checkoutAttempts) {
-									let errorDelay = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
-									setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
+									let errorDelay: number = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
+									setTimeout(this._retryCheckout.bind(this), errorDelay);
 								}
 								else {
 									error = new Error();
@@ -335,22 +355,22 @@ class SupremeBase extends Task {
 							this.cardinal.authentication.payload = this.checkoutData.payload;
 							this.cardinal.consumerData = this.checkoutData.consumer;
 
-							
+
 							this.authHandler()
-								.then(() => {
-									return this._submitCheckout('cardinal');
+								.then((): Promise<any> => {
+									return this._submitCheckout('checkout/' + this.slug + '/cardinal.json');
 								})
 
-								.then((response: any) => {
+								.then((response: any): Promise<void> => {
 									console.log(response.body);
 									this.checkoutData = response.body;
 									return Promise.resolve();
 								})
-								.then(() => {
+								.then((): Promise<void> => {
 									setTimeout(runStage.bind(this, false), 1000);
 									return Promise.resolve();
 								})
-								.catch((error: any) => {
+								.catch((error: any): void => {
 									console.log(error);
 
 								});
@@ -360,7 +380,8 @@ class SupremeBase extends Task {
 						case 'cardinal_queued':
 							this.setStatus('Processing...', 'WARNING');
 							logger.warn(`[T.${this.id}] Cardinal Queued.`);
-							return setTimeout(runStage.bind(this, false), 1000);
+							setTimeout(runStage.bind(this, false), 1000);
+							return;
 
 
 						case 'paid':
@@ -436,7 +457,7 @@ class SupremeBase extends Task {
 						default:
 							console.log(error);
 							this.setStatus('Error. Retrying.', 'ERROR');
-							let errorDelay = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
+							let errorDelay: number = settings.has('errorDelay') ? parseInt(<string>settings.get('errorDelay')) : 1000;
 							setTimeout(runStage.bind(this, isCheckoutResponse), errorDelay);
 					}
 				}
@@ -445,8 +466,8 @@ class SupremeBase extends Task {
 		});
 	}
 
-	_form(this: SupremeRequest | SupremeSafe, type:string):Promise<any> {
-		let form: any;
+	_form(this: SupremeRequest | SupremeSafe, type: string): dynamicObject {
+		let form: dynamicObject;
 		switch (type) {
 			case 'cart-add':
 				if (this.region === 'US') {
@@ -482,13 +503,13 @@ class SupremeBase extends Task {
 				};
 				if (Math.floor(Math.random() * 2)) form['is_from_ios_native'] = '1';
 
-				for (let i = 0; i < this.formElements.length; i++) {
-					let element = this.formElements[i];
+				for (let i: number = 0; i < this.formElements.length; i++) {
+					let element: any = this.formElements[i];
 					if (
 						element.hasOwnProperty('style') &&
 						element.style.includes('absolute')
 					) {
-						let name = element.name || element.id;
+						let name: string = element.name || element.id;
 						form[name] = element.value || '';
 					}
 					else if (element.placeholder) {
@@ -569,9 +590,9 @@ class SupremeBase extends Task {
 		return form;
 	}
 
- 	authHandler():Promise<any> {
-		return new Promise((resolve, reject) => {
-			ipcWorker.once(`cardinal.validated(${this.id})`, (event:any, args:any) => {
+	authHandler(): Promise<any> {
+		return new Promise((resolve: Function, reject: Function): void => {
+			ipcWorker.once(`cardinal.validated(${this.id})`, (event: Electron.Event, args: dynamicObject): void => {
 				console.log('[IPC', `cardinal.validated(${this.id})\n`, args);
 				if (args.responseJWT) {
 					logger.debug('Payment Success');
@@ -600,42 +621,87 @@ class SupremeBase extends Task {
 
 	}
 
-	_setCookie(name:string, value:string):void {
-		let url = this.baseUrl.replace('https://', '');
+	_setCookie(name: string, value: string): void {
+		let url: string = this.baseUrl.replace('https://', '');
 		try {
-			if (this.cookieJar._jar.store.idx[url]){
-				delete this.cookieJar._jar.store.idx[url]['/']['' + name];
-		}
-			
-	
+
+
 		} catch (err) { console.log(err); }
 		try {
-			let cookie = `${name}=${value}`;
-			
+			let cookie: string = `${name}=${value}`;
+
 			this.cookieJar.setCookie(cookie, this.baseUrl);
-		} catch (err) {console.log(err); }
+		} catch (err) { console.log(err); }
 	}
 
-	_deleteCookie(name:string):void {
-		try {
+	async _retryCheckout(this: SupremeSafe | SupremeRequest) {
+			//ATC Process
+			await this._atcProcess();
+
+			//Checkout Process
+			await this._checkoutProcess();
+			await this._processStatus();
+
+			if (this.successful) {
+				this.setStatus('Success.', 'SUCCESS');
+				let privateFields: any = [];
+				let publicFields: any = [];
+				if (this._productStyleName) {
+					let field: any = {
+						name: 'Colour:',
+						value: this._productStyleName,
+						inline: true
+					};
+					privateFields.push(field);
+					publicFields.push(field);
+				}
+
+				if (this.checkoutData.hasOwnProperty('status')) {
+					let field: any = {
+						name: 'Status:',
+						value: this.checkoutData.status.capitalise(),
+						inline: true
+					};
+					privateFields.push(field);
+				}
+
+				if (this.cardinal.id) {
+					let field: any = {
+						name: 'Transaction ID:',
+						value: '||' + this.cardinal.id + '||',
+						inline: true
+					};
+					privateFields.push(field);
+				}
+				this._postPublicWebhook(publicFields);
+				this._postPrivateWebhook(privateFields);
+				this._addToAnalystics();
+			}
+			else { console.log('failed'); }
+			this.isActive = false;
+	}
+
+	_deleteCookie(name: string): void {
+
+		/* try {
 			delete this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/']['' + name];
-		} catch (err) { console.log(err);}
+		} catch (err) { console.log(err);} */
 	}
 
-	_getCookie(name:string):string {
+	_getCookie(name: string): string {
 		try {
 			return this.cookieJar._jar.store.idx['' + this.baseUrl.replace('https://', '')]['/'][name].value;
-	
+
 		} catch (err) { console.error(err); return ''; }
 	}
 
-	_postPublicWebhook(additonalFields:any = []):void {
+	_postPublicWebhook(additonalFields: any = []): void {
 		request({
 			url: process.env.SUCCESS_WEBHOOK_URL,
 			method: 'POST',
 			json: true,
 			body: config.discord.publicWebhook.bind(this)(additonalFields)
-		}, (error, response, body) => {	
+		}, (error: Error, response: request.FullResponse, body: string): void => {
 			if (error) {
 				console.log(error);
 			}
@@ -648,30 +714,46 @@ class SupremeBase extends Task {
 
 					case 'TOO MANY REQUESTS':
 						console.log('Reached Rate Limit.');
-						return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
-						break;
+						setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 5000);
+						return;
 
 					case 'BAD REQUEST':
 						console.log('Format Error');
 						console.log(JSON.stringify(response.body));
 						break;
-					
+
 					default:
 						console.log(response.statusCode, response.statusMessage);
+						setTimeout(this._postPrivateWebhook.bind(this, additonalFields));
 				}
 			}
 		});
 	}
- 
-	_postPrivateWebhook(this: SupremeBase, additonalFields:any = []):void {
+	_setupThreeDS(): Promise<any> {
+		return new Promise((resolve: Function): void => {
+			console.log('helklsj');
+			logger.debug('Submitting Initial JWT.', this);
+			ipcWorker.send('cardinal.setup', {
+				jwt: this.cardinal.serverJWT,
+				profile: this.profileName,
+				taskId: this.id
+			});
+
+			ipcWorker.once(`cardinal.setupComplete(${this.id})`, (event: any, args: any): void => {
+				resolve(args.cardinalId);
+			});
+		});
+	}
+
+	_postPrivateWebhook(this: SupremeBase, additonalFields: any = []): void {
 		if (settings.has('discord')) {
-			const webhookUrl = settings.get('discord');
+			const webhookUrl: string = <string>settings.get('discord');
 			this.request({
 				url: webhookUrl,
 				method: 'POST',
 				json: true,
 				body: config.discord.privateWebhook.bind(this)(additonalFields)
-			}, (error:Error, response:any) => {	
+			}, (error: Error, response: any): void => {
 				if (error) {
 					console.log(error);
 				}
@@ -684,14 +766,14 @@ class SupremeBase extends Task {
 
 						case 'TOO MANY REQUESTS':
 							console.log('Reached Rate Limit.');
-							return setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
-							break;
+							setTimeout(this._postPrivateWebhook.bind(this, additonalFields), 2500);
+							return;
 
 						case 'BAD REQUEST':
 							console.log('Format Error');
 							console.log(JSON.stringify(response.body));
 							break;
-						
+
 						default:
 							console.log(response.statusCode, response.statusMessage);
 					}

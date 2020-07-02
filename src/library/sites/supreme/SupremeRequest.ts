@@ -1,9 +1,11 @@
 import SupremeBase from './SupremeBase';
-import { logger } from '../../other';
 
 import cheerio from 'cheerio';
-import { ipcRenderer as ipcWorker } from 'electron';
 import settings from 'electron-settings';
+
+import { ipcRenderer as ipcWorker } from 'electron';
+import { logger } from '../../other';
+import { UserData } from '../../../data-types';
 
 class SupremeRequest extends SupremeBase {
 	ticket: string;
@@ -11,39 +13,35 @@ class SupremeRequest extends SupremeBase {
 	checkoutTS: number;
 	atcForm: any;
 	
-	constructor(_taskData:any, _id:string) {
+	constructor(_taskData: UserData.task, _id: string) {
 		super(_taskData, _id);
-		
 		this.ticket = '';
 	}
 
-	async run():Promise<any> {
+	async run(): Promise<any> {
 		try {
 			
 			await this._setTimer();
 			this.setStatus('Starting Task.', 'WARNING');
 			logger.warn(`[Task ${this.id}] Starting.`);
-			console.log(this.profile);
+
 			//Find Product
 			await this._fetchStockData();
-			if (this.shouldStop) return this._stop();
 			await this._fetchProductData();
 
 			//ATC Process
-			if (this.shouldStop) return this._stop();
 			await this._atcProcess();
 
 			//Checkout Process
-			if (this.shouldStop) return this._stop();
 			await this._checkoutProcess();
 			await this._processStatus();
 
 			if (this.successful) {
 				this.setStatus('Success.', 'SUCCESS');
-				let privateFields = [];
-				let publicFields = [];
+				let privateFields: any = [];
+				let publicFields: any = [];
 				if (this._productStyleName) {
-					let field = {
+					let field: any = {
 						name: 'Colour:',
 						value: this._productStyleName,
 						inline: true
@@ -53,7 +51,7 @@ class SupremeRequest extends SupremeBase {
 				}
 
 				if (this.checkoutData.hasOwnProperty('status')) {
-					let field = {
+					let field: any = {
 						name: 'Status:',
 						value: this.checkoutData.status.capitalise(),
 						inline: true
@@ -62,7 +60,7 @@ class SupremeRequest extends SupremeBase {
 				}
 
 				if (this.cardinal.id) {
-					let field = {
+					let field: any = {
 						name: 'Transaction ID:',
 						value: '||' + this.cardinal.id + '||',
 						inline: true
@@ -90,10 +88,10 @@ class SupremeRequest extends SupremeBase {
 		}
 	}
 
-	_atcProcess():Promise<any> {
-		return new Promise(async function runStage(this: SupremeRequest, resolve:Function, reject:Function):Promise<any> {
+	_atcProcess(): Promise<any> {
+		return new Promise(async function runStage(this: SupremeRequest, resolve: Function, reject: Function): Promise<any> {
 			try {
-				let cartDelay = !this.restockMode ? this.taskData.delays.cart : 0;
+				let cartDelay: number = !this.restockMode ? this.taskData.delays.cart : 0;
 				this._setCookie('shoppingSessionId', (new Date().getTime()).toString());
 
 				//ATC Delay
@@ -114,9 +112,9 @@ class SupremeRequest extends SupremeBase {
 				/* ------------------------------------ ATC OPTIONS ------------------------------------ */
 			
 
-				let response = await this._addToCart();
+				let response: any = await this._addToCart();
 				console.log('atc response',response);
-				let body = response.body;
+				let body: any = response.body;
 				logger.info(`[T:${this.id}] Cart Response:\n${JSON.stringify(body)}`);
 				if (
 					(body.hasOwnProperty('length') && body.length < 1) ||
@@ -126,8 +124,8 @@ class SupremeRequest extends SupremeBase {
 					throw new Error('OOS');
 				}
 
-				let pureCart = this._getCookie('pure_cart') || null;
-				let ticket = this._getCookie('ticket') || '';
+				let pureCart: string = this._getCookie('pure_cart') || null;
+				let ticket: string = this._getCookie('ticket') || '';
 
 				if (ticket) {
 					logger.debug(`Ticket: ${ticket}`);
@@ -137,7 +135,7 @@ class SupremeRequest extends SupremeBase {
 				if (!pureCart) {
 					throw new Error('NO PURE CART');
 				}
-				let cookieValue = JSON.parse(decodeURIComponent(pureCart));
+				let cookieValue: any = JSON.parse(decodeURIComponent(pureCart));
 				delete cookieValue.cookie;
 				this.cookieSub = encodeURIComponent(JSON.stringify(cookieValue));
 				this.setStatus('Added to Cart!', 'SUCCESS');
@@ -156,23 +154,23 @@ class SupremeRequest extends SupremeBase {
 						this.setStatus('ATC Error', 'ERROR');
 						console.error(error);
 				}
-				let errorDelay:number = settings.has('globalErrorDelay') ? parseInt(<string>settings.get('globalErrorDelay')) : 1000;
+				let errorDelay: number = settings.has('globalErrorDelay') ? parseInt(<string>settings.get('globalErrorDelay')) : 1000;
 				return setTimeout(runStage.bind(this, resolve, reject), errorDelay);
 			}
 		}.bind(this));
 	}
 
-	_checkoutProcess():Promise<any> {
-		return new Promise(async function runStage(this: SupremeRequest, resolve: Function):Promise<any> {
+	_checkoutProcess(): Promise<any> {
+		return new Promise(async function runStage(this: SupremeRequest, resolve: Function): Promise<any> {
 			try {
 				this._setCookie('lastVisitedFragment', 'checkout');
 
 				/* ---------------------------- FETCH & PARSE CHECKOUT FORM ----------------------------- */
 
 				this.setStatus('Parsing Checkout Form.', 'WARNING');
-				let body = (await this._fetchMobile()).body;
-				let $ = cheerio.load(body);
-				let checkoutTemplate = $('#checkoutViewTemplate').html();
+				let body: string = (await this._fetchMobile()).body;
+				let $: Function = cheerio.load(body);
+				let checkoutTemplate: string = $('#checkoutViewTemplate').html();
 				this.formElements = this._parseCheckoutForm(checkoutTemplate);
 				/* ------------------------------------------------------------------------------------- */
 				
@@ -190,9 +188,9 @@ class SupremeRequest extends SupremeBase {
 					
 					//Fetch Mobile Totals
 					body = (await this._fetchMobileTotals()).body;
-					let $ = cheerio.load(body);
-					let serverJWT = $('#jwt_cardinal').val();
-					let orderTotal = $('#total').text();
+					let $: Function = cheerio.load(body);
+					let serverJWT: string = $('#jwt_cardinal').val();
+					let orderTotal: string = $('#total').text();
 
 					if (orderTotal) {
 						logger.info(`Order Total:\n${this.orderTotal}`);
@@ -224,7 +222,7 @@ class SupremeRequest extends SupremeBase {
 				
 				if (!this.restockMode) {
 					this.setStatus('Delaying Checkout.', 'WARNING');
-					let checkoutDelay;
+					let checkoutDelay: number;
 					if (!this.captchaTime) { 
 						checkoutDelay = this.taskData.delays.checkout; 
 					}
@@ -249,9 +247,8 @@ class SupremeRequest extends SupremeBase {
 				this.checkoutTS = Date.now();
 				this.checkoutTime = this.checkoutTS - this.startTS;
 				this._setCookie('_ticket', this._generateTicket(2) || '');
-				let checkoutResponse = await this._submitCheckout();
-				body = checkoutResponse.body;
-				this.checkoutData = body;
+				let checkoutResponse: any = await this._submitCheckout('checkout.json');
+				this.checkoutData = checkoutResponse.body;
 				resolve();
 			}
 			catch (error) {
@@ -268,11 +265,11 @@ class SupremeRequest extends SupremeBase {
 
 
 	
-	async _addToCart():Promise<any> {
+	async _addToCart(): Promise<any> {
 		if (!this.atcForm) {
 			this.atcForm = this._form('cart-add');
 		}
-		let options = {
+		let options: any = {
 			url: `${this.baseUrl}/shop/${this.productId}/add.json`,
 			method: 'POST',
 			proxy: this.proxy,
@@ -293,8 +290,8 @@ class SupremeRequest extends SupremeBase {
 		return this.request(options);
 	}
 
-	async _fetchMobile():Promise<any> {
-		let options = {
+	async _fetchMobile(): Promise<any> {
+		let options: any = {
 			url: `${this.baseUrl}/mobile`,
 			method: 'GET',
 			proxy: this.proxy,
@@ -307,8 +304,8 @@ class SupremeRequest extends SupremeBase {
 		return this.request(options);
 	}
 
-	async _fetchMobileTotals():Promise<any> {
-		let options = {
+	async _fetchMobileTotals(): Promise<any> {
+		let options: any = {
 			url: `${this.baseUrl}/checkout/totals_mobile.js`,
 			method: 'GET',
 			proxy: this.proxy,
@@ -318,10 +315,10 @@ class SupremeRequest extends SupremeBase {
 		return this.request(options);
 	}
 
-	async _submitCheckout(endpoint?:string):Promise<any> {
+	async _submitCheckout(endpoint?: string): Promise<any> {
 	//let path = endpoint !== 'cardinal' ? '/checkout.json' : '/checkout/' + this.slug + '/cardinal.json';
-		let options = {
-			url: this.baseUrl + '/checkout.json',
+		let options: any = {
+			url: this.baseUrl + endpoint === 'cardinal' ? 'cardinal.json' : '/checkout.json',
 			method: 'POST',
 			proxy: this.proxy,
 			json: true,
@@ -336,33 +333,18 @@ class SupremeRequest extends SupremeBase {
 				'User-Agent': this.userAgent
 			}
 		};
-		return this.request(options);
+		return { body: this.request(options)} ;
 	
 	}
 
-	_setupThreeDS():Promise<any> {
-		return new Promise(resolve => {
-			logger.debug('Submitting Initial JWT.');
-			ipcWorker.send('cardinal.setup', {
-				jwt: this.cardinal.serverJWT,
-				profile: this.profileName,
-				taskId: this.id
-			});
-			ipcWorker.once(`cardinal.setupComplete(${this.id})`, (event, args) => {
-				resolve(args.cardinalId);
-			});
-		});
-	}
+	
 
-	_generateTicket(type:number):string {
-		let randomHex = [...Array(128)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-		let timeStamp = Math.floor(Date.now() / 1000);
+	_generateTicket(type: number): string {
+		let randomHex: string = [...Array(128)].map((): any => Math.floor(Math.random() * 16).toString(16)).join('');
+		let timeStamp: number = Math.floor(Date.now() / 1000);
 		switch(type) {
-			case 1:
-				return `${randomHex}${timeStamp}`;
-
-			case 2:
-				return `${this.ticket}${randomHex}${timeStamp}`;
+			case 1: return `${randomHex}${timeStamp}`;
+			case 2: return `${this.ticket}${randomHex}${timeStamp}`;
 		}
 	}
 
