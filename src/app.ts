@@ -54,8 +54,8 @@ function Main():void {
 	});
 
 	this.workerWindow = new BrowserWindow({
-		'height': 100,
-		'width': 100,
+		'height': 50,
+		'width': 50,
 		'show': false,
 		'webPreferences': {
 			nodeIntegration: true

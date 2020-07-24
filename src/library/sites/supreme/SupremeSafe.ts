@@ -20,7 +20,7 @@ class SupremeSafe extends SupremeBase {
 		super(_taskData, _id);
 		this.config = {
 			launch: {
-				headless: true,
+				headless: false,
 				executablePath: settings.has('browser-path') ? settings.get('browser-path') : null,
 				args: [
 					'--no-sandbox',
@@ -93,6 +93,7 @@ class SupremeSafe extends SupremeBase {
 	async _setup(): Promise<void> {
 		if (this.proxy) {
 			let splitProxy: string[] = this.proxy.replace('http://', '').split('@');
+			console.log(splitProxy)
 			let host: string = splitProxy[1].split(':')[0];
 			let port: string = splitProxy[1].split(':')[1];
 			this.config.launch.args.push(`--proxy-server=http://${host}:${port}`);
@@ -100,6 +101,8 @@ class SupremeSafe extends SupremeBase {
 			if (splitProxy.length === 2) {
 				let username: string = splitProxy[0].split(':')[0];
 				let password: string = splitProxy[0].split(':')[1];
+				console.log({ username, password });
+				
 				this.config.auth = { username, password };
 			}
 		}

@@ -1,6 +1,6 @@
 {
 	"name": "ProsperAIO",
-	"version": "3.0.35",
+	"version": "3.0.4",
 	"main": "build/app.js",
 	"description": "Simple Design. Easy to Use. Insane Functionality.",
 	"author": "ProsperSoftware",
@@ -12,8 +12,8 @@
 		"dev:start": "electron .",
 		"ts:watch": "tsc -p src -w",
 		"pack": "electron-builder --dir",
-		"package-mac": "tsc -p src && electron-builder --mac",
-		"package-win": "tsc -p src && electron-builder --win",
+		"package-mac": "electron-builder --mac",
+		"package-win": "electron-builder --win",
 		"package-all": "electron-builder --mac --win",
 		"release": "build --all --x64",
 		"pkg": "rm -rf ./pkg && pkg -t node8-macos-x64 --out-path pkg .",
@@ -73,12 +73,16 @@
 		"xml2js": "^0.4.19"
 	},
 	"devDependencies": {
-		"electron": "^9.0.3",
+		"@typescript-eslint/eslint-plugin": "^3.6.1",
+		"@typescript-eslint/parser": "^3.6.1",
+		"electron": "^9.0.5",
 		"electron-builder": "^22.6.0",
 		"electron-packager": "^13.0.1",
+		"eslint": "^7.4.0",
 		"js-beautify": "^1.11.0",
 		"nodemon": "^2.0.4",
-		"typescript": "^3.9.5",
+		"tsc": "^1.20150623.0",
+		"typescript": "^3.9.6",
 		"watch": "^1.0.2"
 	},
 	"build": {

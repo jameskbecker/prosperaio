@@ -158,7 +158,7 @@ function taskWithProfileExists(profileId: string): boolean {
 	return false;
 }
 
-
+ 
 var newTask_saveBtn: HTMLButtonElement = <HTMLButtonElement>document.getElementById('taskSaveButton');
 newTask_saveBtn.onclick = function (): void {
 	try {
@@ -167,10 +167,11 @@ newTask_saveBtn.onclick = function (): void {
 		}
 
 		if ((<HTMLInputElement>document.getElementById('taskId')).value === '' && taskWithProfileExists(newTask_Profile.value)) {
+			console.log(1)
 			alert('Task with current profile exits! Try using a different profile or deleting existing task.');
 			return;
 		}
-
+		console.log(2)
 		let products: productProps[] = [];
 
 		for (let i: number = 0; i < newTask_SearchInput.length; i++) {

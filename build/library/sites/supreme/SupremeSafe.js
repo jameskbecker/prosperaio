@@ -14,7 +14,7 @@ class SupremeSafe extends SupremeBase_1.default {
         super(_taskData, _id);
         this.config = {
             launch: {
-                headless: true,
+                headless: false,
                 executablePath: electron_settings_1.default.has('browser-path') ? electron_settings_1.default.get('browser-path') : null,
                 args: [
                     '--no-sandbox',
@@ -81,12 +81,14 @@ class SupremeSafe extends SupremeBase_1.default {
     async _setup() {
         if (this.proxy) {
             let splitProxy = this.proxy.replace('http://', '').split('@');
+            console.log(splitProxy);
             let host = splitProxy[1].split(':')[0];
             let port = splitProxy[1].split(':')[1];
             this.config.launch.args.push(`--proxy-server=http://${host}:${port}`);
             if (splitProxy.length === 2) {
                 let username = splitProxy[0].split(':')[0];
                 let password = splitProxy[0].split(':')[1];
+                console.log({ username, password });
                 this.config.auth = { username, password };
             }
         }

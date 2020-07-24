@@ -114,6 +114,7 @@ class SupremeUrlMonitor {
 		console.log({ proxy: options.proxy });
 		request(options)
 		.then((response: any) => {
+			console.log(response);
 			if (!response.body.hasOwnProperty('styles')) { 
 				logger.error(`[Monitor] [${this._productUrl}] No Style Data.`);
 				let monitorDelay = settings.has('globalMonitorDelay') ? settings.get('globalMonitorDelay') : 1000;

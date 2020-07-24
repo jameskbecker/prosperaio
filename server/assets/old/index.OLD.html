@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>XXXAIO - Main</title>
+	<link rel="stylesheet" href="../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+	<link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../css/fonts.css">
+	<link rel="stylesheet" href="./style(OLD).css">
+</head>
+
+<body>
+	<!-- Banner -->
+	<div id="banner" class="banner">
+		<div class="banner banner-logo"></div>
+		<div class="banner banner-nav">
+			<div id="nav_dashboard" class="nav nav-active" data-page="dashboard">
+				<i class="fas fa-tachometer-alt icon"></i>
+				<span>Dashboard</span>
+			</div>
+			<div id="nav_newTask" class="nav" data-page="newTask">
+				<i class="fas fa-scroll icon"></i>
+				<span>Task Creator</span>
+			</div>
+
+			<div id="nav_newProfile" class="nav" data-page="newProfile">
+				<i class="fas fa-user-plus icon"></i>
+				<span>Profile Creator</span>
+			</div>
+
+			<div id="nav_proxies" class="nav" data-page="proxies">
+				<i class="fas fa-globe icon"></i>
+				<span>Proxies</span>
+			</div>
+
+			<div id="nav_googleAccounts" class="nav" data-page="googleAccounts">
+				<i class="fab fa-google icon"></i>
+				<span>Google Accounts</span>
+			</div>
+
+			<div id="nav_settings" class="nav" data-page="settings">
+				<i class="fas fa-cogs icon"></i>
+				<span>Settings</span>
+			</div>
+		</div>
+		<div class="banner banner-controls">
+			<div id="openDocs" class="control" title="Documentation Coming Soon.">
+				<i class="fas fa-question"></i>
+			</div>
+			<div id="openChangelog" class="control">
+				<i class="fas fa-bell"></i>
+			</div>
+			<div id="signout" class="control">
+				<i class="fas fa-sign-out-alt"></i>
+			</div>
+			<div id="reloadApp" class="control">
+				<i class="fas fa-sync-alt"></i>
+			</div>
+			<div id="minimizeApp" class="control">
+				<i class="fas fa-window-minimize"></i>
+			</div>
+			<div id="closeApp" class="control">
+				<i class="fas fa-times"></i>
+			</div>
+		</div>
+	</div>
+
+	<!-- Dashboard -->
+	<div id="dashboard" class="page">
+		<div class="header-container">
+			<h1 class="header-title">Dashboard</h1>
+			<div class="header-extra">
+				<h5 id="taskCount" class="header-extra-item header-extra-text">Task Count: 0</h5>
+				<h5 id="tokenCount" class="header-extra-item header-extra-text">Captcha Bank: 0</h5>
+			</div>
+		</div>
+		<div class="panel panel-main">
+			<div class="column">
+				<div id="dashboardTableHeader" class="panel-title">
+					<i class="fas fa-tasks"></i>
+					<span>Task Overview</span>
+				</div>
+				<table id="taskTable" class="table">
+					<thead id="taskTableHead" class="table-header">
+						<tr class="row">
+							<th class="cell cell-header col-id">
+								<i class="fas fa-id-card"></i>
+								<span>ID</span>
+							</th>
+							<th class="cell cell-header col-profile">
+								<i class="fas fa-users"></i>
+								<span>Profile</span>
+							</th>
+							<th class="cell cell-header col-site">
+								<i class="fas fa-globe-americas"></i>
+								<span>Site</span>
+							</th>
+							<th class="cell cell-header col-mode">
+								<i class="fas fa-adjust"></i>
+								<span>Mode</span>
+							</th>
+							<th class="cell cell-header col-products">
+								<i class="fas fa-tshirt"></i>
+								<span>Products</span>
+							</th>
+							<th class="cell cell-header col-task-proxy">
+								<i class="fas fa-globe"></i>
+								<span>Proxy</span>
+							</th>
+							<th class="cell cell-header col-size">
+								<i class="fas fa-ruler"></i>
+								<span>Size</span>
+							</th>
+							<th class="cell cell-header col-timer">
+								<i class="fas fa-clock"></i>
+								<span>Timer</span>
+							</th>
+							<th id="statusHeader" class="cell cell-header col-status">
+								<i class="fas fa-info"></i>
+								<span>Status</span>
+							</th>
+							<th id="actionsHeader" class="cell cell-header col-actions">
+								<i class="fas fa-tools"></i>
+								<span>Actions</span>
+							</th>
+						</tr>
+					</thead>
+					<tbody id="taskTableBody" class="table-body">
+					</tbody>
+				</table>
+
+				<div class="panel">
+					<button id="runAll" class="btn f-15">
+						<i class="fas fa-play-circle"></i>
+						<span>Run All Tasks</span>
+					</button>
+					<button id="stopAll" class="btn f-15">
+						<i class="fas fa-stop-circle"></i>
+						<span>Stop All Tasks</span>
+					</button>
+					<button id="clearTasks" class="btn f-15">
+						<i class="fas fa-minus-circle"></i>
+						<span>Delete All Tasks</span>
+					</button>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Task Creator -->
+	<div id="newTask" class="page page-hidden">
+		<div class="header-container">
+			<h1 class="header-title">Task Creator</h1>
+		</div>
+
+		<div class="panel panel-main">
+			<div id=taskSetup class="column">
+				<h2 id="taskConfiguration" class="panel-title">
+					<i class="fas fa-wrench"></i>
+					<span>Task Setup</span>
+				</h2>
+				<div class="container medium">
+					<div class="container">
+						<label for="taskProfile" class="">Profile</label>
+						<span class="dropdown">
+							<select id="taskProfile" class="input profile-selector">
+							</select>
+						</span>
+					</div>
+
+					<div class="container">
+						<label for="taskMode" class="">Task Mode</label>
+						<span class="dropdown">
+							<select id="taskMode" class="input ">
+							</select>
+						</span>
+					</div>
+
+					<div class="container">
+						<label for="taskSearchMode" class="">Search Mode</label>
+						<span class="dropdown">
+							<select id="taskSearchMode" class="input">
+							</select>
+						</span>
+					</div>
+				</div>
+				<div class="container medium">
+					<div class="container">
+						<label class="">Site</label>
+						<span class="dropdown">
+							<select id="taskSite" class="input site-selector" size="4">
+							</select>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div id="addProductsContainer" class="column">
+				<h2 id="taskPersonalization" class="panel-title f-row">
+					<i class="fas fa-tshirt"></i>
+					<span>Add Products</span>
+				</h2>
+				<div class="f-row">
+					<span>
+						<label class="">Search Input</label>
+						<input type="text" class="input" name="taskSearchInput">
+					</span>
+					<span>
+						<label class="">Category</label>
+						<span class="dropdown">
+							<select name="taskCategory" class="input ">
+								<option value='' selected></option>
+								<!-- <option value="new">New</option> -->
+								<option value="jackets">Jackets</option>
+								<option value="shirts">Shirts</option>
+								<option value="tops_sweaters">Tops/Sweaters</option>
+								<option value="sweatshirts">Sweatshirts</option>
+								<option value="pants">Pants</option>
+								<option value="shorts">Shorts</option>
+								<option value="t_shirts">T-Shirts</option>
+								<option value="hats">Hats</option>
+								<option value="bags">Bags</option>
+								<option value="accessories">Accessories</option>
+								<option value="skate">Skate</option>
+							</select>
+						</span>
+					</span>
+					<span>
+						<label class="">Size</label>
+						<span class="dropdown">
+							<select name="taskSize" class="input">
+								<option value="" label=""></option>
+								<option value="RANDOM" label="Random"></option>
+								<option value="SMALLEST" label="Smallest In Stock"></option>
+								<option value="LARGEST" label="Largest In Stock"></option>
+								<option value="ONESIZE" label="One Size"></option>
+								<option value="S" label="S"></option>
+								<option value="M" label="M"></option>
+								<option value="L" label="L"></option>
+								<option value="XL" label="XL"></option>
+								<option value="XXL" label="XXL"></option>
+								<option value="XXXL" label="XXXL"></option>
+								<option value="7.0" label="US 7.0"></option>
+								<option value="7.5" label="US 7.5"></option>
+								<option value="8.0" label="US 8.0"></option>
+								<option value="8.5" label="US 8.5"></option>
+								<option value="9.0" label="US 9.0"></option>
+								<option value="9.5" label="US 9.5""></option>
+										<option value=" 10.0" label="US 10.0"></option>
+								<option value="10.5" label="US 10.5""></option>
+										<option value=" 11.0" label="US 11.0"></option>
+								<option value="11.5" label="US 11.5""></option>
+										<option value=" 12.0" label="US 12.0"></option>
+								<option value="12.5" label="US 12.5""></option>
+										<option value=" 13.0" label="US 13.0"></option>
+								<option value="13.5" label="US 13.5""></option>
+										<option value=" 14.0" label="US 14.0"></option>
+								<option value="14.5" label="US 14.5""></option>
+										<option value=" 15.0" label="US 15.0"></option>
+							</select>
+						</span>
+					</span>
+					<span>
+						<label class="">Variant</label>
+						<input type="text" name="taskVariant" class="input">
+					</span>
+					<span>
+						<label class="">Quantity</label>
+						<input type="number" name="taskProductQty" class="input">
+					</span>
+					<span>
+						<label class=""></label>
+						<button name="product-addButton" class="btn btn-add">
+							<i class="fas fa-plus"></i>
+						</button>
+					</span>
+				</div>
+			</div>
+			<div id="taskDelayOptions" class="column">
+				<h2 class="panel-title f-row">
+					<i class="fas fa-clock"></i>
+					<span>Delays</span>
+				</h2>
+				<div class="container">
+					<label for="taskCartDelay" class="f-50">Cart Delay (ms)</label>
+					<label for="taskCheckoutDelay" class="f-50">Checkout Delay (ms)</label>
+					<input type="number" id="taskCartDelay" class="input f-50" value="0">
+					<input type="number" id="taskCheckoutDelay" class="input f-50" value="0">
+				</div>
+
+				<div class="container">
+					<label for="taskMonitorDelay" class="f-50">Monitor Delay (ms)</label>
+					<label for="taskErrorDelay" class="f-50">Error Delay (ms)</label>
+					<input type="number" id="taskMonitorDelay" class="input f-50" value="1000">
+					<input type="number" id="taskErrorDelay" class="input f-50" value="1000">
+				</div>
+
+				<div class="container">
+					<label for="taskTypeDelay" class="f-50">AutoType Delay (ms)</label>
+					<label for="taskTimeoutDelay" class="f-50">Request Timeout (ms)</label>
+					<input type="number" id="taskTypeDelay" class="input f-50" value="0">
+					<input type="number" id="taskTimeoutDelay" class="input f-50" value="10000">
+				</div>
+			</div>
+			<div id="taskAdditionalOptions" class="column">
+				<div class="container">
+					<h2 id="taskAdditionalOptions" class="panel-title">
+						<i class="fas fa-sliders-h"></i>
+						Additional Options</h2>
+					<div class="container">
+						<label for="taskGoogleAccount" class="f-50">Google Account</label>
+						<label for="taskCheckoutAttempts" class="f-50">Checkout Attempts</label>
+						<span class="dropdown f-50">
+							<select id="taskCaptchaAccount" class="input  captchaAccount-selector">
+							</select>
+						</span>
+						<input type="number" id="taskCheckoutAttempts" class="input f-50" value="1">
+					</div>
+					<div class="container">
+						<label for="taskTimer" class="f-50">Timer</label>
+						<label for="taskQuantity" class="f-50">Task Quantity</label>
+
+						<input type="text" id="taskTimer" class="input f-50" placeholder="HH:MM:SS">
+						<input type="number" id="taskQuantity" class="input f-50" value="1">
+					</div>
+					<div class="container">
+						<label for="taskProxyGroup" class="f-50">Proxy Group</label>
+						<label for="taskSpecificProxy" class="f-50">Task-Specfic Proxy</label>
+						<span class="dropdown f-50">
+							<select id="taskProxyGroupt" class="input  proxy-group-selector">
+							</select>
+						</span>
+						<input id="taskSpecificProxy" type="text" class="input f-50">
+					</div>
+
+					<div class="container">
+						<input id="taskUseSpecificProxy" type="checkbox">
+						<label for="taskUseSpecificProxy" class="checkbox-label">
+							<i class="far fa-square"></i>
+							Use Task-Specific Proxy
+						</label>
+					</div>
+					<div class="container">
+						<input id="captchaCheckbox" type="checkbox">
+						<label for="captchaCheckbox" class="checkbox-label">
+							<i class="far fa-square"></i>
+							<span>Submit Captcha</span>
+						</label>
+					</div>
+					<div class="container">
+						<input id="headlessCheckbox" type="checkbox">
+						<label for="headlessCheckbox" class="checkbox-label">
+							<i class="far fa-square"></i>
+							Headless Browser
+						</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="container"></div>
+			<div class="container ">
+				<button id="taskSaveButton" class="btn ">
+					<i class="fas fa-save"></i>
+					Save Task
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Profile Creator -->
+	<div id="newProfile" class="page page-hidden">
+		<div class="main">
+
+			<div class="header">
+				<h1 class="page-header">Profile Creator</h1>
+			</div>
+
+			<div class="panel panel-main">
+				<div class="container f-60">
+					<div class="column f-50">
+						<h2 id="profileBillingForm" class="panel-title">
+							<i class="fas fa-file-invoice-dollar"></i>
+							Billing Information
+						</h2>
+						<span class="container">
+							<label for="profileBillingFirst" class="f-50">First Name</label>
+							<label for="profileBillingLast" class="f-50">Last Name</label>
+
+							<input type="text" id="profileBillingFirst" class="input f-50">
+							<input type="text" id="profileBillingLast" class="input f-50">
+						</span>
+
+						<span class="container">
+							<label for="profileBillingEmail" class="">E-mail</label>
+							<input type="text" id="profileBillingEmail" class="input ">
+						</span>
+
+						<span class="container">
+							<label for="profileBillingTelephone" class="">Telephone</label>
+							<input type="text" id="profileBillingTelephone" class="input ">
+						</span>
+
+						<span class="container">
+							<label for="profileBillingAddress1" class="f-60">Address 1</label>
+							<label for="profileBillingAddress2" class="f-40">Address 2</label>
+
+							<input type="text" id="profileBillingAddress1" class="input f-60">
+							<input type="text" id="profileBillingAddress2" class="input">
+						</span>
+
+						<span class="container">
+							<label for="profileBillingAddress3" class="">Address 3</label>
+
+							<input type="text" id="profileBillingAddress3" class="input ">
+						</span>
+
+						<span class="container">
+							<label for="profileBillingCity" class="f-60">City</label>
+							<label for="profileBillingZip" class="f-40">Zip Code</label>
+
+							<input type="text" id="profileBillingCity" class="input f-60">
+							<input type="text" id="profileBillingZip" class="input">
+						</span>
+
+						<span class="container">
+							<label for="profileBillingCountry" class="f-60">Country</label>
+							<label for="profileBillingState" class="f-40">State</label>
+							<span class="dropdown f-60">
+								<select id="profileBillingCountry" class="input country-selector ">
+								</select>
+							</span>
+							<span class="dropdown">
+								<select disabled id="profileBillingState" class="input ">
+								</select>
+							</span>
+
+						</span>
+
+						<div class="container">
+							<label></label>
+							<input id="sameShippingCheckbox" type="checkbox">
+							<label for="sameShippingCheckbox" class="checkbox-label ">
+								<i class="far fa-square"></i>Same Shipping Information</label>
+						</div>
+
+					</div>
+					<div class="column f-50">
+						<h2 id="profileShippingForm" class="panel-title">
+							<i class="fas fa-shipping-fast"></i>
+							Shipping Information</h2>
+
+						<div class="container">
+							<label for="profileShippingFirst" class="f-50">First Name</label>
+							<label for="profileShippingLast" class="f-50">Last Name</label>
+
+							<input type="text" id="profileShippingFirst" class="input f-50">
+							<input type="text" id="profileShippingLast" class="input f-50">
+						</div>
+
+						<div class="container">
+							<label for="profileShippingEmail" class="">E-mail</label>
+							<input type="text" id="profileShippingEmail" class="input ">
+						</div>
+
+						<div class="container">
+							<label for="profileShippingTelephone" class="">Telephone</label>
+							<input type="text" id="profileShippingTelephone" class="input ">
+						</div>
+
+						<div class="container">
+							<label for="profileShippingAddress1" class="f-60">Address 1</label>
+							<label for="profileShippingAddress2" class="f-40">Address 2</label>
+							<input type="text" id="profileShippingAddress1" class="input f-60">
+							<input type="text" id="profileShippingAddress2" class="input">
+						</div>
+
+						<div class="container">
+							<label for="profileShippingAddress3" class="f-40">Address 3</label>
+							<input type="text" id="profileShippingAddress3" class="input ">
+						</div>
+
+						<div class="container">
+							<label for="profileShippingCity" class="f-60">City</label>
+							<label for="profileShippingZip" class="f-40">Zip Code</label>
+
+							<input type="text" id="profileShippingCity" class="input f-60">
+							<input type="text" id="profileShippingZip" class="input">
+						</div>
+
+						<div class="container">
+							<label for="profileShippingCountry" class="f-60">Country</label>
+							<label for="profileShippingState" class="f-40">State</label>
+							<div class="dropdown f-60">
+								<select id="profileShippingCountry" class="input  country-selector">
+								</select>
+							</div>
+							<div class="dropdown">
+								<select id="profileShippingState" class="input " disabled>
+								</select>
+							</div>
+						</div>
+
+						<span class="container" style="opacity: 0">
+							<label></label>
+							<label class=""></label>
+							<label class=""></label>
+						</span>
+					</div>
+
+
+				</div>
+				<div class="container f-35">
+					<div class="column">
+						<h2 id="profilePaymentForm" class="panel-title">
+							<i class="fas fa-credit-card"></i>
+							Payment Information</h2>
+						<div class="container">
+							<label for="profilePaymentType" class="f-40">Payment Type</label>
+							<label for="profileCardNumber" class="f-60">Card Number</label>
+							<span class="dropdown">
+								<select id="profilePaymentType" class="input ">
+									<option value="visa">Visa</option>
+									<option value="master">Mastercard</option>
+									<option value="american_express">American Express</option>
+								</select>
+							</span>
+							<input type="text" id="profileCardNumber" class="input f-60">
+						</div>
+
+						<div class="container">
+							<label for="profileExpiryMonth" class="f-35">Expiry Month</label>
+							<label for="profileExpiryYear" class="f-35">Expiry Year</label>
+							<label for="profileCvv" class="f-30">CVV</label>
+							<div class="dropdown f-35">
+								<select id="profileExpiryMonth" class="input ">
+									<option value="" label=""></option>
+									<option value="01" label="01"></option>
+									<option value="02" label="02"></option>
+									<option value="03" label="03"></option>
+									<option value="04" label="04"></option>
+									<option value="05" label="05"></option>
+									<option value="06" label="06"></option>
+									<option value="07" label="07"></option>
+									<option value="08" label="08"></option>
+									<option value="09" label="09"></option>
+									<option value="10" label="10"></option>
+									<option value="11" label="11"></option>
+									<option value="12" label="12"></option>
+								</select>
+							</div>
+							<div class="dropdown f-35">
+								<select id="profileExpiryYear" class="input ">
+									<option value="" label=""></option>
+									<option value="2018" label="2018"></option>
+									<option value="2019" label="2019"></option>
+									<option value="2020" label="2020"></option>
+									<option value="2021" label="2021"></option>
+									<option value="2022" label="2022"></option>
+									<option value="2023" label="2023"></option>
+									<option value="2024" label="2024"></option>
+									<option value="2025" label="2025"></option>
+									<option value="2026" label="2026"></option>
+									<option value="2027" label="2027"></option>
+									<option value="2028" label="2028"></option>
+									<option value="2029" label="2029"></option>
+									<option value="2030" label="2030"></option>
+								</select>
+							</div>
+							<input type="text" id="profileCvv" class="input f-30">
+						</div>
+					</div>
+
+					<div class="column">
+						<h2 id="profileManager" class="panel-title">
+							<i class="fas fa-users-cog"></i>
+							Profile Manager</h2>
+						<span class="container">
+							<label for="profileName" class="f-95">Profile Name</label>
+							<input type="text" id="profileName" class="input f-60">
+							<span class="container f-35">
+								<button id="profileSaveButton" class="btn ">
+									<i class="fas fa-save"></i>
+									Save Profile
+								</button>
+							</span>
+						</span>
+						<div class="container">
+							<label for="profileLoader" class="f-95">Select Profile</label>
+							<span class="dropdown f-60">
+								<select id="profileLoader" class="input profile-selector " size="10">
+								</select>
+							</span>
+							<span class="container f-35">
+								<!-- <button id="profileLoadButton" class="btn ">Edit Selected</button> -->
+								<button id="profileDeleteButton" class="btn ">
+									<i class="fas fa-trash"></i>
+									Delete Selected</button>
+								<button id="profileDeleteAllButton" class="btn ">
+									<i class="fas fa-minus-circle"></i>
+									Delete All Profiles</button>
+								<!-- <button id="profileImport" class="btn " disabled>Import Profiles</button>
+									<button id="profileExport" class="btn " disabled>Export Profiles</button> -->
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Google Accounts -->
+	<div id="googleAccounts" class="page page-hidden">
+		<div class="main">
+			<div class="header">
+				<h2 class="page-header">Google Accounts</h2>
+			</div>
+			<div class="panel panel-main">
+
+				<div class="column f-55">
+					<h2 class="panel-title">
+
+						Account Overview</h2>
+					<div class="container">
+						<table class="table">
+							<thead class="table-header">
+								<tr class="row">
+									<th id="captchaAccountsHeader" class="cell cell-header col-captcha-account">
+										<i class="fas fa-user"></i>
+										Account</th>
+									<th id="captchaActionsHeader" class="cell cell-header col-captcha-actions">
+										<i class="fas fa-tools"></i>
+										Actions</th>
+								</tr>
+							</thead>
+							<tbody id="googleAccountTable" class="table-body-content"></tbody>
+						</table>
+
+					</div>
+					<br><br>
+					<div class="container">
+						<button id="clearCaptchaAccounts" class="btn ">
+							<i class="fas fa-minus-circle"></i>
+							Delete All Accounts
+						</button>
+					</div>
+				</div>
+				<div class="container">
+					<div id="panel_newCaptchaAccount" class="column ">
+						<h2 class="panel-title">
+
+							Account Creator</h2>
+						<div class="container">
+							<label for="captchaAccountName" class="">Account Name</label>
+							<input id="captchaAccountName" type="text" class="input f-75">
+							<button id="linkGoogle" class="btn f-25">
+								<i class="fab fa-youtube"></i>
+								Sign In
+							</button>
+							<input id="googleCookies" type="text" class="hidden">
+						</div>
+						<div class="container">
+							<button id="saveCaptchaAccount" class="btn " disabled>
+								<i class="fas fa-save"></i>
+								Save Account</button>
+						</div>
+					</div>
+
+					<div class="column ">
+						<h2 class="panel-title">
+
+							Captcha Bank</h2>
+						<div class="container">
+							<table class="table">
+								<thead class="table-header">
+									<tr class="row">
+										<th id="bankExpiryHeader" class="cell cell-header col-bank-expiry">
+											<i class="fas fa-clock"></i>
+											Time Left</th>
+										<th id="bankSiteHeader" class="cell cell-header col-bank-site">
+											<i class="fas fa-globe-americas"></i>
+											Site</th>
+										<th id="bankTokenHeader" class="cell cell-header col-bank-token">
+											<i class="fas fa-coins"></i>
+											Response Token</th>
+									</tr>
+								</thead>
+								<tbody id="captchaBankTable" class="table-body-content"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Proxies -->
+	<div id="proxies" class="page page-hidden">
+		<div class="main ">
+
+			<div class="header">
+				<h1 id="proxiesPageHeader" class="page-header">Proxies</h1>
+			</div>
+
+			<div class="panel panel-main">
+
+				<div class="column f-25">
+					<h2 class="panel-title">
+
+						Proxy Input</h2>
+					<!-- //Proxy Input -->
+					<div class="container">
+						<textarea id="proxyMassInput" class="input "></textarea>
+
+					</div>
+
+				</div>
+
+				<div class="column f-35">
+					<h2 class="panel-title">
+						<i class="fas fa-vials"></i>
+						Test Results
+					</h2>
+					<!-- Result Table -->
+					<div class="container">
+						<table id="proxyTestResults" class="table">
+							<thead class="table-header">
+								<tr class="row">
+									<th id="proxiesProxyHeader" class="cell-header cell col-proxy">
+										<i class="fas fa-globe"></i>
+										Proxy
+									</th>
+									<th id="proxiesStatusHeader" class="cell-header cell col-proxyStatus">
+										<i class="fas fa-info"></i>
+										Status
+									</th>
+									<th id="proxiesPingHeader" class="cell-header cell col-proxySpeed">
+										<i class="fas fa-exchange-alt"></i>
+										Speed
+									</th>
+								</tr>
+							</thead>
+							<tbody class="table-body-content">
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="column f-35">
+					<h2 class="panel-title">
+						<i class="fas fa-network-wired"></i>
+						<span>Proxy Manager</span>
+					</h2>
+					<!-- Group Creator -->
+					<div class="container">
+						<label class="">Group Name</label>
+						<input id="proxyGroupName" class="input f-70">
+						<button id="proxyNewGroupButton" class="btn f-30">
+							<i class="fas fa-plus"></i>
+							Create Group
+						</button>
+					</div>
+
+					<!-- Group Selector -->
+					<div class="container">
+						<label for="" class="">Group</label>
+						<span class="dropdown ">
+							<select id="proxyGroupSelector" class="input ">
+								<option value="global">Global</option>
+							</select>
+						</span>
+					</div>
+
+					<!-- Save, Edit & Clear Buttons -->
+
+					<div class="container">
+						<label class=""></label>
+						<button id="proxySaveButton" class="btn">
+							<i class="fas fa-save"></i>
+							Save Proxy Input
+						</button>
+						<button id="proxyEditGroupButton" class="btn f-30">
+							<i class="fas fa-edit"></i>
+							Edit Group
+						</button>
+						<button id="proxyDeleteGroupButton" class="btn f-30">
+							<i class="fas fa-trash"></i>
+							Delete Group
+						</button>
+					</div>
+
+					<!-- Tester Site Selector -->
+					<div class="container">
+						<label for="" class="">Tester Site</label>
+						<span class="dropdown ">
+							<select id="proxyTestSite" class="input site-selector " size="8">
+							</select>
+						</span>
+
+					</div>
+
+					<!-- Test Button -->
+					<div class="container">
+						<button id="proxyTestButton" class="btn f-50">
+							<i class="fas fa-vial"></i>
+							Test Proxies
+						</button>
+						<button id="proxyRemoveBadButton" class="btn f-50">
+							<i class="fas fa-ban"></i>
+							Remove Bad Proxies
+						</button>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<!-- Settings -->
+	<div id="settings" class="page page-hidden">
+		<div class="main">
+			<div class="header">
+				<h2 class="page-header">Settings</h2>
+			</div>
+			<div class="panel panel-main">
+				<div class="column" style="height: 25vh">
+					<h2 class="panel-title">
+
+						General Settings</h2>
+					<div class="container">
+						<button id="browserSetup" class="btn ">
+							<i class="fas fa-box-open"></i>
+							Setup Browser Mode</button>
+					</div>
+					<div class="container">
+						<button id="resetAllSettings" class="btn ">
+							<i class="fas fa-minus-circle"></i>
+							Reset All Stored Settings</button>
+					</div>
+					<!-- <div class="container">
+						<label class="">Default Captcha Account</label>
+						<span class="dropdown ">
+							<select class="input "></select>
+						</span>
+					</div>
+					<div class="container">
+						<button class="btn ">Save</button>
+					</div> -->
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Footer -->
+	<div id="footer" class="footer">
+		<span id="footerCopyright" class="footer footer-text"></span>
+		<span id="footerVersion" class="footer footer-text">XXXAIO</span>
+		<a href="#" id="footerUpdate" class="footer footer-text footer-icon hidden">Check for Update</a>
+		<a href="#" id="footerTerms" class="footer footer-text footer-icon hidden">Terms and Conditions</a>
+		<a href="#" id="footerGuides" class="footer footer-text footer-icon hidden">Release Guides</a>
+		<a href="#" id="footerTwitter" class="footer footer-text footer-icon">Twitter</a>
+		<a href="#" id="footerInstagram" class="footer footer-text footer-icon">Instagram</a>
+
+	</div>
+
+
+</body>
+
+<!-- <script src="../node_modules/popper.js/dist/umd/popper.min.js"></script> -->
+<!-- <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script> -->
+<script src="../src/renderer/elements.js"></script>
+<script src="../src/renderer/index.js"></script>
+
+</html>

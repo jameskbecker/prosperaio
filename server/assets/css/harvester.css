@@ -1,0 +1,47 @@
+ /*     Font Imports     */
+
+
+#panel-renderer {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-content: center;
+	min-height: 30vh;
+}
+
+
+#captcha-placeholder {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	flex-basis: 100%;
+	height: 20vh;
+	justify-content: center;
+	align-content: center;
+	font-size: 5vh;
+	font-weight: 300 !important;
+	color: #3794ff
+}
+
+.footer-text {
+	font-size: 1.3vh;
+}
+
+.fa-spinner {
+	margin-top: -4vh
+}
+
+.banner {
+	height: 7.5vh;
+}
+
+.banner-controls {
+	padding-right: 3vw;
+}
+
+.control {
+		font-size: 2vh; 
+		align-self: center;
+		
+} 

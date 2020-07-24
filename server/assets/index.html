@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>ProsperAIO - Main</title>
+	<link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+	<link rel="stylesheet" href="../assets/css/fonts.css">
+	<link rel="stylesheet" href="../assets/css/style.css">
+	<script type="text/javascript"
+	src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.20.13/system.js">
+</script>
+	<script>require('popper.js');</script>
+	<script>require('bootstrap');</script>
+</head>
+
+<body>
+	<!-- Banner -->
+	<div class="banner" id="banner">
+		<div class="banner banner-logo"></div>
+		<div class="banner banner-nav">
+			<div id="nav_tasks" class="nav nav-active" data-page="tasks">
+				<i class="fas fa-list-ul"></i>
+				<div>Tasks</div>
+			</div>
+
+
+			<div id="nav_newProfile" class="nav" data-page="newProfile">
+				<i class="fas fa-user-friends"></i>
+				<div>Profiles</div>
+			</div>
+
+			<div id="nav_sx" class="nav" data-page="proxies">
+				<i class="fas fa-globe icon"></i>
+				<div>Proxies</div>
+			</div>
+
+			<!-- <div id="" class="nav" data-page="">
+				<i class="fas fa-cookie"></i>
+				<div>Cookies</div>
+			</div> -->
+
+			<div id="nav_harvesters" class="nav" data-page="harvesters">
+				<i class="fab fa-google icon"></i>
+				<div>Harvesters</div>
+			</div>
+
+			<div id="nav_analystics" class="nav" data-page="analytics">
+				<i class="fas fa-chart-pie"></i>
+				<div>Analytics</div>
+			</div>
+
+			<div id="nav_settings" class="nav" data-page="settings">
+				<i class="fas fa-cogs icon"></i>
+				<div>Settings</div>
+			</div>
+		</div>
+
+		<div class="banner banner-draggable"></div>
+
+		<div class="banner banner-controls">
+			<div id="minimizeApp" class="control"><i class="fas fa-window-minimize"></i></div>
+			<div id="maximizeApp" class="control"><i class="far fa-square"></i></div>
+			<div id="closeApp" class="control"><i class="fas fa-times"></i></div>
+		</div>
+
+	</div>
+
+	<div class="container container-pages">
+		<!-- Tasks -->
+		<div class="page" id="tasks">
+			<div class="container header-container">
+				<h1 id="tasksHeader" class="header-title">Tasks</h1>
+
+				<!-- New Task Button Container -->
+				<div class="container-element">
+					<label></label>
+					<button id="newTaskButton" class="btn"><i class="fas fa-plus icon"></i>New Task</button>
+				</div>
+
+				<!-- Monitor Delay Container -->
+				<div class="container-element">
+					<label>Monitor Delay</label>
+					<input id="globalMonitor" type="number" class="input" value="1000" step="10">
+				</div>
+
+				<!-- Error Delay Container -->
+				<div class="container-element">
+					<label class="label">Error Delay</label>
+					<input id="globalError" type="number" class="input" value="1000" step="10">
+				</div>
+
+				<!-- Timeout Delay Container -->
+				<div class="container-element">
+					<label class="label">Timeout Delay</label>
+					<input id="globalTimeout" type="number" class="input" value="5000" step="10">
+				</div>
+
+			</div>
+
+			<div class="panel panel-main">
+				<div class="container">
+
+
+					<div class="container-element">
+						<table id="taskTable" class="table">
+							<thead id="taskTableHead" class="table-header">
+								<tr class="row">
+									<th class="cell cell-header col-site">Store</th>
+									<th class="cell cell-header col-mode">Mode</th>
+									<th class="cell cell-header col-products">Product / Keywords</th>
+									<th class="cell cell-header col-size">Size</th>
+									<th class="cell cell-header col-profile">Profile</th>
+									<th class="cell cell-header col-task-proxy">Proxy List</th>
+									<th class="cell cell-header col-timer">Timer</th>
+									<th class="cell cell-header col-status">Status</th>
+									<th class="cell cell-header col-actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="taskTableBody" class="table-body"></tbody>
+						</table>
+					</div>
+
+				</div>
+
+				<div class="container">
+					<!-- <div class="container-element container-element-sm">
+
+						<button id="importTasks" class="btn">
+							<i class="fas fa-file-import"></i>
+							<div>Import
+							</div>
+						</button>
+					</div>
+
+					<div class="container-element container-element-sm">
+
+						<button id="exportTasks" class="btn">
+							<i class="fas fa-file-export"></i>
+							<div>Export</div>
+						</button>
+					</div> -->
+					<div class="container-element container-element-sm">
+						<button id="runAll" class="btn btn-secondary">
+							<i class="fas fa-play-circle"></i>
+							<div>Run All</div>
+						</button>
+					</div>
+					<div class="container-element container-element-sm">
+						<button id="stopAll" class="btn btn-secondary">
+							<i class="fas fa-stop-circle"></i>
+							<div>Stop All</div>
+						</button>
+					</div>
+					<div class="container-element container-element-sm">
+						<button id="clearTasks" class="btn btn-secondary">
+							<i class="fas fa-minus-circle"></i>
+							<div>Delete All</div>
+						</button>
+					</div>
+				</div>
+
+				<div id="newTaskModal" class="modal fade" tabindex="-1" role="dialog">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="container header-container">
+								<h1 class="header-title">Task Editor</h1>
+								
+								<input type="text" id="taskId" class="input">
+								<div class="container-element">
+									<label>Product Status</label> 
+									<input id="productApiStatus" class="input" disabled value="None Loaded"/>
+								</div>
+
+								<div class="container-element">
+									<button id="taskSaveButton" class="btn"><i class="fas fa-save"></i>Save Task</button>
+								</div>							
+							</div>
+							<div class="panel panel-main">
+								<div class="container">
+									<div class="container-element">
+
+										<div id=taskSetup class="panel panel-light">
+											<h2 id="taskConfiguration" class="panel-title">
+												<i class="fas fa-wrench"></i>Setup
+											</h2>
+										
+											<div class="container">
+												<div class="container-element">
+													<label for="taskSite" class="label">Store</label>
+													<select id="taskSite" class="input site-selector">
+														<option value="" label="Select Store" disabled selected></option>
+													</select>
+												</div>
+												<div class="container-element">
+													<label for="taskMode" class="">Task Mode</label>
+													<select id="taskMode" class="input">
+														<option value="" label="" disabled selected></option>
+													</select>
+												</div>
+	
+												<div class="container-element">
+													<label for="taskCheckoutAttempts" class="label">Checkout Attempts</label>
+													<input type="number" id="taskCheckoutAttempts" class="input" value="1">
+												</div>
+											</div>
+	
+											<div class="container">
+	
+												<div class="container-element">
+													<label for="taskProfile" class="">Profile</label>
+													<select id="taskProfile" class="input profile-selector">
+													</select>
+												</div>
+												<div class="container-element">
+													<label class="label">Restock Mode</label>
+													<select id="newTaskMonitorMode" class="input">
+														<option value="" label="" disabled selected></option>
+													</select>
+												</div>
+	
+												<div class="container-element">
+													<label for="taskQuantity" class="label">Task Quantity</label>
+													<input type="number" id="taskQuantity" class="input " value="1">
+												</div>
+											</div>
+	
+										</div>
+									</div>
+									<div class="container-element">
+										<div id="taskAdditionalOptions" class="panel panel-light">
+											<h2 id="taskAdditionalOptions" class="panel-title">
+												<i class="fas fa-sliders-h"></i>Additional Options
+											</h2>
+	
+											<div class="container">
+	
+												<div class="container-element">
+													<label for="taskCartDelay" class="">Cart Delay (ms)</label>
+													<input type="number" id="taskCartDelay" class="input " placeholder="0">
+												</div>
+												
+												<div class="container-element">
+													<label for="taskProxyList" class="label">Proxy List</label>
+													<select id="taskProxyList" class="input proxylist-selector">
+														<option label="None" value=""></option>
+													</select>
+												</div>
+	
+												<div class="container-element">
+													<label for="taskStartDate" class="label">Start Date</label>
+													<input type="date" id="taskStartDate" class="input">
+												</div>
+	
+											</div>
+	
+											<div class="container">
+	
+												<div class="container-element">
+													<label for="taskCheckoutDelay" class="">Checkout Delay (ms)</label>
+													<input type="number" id="taskCheckoutDelay" class="input" placeholder="0">
+												</div>
+	
+												<div class="container-element">
+													<label for="taskMaxPrice" class="label">Price Limit (GBP or USD)</label>
+													<input type="number" class="input" id="taskMaxPrice" step="0.01" placeholder="0.00">
+												</div>
+	
+												<div class="container-element">
+													<label for="taskStartTime" class="label">Start Time</label>
+													<input type="time" id="taskStartTime" class="input" step="3">
+												</div>
+	
+											</div>
+	
+	
+	
+											<div class="container">
+												<div class="container-element">
+													<input id="newTaskRestocks" type="checkbox" checked>
+													<label for="newTaskRestocks" class="checkbox-label">Monitor Restocks</label>
+												</div>
+	
+												<div class="container-element">
+													<input id="captchaCheckbox" type="checkbox">
+													<label for="captchaCheckbox" class="checkbox-label">Bypass Captcha</label>
+												</div>
+	
+												<div class="container-element">
+													<input id="threeDCheckbox" type="checkbox">
+													<label for="threeDCheckbox" class="checkbox-label">Bypass 3DS</div></label>
+											</div>
+										</div>
+									</div>
+
+								</div>
+
+								<div class="container">
+									<div id="addProductsContainer" class="panel panel-light">
+										
+										<h2 id="taskPersonalization" class="panel-title">
+											<i class="fas fa-tshirt"></i>Product Details
+										</h2>
+
+										<div class="container">
+											
+											<div class="container-element" style="flex: 2 2 0;">
+												<label>Product</label>
+												<select class="input" id="newTaskProducts">
+													<option>Custom</option>
+												</select>
+											</div>
+
+											<div class="container-element">
+												<label class="label">Style</label>
+												<select id="newTaskStyles" class="input"></select>
+											</div>
+
+											<div class="container-element">
+												<label class="label">Size</label>
+												<select id="newTaskSizes" class="input">
+													<option value="" label=""></option>
+													<option value="RANDOM" label="Random"></option>
+													<option value="SMALLEST" label="Smallest"></option>
+													<option value="LARGEST" label="Largest"></option>
+													<option value=" " label="--------------------------------"></option>
+												</select>
+											</div>
+
+											<div class="container-element">
+												<label class="label">Quantity</label>
+												<input type="number" name="taskProductQty" class="input" value="1">
+											</div>
+
+										</div>
+
+										<div id="customRow" class="container">
+
+											<div class="container-element" style="flex: 2 2 0">
+												<label class="label">Product Keywords</label>
+												<input type="text" class="input" name="taskSearchInput">
+											</div>
+
+											<div class="container-element">
+												<label class="label">Style Keywords</label>
+												<input type="text" name="taskVariant" class="input">
+											</div>
+
+											<div class="container-element">
+												<label>Size Keywords</label>
+												<input name="taskSize" class="input" />
+											</div>
+
+											<div class="container-element">
+												<label for="taskCategory" class="label">Category</label>
+												<input name="taskCategory" class="input">
+											</div>
+
+										</div>
+									</div>
+								</div>
+
+								
+							</div>
+
+
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Profiles -->
+		<div class="page page-hidden" id="newProfile">
+			<div class="container header-container">
+				<h1 class="header-title">Profiles</h1>
+				<div class="container-element">
+				 <button id="newProfileBtn" class="btn">
+						<i class="fas fa-plus icon"></i>
+						<span>New Profile</span>
+					</button>
+				</div>
+			</div>
+
+			<div class="panel panel-main">
+
+				<div class="container">
+					<div class="container-element">
+						<table id="profileTable" class="table">
+							<thead id="profileTableHead" class="table-header">
+								<tr class="row">
+									<th class="cell cell-header col-profile">Profile Name</th>
+									<th class="cell cell-header col-site">Name</th>
+									<th class="cell cell-header col-products">Billing Address</th>
+									<th class="cell cell-header col-status">Card</th>
+									<th class="cell cell-header col-actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="profileTableBody" class="table-body"></tbody>
+						</table>
+					</div>
+
+				</div>
+
+				<div class="container">
+					<!-- <div class="container-element container-element-sm">
+						<button id="importProfiles" class="btn">
+							<i class="fas fa-file-import"></i>
+							<div>Import</div>
+						</button>
+					</div>
+
+					<div class="container-element container-element-sm">
+						<button id="exportProfiles" class="btn">
+							<i class="fas fa-file-export"></i>
+							<div>Export</div>
+						</button>
+					</div> -->
+
+					<div class="container-element container-element-sm">
+						<button id="deleteAllProfiles" class="btn btn-secondary">
+							<i class="fas fa-minus-circle"></i>
+							Delete All
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div id="profileModal" class="modal fade" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="container header-container">
+							<h2 class="header-title">Profile Editor</h2>
+							<input type="hidden" id="profileId" class="input">
+							<div class="container-element container-element-sm">
+								<label for="profileName" class="f-95">Profile Name</label>
+								<input type="text" id="profileName" class="input">
+							</div>
+
+							<div class="container-element container-element-sm">
+								<label for="profileName" class="f-95" style="opacity:0;">.</label>
+								<button id="profileSaveButton" class="btn">
+									<i class="fas fa-save"></i>
+									Save Profile
+								</button>
+							</div>
+
+							<div class="container-element container-element-sm">
+								<label for="profileName" style="opacity:0;">.</label>
+								<button id="profileClearFieldButton" class="btn">
+									<i class="fas fa-broom"></i>
+									Clear Fields
+								</button>
+							</div>
+						</div>
+						<div class="panel panel-main">
+							<div class="container">
+								<div class="container-element">
+									<div id="billingOptions" class="panel panel-light">
+										<h2 id="profileBillingForm" class="panel-title">
+											<i class="fas fa-file-invoice-dollar"></i>
+											Billing Information
+										</h2>
+										<div class="container">
+											<div class="container-element">
+												<label for="profileBillingFirst" class="">First Name</label>
+												<input type="text" id="profileBillingFirst" class="input">
+											</div>
+
+											<div class="container-element">
+												<label for="profileBillingLast" class="">Last Name</label>
+												<input type="text" id="profileBillingLast" class="input">
+											</div>
+										</div>
+
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileBillingEmail" class="label">E-mail</label>
+												<input type="text" id="profileBillingEmail" class="input">
+											</div>
+
+											<div class="container-element">
+												<label for="profileBillingTelephone" class="">Telephone</label>
+												<input type="text" id="profileBillingTelephone" class="input ">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileBillingAddress1" class="">Address 1</label>
+												<input type="text" id="profileBillingAddress1" class="input">
+											</div>
+
+											<div class="container-element">
+												<label for="profileBillingAddress2" class="">Address 2</label>
+												<input type="text" id="profileBillingAddress2" class="input">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileBillingCity" class="label">City</label>
+												<input type="text" id="profileBillingCity" class="input">
+											</div>
+
+											<div class="container-element">
+												<label for="profileBillingZip" class="label">Zip Code</label>
+												<input type="text" id="profileBillingZip" class="input">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileBillingCountry" class="">Country</label>
+												<select id="profileBillingCountry" class="input country-selector">
+												</select>
+											</div>
+											<div class="container-element">
+												<label for="profileBillingState" class="label">State</label>
+												<select id="profileBillingState" class="input">
+												</select>
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<input id="sameShippingCheckbox" type="checkbox">
+												<label for="sameShippingCheckbox" class="checkbox-label">
+													<!--<i class="far fa-square"></i>-->
+													<div>Same Shipping Information</div>
+												</label>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<div class="container-element">
+									<div id="shippingOptions" class="panel panel-light">
+										<h2 id="profileShippingForm" class="panel-title">
+											<i class="fas fa-shipping-fast"></i>
+											Shipping Information
+										</h2>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileShippingFirst" class="label">First Name</label>
+												<input type="text" id="profileShippingFirst" class="input">
+											</div>
+											<div class="container-element">
+												<label for="profileShippingLast" class="label">Last Name</label>
+												<input type="text" id="profileShippingLast" class="input">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileShippingEmail" class="label">E-mail</label>
+												<input type="text" id="profileShippingEmail" class="input">
+											</div>
+											<div class="container-element">
+												<label for="profileShippingTelephone" class="label">Telephone</label>
+												<input type="text" id="profileShippingTelephone" class="input">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileShippingAddress1" class="label">Address 1</label>
+												<input type="text" id="profileShippingAddress1" class="input">
+											</div>
+
+											<div class="container-element">
+												<label for="profileShippingAddress2" class="label">Address 2</label>
+												<input type="text" id="profileShippingAddress2" class="input">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileShippingCity" class="label">City</label>
+												<input type="text" id="profileShippingCity" class="input">
+											</div>
+
+											<div class="container-element">
+												<label for="profileShippingZip" class="label">Zip Code</label>
+												<input type="text" id="profileShippingZip" class="input">
+											</div>
+										</div>
+
+										<div class="container">
+											<div class="container-element">
+												<label for="profileShippingCountry" class="">Country</label>
+												<select id="profileShippingCountry" class="input country-selector">
+												</select>
+											</div>
+
+											<div class="container-element">
+												<label for="profileShippingState" class="">State</label>
+												<select id="profileShippingState" class="input " disabled>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="container">
+								<div class="container">
+									<div id="paymentOptions" class="panel panel-light">
+										<h2 id="profilePaymentForm" class="panel-title">
+											<i class="fas fa-credit-card"></i>
+											Payment Information
+										</h2>
+										<div class="container">
+											<div class="container-element">
+												<label for="profilePaymentType" class="label">Payment Type</label>
+												<select id="profilePaymentType" class="input">
+													<option value="visa">Visa</option>
+													<option value="master">Mastercard</option>
+													<option value="american_express">American Express</option>
+												</select>
+											</div>
+											<div class="container-element">
+												<label for="profileCardNumber" class="label">Card Number</label>
+												<input type="text" id="profileCardNumber" class="input">
+											</div>
+											<div class="container-element">
+												<label for="profileExpiryMonth" class="label">Expiry Month</label>
+												<select id="profileExpiryMonth" class="input">
+													<option value="" label=""></option>
+													<option value="01" label="01"></option>
+													<option value="02" label="02"></option>
+													<option value="03" label="03"></option>
+													<option value="04" label="04"></option>
+													<option value="05" label="05"></option>
+													<option value="06" label="06"></option>
+													<option value="07" label="07"></option>
+													<option value="08" label="08"></option>
+													<option value="09" label="09"></option>
+													<option value="10" label="10"></option>
+													<option value="11" label="11"></option>
+													<option value="12" label="12"></option>
+												</select>
+											</div>
+											<div class="container-element">
+												<label for="profileExpiryYear" class="label">Expiry Year</label>
+												<select id="profileExpiryYear" class="input">
+													<option value="" label=""></option>
+													<option value="2018" label="2018"></option>
+													<option value="2019" label="2019"></option>
+													<option value="2020" label="2020"></option>
+													<option value="2021" label="2021"></option>
+													<option value="2022" label="2022"></option>
+													<option value="2023" label="2023"></option>
+													<option value="2024" label="2024"></option>
+													<option value="2025" label="2025"></option>
+													<option value="2026" label="2026"></option>
+													<option value="2027" label="2027"></option>
+													<option value="2028" label="2028"></option>
+													<option value="2029" label="2029"></option>
+													<option value="2030" label="2030"></option>
+												</select>
+											</div>
+											<div class="container-element">
+												<label for="profileCvv" class="label">CVV</label>
+												<input type="text" id="profileCvv" class="input">
+											</div>
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+						
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Proxies -->
+		<div class="page page-hidden" id="proxies">
+			<div class="container header-container">
+				<h1 id="proxy-header" class="header-title">Proxies</h1>
+				<div class="container-element">
+					<label class="label"> </label>
+					<button class="btn" data-toggle="modal" data-target="#proxyModal">
+						<i class="fas fa-plus"></i><span>New Proxy List</span></button>
+				</div>
+
+				<div class="container-element container-element-md">
+					<label class="label">Proxy List</label>
+					<select id="proxyListSelectorMain" class="input proxylist-selector">
+						<option value="">None Selected</option>
+					</select>
+				</div>
+
+				<div class="container-element container-element-md">
+					<label class="label">Test Store</label>
+					<select id="proxySiteSelector" class="input">
+						<option label="Kickz" value="www.kickz.com"></option>
+						<option label="Kickz Premium" value="www.kickzpremium.com"></option>
+						<option label="Supreme" value="www.supremenewyork.com" selected></option>
+					</select>
+				</div>
+			</div>
+
+			<div class="panel panel-main">
+				<div class="container">
+					<div class="container-element">
+						<table class="table">
+							<thead class="table-header">
+								<tr class="row">
+									<th class="cell cell-header col-proxy">IP Address</th>
+									<th class="cell cell-header col-proxyPort">Port</th>
+									<th class="cell cell-header col-proxyUser">Username</th>
+									<th class="cell cell-header col-proxy">Password</th>
+									<th class="cell cell-header col-proxyStatus">Status</th>
+									<th class="cell cell-header col-proxySpeed">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="proxyTestResults" class="table-body"></tbody>
+						</table>
+					</div>
+
+
+
+				</div>
+
+				<div class="container">
+					<!-- <div class="container-element container-element-sm">
+						<button id="importProxies" class="btn">
+							<i class="fas fa-file-import"></i>Import
+						</button>
+					</div> -->
+
+					<!-- <div class="container-element container-element-sm">
+						<button id="exportProxies" class="btn">
+							<i class="fas fa-file-export"></i>Export
+						</button>
+					</div> -->
+
+					<div class="container-element container-element-sm">
+						<button id="proxyTestAll" class="btn btn-secondary">
+							<i class="fas fa-play-circle"></i>Test Proxies
+						</button>
+					</div>
+
+					<div class="container-element container-element-sm">
+						<button id="proxyDeleteList" class="btn btn-secondary">
+							<i class="fas fa-trash"></i>Delete List
+						</button>
+					</div>
+
+				</div>
+			</div>
+
+			<div id="proxyModal" class="modal fade" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="container header-container">
+							<h2 class="header-title">New Proxy List</h2>
+							<div class="container-element">
+								<button id="saveProxyListBtn" class="btn">
+									<i class="fas fa-save"></i>
+									<div>Save List</div>
+								</button>
+							</div>
+						</div>
+						<div class="modal-body panel">
+							<div class="container">
+								<div class="container-element">
+									<label for="proxyListName" class="label">List Name</label>
+									<input id="proxyListName" class="input">
+								</div>
+							</div>
+							<div class="container">
+								<div class="container-element">
+									<textarea id="proxyInput" class="input"></textarea>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Harvesters -->
+		<div class="page page-hidden" id="harvesters">
+			<div id="harvesterModal" class="modal fade" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="container header-container">
+							<h1 class="header-title">New Harvester</h1>
+							<div class="container-element">
+								<button id="saveHarvesterBtn" class="btn">Save</button>
+							</div>
+						</div>
+						<div class="modal-body panel">
+							<div class="container">
+								<div class="container-element">
+									<label class="label">Name</label>
+									<input id="harvesterName" type="text" class="input"></div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<div class="container header-container">
+				<h1 class="header-title">Harvesters</h1>
+				<div class="container-element container-element-sm">
+					<button class="btn" data-toggle="modal" data-target="#harvesterModal">
+						<i class="fas fa-plus icon"></i>
+						New Harvester
+					</button>
+				</div>
+				<!-- <div class="container-element container-element-sm">
+					<button class="btn">
+						<i class="fas fa-trash icon"></i>
+						Delete All
+					</button>
+				</div> -->
+			</div>
+
+			<div class="panel panel-main">
+				<div class="container">
+					<div class="container-element">
+						<table  class="table">
+							<thead id="harvesterTableHead" class="table-header">
+								<tr class="row">
+									<th class="cell cell-header col-profile">Name</th>
+									<th class="cell cell-header col-site">Site</th>
+									<th class="cell cell-header col-actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="harvesterTable" class="table-body">
+
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Analytics -->
+		<div class="page page-hidden" id="analytics">
+			<div class="container header-container">
+				<h1 class="header-title">Analytics</h1>
+				<div class="container-element container-element-sm">
+					<button id="clearAnalytics" class="btn">
+						<i class="fas fa-broom"></i>
+						Clear
+					</button>
+				</div>
+			</div>
+			<div class="panel panel-main">
+
+				<div class="container">
+					<div class="container-element">
+						<table id="orderTable" class="table">
+							<thead id="orderTableHead" class="table-header">
+								<tr class="row">
+									<th class="cell cell-header col-id">Date</th>
+									<th class="cell cell-header col-site">Store</th>
+									<th class="cell cell-header col-products">Product Name</th>
+									<th class="cell cell-header col-order">Order Number</th>
+									<th class="cell cell-header col-actions-sm">Actions</th>
+							</thead>
+							<tbody id="orderTableBody" class="table-body"></tbody>
+						</table>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Settings -->
+		<div class="page page-hidden" id="settings">
+			<div class="container header-container">
+				<h2 class="header-title">Settings</h2>
+			</div>
+			<div class="panel panel-main">
+				<div class="container">
+					<div class="container-element">
+						<div class="panel panel-light">
+							<h2 class="panel-title">
+								<i class="fas fa-cog"></i>
+								<div>General Settings</div>
+							</h2>
+
+							<div class="container" style="display:none">
+								<div class="container-element">
+									<label class="label">Supreme Monitor Proxy List</label>
+									<select id="monitorProxyList" class="input proxylist-selector">
+										<option label="None" value=""></option>
+									</select>
+								</div>
+
+							</div>
+
+							<div class="container">
+								<div class="container-element">
+									<button id="browserSetup" class="btn">Install Safe Mode</button>
+								</div>
+								<div class="container-element">
+									<label class="label">Custom Browser</label>
+									<input id="browserPath" class="input" type="file">
+								</div>
+								<div class="container-element" style="flex: 2 2 0;">
+									<label class="label">Current Browser Path</label>
+									<input id="currentBrowserPath" disabled class="input" type="text">
+								</div>
+							</div>
+							<div class="container">
+								<div class="container-element">
+									<label class="label">Discord Webhook</label>
+									<input id="discordWebhook" class="input" type="text"
+										placeholder='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXXXXX/XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXX-XXXXXXXXXXXXXXXX'>
+								</div>
+								<div class="container-element container-element-sm">
+									<label> </label>
+									<button id="testDiscordWebhook" class="btn">
+										<i class="fas fa-vial"></i>
+										<div>Test</div>
+									</button>
+								</div>
+							</div>
+							<div class="container">
+								<div class="container-element">
+									<button id="resetAllSettings" class="btn btn-transparent">
+										<i class="fas fa-minus-circle"></i>
+										<div>Reset All Stored Settings</div>
+									</button>
+								</div>
+							</div>
+
+							<div class="container">
+								<div class="container-element">
+									<button id="signout" class="btn btn-transparent">
+										<i class="fas fa-sign-out-alt"></i>
+										<div>Sign Out</div>
+									</button>
+								</div>
+							</div>
+
+							<div class="container">
+								<div class="container-element container-element-sm">
+									<label id="version" style="justify-content: center;"></label>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+<!-- 
+					<div class="container-element">
+						<div class="panel panel-light">
+							<h2 class="panel-title">
+								<i class="fas fa-robot"></i>
+								<div>Webhooks</div>
+							</h2>
+							<div class="container">
+								<div class="container-element">
+									<label class="label">
+										<i class="fab fa-discord"></i>
+										<div>Discord Webhook</div>
+									</label>
+									<input id="discordWebhook" class="input" type="text"
+										placeholder='https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXXXXX/XX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXX-XXXXXXXXXXXXXXXX'>
+								</div>
+								<div class="container-element container-element-sm">
+									<label> </label>
+									<button id="testDiscordWebhook" class="btn">
+										<i class="fas fa-vial"></i>
+										<div>Test</div>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div> -->
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- Footer -->
+	<!-- <div class="container footer" id="footer">
+		<div id="footerCopyright" class="container-element footer-text">Copyright© 2020 ProsperAIO
+		</div>
+		<div id="footerCopyright" class="container-element footer-text">Version 2.5.63
+		</div>
+		<div id="footerCopyright" class="container-element footer-text">Twitter & Instagram: @prosperaio
+		</div>
+	</div> -->
+	<script type="application/javascript">
+		require('../build/renderer/index.js');
+	</script>
+</body>
+
+</html>
