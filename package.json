@@ -7,9 +7,10 @@
 	"keywords": [],
 	"license": "MIT",
 	"scripts": {
-		"start": "nodemon -e js,ts --watch src --exec \"npm run dev:compile\"",
-		"dev:compile": "tsc -p src && npm run dev:start",
-		"dev:start": "electron .",
+		"start": "nodemon -e js,ts --watch src --exec \"npm run dev:TScompile\"",
+		"dev:TScompile": "rm -rf build && tsc -p src && npm run dev:GOcompile",
+		"dev:GOcompile": "cd go && go build -o ../build/go-server *.go && cd .. && npm run dev:start",
+		"dev:start": "node .",
 		"ts:watch": "tsc -p src -w",
 		"pack": "electron-builder --dir",
 		"package-mac": "electron-builder --mac",
