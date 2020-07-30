@@ -6,24 +6,26 @@ import { utilities } from './library/other';
 import { SupremeRequest, SupremeSafe } from './library/sites/supreme';
 
 export function runTask (id: any): void {
-	let allTasks: any = settings.get('tasks');
-	const taskData: any = allTasks[id];
-	if (!taskData) {
-		return console.log('task data undefined');
-	}
-	if (!Worker.activeTasks[id]) {
-		switch (taskData.setup.mode) {
-			case 'supreme-browser':
-				Worker.activeTasks[id] = new SupremeSafe(taskData, id);
-				return Worker.activeTasks[id].run();
+	
+	
+	// let allTasks: any = settings.get('tasks');
+	// const taskData: any = allTasks[id];
+	// if (!taskData) {
+	// 	return console.log('task data undefined');
+	// }
+	// if (!Worker.activeTasks[id]) {
+	// 	switch (taskData.setup.mode) {
+	// 		case 'supreme-browser':
+	// 			Worker.activeTasks[id] = new SupremeSafe(taskData, id);
+	// 			return Worker.activeTasks[id].run();
 		
-			case 'supreme-request':
-				Worker.activeTasks[id] = new SupremeRequest(taskData, id);
-				return Worker.activeTasks[id].run();
+	// 		case 'supreme-request':
+	// 			Worker.activeTasks[id] = new SupremeRequest(taskData, id);
+	// 			return Worker.activeTasks[id].run();
 
-			default: alert('Configured Site Not Found.');
-		}
-	}	
+	// 		default: alert('Configured Site Not Found.');
+	// 	}
+	// }	
 
 }
 

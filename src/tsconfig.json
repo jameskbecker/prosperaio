@@ -5,6 +5,7 @@
     "sourceMap": true,
     "allowJs": true,
     "esModuleInterop": true,
+    "strict": false,
     "moduleResolution": "node",
     "lib": [
       /* Specify library files to be included in the compilation. */
@@ -25,7 +26,8 @@
   ],
   "exclude": [
     "../node_modules",
-    "../dist"
+    "../dist",
+    "./go"
    
   ]
 }

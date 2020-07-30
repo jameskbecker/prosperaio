@@ -678,6 +678,22 @@ tbody .row:nth-child(odd) {
 	outline: 0;
 }
 
+.play-btn {
+	font-size: 0.8vw;
+	background-size: 0.8vw 0.8vw;
+	height: 0.8vw;
+	width: 0.8vw;
+	font-size: 0.8px;
+}
+
+.play-btn::before {
+	font-size: 0.8vw;
+	background-size: 0.8vw 0.8vw;
+	height: 0.8vw;
+	width: 0.8vw;
+	content: url('../icons/play.svg')
+}
+
 .col-id {
 	flex: 1;
 	border-left-width: 0 !important;

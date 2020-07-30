@@ -1,13 +1,12 @@
-//import './elements';
-import settings from 'electron-settings';
-import { ipcRenderer } from 'electron';
-import { default as config } from '../library/configuration';
 import * as profileActions from './profiles';
+import { UserData, profileDataProps, siteDataProps } from '../data-types';
+import { ipcRenderer } from 'electron';
+import config from '../library/configuration';
+import dropList from './droplist';
+import settings from 'electron-settings';
+
 const $: Function = require('jquery');
 //const dropData = require('../mock-drop');
-import { default as dropList } from './droplist';
-import { siteDataProps, profileDataProps, UserData } from '../data-types';
-import { Mouse } from 'puppeteer-core';
 
 function populateTaskForm(taskData: UserData.task, taskId: string): void {
 	newTask_Site.value = taskData.site;
