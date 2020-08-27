@@ -3,16 +3,19 @@ package supreme
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-//GetStockData fetches data from either mobile_stock.json, shop.json or mobile/products.json
-func (t *Task) GetStockData(endpoint string) error {
+//Stock monitor from either mobile_stock.json, shop.json or mobile/products.json
+func (t *InputOptions) Stock(endpoint string) error {
+	url := t.BaseURL.Scheme + "://" + t.BaseURL.Host + "/" + endpoint
 
-	request, _ := http.NewRequest("GET", t.BaseURL+`/`+endpoint, nil)
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
 
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Accept-Lanaguage", "en-us")
@@ -25,35 +28,36 @@ func (t *Task) GetStockData(endpoint string) error {
 		return err
 	}
 
-	if response.StatusCode >= 300 && response.StatusCode <= 599 {
-		return errors.New("Error Fetching Stock Data --> " + response.Status)
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		return errors.New("ESTATUS")
 	}
 
 	defer response.Body.Close()
 
 	var body stockResponse
-	json.NewDecoder(response.Body).Decode(&body)
-	log.Println(body)
-	foundProduct := false
-	categories := body.Categories
-	matchedCategory, foundCategory := categories[t.InputCat]
-
-	if !foundCategory {
-		return errors.New("Error: Category " + t.InputCat + " Not Found")
-	}
-
 	var matchedProduct stockItem
 
+	json.NewDecoder(response.Body).Decode(&body)
+
+	categories := body.Categories
+	if len(categories) == 0 {
+		return errors.New("ECLOSED")
+	}
+
+	matchedCategory, foundCategory := categories[t.Category]
+	if !foundCategory {
+		return errors.New("ENOCAT")
+	}
+
 	for i, v := range matchedCategory {
-		if matchedCategory[i].matchesKWs(&t.InputKW) {
+		if matchedCategory[i].matchesKWs(&t.Keywords) {
 			matchedProduct = v
-			foundProduct = true
 			break
 		}
 	}
 
-	if !foundProduct {
-		return errors.New("Error: Product Not Found")
+	if matchedProduct.ID == 0 {
+		return errors.New("ENOPDCT")
 	}
 
 	t.ProductName = matchedProduct.Name
@@ -62,9 +66,12 @@ func (t *Task) GetStockData(endpoint string) error {
 	return nil
 }
 
-//GetProductData fetches data of a given product id
-func (t *Task) GetProductData() error {
-	request, err := http.NewRequest("GET", t.BaseURL+`/shop/`+strconv.Itoa(t.ProductID)+`.json`, nil)
+//Product monitor
+func (t *InputOptions) Product() error {
+	path := "/shop/" + strconv.Itoa(t.ProductID)
+	t.ProductURL = t.BaseURL.Scheme + "://" + t.BaseURL.Host + path
+
+	request, err := http.NewRequest("GET", t.ProductURL+".json", nil)
 	if err != nil {
 		return err
 	}
@@ -83,28 +90,27 @@ func (t *Task) GetProductData() error {
 	defer response.Body.Close()
 
 	var body productResponse
+	var matchedStyle productStyle
+	var matchedSize productSize
+
 	json.NewDecoder(response.Body).Decode(&body)
 
-	var matchedStyle productStyle
-
 	for _, v := range body.Styles {
-		matchedStyle = v
-		if v.matchesKWs(&t.InputStyle) {
+		if v.matchesKWs(&t.StyleKeywords) {
+			matchedStyle = v
+			break
+		}
+	}
+
+	for _, v := range matchedStyle.Sizes {
+		if strings.ToLower(v.Name) == strings.ToLower(t.SizeKeywords) {
+			matchedSize = v
 			break
 		}
 	}
 
 	t.StyleName = matchedStyle.Name
 	t.StyleID = matchedStyle.ID
-
-	var matchedSize productSize
-	for _, v := range matchedStyle.Sizes {
-		matchedSize = v
-		if strings.ToLower(v.Name) == strings.ToLower(t.InputSize) {
-			break
-		}
-	}
-
 	t.SizeName = matchedSize.Name
 	t.SizeID = matchedSize.ID
 

@@ -1,0 +1,28 @@
+{ 
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "target": "ES5", 
+    "module": "CommonJS",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "moduleResolution": "node",
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+		"skipLibCheck": true,
+    "removeComments": true,
+    "jsx": "react",
+    "allowJs": true
+  },
+  "exclude": [
+    "./node_modules",
+    "./BACKUP",
+    "./dist"
+  ]
+}

@@ -4,23 +4,24 @@ package main
 
 //IPCMessage is received through socket from NodeJS MAIN process
 type IPCMessage struct {
-	Channel string `json:"channel"`
-	Args    string `json:"args"`
+	Channel string    `json:"channel"`
+	Args    TaskInput `json:"args"`
 }
 
 //TaskInput is the user's input to run a task
 type TaskInput struct {
-	Site         string
+	Site         string              `json:"site"`
 	ProfileName  string              `json:"profileName"`
 	ErrorDelay   int                 `json:"errorDelay"`
 	MonitorDelay int                 `json:"monitorDelay"`
+	TimeoutDelay int                 `json:"timeoutDelay"`
 	ProductInput []taskInputProducts `json:"products"`
 }
 
 type taskInputProducts struct {
 	Keywords string `json:"searchInput"`
 	Size     string `json:"size"`
-	Qty      string `json:"productQty"`
+	Qty      int    `json:"productQty"`
 	Category string `json:"category,omitonempty"`
 	Style    string `json:"style,omitonempty"`
 }
