@@ -1,0 +1,127 @@
+// func ipc(message IPCMessage) {
+// 	switch message.Channel {
+// 	case "main.connected":
+// 		log.Println("Connected to Node Process")
+// 		break
+// 	case "task.run":
+// 		go runTask(message.Args)
+// 		break
+
+// 	default:
+// 		log.Println("[GO] Unable to read IPC Message on channel: " + message.Channel)
+// 	}
+// }
+
+// func runTask(input TaskInput) {
+// 	log.Println("[IPC] - task.run - " + input.ProfileName)
+
+// 	monitordelay := time.Duration(input.MonitorDelay) * time.Millisecond
+// 	errordelay := time.Duration(input.ErrorDelay) * time.Millisecond
+// 	timeoutdelay := time.Duration(input.TimeoutDelay) * time.Millisecond
+
+// 	cookieJar, err := cookiejar.New(nil)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+
+// 	transport := &http.Transport{
+// 		TLSClientConfig: getTLSConfig(),
+// 	}
+
+// 	proxyString := ""
+// 	if proxyString != "" {
+// 		proxyURL, err := url.Parse(proxyString)
+// 		if err != nil {
+// 			log.Println(err.Error())
+// 		} else {
+// 			transport.Proxy = http.ProxyURL(proxyURL)
+// 		}
+
+// 	}
+
+// 	client := http.Client{
+// 		Jar:       cookieJar,
+// 		Timeout:   timeoutdelay,
+// 		Transport: transport,
+// 	}
+
+// 	switch input.Site {
+// 	// case "supreme-us", "supreme-eu", "supreme-jp":
+// 	// 	task := getSupremeOptions(&input)
+// 	// 	task.Client = client
+// 	// 	task.Socket = &c
+// 	// 	task.MonitorDelay = monitordelay
+// 	// 	task.ErrorDelay = errordelay
+
+// 	// 	//go supreme.Run(task)
+// 	// 	break
+
+// 	default:
+// 		log.Println("No Site Specified", input)
+// 	}
+// }
+
+// func getTLSConfig() *tls.Config {
+// 	return &tls.Config{
+// 		MinVersion:               tls.VersionTLS12,
+// 		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+// 		PreferServerCipherSuites: true,
+// 		CipherSuites: []uint16{
+// 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+// 			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+// 			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+// 			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+// 		},
+// 	}
+// }
+
+// func getSupremeOptions(input *TaskInput) *supreme.InputOptions {
+// 	return &supreme.InputOptions{
+// 		ID:            "testID",
+// 		Keywords:      input.ProductInput[0].Keywords,
+// 		StyleKeywords: input.ProductInput[0].Style,
+// 		SizeKeywords:  input.ProductInput[0].Size,
+// 		Category:      input.ProductInput[0].Category,
+// 		Quantity:      input.ProductInput[0].Qty,
+// 	}
+// }
+
+
+//func connectToServer() {
+//fmt.Println("Connecting to Server...")
+// conn, err := net.Dial("unix", "/tmp/prosperaio.sock")
+// if err != nil {
+// 	log.Println(err.Error())
+// }
+// c = conn
+// go reader(c)
+// //go writer(c)
+// time.Sleep(3000 * time.Millisecond)
+//}
+
+// func reader(r net.Conn) {
+// 	buf := make([]byte, 1024)
+// 	for {
+// 		n, err := r.Read(buf[:])
+// 		if err != nil {
+// 			return
+// 		}
+// 		var message startTask
+// 		json.Unmarshal(buf[0:n], &message)
+
+// 		switch message.Site {
+// 		case "kickz":
+// 			fmt.Println("Starting Kickz Tasks")
+
+// 			break
+// 		case "outback":
+// 			fmt.Println("Starting Outback Tasks")
+// 			break
+// 		case "titolo":
+// 			fmt.Println("Starting Titolo Tasks")
+// 			break
+// 		}
+// 	}
+
+// 	//}
+// }
