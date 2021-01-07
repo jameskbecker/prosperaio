@@ -1,7 +1,7 @@
-/node_modules
-/dist
-/offwhite
-/build
-/.cache
-/srcOLD
-/BACKUP
+node_modules
+dist
+offwhite
+build
+.cache
+srcOLD
+BACKUP
