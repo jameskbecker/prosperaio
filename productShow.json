@@ -1,0 +1,135 @@
+{
+	"action": "Product-Show",
+	"queryString": "chosen=size&dwvar_00013801126425_212=40.5&format=ajax&pid=00013801126425",
+	"locale": "de_DE",
+	"csrf": {
+		"tokenName": "csrf_token",
+		"token": "D0UCym3KMxbcabPOOSSpHtzoqUbEZg-TXNEKKAZS2WCfzwd0BRJmR5Ptqal9NcRwt1ly1pF-VCfrtnwajZi6U1RMsCpVKb-ziW-pT4iovbQQRegFqFahkz8moeHTFillfRN-ZS32JeoTKLAHYTp973GgDLaR9_MFJYXJO2RB6yuMsh-oP0g="
+	},
+	"product": {
+		"uuid": "412add6f4b21085e9dffb13aa0",
+		"id": "0001380112642500000007",
+		"productName": "Air Force 1 '07",
+		"productType": "variant",
+		"brand": "nike",
+		"price": {
+			"sales": {
+				"value": 99.99,
+				"currency": "EUR",
+				"formatted": "99,99 €",
+				"decimalPrice": "99.99"
+			},
+			"list": null,
+			"promotionID": "",
+			"discount": null,
+			"isFreeShippingApplicable": true
+		},
+		"longDescription": "<p><span style='line-height: 1.3;'>Der <strong>NIKE Air Force 1 &#39;07</strong>, ein absoluter Klassiker in der Hip-Hop und Street-Szene. Er ist in allen Altersklassen vertreten und steht dank der vielen verschiedenen Farb-Kombis f&uuml;r absolute Wandlungsf&auml;higkeit! Hier ist er jedoch low und im klassischen, wei&szlig;en Colorway gehalten</span> - f&uuml;r einen gelungenen Old School-Look! Die Performance ist und bleibt fresh - D&auml;mpfung dank NIKE Air Element, Grip dank Gummiau&szlig;ensohle und Bel&uuml;ftung dank Perforationen im strapazierf&auml;higen Leder-Upper!</p>\n\n<p><br />\nFeatures:</p>\n\n<ul>\n\t<li>integriertes Air Element</li>\n\t<li>Laufsohle: Gummi</li>\n\t<li>Obermaterial: Leder</li>\n\t<li>Innenmaterial: Textil</li>\n\t<li>STYLE: 315122-111 AIR FORCE 1 &#39;07</li>\n</ul>\n",
+		"shortDescription": null,
+		"availability": {
+			"messages": [
+				"Sofort lieferbar"],
+			"inStockDate": null,
+			"custom": {
+				"code": null,
+				"label": null,
+				"orderable": true,
+				"sizeSelectable": true,
+				"badge": false
+			}
+		},
+		"isOnlyInStore": true,
+		"available": true,
+		"lineItemAvailability": {
+			"statusCode": "instock",
+			"status": "Sofort lieferbar",
+			"error": null,
+			"available": 39
+		},
+		"readyToOrder": true,
+		"online": true,
+		"badge": null,
+		"brandInfo": {
+			"name": "NIKE",
+			"link": "/c/brands/nike"
+		},
+		"custom": {
+			"articleCode": "1000413",
+			"size": "40.5",
+			"color": "white/white",
+			"releaseDate": "",
+			"releaseDateUTC": "",
+			"quickView": false,
+			"editView": false,
+			"isBackInStockDisabled": false
+		},
+		"releaseDate": "",
+		"isComingSoon": false,
+		"isRelease": false,
+		"isCountdown": false,
+		"facts": [{
+			"ID": "brand",
+			"label": "Marke",
+			"value": "NIKE"
+		}, {
+			"ID": "manufacturerSKU",
+			"label": "Hersteller Nr.",
+			"value": "315122-111"
+		}, {
+			"ID": "color",
+			"label": "Farbe",
+			"value": "white/white"
+		}, {
+			"ID": "category",
+			"label": "Kategorie",
+			"value": "Fashion Sneaker"
+		}, {
+			"ID": "articleCode",
+			"label": "Art.-Nr.",
+			"value": "1000413"
+		}],
+		"socialNetworks": {
+			"showFacebook": true,
+			"showTwitter": true,
+			"showEmail": true,
+			"showWhatsApp": true,
+			"pdpUrlEncoded": "https://www.snipes.com/p/nike-air_force_1__07-white%252Fwhite-0001380112642500000007.html",
+			"emailSubject": "NIKE Air Force 1 '07",
+			"emailBody": "https://www.snipes.com/p/nike-air_force_1__07-white%252Fwhite-0001380112642500000007.html"
+		},
+		"variables": "[{\"optionId\":\"212\",\"selectedValueId\":\"40.5\"}]",
+		"limitation": {
+			"isLimited": false,
+			"isLimitReached": false,
+			"limitedTo": 0
+		},
+		"lineItemLimitation": {
+			"isAboveLimit": false,
+			"error": null
+		},
+		"variationAttributes": [],
+		"isVariationProduct": true,
+		"loyalty": {
+			"promotions": [],
+			"isPromoted": false,
+			"factor": 1,
+			"coins": 495,
+			"coinsFormatted": "+ 495 COINS"
+		},
+		"apiProduct": {}
+	},
+	"resources": {
+		"info_selectforstock": "Style wählen um die Verfügbarkeit zu prüfen"
+	},
+	"queryParams": {
+		"format": "ajax",
+		"variables": {
+			"212": {
+				"id": "00013801126425",
+				"value": "40.5"
+			}
+		},
+		"chosen": "size",
+		"pid": "00013801126425"
+	}
+}

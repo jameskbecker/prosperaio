@@ -1,0 +1,220 @@
+> Executing task: npm run test-backend <
+
+
+> prosperaio@4.0.0 test-backend /Users/james/Documents/GitHub/prosperaio
+> cd backend && go run *.go
+
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:17 GetProductData 200 OK
+2020/11/14 15:38:17 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:18 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:18 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:19 GetProductData 200 OK
+2020/11/14 15:38:19 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:20 GetProductData 200 OK
+2020/11/14 15:38:20 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:20 GetProductData 200 OK
+2020/11/14 15:38:20 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:20 GetProductData 200 OK
+2020/11/14 15:38:20 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:23 GetProductData 200 OK
+2020/11/14 15:38:23 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:23 GetProductData 200 OK
+2020/11/14 15:38:23 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:25 GetProductData 200 OK
+2020/11/14 15:38:25 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:34 GetProductData 200 OK
+2020/11/14 15:38:34 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+2020/11/14 15:38:35 DGet "https://www.snipes.com/p/adidas_originals-continental_80_vegan-ftwr_white%2Fcollegiate_navy%2Fscarlet-00013801843144.html?chosen=size&dwvar_00013801843144_212=44&format=ajax": unexpected EOF
+2020/11/14 15:38:40 GetProductData 200 OK
+2020/11/14 15:38:40 Found Product - [0001380184314400000006] adidas_originals Continental 80 Vegan
+panic: DGet "https://www.snipes.com/p/adidas_originals-continental_80_vegan-ftwr_white%2Fcollegiate_navy%2Fscarlet-00013801843144.html": unexpected EOF
+
+goroutine 30 [running]:
+_/Users/james/Documents/GitHub/prosperaio/backend/snipes.Run(0x1353d13, 0x79, 0x133c0a5, 0x2, 0xc0001382a8, 0xc0001382e0, 0xc0001382d0)
+        /Users/james/Documents/GitHub/prosperaio/backend/snipes/snipes.go:60 +0x88e
+created by main.main
+        /Users/james/Documents/GitHub/prosperaio/backend/main.go:34 +0x100
+exit status 2
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! prosperaio@4.0.0 test-backend: `cd backend && go run *.go`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the prosperaio@4.0.0 test-backend script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /Users/james/.npm/_logs/2020-11-14T15_38_47_619Z-debug.log
+The terminal process "/bin/bash '-c', 'npm run test-backend'" terminated with exit code: 1.
+
+Terminal will be reused by tasks, press any key to close it.

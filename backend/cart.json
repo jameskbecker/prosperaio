@@ -1,0 +1,723 @@
+{
+	"action": "Cart-AddProduct",
+	"queryString": "format=ajax",
+	"locale": "de_DE",
+	"quantityTotal": 1,
+	"message": "Hinzugefügt",
+	"cart": {
+		"nonExistingProductsRemoved": false,
+		"hasBonusProduct": false,
+		"actionUrls": {
+			"removeProductLineItemUrl": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-RemoveProductLineItem",
+			"updateQuantityUrl": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-UpdateQuantity",
+			"selectShippingUrl": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-SelectShippingMethod",
+			"submitCouponCodeUrl": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-AddCoupon",
+			"removeCouponLineItem": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-RemoveCouponLineItem"
+		},
+		"numOfShipments": 1,
+		"totals": {
+			"subTotalPrice": {
+				"value": 74.99,
+				"currency": "EUR"
+			},
+			"subTotal": "74,99 €",
+			"totalShippingCost": "0,00 €",
+			"totalShippingPrice": {
+				"value": 0,
+				"currency": "EUR"
+			},
+			"giftCardAmount": {},
+			"giftCardTotals": "0,00 €",
+			"giftCardPrice": {
+				"value": 0,
+				"currency": "EUR"
+			},
+			"totalTaxPrice": {
+				"value": 10.34,
+				"currency": "EUR"
+			},
+			"grandTotalValue": {},
+			"grandTotal": "74,99 €",
+			"totalTaxValue": {},
+			"totalTax": "10,34 €",
+			"totalFreeShippingCost": "0,00 €",
+			"grandTotalPriceWithoutGiftCards": {
+				"value": 74.99,
+				"currency": "EUR"
+			},
+			"grandTotalPrice": {
+				"value": 74.99,
+				"currency": "EUR"
+			},
+			"orderLevelDiscountTotal": {
+				"value": 0,
+				"formatted": "0,00 €"
+			},
+			"shippingLevelDiscountTotal": {
+				"value": 0,
+				"formatted": "0,00 €"
+			},
+			"discounts": [],
+			"discountsHtml": "\n",
+			"deliveryFeeTotal": null,
+			"loyaltyTotals": {
+				"coins": 370
+			},
+			"isFreeShipping": true
+		},
+		"shipments": [{
+			"shippingMethods": [{
+				"ID": "home-delivery",
+				"displayName": "Lieferadresse",
+				"description": "Lieferadresse",
+				"estimatedArrivalTime": null,
+				"default": true,
+				"image": "/on/demandware.static/-/Sites/de_DE/v1605457109254/Shipping_method.png"
+			}, {
+				"ID": "packstation",
+				"displayName": "Packstation",
+				"description": "Packstation",
+				"estimatedArrivalTime": null,
+				"default": false,
+				"image": "/on/demandware.static/-/Sites/de_DE/v1605457109254/Shipping_method.png"
+			}, {
+				"ID": "ship-to-store",
+				"displayName": "Click & Collect",
+				"description": "Click & Collect",
+				"estimatedArrivalTime": null,
+				"default": false
+			}, {
+				"ID": "post-office",
+				"displayName": "Post Filiale",
+				"description": "Post Filiale",
+				"estimatedArrivalTime": null,
+				"default": false
+			}],
+			"selectedShippingMethod": "home-delivery"
+		}],
+		"approachingDiscounts": [],
+		"items": [{
+			"uuid": "bec4d746cbef52b5a96caa3656",
+			"id": "0001380179007400000005",
+			"productName": "Air Force 1 Low (GS)",
+			"productType": "variant",
+			"brand": "nike",
+			"price": {
+				"sales": {
+					"value": 74.99,
+					"currency": "EUR",
+					"formatted": "74,99 €",
+					"decimalPrice": "74.99"
+				},
+				"list": null,
+				"promotionID": "",
+				"discount": null,
+				"isFreeShippingApplicable": true
+			},
+			"images": [{
+				"pdp": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=450&sh=450&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=780&sh=780&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=780&sh=780&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=900&sh=900&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=1560&sh=1560&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=1560&sh=1560&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=780&sh=780&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=1560&sh=1560&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=780&sh=780&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=1560&sh=1560&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=450&sh=450&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=900&sh=900&sm=fit&sfrm=png 1.5x"
+					}]
+				},
+				"plp": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=175&sh=175&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=240&sh=240&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=300&sh=300&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=350&sh=350&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=480&sh=480&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=600&sh=600&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=300&sh=300&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=600&sh=600&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=240&sh=240&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=480&sh=480&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=175&sh=175&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=350&sh=350&sm=fit&sfrm=png 1.5x"
+					}]
+				},
+				"suggestions": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=50&sh=50&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=50&sh=50&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=50&sh=50&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=50&sh=50&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=50&sh=50&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=50&sh=50&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png 1.5x"
+					}]
+				},
+				"cart": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=140&sh=140&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=150&sh=150&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=200&sh=200&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=280&sh=280&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=300&sh=300&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=150&sh=150&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=300&sh=300&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=140&sh=140&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=280&sh=280&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=100&sh=100&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=200&sh=200&sm=fit&sfrm=png 1.5x"
+					}]
+				},
+				"plp-swatch": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png 1.5x"
+					}]
+				},
+				"pdp-swatch": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=130&sh=130&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=80&sh=80&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=260&sh=260&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=160&sh=160&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=80&sh=80&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=160&sh=160&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=130&sh=130&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=260&sh=260&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=60&sh=60&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=120&sh=120&sm=fit&sfrm=png 1.5x"
+					}]
+				},
+				"pdp-whatsapp": {
+					"srcM": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png",
+					"srcT": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png",
+					"srcD": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png",
+					"srcMRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png",
+					"srcTRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png",
+					"srcDRetina": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png",
+					"alt": "Air Force 1 Low (GS)",
+					"title": "Air Force 1 Low (GS)",
+					"classValue": "b-dynamic_image",
+					"sources": [{
+						"media": "(min-width: 1024px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 1023px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png 1.5x"
+					}, {
+						"media": "(max-width: 767px)",
+						"srcSet": "https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png, https://www.snipes.com/dw/image/v2/BDCB_PRD/on/demandware.static/-/Sites-snse-master-eu/default/dw9d671f6a/1790074_P.jpg?sw=400&sh=400&sm=fit&sfrm=png 1.5x"
+					}]
+				}
+			}],
+			"variationAttributes": [{
+				"displayName": "Size",
+				"displayValue": "38.5",
+				"attributeId": "size",
+				"id": "212"
+			}, {
+				"displayName": "Art-Nr",
+				"displayValue": "1200004"
+			}, {
+				"displayName": "Farbe",
+				"displayValue": "black/white",
+				"attributeId": "color",
+				"id": "color"
+			}],
+			"isVariationProduct": false,
+			"sizingSystems": {
+				"15": {
+					"EU": "15",
+					"US": "0C",
+					"UK": "0",
+					"CM": "8.3"
+				},
+				"16": {
+					"EU": "16",
+					"US": "1C",
+					"UK": "0.5",
+					"CM": "9.1"
+				},
+				"16.5": {
+					"EU": "16.5",
+					"US": "1.5C",
+					"UK": "1",
+					"CM": "9.5"
+				},
+				"17": {
+					"EU": "17",
+					"US": "2C",
+					"UK": "1.5",
+					"CM": "10"
+				},
+				"18": {
+					"EU": "18",
+					"US": "2.5C",
+					"UK": "2",
+					"CM": "10.4"
+				},
+				"18.5": {
+					"EU": "18.5",
+					"US": "3C",
+					"UK": "2.5",
+					"CM": "10.8"
+				},
+				"19": {
+					"EU": "19",
+					"US": "3.5C",
+					"UK": "3",
+					"CM": "11.2"
+				},
+				"19.5": {
+					"EU": "19.5",
+					"US": "4C",
+					"UK": "3.5",
+					"CM": "11.6"
+				},
+				"20": {
+					"EU": "20",
+					"US": "4.5C",
+					"UK": "4",
+					"CM": "12"
+				},
+				"21": {
+					"EU": "21",
+					"US": "5C",
+					"UK": "4.5",
+					"CM": "12.5"
+				},
+				"21.5": {
+					"EU": "21.5",
+					"US": "5.5C",
+					"UK": "5",
+					"CM": "13"
+				},
+				"22": {
+					"EU": "22",
+					"US": "6C",
+					"UK": "5.5",
+					"CM": "13.3"
+				},
+				"22.5": {
+					"EU": "22.5",
+					"US": "6.5C",
+					"UK": "6",
+					"CM": "13.8"
+				},
+				"23.5": {
+					"EU": "23.5",
+					"US": "7C",
+					"UK": "6.5",
+					"CM": "14.2"
+				},
+				"24": {
+					"EU": "24",
+					"US": "7.5C",
+					"UK": "7",
+					"CM": "14.6"
+				},
+				"25": {
+					"EU": "25",
+					"US": "8C",
+					"UK": "7.5",
+					"CM": "15"
+				},
+				"25.5": {
+					"EU": "25.5",
+					"US": "8.5C",
+					"UK": "8",
+					"CM": "15.5"
+				},
+				"26": {
+					"EU": "26",
+					"US": "9C",
+					"UK": "8.5",
+					"CM": "15.9"
+				},
+				"26.5": {
+					"EU": "26.5",
+					"US": "9.5C",
+					"UK": "9",
+					"CM": "16.3"
+				},
+				"27": {
+					"EU": "27",
+					"US": "10C",
+					"UK": "9.5",
+					"CM": "16.7"
+				},
+				"27.5": {
+					"EU": "27.5",
+					"US": "10.5C",
+					"UK": "10",
+					"CM": "17.2"
+				},
+				"28": {
+					"EU": "28",
+					"US": "11C",
+					"UK": "10.5",
+					"CM": "17.6"
+				},
+				"28.5": {
+					"EU": "28.5",
+					"US": "11.5C",
+					"UK": "11",
+					"CM": "18"
+				},
+				"29.5": {
+					"EU": "29.5",
+					"US": "12C",
+					"UK": "11.5",
+					"CM": "18.4"
+				},
+				"30": {
+					"EU": "30",
+					"US": "12.5C",
+					"UK": "12",
+					"CM": "18.8"
+				},
+				"31": {
+					"EU": "31",
+					"US": "13C",
+					"UK": "12.5",
+					"CM": "19.3"
+				},
+				"31.5": {
+					"EU": "31.5",
+					"US": "13.5C",
+					"UK": "13",
+					"CM": "19.7"
+				},
+				"32": {
+					"EU": "32",
+					"US": "1Y",
+					"UK": "13.5",
+					"CM": "20.1"
+				},
+				"33": {
+					"EU": "33",
+					"US": "1.5Y",
+					"UK": "1",
+					"CM": "20.5"
+				},
+				"33.5": {
+					"EU": "33.5",
+					"US": "2Y",
+					"UK": "1.5",
+					"CM": "20.9"
+				},
+				"34": {
+					"EU": "34",
+					"US": "2.5Y",
+					"UK": "2",
+					"CM": "21.4"
+				},
+				"35": {
+					"EU": "35",
+					"US": "3Y",
+					"UK": "2.5",
+					"CM": "21.8"
+				},
+				"35.5": {
+					"EU": "35.5",
+					"US": "3.5Y",
+					"UK": "3",
+					"CM": "22.2"
+				},
+				"36": {
+					"EU": "36",
+					"US": "4Y",
+					"UK": "3.5",
+					"CM": "22.4"
+				},
+				"36.5": {
+					"EU": "36.5",
+					"US": "4.5Y",
+					"UK": "4",
+					"CM": "22.7"
+				},
+				"37.5": {
+					"EU": "37.5",
+					"US": "5Y",
+					"UK": "4.5",
+					"CM": "23.2"
+				},
+				"38": {
+					"EU": "38",
+					"US": "5.5Y",
+					"UK": "5",
+					"CM": "23.5"
+				},
+				"38.5": {
+					"EU": "38.5",
+					"US": "6Y",
+					"UK": "5.5",
+					"CM": "23.8"
+				},
+				"39": {
+					"EU": "39",
+					"US": "6.5Y",
+					"UK": "6",
+					"CM": "24.3"
+				},
+				"40": {
+					"EU": "40",
+					"US": "7Y",
+					"UK": "6",
+					"CM": "24.6"
+				},
+				"40.5": {
+					"EU": "40.5",
+					"US": "7.5Y",
+					"UK": "6.5",
+					"CM": "24.9"
+				},
+				"41": {
+					"EU": "41",
+					"US": "8Y",
+					"UK": "7",
+					"CM": "25.4"
+				},
+				"42": {
+					"EU": "42",
+					"US": "8.5Y",
+					"UK": "7.5",
+					"CM": "25.8"
+				},
+				"42.5": {
+					"EU": "42.5",
+					"US": "9Y",
+					"UK": "8",
+					"CM": "26.2"
+				},
+				"43": {
+					"EU": "43",
+					"US": "9.5Y",
+					"UK": "8.5",
+					"CM": "26.7"
+				},
+				"44": {
+					"EU": "44",
+					"US": "10Y",
+					"UK": "9",
+					"CM": "27.1"
+				},
+				"44.5": {
+					"EU": "44.5",
+					"US": "10.5Y",
+					"UK": "9.5",
+					"CM": "27.5"
+				}
+			},
+			"availability": {
+				"messages": [
+					"Sofort lieferbar"],
+				"inStockDate": null,
+				"custom": {
+					"code": null,
+					"label": null,
+					"orderable": true,
+					"sizeSelectable": true,
+					"badge": false
+				}
+			},
+			"isOnlyInStore": true,
+			"available": true,
+			"lineItemAvailability": {
+				"statusCode": "instock",
+				"status": "Sofort lieferbar",
+				"error": null,
+				"available": 25
+			},
+			"limitation": {
+				"isLimited": false,
+				"isLimitReached": false,
+				"limitedTo": 0
+			},
+			"lineItemLimitation": {
+				"isAboveLimit": false,
+				"error": null
+			},
+			"brandInfo": {
+				"name": "NIKE",
+				"link": "/c/brands/nike"
+			},
+			"quantity": 1,
+			"isGift": false,
+			"appliedPromotions": [],
+			"renderedPromotions": "\n\n\n\n    \n\n\n",
+			"UUID": "97b0cc338a7f04a7c7e7e020a1",
+			"isOrderable": true,
+			"shipmentUUID": "95a2ebed1c77b6e739ed9b8ecc",
+			"isBonusProductLineItem": false,
+			"priceTotal": {
+				"sales": "74,99 €",
+				"price": "74,99 €",
+				"priceDecimal": 74.99,
+				"renderedPrice": "\n\n\n<div class=\"strike-through\nnon-adjusted-price\"\n>\n    null\n</div>\n<div class=\"pricing line-item-total-price-amount item-total-null\">74,99 &euro;</div>\n\n"
+			},
+			"quantityOptions": {
+				"minOrderQuantity": 1,
+				"maxOrderQuantity": 10,
+				"items": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10]
+			},
+			"options": [],
+			"bonusProductLineItemUUID": null,
+			"preOrderUUID": null,
+			"discountLineItems": [],
+			"urls": {
+				"pdp": "https://www.snipes.com/p/nike-air_force_1_low_%28gs%29-black%2Fwhite-0001380179007400000005.html",
+				"edit": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-GetProduct?uuid=97b0cc338a7f04a7c7e7e020a1",
+				"updateQuantity": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-UpdateQuantity",
+				"removeProductLineItem": "/on/demandware.store/Sites-snse-DE-AT-Site/de_DE/Cart-RemoveProductLineItem"
+			},
+			"storefrontAttributes": [{
+				"displayName": "Size",
+				"displayValue": "38.5",
+				"attributeId": "size",
+				"id": "212"
+			}, {
+				"displayName": "Art-Nr",
+				"displayValue": "1200004"
+			}, {
+				"displayName": "Farbe",
+				"displayValue": "black/white",
+				"attributeId": "color",
+				"id": "color"
+			}],
+			"restrictions": {
+				"releaseGuestCheckout": false,
+				"releasePaymentMethods": false,
+				"exist": false
+			},
+			"gtm": {
+				"name": "Air Force 1 Low (GS)",
+				"id": "1200004",
+				"price": "74.99",
+				"brand": "NIKE",
+				"category": "Fashion Sneaker",
+				"variant": "38.5",
+				"metric1": "74.99",
+				"dimension20": "yes",
+				"dimension21": "0-10",
+				"dimension22": "",
+				"dimension23": "00013801790074",
+				"dimension24": "Schwarz",
+				"dimension25": "black/white",
+				"dimension27": "0001380179007400000005"
+			},
+			"loyalty": {
+				"promotions": [],
+				"isPromoted": false,
+				"factor": 1,
+				"coins": 370,
+				"coinsFormatted": "+ 370 COINS"
+			},
+			"isRaffleProduct": false,
+			"raffleStartDate": null,
+			"raffleStartDateText": null,
+			"apiProduct": {},
+			"bonusProducts": null,
+			"numberUnreternedEntities": 1,
+			"variationGroupID": "00013801790074",
+			"apiLineItem": {}
+		}],
+		"restrictions": {
+			"exist": false,
+			"releaseGuestCheckout": false,
+			"releasePaymentMethods": false
+		},
+		"einsteinAnchorProduct": {},
+		"numItems": 1,
+		"valid": {
+			"error": false,
+			"message": null
+		},
+		"resources": {
+			"numberOfItems": "Du hast 1 Artikel in deinem Warenkorb",
+			"emptyCartMsg": "Dein Warenkorb ist leer"
+		}
+	},
+	"newBonusDiscountLineItem": {},
+	"error": false,
+	"pliUUID": "97b0cc338a7f04a7c7e7e020a1",
+	"gtm": {
+		"name": "Air Force 1 Low (GS)",
+		"id": "1200004",
+		"price": "74.99",
+		"brand": "NIKE",
+		"category": "Fashion Sneaker",
+		"variant": "38.5",
+		"metric1": "74.99",
+		"dimension20": "no",
+		"dimension21": "0-10",
+		"dimension22": "",
+		"dimension23": "00013801790074",
+		"dimension24": "Schwarz",
+		"dimension25": "black/white",
+		"dimension27": "0001380179007400000005"
+	}
+}

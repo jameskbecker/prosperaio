@@ -1,0 +1,6 @@
+// "dev:GO_": "cd src/go && go build -o ../../build/go-server *.go && ../../build/go-server",
+		// "dev:START_wUI": "nodemon -e ts,go --watch . --exec \"npm run dev:GOCOMP\"",
+		// "dev:GOCOMP": "cd src/go && go build -o ../../build/go-server *.go && cd .. && npm run dev:RENDERER",
+		// "dev:GO": "build/go-server",
+		// "dev:MAIN": "webpack && electron .",
+		// "dev:RENDERER": "webpack-dev-server --config webpack.react.config.js"

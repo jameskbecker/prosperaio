@@ -1,0 +1,70 @@
+
+// func (sa *sneakAvenue) createPayment() error {
+// 	uri := sa.BaseURL + "/cart/paypal-create-payment"
+
+// 	request, err := http.NewRequest("POST", uri, nil)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	request.Header.Set("Accept", "application/json")
+// 	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
+// 	request.Header.Set("Accept-Language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
+// 	request.Header.Set("Origin", "https://www.sneak-a-venue.com")
+// 	request.Header.Set("Referer", "https://www.sneak-a-venue.com/cart")
+// 	request.Header.Set("Sec-Fetch-Site", "same-origin")
+// 	request.Header.Set("Sec-Fetch-Mode", "cors")
+// 	request.Header.Set("Sec-Fetch-Dest", "empty")
+// 	request.Header.Set("User-Agent", sa.UserAgent)
+
+// 	return nil
+// }
+
+// func (sa *sneakAvenue) getECToken() error {
+// 	path := "/smart/api/payment/PAYID-" + sa.PaymentID + "/ectoken"
+
+// 	request, err := http.NewRequest("POST", sa.BaseURL+path, nil)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	request.Header.Set("Accept", "application/json")
+// 	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
+// 	request.Header.Set("Accept-Language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
+// 	request.Header.Set("Origin", "https://www.paypal.com")
+// 	request.Header.Set("Referer", "https://www.paypal.com/smart/button?env=production&logLevel=warn&style.color=blue&style.shape=rect&style.size=responsive&style.label=checkout&locale.x=en_US&domain=www.sneak-a-venue.com&sessionID=b47d0d2001_mta6ndk6mdc&buttonSessionID=9d64ec8bf5_mta6ndk6ntu&sdkMeta=eyJ1cmwiOiJodHRwczovL3d3dy5wYXlwYWxvYmplY3RzLmNvbS9hcGkvY2hlY2tvdXQuanMifQ%3D%3D&uid=a01d073299&version=4&xcomponent=1")
+// 	request.Header.Set("Sec-Fetch-Site", "same-origin")
+// 	request.Header.Set("Sec-Fetch-Mode", "cors")
+// 	request.Header.Set("Sec-Fetch-Dest", "empty")
+// 	request.Header.Set("User-Agent", sa.UserAgent)
+// 	request.Header.Set("X-Cookies", "{}")
+// 	request.Header.Set("X-Csrf-Jwt", "__blank__")
+// 	request.Header.Set("X-Requested-By", "smart-payment-buttons")
+// 	request.Header.Set("X-Requested-With", "XMLHttpRequest")
+
+// 	return nil
+// }
+
+// func (sa *sneakAvenue) generateCheckoutLink() string {
+// 	qs := url.Values{}
+// 	qs.Set("locale.x", "en_US")
+// 	qs.Set("fundingSource", "paypal")
+// 	qs.Set("sessionID", "")
+// 	qs.Set("buttonSessionID", "")
+// 	qs.Set("env", "production")
+// 	qs.Set("fundingOffered", "paypal")
+// 	qs.Set("logLevel", "warn")
+// 	qs.Set("sdkMeta", "eyJ1cmwiOiJodHRwczovL3d3dy5wYXlwYWxvYmplY3RzLmNvbS9hcGkvY2hlY2tvdXQuanMifQ==") //{"url":"https://www.paypalobjects.com/api/checkout.js"}
+// 	qs.Set("uid", sa.PaypalUID)
+// 	qs.Set("version", "4")
+// 	qs.Set("token", sa.ECToken)
+
+// 	url := sa.BaseURL + "?" + qs.Encode()
+// 	return url
+// }
+
+// type cartResponse struct {
+// 	Partials struct {
+// 		CartHeader
+// 	} `json:"partials"`
+// }
