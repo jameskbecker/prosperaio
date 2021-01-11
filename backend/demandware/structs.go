@@ -69,9 +69,15 @@ type Payment struct {
 	GiftCardPins string
 }
 
+//Cookie ...
+type Cookie struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type pxResponse struct {
-	Cookie string `json:"cookie"`
-	Error  string `json:"error"`
+	Cookies []Cookie `json:"cookies"`
+	Error   string   `json:"error"`
 }
 
 type productShow struct {

@@ -86,31 +86,31 @@ func Run(i Input, tNbr string, wg *sync.WaitGroup) {
 	task.Client.Jar.SetCookies(task.BaseURL, cookies)
 
 	//Get CSFR Token for valid POST requests
-	for {
-		err = task.GetCSRFToken()
-		if err != nil {
-			task.err(err.Error())
-			select {
-			case <-time.After(errorDelay):
-				continue
-			}
-		}
+	// for {
+	// 	err = task.GetCSRFToken()
+	// 	if err != nil {
+	// 		task.err(err.Error())
+	// 		select {
+	// 		case <-time.After(errorDelay):
+	// 			continue
+	// 		}
+	// 	}
 
-		break
-	}
+	// 	break
+	// }
 
 	//Generate Account
-	for {
-		err = task.SubmitRegistration()
-		if err != nil {
-			task.err(err.Error())
-			select {
-			case <-time.After(errorDelay):
-				continue
-			}
-		}
-		break
-	}
+	// for {
+	// 	err = task.SubmitRegistration()
+	// 	if err != nil {
+	// 		task.err(err.Error())
+	// 		select {
+	// 		case <-time.After(errorDelay):
+	// 			continue
+	// 		}
+	// 	}
+	// 	break
+	// }
 
 	//ProductURL Mode
 	if task.BPID == "" {
@@ -130,7 +130,7 @@ func Run(i Input, tNbr string, wg *sync.WaitGroup) {
 		for {
 			err = task.GetProductData()
 			if err != nil {
-				task.err(err.Error())
+				//task.err(err.Error())
 				select {
 				case <-time.After(errorDelay):
 					continue
@@ -147,17 +147,17 @@ func Run(i Input, tNbr string, wg *sync.WaitGroup) {
 	// time.Sleep(duration)
 
 	//Add item to cart
-	for {
-		err = task.AddToCart()
-		if err != nil {
-			task.err(err.Error())
-			select {
-			case <-time.After(errorDelay):
-				continue
-			}
-		}
-		break
-	}
+	// for {
+	// 	err = task.AddToCart()
+	// 	if err != nil {
+	// 		task.err(err.Error())
+	// 		select {
+	// 		case <-time.After(errorDelay):
+	// 			continue
+	// 		}
+	// 	}
+	// 	break
+	// }
 
 	// for {
 	// 	err = task.SubmitShipping()

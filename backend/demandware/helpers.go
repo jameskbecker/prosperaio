@@ -21,10 +21,10 @@ const red = "\u001b[31m"
 //GetPXCookie ...
 func (t *Task) GetPXCookie() (string, error) {
 	t.warn("Fetching px cookie...")
-	uri := "http://127.0.0.1:8080/api/px/gen"
+	uri := "http://127.0.0.1:8080/px/v1/generate"
 	qs := url.Values{}
 	qs.Set("site", "snipes")
-	qs.Set("productUrl", t.BaseURL.String())
+	//qs.Set("productUrl", t.BaseURL.String())
 
 	req, err := http.NewRequest("GET", uri+"?"+qs.Encode(), nil)
 	if err != nil {
@@ -51,7 +51,7 @@ func (t *Task) GetPXCookie() (string, error) {
 			return "", err
 		}
 
-		return px.Cookie, nil
+		return px.Cookies[0].Value, nil
 	default:
 		t.lErr.Println("Failed to fetch PX Cookie: " + res.Status)
 

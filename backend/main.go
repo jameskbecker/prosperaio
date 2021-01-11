@@ -22,6 +22,11 @@ const cyan = "\u001b[36m"
 const bold = "\u001b[1m"
 const reset = "\u001b[0m"
 
+func updateTitle(a string, b string) {
+	title := "ProsperAIO | Carted: " + a + " | Checkouts: " + b
+	fmt.Print("\033]0;" + title + "\007")
+}
+
 func main() {
 	csvData, _ := loadConfig("/Users/james/Documents/GitHub/prosperaio/dw_tasks.csv")
 	entries := readConfig(csvData)

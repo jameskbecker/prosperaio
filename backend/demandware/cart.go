@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -39,8 +40,7 @@ func (t *Task) GetProductShowURL() error {
 	switch res.StatusCode {
 	case 200:
 		resBody := decompressBody(res)
-		body, _ := ioutil.ReadAll(resBody)
-		fmt.Println(string(body))
+		//body, _ := ioutil.ReadAll(resBody)
 		optID, err := parseOption(resBody, t.Size)
 		if err == nil {
 
@@ -60,7 +60,6 @@ func (t *Task) GetProductShowURL() error {
 }
 
 func decompressBody(res *http.Response) io.Reader {
-	fmt.Println(res.Header.Get("Content-Encoding"))
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
 		dcb, _ := gzip.NewReader(res.Body)
@@ -129,8 +128,10 @@ func (t *Task) GetProductData() error {
 
 		t.debg("Found Product - " + t.PBrand + " " + t.PName)
 	case 403:
-		t.lErr.Println("Unable to fetch product data -" + res.Status)
-		_, err := ioutil.ReadAll(res.Body)
+		t.lErr.Println("Unable to Fetch Product Data - " + res.Status)
+		body, err := ioutil.ReadAll(res.Body)
+		fmt.Println(string(body))
+		os.Exit(0)
 		if err != nil {
 			return err
 
