@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"./log"
+)
 
 func settings() {
 	fmt.Println(settingsMenu())
@@ -11,8 +15,8 @@ func settings() {
 }
 
 func settingsMenu() string {
-	return line() + bold + `
-Settings` + reset + `
+	return line() + log.Bold + `
+Settings` + log.Reset + `
 0. Set Discord Webhook URL
 1. Set Monitor Delay` + "\n"
 }

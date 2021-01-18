@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -11,13 +12,7 @@ import (
 	"./demandware"
 )
 
-//var sites = [...]string{"Kickz"}
-
-func checkConfig() bool {
-	return true
-}
-
-func loadConfig(path string) (*csv.Reader, error) {
+func openCSV(path string) (*csv.Reader, error) {
 	if !strings.Contains(path, ".csv") {
 		return nil, errors.New("Input Not a CSV File")
 	}
@@ -32,7 +27,7 @@ func loadConfig(path string) (*csv.Reader, error) {
 	return reader, nil
 }
 
-func readConfig(r *csv.Reader) (entries [][]string, err error) {
+func readCSV(r *csv.Reader) (entries [][]string, err error) {
 	r.TrimLeadingSpace = true
 	//r.FieldsPerRecord = 5
 	//fmt.Println(entries)
@@ -54,6 +49,28 @@ func readConfig(r *csv.Reader) (entries [][]string, err error) {
 	}
 
 	return entries, nil
+}
+
+func loadCSV(path string) ([][]string, error) {
+	data, err := openCSV(path)
+	if err != nil {
+		return nil, err
+	}
+
+	tasks, err := readCSV(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+//TODO: check for errors
+func loadTXT(path string) ([]byte, error) {
+	file, _ := os.Open(path)
+	bData, _ := ioutil.ReadAll(file)
+
+	return bData, nil
 }
 
 // func setupConfig() error {

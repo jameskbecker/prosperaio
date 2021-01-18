@@ -3,7 +3,6 @@ package wearestrap
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -13,7 +12,7 @@ import (
 )
 
 const baseURL = "https://wearestrap.com"
-const pURL = "https://wearestrap.com/es/basket-/4074-14578-nike-air-force-1-07-craft--ct2317-100.html"
+const pURL = "https://wearestrap.com/es/basket-/4126-nike-dunk-low-sp-women-dd1503-101.html"
 const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
 const size = "42.5"
 
@@ -45,7 +44,7 @@ func Run(twg *sync.WaitGroup) {
 }
 
 func (t *task) cartProcess() {
-	bodyP := strings.Reader{}
+	pDataP := productData{}
 	for {
 		t.log.Warn("Getting product data")
 		body, err := getProductData(pURL, t.client)
@@ -54,15 +53,10 @@ func (t *task) cartProcess() {
 			time.Sleep(1000 * time.Millisecond)
 			continue
 		}
-		bodyP = body
-		break
-	}
 
-	pDataP := productData{}
-	for {
-		pData, err := parseProductData(bodyP)
+		pData, err := parseProductData(body)
 		if err != nil {
-			t.log.Error(err.Error())
+			t.log.Error("Product Data Not Found")
 			time.Sleep(1000 * time.Millisecond)
 			continue
 		}

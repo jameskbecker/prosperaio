@@ -66,9 +66,9 @@ func PostWebhook(url string, data Message) error {
 //TestWebhook sends a test webhook to a given webhook URL
 func TestWebhook(url string) {
 	logo := Image{
-		URL:    "https://i.imgur.com/NGGew9J.png",
-		Height: 400,
-		Width:  400,
+		URL:    "https://img.favpng.com/20/13/20/air-force-jumpman-nike-free-coloring-book-air-jordan-png-favpng-50G7r6aWHwsbe9YC4ha20PUPj.jpg",
+		Height: 500,
+		Width:  500,
 	}
 
 	embedData := Embed{
@@ -94,8 +94,8 @@ func testFields() []Field {
 	return []Field{
 		Field{
 			Name:   "Product",
-			Value:  "----------",
-			Inline: true,
+			Value:  "------------------------------",
+			Inline: false,
 		},
 		Field{
 			Name:   "Site",
@@ -122,8 +122,9 @@ func testFields() []Field {
 
 func getFooter() Footer {
 	ts := time.Now().UTC()
+
 	return Footer{
-		Text:    "ProsperAIO v" + version + " • " + ts.String(),
+		Text:    "ProsperAIO v" + version + " • " + ts.Format("02/01/2006 15:04:05.000 MST"),
 		IconURL: "https://i.imgur.com/NGGew9J.png",
 	}
 }

@@ -4,22 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 
-	"./discord"
+	"./log"
 	"./wearestrap"
 )
 
-func getTaskPaths() []string {
-	homedir, _ := os.UserHomeDir()
-	configBase := path.Join(homedir, "ProsperAIO", "tasks")
+func getDirPaths(dir string, ext string) []string {
 	taskPaths := []string{}
-	filepath.Walk(configBase, func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == ".csv" {
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if filepath.Ext(path) == ext {
 			_, name := filepath.Split(path)
 			taskPaths = append(taskPaths, name)
 		}
@@ -27,29 +24,6 @@ func getTaskPaths() []string {
 		return nil
 	})
 	return taskPaths
-}
-
-func readTaskConfig() ([][]string, error) {
-	homedir, _ := os.UserHomeDir()
-	configBase := path.Join(homedir, "ProsperAIO", "tasks")
-
-	taskPaths := getTaskPaths()
-	selectedPath, err := selectTaskFile(taskPaths)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := loadConfig(path.Join(configBase, selectedPath))
-	if err != nil {
-		return nil, err
-	}
-
-	tasks, err := readConfig(data)
-	if err != nil {
-		return nil, err
-	}
-
-	return tasks, nil
 }
 
 func getTaskCount(data [][]string) map[string]int {
@@ -70,16 +44,13 @@ func getTaskCount(data [][]string) map[string]int {
 	return output
 }
 
-func selectTaskFile(taskPaths []string) (string, error) {
-	fmt.Println(line() + bold + "Task File Selector" + reset)
+func getSliceSelection(title string, taskPaths []string) (string, error) {
+	fmt.Println(line() + log.Bold + "\n" + title + log.Reset)
 	for i, v := range taskPaths {
 		fmt.Println(strconv.Itoa(i) + ". " + v)
 	}
 
-	fmt.Print(reset + "\nSelect Option > ")
-	scanner.Scan()
-
-	index, err := strconv.Atoi(scanner.Text())
+	index, err := getSelection()
 	if err != nil {
 		return "", err
 	}
@@ -91,58 +62,55 @@ func selectTaskFile(taskPaths []string) (string, error) {
 	return taskPaths[index], nil
 }
 
-func mainMenu(data map[string]int) (selection string) {
-	options := make(map[string]string)
+func taskMenu(data map[string]int) (selection string) {
+	options := make(map[int]string)
 	taskCount := 0
 
-	fmt.Println(line() + bold + "Main Menu" + reset)
-
-	// i := 0
-	// for site, v := range data {
-	// 	fmt.Println(strconv.Itoa(i) + ". Run " + site + " Tasks (" + strconv.Itoa(v) + ")")
-	// 	options[strconv.Itoa(i)] = site
-	// 	taskCount += v
-	// 	i++
-	// }
+	fmt.Println(line() + log.Bold + "\nTask Menu" + log.Reset)
 
 	i := 0
-	for _, v := range data {
+	for site, v := range data {
+		fmt.Println(strconv.Itoa(i) + ". Run " + site + " Tasks (" + strconv.Itoa(v) + ")")
+		options[i] = site
 		taskCount += v
+		i++
 	}
 
+	// i := 0
+	// for _, v := range data {
+	// 	taskCount += v
+	// }
+
 	fmt.Println(strconv.Itoa(i) + ". Run all Tasks (" + strconv.Itoa(taskCount) + ")")
-	options[strconv.Itoa(i)] = "all"
-	i++
+	options[i] = "all"
 
-	fmt.Println(strconv.Itoa(i) + ". Test Webhook\n")
-	options[strconv.Itoa(i)] = "webhook"
+	index, err := getSelection()
+	if err != nil {
+		return ""
+	}
 
-	fmt.Print("Select Option > ")
-
-	scanner.Scan()
-	selectedOption := scanner.Text()
 	fmt.Println(line())
-	return options[selectedOption]
+	return options[index]
 
 }
 
 func parseMenuSelection(tasks [][]string) {
 	for {
 		taskCount := getTaskCount(tasks)
-		selection := mainMenu(taskCount)
+		selection := taskMenu(taskCount)
 		switch selection {
 		case "all":
 			break
 		case "webhook":
-			discord.TestWebhook("")
+
 			continue
 		default:
-			fmt.Println(red + "Error: unexpected selection value" + reset)
+			fmt.Println(log.Red + "Error: unexpected selection value" + log.Reset)
 			continue
 		}
 		break
 	}
-	fmt.Println(bold + "Task Log" + reset)
+	fmt.Println(log.Bold + "Task Log" + log.Reset)
 	runningTasks := sync.WaitGroup{}
 	runningTasks.Add(1)
 	for _, row := range tasks[1:] {
