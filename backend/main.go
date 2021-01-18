@@ -4,12 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+
+	"./discord"
 )
 
 var scanner = bufio.NewScanner(os.Stdin)
 
-const version = "4.0.0"
+const version = "4.0.0 (BETA)"
 const expiryDate = "27 Sep 21 18:53 GMT"
 const blue = "\u001b[34m"
 const magenta = "\u001b[35m"
@@ -25,6 +28,7 @@ type csvData = [][]string
 
 func main() {
 	welcome()
+	go discord.SetPresence()
 
 	tasks := [][]string{}
 	for {
@@ -49,19 +53,19 @@ func main() {
 }
 
 func welcome() {
-	updateTitle("0", "0")
+	updateTitle(0, 0, 0)
 	fmt.Println(logo())
 	fmt.Println(bold + "Welcome to ProsperAIO!" + reset)
 	fmt.Println("Expires: " + expiryDate)
 
 }
 
-func updateTitle(a string, b string) {
+func updateTitle(a, b, c int) {
 	title := []string{
 		"ProsperAIO v" + version,
-		"Carted: " + a,
-		"Checkouts: " + b,
-		"Proxy List: NONE",
+		"Carted: " + strconv.Itoa(a),
+		"Checkouts: " + strconv.Itoa(b),
+		"Proxies: " + strconv.Itoa(c),
 	}
 	fmt.Print("\033]0;" + strings.Join(title, " | ") + "\007")
 }

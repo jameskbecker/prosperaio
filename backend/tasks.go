@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"./discord"
 	"./wearestrap"
 )
 
@@ -133,7 +134,7 @@ func parseMenuSelection(tasks [][]string) {
 		case "all":
 			break
 		case "webhook":
-			testWebhook("")
+			discord.TestWebhook("")
 			continue
 		default:
 			fmt.Println(red + "Error: unexpected selection value" + reset)
@@ -141,6 +142,7 @@ func parseMenuSelection(tasks [][]string) {
 		}
 		break
 	}
+	fmt.Println(bold + "Task Log" + reset)
 	runningTasks := sync.WaitGroup{}
 	runningTasks.Add(1)
 	for _, row := range tasks[1:] {
