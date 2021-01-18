@@ -10,7 +10,7 @@ import (
 	"github.com/hugolgst/rich-go/client"
 )
 
-const version = "4.0.0 (BETA)"
+const version = "4.0.0 (ALPHA)"
 
 // SetPresence sets the currently logged in user's presence via IPC
 func SetPresence() {
