@@ -76,3 +76,8 @@ func TestProxy(data string, wg *sync.WaitGroup) {
 
 	wg.Done()
 }
+
+//RotateProxy ...
+func RotateProxy(data []string) []string {
+	return append(data[1:], data[0])
+}
