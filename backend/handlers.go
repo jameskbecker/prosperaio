@@ -12,7 +12,7 @@ import (
 	"./log"
 )
 
-func runTasksHandler() {
+func loadTasksHandler() {
 	tasks := [][]string{}
 	for {
 		homedir, _ := os.UserHomeDir()
@@ -24,7 +24,7 @@ func runTasksHandler() {
 			continue
 		}
 
-		data, err := loadCSV(path.Join(taskFolder, selectedFile))
+		data, err := loadCSV(path.Join(taskFolder, selectedFile), taskFields)
 		if err != nil {
 			fmt.Println(log.Red + "Error: " + err.Error() + log.Reset)
 			continue
@@ -66,6 +66,7 @@ func testProxies(data []string) {
 	proxyWG := sync.WaitGroup{}
 	for _, v := range data {
 		proxyWG.Add(1)
+		proxies = append(proxies, v)
 		go client.TestProxy(v, &proxyWG)
 	}
 	proxyWG.Wait()
@@ -75,7 +76,7 @@ func testProxies(data []string) {
 func testWebhookHandler() {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
-	data, err := loadCSV(path.Join(basedir, "settings.csv"))
+	data, err := loadCSV(path.Join(basedir, "settings.csv"), settingsFields)
 	if err != nil {
 		fmt.Println(log.Red + "Error: " + err.Error() + log.Reset)
 	}

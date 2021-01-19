@@ -1,60 +1,64 @@
 package wearestrap
 
 import (
-	"net/http"
+	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
-	"../client"
 	"../discord"
 	"../log"
 )
 
-const baseURL = "https://wearestrap.com"
-const pURL = "https://wearestrap.com/es/basket-/4126-nike-dunk-low-sp-women-dd1503-101.html"
 const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
-const size = "42.5"
 
 //atc url https://wearestrap.com/es/carrito?add=1&id_product=4074&id_product_attribute=14580
 
-type task struct {
-	log    log.Logger
-	client *http.Client
-	PData  productData
-}
-
 //Run --
-func Run(twg *sync.WaitGroup) {
-	//startTS := time.Now()
-	c, _ := client.Create("")
-	t := task{
-		client: &c,
-		PData:  productData{PID: "0000"},
-	}
+func Run(i Input, wg *sync.WaitGroup) {
+	fmt.Printf("%+v\n", i)
+	// //startTS := time.Now()
+	// c, _ := client.Create(i.Proxy)
 
-	t.updatePrefix()
-	t.log.Debug("Starting Task")
+	// t := task{
+	// 	size:    i.Size,
+	// 	email:   i.Email,
+	// 	billing: i.Billing,
 
-	t.cartProcess()
+	// 	client: &c,
+	// 	pData:  productData{PID: "0000"},
+	// }
+	// t.updatePrefix()
+	// pURL, err := url.Parse(i.ProductURL)
+	// if err != nil {
+	// 	t.log.Error("Invalid Product URL")
+	// 	return
+	// }
+
+	// t.productURL = pURL
+	// t.baseURL = "https://" + t.productURL.Hostname()
+	// t.log.Debug("Starting Task")
+
+	// t.cartProcess()
 	//t.checkoutProcess()
 
 	//discord.PostWebhook()
-	//twg.Done()
+	//wg.Done()
 }
 
 func (t *task) cartProcess() {
 	pDataP := productData{}
 	for {
 		t.log.Warn("Getting product data")
-		body, err := getProductData(pURL, t.client)
+		body, err := t.getProductData()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(1000 * time.Millisecond)
 			continue
 		}
 
-		pData, err := parseProductData(body)
+		pData, err := t.parseProductData(body)
 		if err != nil {
 			t.log.Error("Product Data Not Found")
 			time.Sleep(1000 * time.Millisecond)
@@ -63,13 +67,13 @@ func (t *task) cartProcess() {
 		pDataP = pData
 		break
 	}
-	t.PData = pDataP
+	t.pData = pDataP
 	t.updatePrefix()
 	t.log.Warn("Adding to cart")
 	addForm := atcForm(pDataP)
 	qtyP := 0
 	for {
-		qty, err := add(addForm, t.client)
+		qty, err := t.add(addForm)
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(1000 * time.Millisecond)
@@ -85,26 +89,26 @@ func (t *task) cartProcess() {
 func (t *task) checkoutProcess() {
 	t.log.Warn("Checking out")
 	t.log.Debug("Submitting Account and Address")
-	err := modifyAccountAndAddress(t.client)
+	err := t.modifyAccountAndAddress(t.client)
 	if err != nil {
 		t.log.Error(err.Error())
 		return
 	}
 	t.log.Debug("Accepting GDPR")
-	err = acceptGDPR(t.client)
+	err = t.acceptGDPR(t.client)
 	if err != nil {
 		t.log.Error(err.Error())
 		return
 	}
 
 	t.log.Debug("Accepting T&S")
-	err = acceptTerms(t.client)
+	err = t.acceptTerms(t.client)
 	if err != nil {
 		t.log.Error(err.Error())
 		return
 	}
 
-	checkoutURL, err := getPPURL(t.client)
+	checkoutURL, err := t.getPPURL(t.client)
 	if err != nil {
 		t.log.Error(err.Error())
 		return
@@ -115,11 +119,11 @@ func (t *task) checkoutProcess() {
 }
 
 func (t *task) updatePrefix() {
-	prefix := "[wearestrap] [" + size + "] [" + t.PData.PID + "] "
+	prefix := "[wearestrap] [" + t.size + "] [" + t.pData.PID + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
 
-func defaultHeaders() [][]string {
+func defaultHeaders(baseURL string) [][]string {
 	return [][]string{
 		[]string{"accept", "application/json, text/javascript, */*; q=0.01"},
 		//[]string{"accept-encoding", "gzip, deflate, br"},
@@ -154,7 +158,7 @@ func (t *task) webhookMessage(i webhookData) discord.Message {
 		},
 		discord.Field{
 			Name:   "Size",
-			Value:  size,
+			Value:  t.size,
 			Inline: true,
 		},
 		discord.Field{
@@ -175,4 +179,41 @@ func (t *task) webhookMessage(i webhookData) discord.Message {
 	return discord.Message{
 		Embeds: []discord.Embed{embedData},
 	}
+}
+
+func getCountryCode(key string) int {
+	data := map[string]int{
+		"AT": 2,
+		"BE": 3,
+		"BA": 233,
+		"BG": 236,
+		"CY": 76,
+		"CZ": 16,
+		"DK": 20,
+		"EE": 86,
+		"FI": 7,
+		"FR": 8,
+		"DE": 1,
+		"GR": 9,
+		"HU": 143,
+		"IE": 26,
+		"IT": 10,
+		"LV": 125,
+		"LI": 130,
+		"LT": 131,
+		"LU": 12,
+		"MT": 139,
+		"NL": 13,
+		"PL": 14,
+		"PT": 15,
+		"RO": 36,
+		"SK": 37,
+		"SI": 193,
+		"ES": 6,
+		"SE": 18,
+		"UA": 216,
+		"UK": 17,
+	}
+
+	return data[strings.ToUpper(key)]
 }

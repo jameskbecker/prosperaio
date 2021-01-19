@@ -1,6 +1,9 @@
 package wearestrap
 
-import "net/url"
+import (
+	"net/url"
+	"strconv"
+)
 
 func atcForm(pData productData) url.Values {
 	form := url.Values{}
@@ -23,8 +26,8 @@ func accountAndAddress() url.Values {
 	form.Set("ajax_request", "1")
 	form.Set("action", "modifyAccountAndAddress")
 	form.Set("trigger", "thecheckout-confirm") //"thecheckout-address-invoice"
-	form.Set("account", account().Encode())
-	form.Set("invoice", address().Encode())
+	form.Set("account", account("").Encode())
+	form.Set("invoice", address(Address{}).Encode())
 	form.Set("delivery", "")
 	form.Set("passwordVisible", "0")
 	form.Set("passwordRequired", "0")
@@ -35,27 +38,27 @@ func accountAndAddress() url.Values {
 	return form
 }
 
-func address() url.Values {
+func address(a Address) url.Values {
 	form := url.Values{}
 
-	form.Set("firstname", "Johan")
-	form.Set("lastname", "Smfith")
-	form.Set("address1", "403+Kingston+Hall+Rd")
-	form.Set("city", "Kingston+Upon+Thames")
-	form.Set("postcode", "KT12BP")
-	form.Set("id_country", "17")
-	form.Set("phone", "07913920398")
+	form.Set("firstname", a.First)
+	form.Set("lastname", a.Last)
+	form.Set("address1", a.Address)
+	form.Set("city", a.City)
+	form.Set("postcode", a.Zip)
+	form.Set("id_country", strconv.Itoa(getCountryCode(a.Country)))
+	form.Set("phone", a.Phone)
 
 	return form
 }
 
-func account() url.Values {
+func account(email string) url.Values {
 	form := url.Values{}
 
 	form.Set("back", "")
 	form.Set("id_address", "")
 	form.Set("token", "c45c161fb8309f28f326322bb88d8a12")
-	form.Set("email", "johnsmith@gmail.com")
+	form.Set("email", email)
 	form.Set("psgdpr", "1")
 
 	return form

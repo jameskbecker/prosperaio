@@ -1,24 +1,62 @@
 package wearestrap
 
+import (
+	"net/http"
+	"net/url"
+
+	"../log"
+)
+
+//Input data for task
+type Input struct {
+	ProductURL string
+	Size       string
+	Email      string
+	Proxy      string
+	Billing    Address
+}
+
+//Address ...
+type Address struct {
+	First   string
+	Last    string
+	Address string
+	City    string
+	Zip     string
+	Country string
+	Phone   string
+}
+
+type task struct {
+	productURL *url.URL
+	baseURL    string
+	size       string
+	email      string
+	billing    Address
+	pData      productData
+	log        log.Logger
+	client     *http.Client
+}
+
 type productData struct {
 	Token, PID, CustID, PVal string
 }
 
 type atcResponse struct {
-	Success bool   `json:"success"`
-	Errors  string `json:"errors"`
-	Qty     int        `json:"quantity"`
-	Cover   imageData  `json:"cover"`
+	Success bool      `json:"success"`
+	Errors  string    `json:"errors"`
+	Qty     int       `json:"quantity"`
+	Cover   imageData `json:"cover"`
 }
 
-type imageData struct{
+type imageData struct {
 	Medium image `json:"medium"`
 }
 
 type image struct {
-	URL string `json:"url"`
-	Width int `json:"width"`
-	Height int `json:"height"`
+	URL    string `json:"url"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 type addressResponse struct {
@@ -35,7 +73,7 @@ type ppTokenResponse struct {
 }
 
 type webhookData struct {
-	ProductName string
-	CheckoutURL string
+	ProductName  string
+	CheckoutURL  string
 	thumbnailURL string
 }

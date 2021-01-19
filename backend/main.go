@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"./client"
 	"./discord"
 	"./log"
 )
@@ -14,8 +15,12 @@ import (
 var scanner = bufio.NewScanner(os.Stdin)
 
 const version = "4.0.0 (ALPHA)"
+const taskFields = 14
+const settingsFields = 1
 
 type csvData = [][]string
+
+var proxies = []string{}
 
 func init() {
 	const expiryDate = "28 Jan 2021 10:55 GMT"
@@ -37,7 +42,7 @@ func main() {
 		selection := getSelection()
 		switch selection {
 		case 0:
-			runTasksHandler()
+			loadTasksHandler()
 			continue
 		case 1:
 			loadProxiesHandler(&counters)
@@ -67,4 +72,16 @@ func getSelection() int {
 
 		return IntSelection
 	}
+}
+
+func getProxy() string {
+	proxy := ""
+	if len(proxies) == 0 {
+		return proxy
+	}
+
+	proxy = proxies[0]
+	proxies = client.RotateProxy(proxies)
+
+	return proxy
 }

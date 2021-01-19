@@ -11,9 +11,9 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func getProductData(productURL string, c *http.Client) (strings.Reader, error) {
+func (t *task) getProductData() (strings.Reader, error) {
 	body := strings.Reader{}
-	req, err := http.NewRequest("GET", productURL, nil)
+	req, err := http.NewRequest("GET", t.productURL.String(), nil)
 	if err != nil {
 		return body, err
 	}
@@ -29,7 +29,7 @@ func getProductData(productURL string, c *http.Client) (strings.Reader, error) {
 	req.Header.Set("upgrade-insecure-requests", "1")
 	req.Header.Set("user-agent", useragent)
 
-	res, err := c.Do(req)
+	res, err := t.client.Do(req)
 	if err != nil {
 		return body, err
 	}
@@ -44,7 +44,7 @@ func getProductData(productURL string, c *http.Client) (strings.Reader, error) {
 	return body, nil
 }
 
-func parseProductData(data strings.Reader) (productData, error) {
+func (t *task) parseProductData(data strings.Reader) (productData, error) {
 	pData := productData{}
 	doc, err := goquery.NewDocumentFromReader(&data)
 	if err != nil {
@@ -75,7 +75,7 @@ func parseProductData(data strings.Reader) (productData, error) {
 	}
 	pData.CustID = custID
 
-	sizeCode := "EU_" + strings.ReplaceAll(size, ".", "-")
+	sizeCode := "EU_" + strings.ReplaceAll(t.size, ".", "-")
 	group1Selector := `[data-referencia="` + sizeCode + `"]`
 	group1Match := doc.Find(group1Selector)
 	group1, exists := group1Match.Attr("data-valor")
@@ -87,27 +87,23 @@ func parseProductData(data strings.Reader) (productData, error) {
 	return pData, nil
 }
 
-func add(form url.Values, c *http.Client) (int, error) {
+func (t *task) add(form url.Values) (int, error) {
 	formEncoded := form.Encode()
 	formReader := strings.NewReader(formEncoded)
-	req, err := http.NewRequest("POST", baseURL+"/es/carrito", formReader)
+	req, err := http.NewRequest("POST", t.baseURL+"/es/carrito", formReader)
 	if err != nil {
 		return 0, err
 	}
 
-	for _, v := range defaultHeaders() {
+	for _, v := range defaultHeaders(t.baseURL) {
 		req.Header.Set(v[0], v[1])
 	}
-	req.Header.Set("referer", pURL)
+	req.Header.Set("referer", t.productURL.String())
 
-	res, err := c.Do(req)
+	res, err := t.client.Do(req)
 	if err != nil {
 		return 0, err
 	}
-	// bBody, err := ioutil.ReadAll(res.Body)
-	// if err != nil {
-	// 	return err
-	// }
 
 	body := atcResponse{}
 	json.NewDecoder(res.Body).Decode(&body)

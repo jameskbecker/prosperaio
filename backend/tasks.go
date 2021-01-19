@@ -50,18 +50,18 @@ func taskMenu(data map[string]int) (selection string) {
 
 	fmt.Println(line() + log.Bold + "\nTask Menu" + log.Reset)
 
-	i := 0
-	for site, v := range data {
-		fmt.Println(strconv.Itoa(i) + ". Run " + site + " Tasks (" + strconv.Itoa(v) + ")")
-		options[i] = site
-		taskCount += v
-		i++
-	}
-
 	// i := 0
-	// for _, v := range data {
+	// for site, v := range data {
+	// 	fmt.Println(strconv.Itoa(i) + ". Run " + site + " Tasks (" + strconv.Itoa(v) + ")")
+	// 	options[i] = site
 	// 	taskCount += v
+	// 	i++
 	// }
+
+	i := 0
+	for _, v := range data {
+		taskCount += v
+	}
 
 	fmt.Println(strconv.Itoa(i) + ". Run all Tasks (" + strconv.Itoa(taskCount) + ")")
 	options[i] = "all"
@@ -74,35 +74,67 @@ func taskMenu(data map[string]int) (selection string) {
 }
 
 func parseMenuSelection(tasks [][]string) {
+	fmt.Println(log.Bold + "Task Log" + log.Reset)
+	runningTasks := sync.WaitGroup{}
 	for {
 		taskCount := getTaskCount(tasks)
 		selection := taskMenu(taskCount)
 		switch selection {
 		case "all":
+			for _, row := range tasks[1:] {
+				runningTasks.Add(1)
+				go startTask(row, &runningTasks)
+			}
 			break
-		case "webhook":
-
-			continue
 		default:
 			fmt.Println(log.Red + "Error: unexpected selection value" + log.Reset)
 			continue
 		}
 		break
 	}
-	fmt.Println(log.Bold + "Task Log" + log.Reset)
-	runningTasks := sync.WaitGroup{}
-	runningTasks.Add(1)
-	for _, row := range tasks[1:] {
-		go startTask(row, &runningTasks)
-	}
+
 	runningTasks.Wait()
 }
 
 func startTask(data []string, runningTasks *sync.WaitGroup) {
 	site := data[0]
+	//mode := data[1]
+	searchInput := data[2]
+	size := data[3]
+	firstName := data[4]
+	lastName := data[5]
+	zip := data[6]
+	city := data[7]
+	address1 := data[8]
+	address2 := data[9]
+	country := data[10]
+	email := data[11]
+	phone := data[12]
+	//pMethod := data[13]
+
+	address := address1
+	if address2 != "" {
+		address += " " + address2
+	}
+
 	switch strings.ToLower(site) {
 	case "wearestrap":
-		wearestrap.Run(runningTasks)
+		input := wearestrap.Input{
+			ProductURL: searchInput,
+			Size:       size,
+			Email:      email,
+			Proxy:      getProxy(),
+			Billing: wearestrap.Address{
+				First:   firstName,
+				Last:    lastName,
+				Address: address,
+				City:    city,
+				Zip:     zip,
+				Country: country,
+				Phone:   phone,
+			},
+		}
+		wearestrap.Run(input, runningTasks)
 
 	default:
 

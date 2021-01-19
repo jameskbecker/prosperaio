@@ -26,7 +26,7 @@ func getDirPaths(dir string, ext string) []string {
 	return taskPaths
 }
 
-func openCSV(path string) (*csv.Reader, error) {
+func openCSV(path string, cLen int) (*csv.Reader, error) {
 	if !strings.Contains(path, ".csv") {
 		return nil, errors.New("Input Not a CSV File")
 	}
@@ -37,36 +37,34 @@ func openCSV(path string) (*csv.Reader, error) {
 	}
 
 	reader := csv.NewReader(file)
+	reader.TrimLeadingSpace = true
 
+	if cLen > 0 {
+		reader.FieldsPerRecord = cLen
+	}
 	return reader, nil
 }
 
-func readCSV(r *csv.Reader) (entries [][]string, err error) {
-	r.TrimLeadingSpace = true
-	//r.FieldsPerRecord = 5
-	//fmt.Println(entries)
+func readCSV(r *csv.Reader) (records [][]string, err error) {
 	for {
-		// Read each record from csv
-
-		row, err := r.Read()
-		if err == io.EOF {
+		record, err := r.Read()
+		if err != nil && err == io.EOF {
 			break
+		} else if err != nil {
+			return nil, err
 		}
-		if err != nil {
-			break
-		}
-		entries = append(entries, row)
+		records = append(records, record)
 	}
-	if len(entries) == 0 || len(entries) == 1 && len(entries[0]) == 1 && entries[0][0] == "" {
+	if len(records) == 0 || len(records) == 1 && len(records[0]) == 1 && records[0][0] == "" {
 		err = errors.New("no tasks in selected file. Please try again")
-		return entries, err
+		return records, err
 	}
 
-	return entries, nil
+	return records, nil
 }
 
-func loadCSV(path string) ([][]string, error) {
-	data, err := openCSV(path)
+func loadCSV(path string, cLen int) ([][]string, error) {
+	data, err := openCSV(path, cLen)
 	if err != nil {
 		return nil, err
 	}

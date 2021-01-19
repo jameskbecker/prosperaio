@@ -6,15 +6,15 @@ import (
 	"strings"
 )
 
-func modifyAccountAndAddress(c *http.Client) error {
-	url := baseURL + "/es/pedido?modifyAccountAndAddress"
+func (t *task) modifyAccountAndAddress(c *http.Client) error {
+	url := t.baseURL + "/es/pedido?modifyAccountAndAddress"
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Set("referer", baseURL+"/es/pedido")
-	for _, v := range defaultHeaders() {
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
+	for _, v := range defaultHeaders(t.baseURL) {
 		req.Header.Set(v[0], v[1])
 	}
 
@@ -30,44 +30,44 @@ func modifyAccountAndAddress(c *http.Client) error {
 }
 
 //might be apple to add this to modify acc and address
-func acceptGDPR(c *http.Client) error {
+func (t *task) acceptGDPR(c *http.Client) error {
 	form := gdpr().Encode()
-	url := baseURL + "/es/pedido"
+	url := t.baseURL + "/es/pedido"
 	req, err := http.NewRequest("POST", url, strings.NewReader(form))
 	if err != nil {
 		return err
 	}
 
-	for _, v := range defaultHeaders() {
+	for _, v := range defaultHeaders(t.baseURL) {
 		req.Header.Set(v[0], v[1])
 	}
-	req.Header.Set("referer", baseURL+"/es/pedido")
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
 
 	c.Do(req)
 
 	return nil
 }
 
-func acceptTerms(c *http.Client) error {
+func (t *task) acceptTerms(c *http.Client) error {
 	form := terms().Encode()
-	url := baseURL + "/es/pedido"
+	url := t.baseURL + "/es/pedido"
 	req, err := http.NewRequest("POST", url, strings.NewReader(form))
 	if err != nil {
 		return err
 	}
 
-	for _, v := range defaultHeaders() {
+	for _, v := range defaultHeaders(t.baseURL) {
 		req.Header.Set(v[0], v[1])
 	}
-	req.Header.Set("referer", baseURL+"/es/pedido")
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
 
 	c.Do(req)
 
 	return nil
 }
 
-func getPPURL(c *http.Client) (string, error) {
-	url := baseURL + "/es/module/paypal/ecInit?credit_card=0&getToken=1"
+func (t *task) getPPURL(c *http.Client) (string, error) {
+	url := t.baseURL + "/es/module/paypal/ecInit?credit_card=0&getToken=1"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", err
@@ -76,7 +76,7 @@ func getPPURL(c *http.Client) (string, error) {
 	req.Header.Set("accept", "*/*")
 	//req.Header.Set("accept-encoding", "gzip, deflate, br")
 	req.Header.Set("accept-language", "en-GB,en;q=0.9")
-	req.Header.Set("referer", baseURL+"/es/pedido")
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
 	req.Header.Set("rsec-fetch-site", "same-origin")
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-dest", "empty")
