@@ -64,13 +64,18 @@ func (l *Logger) Error(m string) {
 	fmt.Println(fTS + Red + l.Prefix + m + Reset)
 }
 
+//TitleCounts ...
+type TitleCounts struct {
+	Cart, Checkout, Proxy int
+}
+
 //UpdateTitle ...
-func UpdateTitle(a string, b, c, d int) {
+func UpdateTitle(a string, b *TitleCounts) {
 	title := []string{
 		"ProsperAIO v" + a,
-		"Carted: " + strconv.Itoa(b),
-		"Checkouts: " + strconv.Itoa(c),
-		"Proxies: " + strconv.Itoa(d),
+		"Carted: " + strconv.Itoa(b.Cart),
+		"Checkouts: " + strconv.Itoa(b.Checkout),
+		"Proxies: " + strconv.Itoa(b.Proxy),
 	}
 	fmt.Print("\033]0;" + strings.Join(title, " | ") + "\007")
 }

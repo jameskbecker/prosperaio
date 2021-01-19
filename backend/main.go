@@ -18,27 +18,22 @@ import (
 var scanner = bufio.NewScanner(os.Stdin)
 
 const version = "4.0.0 (ALPHA)"
-const expiryDate = "28 Jan 2021 10:55 GMT"
-
-var siteIDs = []string{"Snipes-DE"}
-var configPaths = []string{"snipes.csv"}
-
-var cartCount = 0
-var checkoutCount = 0
-var proxyCount = 0
 
 type csvData = [][]string
 
 func init() {
+	const expiryDate = "28 Jan 2021 10:55 GMT"
 	expTime, _ := time.Parse("02 Jan 2006 15:04 MST", expiryDate)
 	if time.Until(expTime) < 0*time.Millisecond {
 		os.Exit(0)
 	}
 	discord.SetPresence()
+	welcome(expiryDate)
 }
 
 func main() {
-	welcome()
+	counters := log.TitleCounts{}
+	log.UpdateTitle(version, &counters)
 	for {
 		fmt.Println(mainMenu())
 		selection := getSelection()
@@ -47,7 +42,7 @@ func main() {
 			runTasksHandler()
 			continue
 		case 1:
-			loadProxiesHandler()
+			loadProxiesHandler(&counters)
 			continue
 		case 2:
 			testWebhookHandler()
@@ -84,8 +79,7 @@ func runTasksHandler() {
 	parseMenuSelection(tasks)
 }
 
-func loadProxiesHandler() {
-	//proxies := [][]string{}
+func loadProxiesHandler(counters *log.TitleCounts) {
 	for {
 		homedir, _ := os.UserHomeDir()
 		taskFolder := path.Join(homedir, "ProsperAIO", "proxies")
@@ -97,18 +91,27 @@ func loadProxiesHandler() {
 		}
 
 		sPath := path.Join(taskFolder, selectedFile)
-
 		bData, _ := loadTXT(sPath)
-
 		data := strings.FieldsFunc(string(bData), func(r rune) bool {
 			return string(r) == "\n" || string(r) == "\r"
 		})
 
-		fmt.Println(log.Bold + "Proxy Tester" + log.Reset)
+		counters.Proxy = len(data)
+		log.UpdateTitle(version, counters)
+
 		testProxies(data)
-		log.UpdateTitle(version, cartCount, checkoutCount, proxyCount)
+		log.UpdateTitle(version, counters)
 		break
 	}
+}
+func testProxies(data []string) {
+	fmt.Println(log.Bold + "Proxy Tester" + log.Reset)
+	proxyWG := sync.WaitGroup{}
+	for _, v := range data {
+		proxyWG.Add(1)
+		go client.TestProxy(v, &proxyWG)
+	}
+	proxyWG.Wait()
 }
 
 //Thought: maybe instead of extracting data in this func have a func that parses all setting data and sets global vars
@@ -131,15 +134,6 @@ func testWebhookHandler() {
 	}
 	discord.TestWebhook(webhookURL)
 }
-func testProxies(data []string) {
-	proxyWG := sync.WaitGroup{}
-	for _, v := range data {
-		proxyWG.Add(1)
-		proxyCount++
-		go client.TestProxy(v, &proxyWG)
-	}
-	proxyWG.Wait()
-}
 
 func getSelection() int {
 	for {
@@ -157,8 +151,7 @@ func getSelection() int {
 	}
 }
 
-func welcome() {
-	log.UpdateTitle(version, cartCount, checkoutCount, proxyCount)
+func welcome(expiryDate string) {
 	fmt.Println(logo())
 	fmt.Println(log.Bold + "Welcome to ProsperAIO!" + log.Reset)
 	fmt.Println("Expires: " + expiryDate)
