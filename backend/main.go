@@ -33,7 +33,7 @@ func main() {
 	counters := log.TitleCounts{}
 	log.UpdateTitle(version, &counters)
 	for {
-		fmt.Println(mainMenu())
+		mainMenu()
 		selection := getSelection()
 		switch selection {
 		case 0:

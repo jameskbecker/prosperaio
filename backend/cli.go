@@ -1,6 +1,10 @@
 package main
 
-import "./log"
+import (
+	"fmt"
+
+	"./log"
+)
 
 func line() string {
 	return log.Cyan + "-------------------------------------------------------------------------------------" + log.Reset
@@ -18,10 +22,10 @@ func logo() string {
 ` + line()
 }
 
-func mainMenu() string {
-	return line() + log.Bold + `
+func mainMenu() {
+	fmt.Println(line() + log.Bold + `
 Main Menu` + log.Reset + `
 0. Run Tasks
 1. Load Proxies
-2. Test Webhook`
+2. Test Webhook`)
 }
