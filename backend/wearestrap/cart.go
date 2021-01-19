@@ -51,8 +51,7 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 		return pData, err
 	}
 
-	nameSelector := `h1[class="title-ficha"]`
-	nameMatch := doc.Find(nameSelector)
+	nameMatch := doc.Find(`h1[class="title-ficha"]`)
 	name := nameMatch.Text()
 	if name == "" {
 		t.log.Error("Product name not found. Continuing.")
@@ -61,24 +60,21 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 		pData.Name = name
 	}
 
-	tokenSelector := `input[name="token"]`
-	tokenMatch := doc.Find(tokenSelector)
+	tokenMatch := doc.Find(`input[name="token"]`)
 	token, exists := tokenMatch.Attr("value")
 	if !exists {
 		return pData, errors.New("Token Not Found")
 	}
 	pData.Token = token
 
-	PIDSelector := `input[name="id_product"],[id="product_page_product_id"]`
-	PIDMatch := doc.Find(PIDSelector)
+	PIDMatch := doc.Find(`input[name="id_product"],[id="product_page_product_id"]`)
 	PID, exists := PIDMatch.Attr("value")
 	if !exists {
 		return pData, errors.New("PID Not Found")
 	}
 	pData.PID = PID
 
-	custIDSelector := `input[name="id_customization"],[id="product_customization_id"]`
-	custIDMatch := doc.Find(custIDSelector)
+	custIDMatch := doc.Find(`input[name="id_customization"],[id="product_customization_id"]`)
 	custID, exists := custIDMatch.Attr("value")
 	if !exists {
 		return pData, errors.New("Product Customization ID Not Found")
@@ -86,8 +82,7 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 	pData.CustID = custID
 
 	sizeCode := "EU_" + strings.ReplaceAll(t.size, ".", "-")
-	group1Selector := `[data-referencia="` + sizeCode + `"]`
-	group1Match := doc.Find(group1Selector)
+	group1Match := doc.Find(`[data-referencia="` + sizeCode + `"]`)
 	group1, exists := group1Match.Attr("data-valor")
 	if !exists {
 		return pData, errors.New("Group[1] value Not Found")
