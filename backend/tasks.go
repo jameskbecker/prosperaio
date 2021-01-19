@@ -35,7 +35,7 @@ func getSliceSelection(title string, taskPaths []string) (string, error) {
 		fmt.Println(strconv.Itoa(i) + ". " + v)
 	}
 
-	index := getSelection()
+	index := getSelection("")
 
 	if index > len(taskPaths)-1 || index < 0 {
 		return "", errors.New("Out of Bounds")
@@ -66,7 +66,7 @@ func taskMenu(data map[string]int) (selection string) {
 	fmt.Println(strconv.Itoa(i) + ". Run all Tasks (" + strconv.Itoa(taskCount) + ")")
 	options[i] = "all"
 
-	index := getSelection()
+	index := getSelection("")
 
 	fmt.Println(line())
 	return options[index]

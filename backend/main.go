@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"./client"
@@ -39,7 +40,7 @@ func main() {
 	log.UpdateTitle(version, &counters)
 	for {
 		mainMenu()
-		selection := getSelection()
+		selection := getSelection("")
 		switch selection {
 		case 0:
 			loadTasksHandler()
@@ -58,12 +59,17 @@ func main() {
 
 }
 
-func getSelection() int {
+func getSelection(prefix string) int {
 	for {
-		fmt.Print("\n> ")
+		fmt.Print("\n" + prefix + "> ")
 		scanner.Scan()
 
 		SSelection := scanner.Text()
+		if strings.ToUpper(SSelection) == "Y" {
+			return 1
+		} else if strings.ToUpper(SSelection) == "N" {
+			return 0
+		}
 		IntSelection, err := strconv.Atoi(SSelection)
 		if err != nil {
 			fmt.Println("Invalid selection please try again.")

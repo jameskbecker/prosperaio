@@ -56,8 +56,11 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 		counters.Proxy = len(data)
 		log.UpdateTitle(version, counters)
 
-		testProxies(data)
-		log.UpdateTitle(version, counters)
+		testP := getSelection("Test Proxies? (Y/N) ")
+		if testP == 1 {
+			testProxies(data)
+		}
+
 		break
 	}
 }
