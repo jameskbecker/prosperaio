@@ -44,13 +44,13 @@ func main() {
 		selection := getSelection()
 		switch selection {
 		case 0:
-			selectRunTasks()
+			runTasksHandler()
 			continue
 		case 1:
-			selectLoadProxies()
+			loadProxiesHandler()
 			continue
 		case 2:
-			selectTestWebhook()
+			testWebhookHandler()
 			continue
 		default:
 			fmt.Println("Invalid Selection: " + strconv.Itoa(selection))
@@ -60,7 +60,7 @@ func main() {
 
 }
 
-func selectRunTasks() {
+func runTasksHandler() {
 	tasks := [][]string{}
 	for {
 		homedir, _ := os.UserHomeDir()
@@ -84,7 +84,7 @@ func selectRunTasks() {
 	parseMenuSelection(tasks)
 }
 
-func selectLoadProxies() {
+func loadProxiesHandler() {
 	//proxies := [][]string{}
 	for {
 		homedir, _ := os.UserHomeDir()
@@ -112,7 +112,7 @@ func selectLoadProxies() {
 }
 
 //Thought: maybe instead of extracting data in this func have a func that parses all setting data and sets global vars
-func selectTestWebhook() {
+func testWebhookHandler() {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
 	data, err := loadCSV(path.Join(basedir, "settings.csv"))
