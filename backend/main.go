@@ -23,8 +23,6 @@ const expiryDate = "28 Jan 2021 10:55 GMT"
 var siteIDs = []string{"Snipes-DE"}
 var configPaths = []string{"snipes.csv"}
 
-var webhookURL = "https://discord.com/api/webhooks/799261395920879636/XfptkYZ51sANptdoHZO5kl48LuPiHMypfBjn9NYut7VJN_B4AX-LHdrYGqMx4a7hbEC-"
-
 var cartCount = 0
 var checkoutCount = 0
 var proxyCount = 0
@@ -52,7 +50,7 @@ func main() {
 			selectLoadProxies()
 			continue
 		case 2:
-			discord.TestWebhook(webhookURL)
+			selectTestWebhook()
 			continue
 		default:
 			fmt.Println("Invalid Selection: " + strconv.Itoa(selection))
@@ -113,6 +111,26 @@ func selectLoadProxies() {
 	}
 }
 
+//Thought: maybe instead of extracting data in this func have a func that parses all setting data and sets global vars
+func selectTestWebhook() {
+	homedir, _ := os.UserHomeDir()
+	basedir := path.Join(homedir, "ProsperAIO")
+	data, err := loadCSV(path.Join(basedir, "settings.csv"))
+	if err != nil {
+		fmt.Println(log.Red + "Error: " + err.Error() + log.Reset)
+	}
+
+	if len(data) < 2 || len(data[0]) < 1 {
+		fmt.Println(log.Red + "Error: invalid settings.csv format" + log.Reset)
+	}
+	webhookURL := data[1][0]
+
+	if webhookURL == "" {
+		fmt.Println(log.Red + "Error: no webhook URL found in settings.csv" + log.Reset)
+		return
+	}
+	discord.TestWebhook(webhookURL)
+}
 func testProxies(data []string) {
 	proxyWG := sync.WaitGroup{}
 	for _, v := range data {
