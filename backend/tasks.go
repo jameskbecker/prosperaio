@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -12,19 +10,6 @@ import (
 	"./log"
 	"./wearestrap"
 )
-
-func getDirPaths(dir string, ext string) []string {
-	taskPaths := []string{}
-	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == ext {
-			_, name := filepath.Split(path)
-			taskPaths = append(taskPaths, name)
-		}
-
-		return nil
-	})
-	return taskPaths
-}
 
 func getTaskCount(data [][]string) map[string]int {
 	output := map[string]int{
@@ -50,10 +35,7 @@ func getSliceSelection(title string, taskPaths []string) (string, error) {
 		fmt.Println(strconv.Itoa(i) + ". " + v)
 	}
 
-	index, err := getSelection()
-	if err != nil {
-		return "", err
-	}
+	index := getSelection()
 
 	if index > len(taskPaths)-1 || index < 0 {
 		return "", errors.New("Out of Bounds")
@@ -84,10 +66,7 @@ func taskMenu(data map[string]int) (selection string) {
 	fmt.Println(strconv.Itoa(i) + ". Run all Tasks (" + strconv.Itoa(taskCount) + ")")
 	options[i] = "all"
 
-	index, err := getSelection()
-	if err != nil {
-		return ""
-	}
+	index := getSelection()
 
 	fmt.Println(line())
 	return options[index]
@@ -130,23 +109,3 @@ func startTask(data []string, runningTasks *sync.WaitGroup) {
 		//fmt.Println("[Row " + strconv.Itoa(i+1) + "] Error: invalid site")
 	}
 }
-
-/*
-// case "onygo":
-	// case "snipes-de":
-	// case "snipes-uk":
-	// 	task, err := dwTask(row)
-	// 	if err != nil {
-	// 		log.Println("Unable to Run Task " + taskNumber + " (" + err.Error() + "). Exiting Program.")
-	// 		os.Exit(0)
-	// 	}
-	// 	runningTasks.Add(1)
-	// 	go demandware.Run(task, taskNumber, runningTasks)
-	// 	break
-
-	// case "sneakavenue":
-	// 	task := sneakavenue.TaskInput{}
-	// 	runningTasks.Add(1)
-	// 	go sneakavenue.Run(task)
-	// 	break
-*/

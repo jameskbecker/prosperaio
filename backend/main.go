@@ -41,31 +41,25 @@ func init() {
 
 func main() {
 	welcome()
-	fmt.Println(mainMen())
-	selection := -1
 	for {
-		s, err := getSelection()
-		if err != nil {
-			fmt.Println("Invalid selection please try again.")
+		fmt.Println(mainMenu())
+		selection := getSelection()
+		switch selection {
+		case 0:
+			selectRunTasks()
+			continue
+		case 1:
+			selectLoadProxies()
+			continue
+		case 2:
+			discord.TestWebhook(webhookURL)
+			continue
+		default:
+			fmt.Println("Invalid Selection: " + strconv.Itoa(selection))
 			continue
 		}
-		selection = s
-		break
 	}
 
-	switch selection {
-	case 0:
-		selectRunTasks()
-		break
-	case 1:
-		selectLoadProxies()
-		break
-	case 2:
-		discord.TestWebhook(webhookURL)
-		break
-	default:
-		fmt.Println("Invalid Selection: " + strconv.Itoa(selection))
-	}
 }
 
 func selectRunTasks() {
@@ -129,17 +123,20 @@ func testProxies(data []string) {
 	proxyWG.Wait()
 }
 
-func getSelection() (int, error) {
-	fmt.Print("\n> ")
-	scanner.Scan()
+func getSelection() int {
+	for {
+		fmt.Print("\n> ")
+		scanner.Scan()
 
-	SSelection := scanner.Text()
-	IntSelection, err := strconv.Atoi(SSelection)
-	if err != nil {
-		return 0, err
+		SSelection := scanner.Text()
+		IntSelection, err := strconv.Atoi(SSelection)
+		if err != nil {
+			fmt.Println("Invalid selection please try again.")
+			continue
+		}
+
+		return IntSelection
 	}
-
-	return IntSelection, nil
 }
 
 func welcome() {

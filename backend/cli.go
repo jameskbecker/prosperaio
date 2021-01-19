@@ -18,7 +18,7 @@ func logo() string {
 ` + line()
 }
 
-func mainMen() string {
+func mainMenu() string {
 	return line() + log.Bold + `
 Main Menu` + log.Reset + `
 0. Run Tasks

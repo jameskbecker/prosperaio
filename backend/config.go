@@ -6,11 +6,25 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"./demandware"
 )
+
+func getDirPaths(dir string, ext string) []string {
+	taskPaths := []string{}
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if filepath.Ext(path) == ext {
+			_, name := filepath.Split(path)
+			taskPaths = append(taskPaths, name)
+		}
+
+		return nil
+	})
+	return taskPaths
+}
 
 func openCSV(path string) (*csv.Reader, error) {
 	if !strings.Contains(path, ".csv") {
