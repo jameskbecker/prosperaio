@@ -1,12 +1,13 @@
 package wearestrap
 
 import (
-	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"../client"
 	"../discord"
 	"../log"
 )
@@ -17,30 +18,29 @@ const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/5
 
 //Run --
 func Run(i Input, wg *sync.WaitGroup) {
-	fmt.Printf("%+v\n", i)
 	// //startTS := time.Now()
-	// c, _ := client.Create(i.Proxy)
+	c, _ := client.Create(i.Proxy)
 
-	// t := task{
-	// 	size:    i.Size,
-	// 	email:   i.Email,
-	// 	billing: i.Billing,
+	t := task{
+		size:    i.Size,
+		email:   i.Email,
+		billing: i.Billing,
 
-	// 	client: &c,
-	// 	pData:  productData{PID: "0000"},
-	// }
-	// t.updatePrefix()
-	// pURL, err := url.Parse(i.ProductURL)
-	// if err != nil {
-	// 	t.log.Error("Invalid Product URL")
-	// 	return
-	// }
+		client: &c,
+		pData:  productData{PID: "0000"},
+	}
+	t.updatePrefix()
+	pURL, err := url.Parse(i.ProductURL)
+	if err != nil {
+		t.log.Error("Invalid Product URL")
+		return
+	}
 
-	// t.productURL = pURL
-	// t.baseURL = "https://" + t.productURL.Hostname()
-	// t.log.Debug("Starting Task")
+	t.productURL = pURL
+	t.baseURL = "https://" + t.productURL.Hostname()
+	t.log.Debug("Starting Task")
 
-	// t.cartProcess()
+	t.cartProcess()
 	//t.checkoutProcess()
 
 	//discord.PostWebhook()

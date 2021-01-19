@@ -51,6 +51,16 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 		return pData, err
 	}
 
+	nameSelector := `h1[class="title-ficha"]`
+	nameMatch := doc.Find(nameSelector)
+	name := nameMatch.Text()
+	if name == "" {
+		t.log.Error("Product name not found. Continuing.")
+	} else {
+		t.log.Debug("Found Product - " + name)
+		pData.Name = name
+	}
+
 	tokenSelector := `input[name="token"]`
 	tokenMatch := doc.Find(tokenSelector)
 	token, exists := tokenMatch.Attr("value")

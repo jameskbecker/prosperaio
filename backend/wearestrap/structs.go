@@ -39,7 +39,7 @@ type task struct {
 }
 
 type productData struct {
-	Token, PID, CustID, PVal string
+	Token, PID, CustID, PVal, Name string
 }
 
 type atcResponse struct {
