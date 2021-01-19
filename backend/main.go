@@ -28,7 +28,9 @@ func init() {
 		os.Exit(0)
 	}
 	discord.SetPresence()
-	welcome(expiryDate)
+	fmt.Println(logo())
+	fmt.Println(log.Bold + "Welcome to ProsperAIO!" + log.Reset)
+	fmt.Println("Expires: " + expiryDate)
 }
 
 func main() {
@@ -149,11 +151,4 @@ func getSelection() int {
 
 		return IntSelection
 	}
-}
-
-func welcome(expiryDate string) {
-	fmt.Println(logo())
-	fmt.Println(log.Bold + "Welcome to ProsperAIO!" + log.Reset)
-	fmt.Println("Expires: " + expiryDate)
-
 }
