@@ -82,8 +82,8 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 	}
 	pData.CustID = custID
 
-	sizeCode := "EU_" + strings.ReplaceAll(t.size, ".", "-")
-	group1Match := doc.Find(`[data-referencia="` + sizeCode + `"]`)
+	//sizeCode := "EU_" + strings.ReplaceAll(t.size, ".", "-")
+	group1Match := doc.Find(`[data-referencia="` + t.size + `"]`)
 	group1, exists := group1Match.Attr("data-valor")
 	if !exists {
 		return pData, errors.New("Group[1] value Not Found")

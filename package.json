@@ -1,6 +1,6 @@
 {
 	"name": "prosperaio",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"private": true,
 	"workspaces": [
 		"backend",
@@ -12,7 +12,9 @@
 	"keywords": [],
 	"license": "MIT",
 	"scripts": {
-		"test-backend": "cd backend && go run *.go"
+		"BACKEND:TEST": "cd backend && go run *.go",
+		"BACKEND:WINBUILD": "cd backend && GOOS=windows GOARCH=amd64 go build -o ../dist/ProsperAIO_Win",
+		"BACKEND:OSXBUILD": "cd backend && go build -o ../dist/ProsperAIO_Mac"
 	},
 	"dependencies": {
 		"body-parser": "^1.18.3",

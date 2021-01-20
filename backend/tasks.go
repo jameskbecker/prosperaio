@@ -110,7 +110,7 @@ func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
 	address2 := data[9]
 	country := data[10]
 	email := data[11]
-	phone := data[12]
+	phone := strings.ReplaceAll(data[12], `"`, "")
 	//pMethod := data[13]
 
 	address := address1

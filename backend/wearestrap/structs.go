@@ -39,6 +39,8 @@ type task struct {
 	email        string
 	checkoutURL  string
 	thumbnailURL string
+	token        string
+	staticToken  string
 	monitor      time.Duration
 	retry        time.Duration
 	billing      Address
