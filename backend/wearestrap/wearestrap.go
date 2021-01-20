@@ -1,8 +1,8 @@
 package wearestrap
 
 import (
+	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -17,7 +17,7 @@ const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/5
 //atc url https://wearestrap.com/es/carrito?add=1&id_product=4074&id_product_attribute=14580
 
 //Run --
-func Run(i Input, wg *sync.WaitGroup) {
+func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	// //startTS := time.Now()
 	c, _ := client.Create(i.Proxy)
 
@@ -25,9 +25,9 @@ func Run(i Input, wg *sync.WaitGroup) {
 		size:    i.Size,
 		email:   i.Email,
 		billing: i.Billing,
-
-		client: &c,
-		pData:  productData{PID: "0000"},
+		id:      taskID,
+		client:  &c,
+		pData:   productData{PID: "0000"},
 	}
 	t.updatePrefix()
 	pURL, err := url.Parse(i.ProductURL)
@@ -69,21 +69,21 @@ func (t *task) cartProcess() {
 	}
 	t.pData = pDataP
 	t.updatePrefix()
-	t.log.Warn("Adding to cart")
-	addForm := atcForm(pDataP)
-	qtyP := 0
-	for {
-		qty, err := t.add(addForm)
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(1000 * time.Millisecond)
-			continue
-		}
-		qtyP = qty
-		break
-	}
-	qtyS := strconv.Itoa(qtyP)
-	t.log.Info("Successfully added " + qtyS + " item(s) to cart!")
+	// t.log.Warn("Adding to cart")
+	// addForm := atcForm(pDataP)
+	// qtyP := 0
+	// for {
+	// 	qty, err := t.add(addForm)
+	// 	if err != nil {
+	// 		t.log.Error(err.Error())
+	// 		time.Sleep(1000 * time.Millisecond)
+	// 		continue
+	// 	}
+	// 	qtyP = qty
+	// 	break
+	// }
+	// qtyS := strconv.Itoa(qtyP)
+	// t.log.Info("Successfully added " + qtyS + " item(s) to cart!")
 }
 
 func (t *task) checkoutProcess() {
@@ -119,7 +119,8 @@ func (t *task) checkoutProcess() {
 }
 
 func (t *task) updatePrefix() {
-	prefix := "[wearestrap] [" + t.size + "] [" + t.pData.PID + "] "
+	tID := fmt.Sprintf("%04d", t.id)
+	prefix := "[" + tID + "] [wearestrap] [" + t.size + "] [" + t.pData.PID + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
 
@@ -139,33 +140,12 @@ func defaultHeaders(baseURL string) [][]string {
 }
 
 func (t *task) webhookMessage(i webhookData) discord.Message {
-	logo := discord.Image{
-		URL:    i.thumbnailURL,
-		Height: 400,
-		Width:  400,
-	}
-
+	logo := discord.Image{URL: i.thumbnailURL}
 	fields := []discord.Field{
-		discord.Field{
-			Name:   "Product",
-			Value:  i.ProductName,
-			Inline: false,
-		},
-		discord.Field{
-			Name:   "Site",
-			Value:  "wearestrap",
-			Inline: true,
-		},
-		discord.Field{
-			Name:   "Size",
-			Value:  t.size,
-			Inline: true,
-		},
-		discord.Field{
-			Name:   "Checkout Link",
-			Value:  "[Click Here](" + i.CheckoutURL + ")",
-			Inline: true,
-		},
+		discord.Field{Name: "Product", Value: t.pData.Name, Inline: false},
+		discord.Field{Name: "Site", Value: "wearestrap", Inline: true},
+		discord.Field{Name: "Size", Value: t.size, Inline: true},
+		discord.Field{Name: "Checkout Link", Value: "[Click Here](" + i.CheckoutURL + ")", Inline: true},
 	}
 
 	embedData := discord.Embed{

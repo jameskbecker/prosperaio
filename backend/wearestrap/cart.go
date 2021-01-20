@@ -55,8 +55,9 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 	name := nameMatch.Text()
 	if name == "" {
 		t.log.Error("Product name not found. Continuing.")
+		pData.Name = "N/A"
 	} else {
-		t.log.Debug("Found Product - " + name)
+		t.log.Debug("Found Product Name - " + name)
 		pData.Name = name
 	}
 

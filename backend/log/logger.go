@@ -39,28 +39,28 @@ type Logger struct {
 //Info ...
 func (l *Logger) Info(m string) {
 	ts := time.Now()
-	fTS := ts.Format("[02/01/2006 15:04:05.000] ")
+	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
 	fmt.Println(fTS + Green + l.Prefix + m + Reset)
 }
 
 //Warn ...
 func (l *Logger) Warn(m string) {
 	ts := time.Now()
-	fTS := ts.Format("[02/01/2006 15:04:05.000] ")
+	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
 	fmt.Println(fTS + Yellow + l.Prefix + m + Reset)
 }
 
 //Debug ...
 func (l *Logger) Debug(m string) {
 	ts := time.Now()
-	fTS := ts.Format("[02/01/2006 15:04:05.000] ")
+	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
 	fmt.Println(fTS + Blue + l.Prefix + m + Reset)
 }
 
 //Error ...
 func (l *Logger) Error(m string) {
 	ts := time.Now()
-	fTS := ts.Format("[02/01/2006 15:04:05.000] ")
+	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
 	fmt.Println(fTS + Red + l.Prefix + m + Reset)
 }
 

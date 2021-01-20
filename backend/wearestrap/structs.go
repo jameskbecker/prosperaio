@@ -28,6 +28,7 @@ type Address struct {
 }
 
 type task struct {
+	id         int
 	productURL *url.URL
 	baseURL    string
 	size       string

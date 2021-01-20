@@ -74,16 +74,17 @@ func taskMenu(data map[string]int) (selection string) {
 }
 
 func parseMenuSelection(tasks [][]string) {
-	fmt.Println(log.Bold + "Task Log" + log.Reset)
+
 	runningTasks := sync.WaitGroup{}
 	for {
 		taskCount := getTaskCount(tasks)
 		selection := taskMenu(taskCount)
+		fmt.Println(log.Bold + "Task Log" + log.Reset)
 		switch selection {
 		case "all":
-			for _, row := range tasks[1:] {
+			for i, row := range tasks[1:] {
 				runningTasks.Add(1)
-				go startTask(row, &runningTasks)
+				go startTask(row, i+1, &runningTasks)
 			}
 			break
 		default:
@@ -96,7 +97,7 @@ func parseMenuSelection(tasks [][]string) {
 	runningTasks.Wait()
 }
 
-func startTask(data []string, runningTasks *sync.WaitGroup) {
+func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
 	site := data[0]
 	//mode := data[1]
 	searchInput := data[2]
@@ -134,7 +135,7 @@ func startTask(data []string, runningTasks *sync.WaitGroup) {
 				Phone:   phone,
 			},
 		}
-		wearestrap.Run(input, runningTasks)
+		wearestrap.Run(input, taskID, runningTasks)
 
 	default:
 
