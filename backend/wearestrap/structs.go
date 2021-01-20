@@ -14,6 +14,7 @@ type Input struct {
 	Size       string
 	Email      string
 	Proxy      string
+	WebhookURL string
 	Monitor    time.Duration
 	Retry      time.Duration
 	Billing    Address
@@ -31,17 +32,19 @@ type Address struct {
 }
 
 type task struct {
-	id         int
-	productURL *url.URL
-	baseURL    string
-	size       string
-	email      string
-	monitor    time.Duration
-	retry      time.Duration
-	billing    Address
-	pData      productData
-	log        log.Logger
-	client     *http.Client
+	id           int
+	productURL   *url.URL
+	baseURL      string
+	size         string
+	email        string
+	checkoutURL  string
+	thumbnailURL string
+	monitor      time.Duration
+	retry        time.Duration
+	billing      Address
+	pData        productData
+	log          log.Logger
+	client       *http.Client
 }
 
 type productData struct {
@@ -49,10 +52,18 @@ type productData struct {
 }
 
 type atcResponse struct {
-	Success bool      `json:"success"`
-	Errors  string    `json:"errors"`
-	Qty     int       `json:"quantity"`
-	Cover   imageData `json:"cover"`
+	Success bool   `json:"success"`
+	Errors  string `json:"errors"`
+	Qty     int    `json:"quantity"`
+	Cart    cart   `json:"cart"`
+}
+
+type cart struct {
+	Products []product `json:"products"`
+}
+
+type product struct {
+	Cover imageData `json:"cover"`
 }
 
 type imageData struct {

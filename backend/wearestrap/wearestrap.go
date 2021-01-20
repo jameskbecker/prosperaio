@@ -3,6 +3,7 @@ package wearestrap
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -43,10 +44,10 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	t.log.Debug("Starting Task")
 
 	t.cartProcess()
-	//t.checkoutProcess()
+	t.checkoutProcess()
 
-	//discord.PostWebhook()
-	//wg.Done()
+	discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	wg.Done()
 }
 
 func (t *task) cartProcess() {
@@ -71,21 +72,21 @@ func (t *task) cartProcess() {
 	}
 	t.pData = pDataP
 	t.updatePrefix()
-	// t.log.Warn("Adding to cart")
-	// addForm := atcForm(pDataP)
-	// qtyP := 0
-	// for {
-	// 	qty, err := t.add(addForm)
-	// 	if err != nil {
-	// 		t.log.Error(err.Error())
-	// 		time.Sleep(1000 * time.Millisecond)
-	// 		continue
-	// 	}
-	// 	qtyP = qty
-	// 	break
-	// }
-	// qtyS := strconv.Itoa(qtyP)
-	// t.log.Info("Successfully added " + qtyS + " item(s) to cart!")
+	t.log.Warn("Adding to cart")
+	addForm := atcForm(pDataP)
+	qtyP := 0
+	for {
+		qty, err := t.add(addForm)
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(1000 * time.Millisecond)
+			continue
+		}
+		qtyP = qty
+		break
+	}
+	qtyS := strconv.Itoa(qtyP)
+	t.log.Info("Successfully added " + qtyS + " item(s) to cart!")
 }
 
 func (t *task) checkoutProcess() {
@@ -115,6 +116,7 @@ func (t *task) checkoutProcess() {
 		t.log.Error(err.Error())
 		return
 	}
+	t.checkoutURL = checkoutURL
 
 	t.log.Info("Successfully Checked out!")
 	t.log.Debug("Checkout URL: " + checkoutURL)
@@ -141,23 +143,27 @@ func defaultHeaders(baseURL string) [][]string {
 	}
 }
 
-func (t *task) webhookMessage(i webhookData) discord.Message {
-	logo := discord.Image{URL: i.thumbnailURL}
+func (t *task) webhookMessage() discord.Message {
+	tn := discord.Image{URL: t.thumbnailURL}
 	fields := []discord.Field{
 		discord.Field{Name: "Product", Value: t.pData.Name, Inline: false},
 		discord.Field{Name: "Site", Value: "wearestrap", Inline: true},
 		discord.Field{Name: "Size", Value: t.size, Inline: true},
-		discord.Field{Name: "Checkout Link", Value: "[Click Here](" + i.CheckoutURL + ")", Inline: true},
+		discord.Field{Name: "Checkout Link", Value: "[Click Here](" + t.checkoutURL + ")", Inline: true},
 	}
 
 	embedData := discord.Embed{
-		Title:     "Successful Checkout",
-		Type:      "rich",
-		Color:     3642623,
-		Thumbnail: logo,
-		Fields:    fields,
-		Footer:    discord.GetFooter(),
+		Title:  "Successful Checkout",
+		Type:   "rich",
+		Color:  3642623,
+		Fields: fields,
+		Footer: discord.GetFooter(),
 	}
+
+	if tn.URL != "" {
+		embedData.Thumbnail = tn
+	}
+
 	return discord.Message{
 		Embeds: []discord.Embed{embedData},
 	}

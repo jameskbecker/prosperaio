@@ -114,9 +114,11 @@ func (t *task) add(form url.Values) (int, error) {
 	body := atcResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
 
-	if !body.Success || body.Errors != "" {
+	if !body.Success || body.Errors != "" || len(body.Cart.Products) < 1 {
 		return 0, errors.New("Error Adding to Cart")
 	}
+
+	t.thumbnailURL = body.Cart.Products[0].Cover.Medium.URL
 
 	return body.Qty, nil
 }

@@ -125,6 +125,7 @@ func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
 			Size:       size,
 			Monitor:    monitorDelay,
 			Retry:      retryDelay,
+			WebhookURL: getWebhookURL(),
 			Email:      email,
 			Proxy:      getProxy(),
 			Billing: wearestrap.Address{

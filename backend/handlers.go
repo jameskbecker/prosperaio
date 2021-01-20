@@ -77,6 +77,11 @@ func testProxies(data []string) {
 
 //Thought: maybe instead of extracting data in this func have a func that parses all setting data and sets global vars
 func testWebhookHandler() {
+	webhookURL := getWebhookURL()
+	discord.TestWebhook(webhookURL)
+}
+
+func getWebhookURL() string {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
 	data, err := loadCSV(path.Join(basedir, "settings.csv"), settingsFields)
@@ -91,7 +96,8 @@ func testWebhookHandler() {
 
 	if webhookURL == "" {
 		fmt.Println(log.Red + "Error: no webhook URL found in settings.csv" + log.Reset)
-		return
+		return ""
 	}
-	discord.TestWebhook(webhookURL)
+
+	return webhookURL
 }
