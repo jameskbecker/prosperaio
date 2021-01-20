@@ -77,7 +77,7 @@ func TestWebhook(url string) {
 		Color:     3642623,
 		Thumbnail: logo,
 		Fields:    testFields(),
-		Footer:    getFooter(),
+		Footer:    GetFooter(),
 	}
 
 	data := Message{
@@ -120,7 +120,8 @@ func testFields() []Field {
 	}
 }
 
-func getFooter() Footer {
+//GetFooter ...
+func GetFooter() Footer {
 	ts := time.Now().UTC()
 
 	return Footer{

@@ -3,6 +3,7 @@ package wearestrap
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	"../log"
 )
@@ -13,6 +14,8 @@ type Input struct {
 	Size       string
 	Email      string
 	Proxy      string
+	Monitor    time.Duration
+	Retry      time.Duration
 	Billing    Address
 }
 
@@ -33,6 +36,8 @@ type task struct {
 	baseURL    string
 	size       string
 	email      string
+	monitor    time.Duration
+	retry      time.Duration
 	billing    Address
 	pData      productData
 	log        log.Logger

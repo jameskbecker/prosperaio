@@ -123,6 +123,8 @@ func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
 		input := wearestrap.Input{
 			ProductURL: searchInput,
 			Size:       size,
+			Monitor:    monitorDelay,
+			Retry:      retryDelay,
 			Email:      email,
 			Proxy:      getProxy(),
 			Billing: wearestrap.Address{

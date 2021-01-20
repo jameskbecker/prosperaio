@@ -26,6 +26,8 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 		email:   i.Email,
 		billing: i.Billing,
 		id:      taskID,
+		monitor: i.Monitor,
+		retry:   i.Retry,
 		client:  &c,
 		pData:   productData{PID: "0000"},
 	}
@@ -54,14 +56,14 @@ func (t *task) cartProcess() {
 		body, err := t.getProductData()
 		if err != nil {
 			t.log.Error(err.Error())
-			time.Sleep(1000 * time.Millisecond)
+			time.Sleep(t.monitor)
 			continue
 		}
 
 		pData, err := t.parseProductData(body)
 		if err != nil {
 			t.log.Error("Product Data Not Found")
-			time.Sleep(1000 * time.Millisecond)
+			time.Sleep(t.monitor)
 			continue
 		}
 		pDataP = pData
@@ -154,7 +156,7 @@ func (t *task) webhookMessage(i webhookData) discord.Message {
 		Color:     3642623,
 		Thumbnail: logo,
 		Fields:    fields,
-		//Footer:    getFooter(),
+		Footer:    discord.GetFooter(),
 	}
 	return discord.Message{
 		Embeds: []discord.Embed{embedData},
