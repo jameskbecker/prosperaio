@@ -73,8 +73,8 @@ type TitleCounts struct {
 func UpdateTitle(a string, b *TitleCounts) {
 	title := []string{
 		"ProsperAIO v" + a,
-		"Carted: " + strconv.Itoa(b.Cart),
-		"Checkouts: " + strconv.Itoa(b.Checkout),
+		//"Carted: " + strconv.Itoa(b.Cart),
+		//"Checkouts: " + strconv.Itoa(b.Checkout),
 		"Proxies: " + strconv.Itoa(b.Proxy),
 	}
 	fmt.Print("\033]0;" + strings.Join(title, " | ") + "\007")
