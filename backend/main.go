@@ -12,6 +12,7 @@ import (
 	"./client"
 	"./discord"
 	"./log"
+	"github.com/fatih/color"
 )
 
 const version = "4.0.0 (ALPHA)"
@@ -34,11 +35,11 @@ func init() {
 	monitorDelay = time.Duration(m) * time.Millisecond
 	retryDelay = time.Duration(r) * time.Millisecond
 
-	fmt.Println(logo())
-	fmt.Println(log.Bold + "Welcome to ProsperAIO!" + log.Reset)
-	fmt.Println("Expires: " + expiryDate)
-	fmt.Println("Monitor Delay: " + strconv.FormatInt(m, 10))
-	fmt.Println("Retry Delay: " + strconv.FormatInt(r, 10))
+	color.Cyan(logo())
+	color.White("Welcome to ProsperAIO!")
+	color.White("Expires: " + expiryDate)
+	color.White("Monitor Delay: " + strconv.FormatInt(m, 10))
+	color.White("Retry Delay: " + strconv.FormatInt(r, 10))
 }
 
 func main() {
@@ -58,7 +59,7 @@ func main() {
 			testWebhookHandler()
 			continue
 		default:
-			fmt.Println("Invalid Selection: " + strconv.Itoa(selection))
+			color.Red("Invalid Selection: " + strconv.Itoa(selection))
 			continue
 		}
 	}
@@ -78,7 +79,7 @@ func getSelection(prefix string) int {
 		}
 		IntSelection, err := strconv.Atoi(SSelection)
 		if err != nil {
-			fmt.Println("Invalid selection please try again.")
+			color.Red("Invalid selection please try again.")
 			continue
 		}
 
@@ -103,24 +104,24 @@ func loadDelays() (int64, int64) {
 	basedir := path.Join(homedir, "ProsperAIO")
 	records, err := loadCSV(path.Join(basedir, "settings.csv"), settingsFields)
 	if err != nil {
-		fmt.Println(log.Red + "Error: " + err.Error() + log.Reset)
+		color.Red("Error: " + err.Error())
 	}
 
 	if len(records) < 2 || len(records[0]) < 1 {
-		fmt.Println(log.Red + "Error: invalid settings.csv format" + log.Reset)
+		color.Red("Error: invalid settings.csv format")
 	}
 	monitorDelayStr := records[1][1]
 	retryDelayStr := records[1][2]
 
 	monitorDelay, err := strconv.Atoi(monitorDelayStr)
 	if err != nil {
-		fmt.Println(log.Red + "Error: invalid monitor delay. Using default.")
+		color.Red("Error: invalid monitor delay. Using default.")
 		monitorDelay = 1000
 	}
 
 	retryDelay, err := strconv.Atoi(retryDelayStr)
 	if err != nil {
-		fmt.Println(log.Red + "Error: invalid retry delay. Using default.")
+		color.Red("Error: invalid retry delay. Using default.")
 		retryDelay = 1000
 	}
 

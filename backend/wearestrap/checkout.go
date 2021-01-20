@@ -3,8 +3,6 @@ package wearestrap
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"html"
 	"net/http"
 	"strings"
 
@@ -28,15 +26,9 @@ func (t *task) modifyAccountAndAddress() error {
 	if err != nil {
 		return err
 	}
-	// bodyS, err := ioutil.ReadAll(res.Body)
-	// if err != nil {
-	// 	return err
-	// }
-	//fmt.Println(string(bodyS))
+
 	body := addressResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
-
-	fmt.Println(html.EscapeString(form))
 	return nil
 }
 

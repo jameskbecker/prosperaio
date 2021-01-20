@@ -1,17 +1,15 @@
 package main
 
 import (
-	"fmt"
-
-	"./log"
+	"github.com/fatih/color"
 )
 
 func line() string {
-	return log.Cyan + "-------------------------------------------------------------------------------------" + log.Reset
+	return "-------------------------------------------------------------------------------------"
 }
 
 func logo() string {
-	return line() + log.Cyan + `                                                                                
+	return line() + `                                                                                
     ██████╗ ██████╗  ██████╗ ███████╗██████╗ ███████╗██████╗  █████╗ ██╗ ██████╗   
     ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██║██╔═══██╗  
     ██████╔╝██████╔╝██║   ██║███████╗██████╔╝█████╗  ██████╔╝███████║██║██║   ██║  
@@ -23,8 +21,8 @@ func logo() string {
 }
 
 func mainMenu() {
-	fmt.Println(line() + log.Bold + `
-Main Menu` + log.Reset + `
+	color.Cyan(line())
+	color.White(`Main Menu
 0. Run Tasks
 1. Load Proxies
 2. Test Webhook`)

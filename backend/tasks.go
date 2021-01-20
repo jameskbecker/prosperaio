@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"./log"
 	"./wearestrap"
+	"github.com/fatih/color"
 )
 
 func getTaskCount(data [][]string) map[string]int {
@@ -30,7 +30,7 @@ func getTaskCount(data [][]string) map[string]int {
 }
 
 func getSliceSelection(title string, taskPaths []string) (string, error) {
-	fmt.Println(line() + log.Bold + "\n" + title + log.Reset)
+	fmt.Println(line() + "\n" + title)
 	for i, v := range taskPaths {
 		fmt.Println(strconv.Itoa(i) + ". " + v)
 	}
@@ -48,7 +48,8 @@ func taskMenu(data map[string]int) (selection string) {
 	options := make(map[int]string)
 	taskCount := 0
 
-	fmt.Println(line() + log.Bold + "\nTask Menu" + log.Reset)
+	color.Cyan(line())
+	color.White("\nTask Menu")
 
 	// i := 0
 	// for site, v := range data {
@@ -79,7 +80,7 @@ func parseMenuSelection(tasks [][]string) {
 	for {
 		taskCount := getTaskCount(tasks)
 		selection := taskMenu(taskCount)
-		fmt.Println(log.Bold + "Task Log" + log.Reset)
+		fmt.Println("Task Log")
 		switch selection {
 		case "all":
 			for i, row := range tasks[1:] {
@@ -88,7 +89,7 @@ func parseMenuSelection(tasks [][]string) {
 			}
 			break
 		default:
-			fmt.Println(log.Red + "Error: unexpected selection value" + log.Reset)
+			color.Red("Error: unexpected selection value")
 			continue
 		}
 		break

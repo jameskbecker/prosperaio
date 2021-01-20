@@ -5,31 +5,33 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
 )
 
-//Reset ...
-const Reset = "\u001b[0m"
+// //Reset ...
+// var Reset = strconv.Itoa(int(color.Reset))
 
-//Red ...
-const Red = Reset + "\u001b[31m"
+// //Red ...
+// var Red = Reset + "\u001b[32m"
 
-//Green ...
-const Green = Reset + "\u001b[32m"
+// //Green ...
+// var Green = Reset + "\u001b[32m"
 
-//Yellow ...
-const Yellow = Reset + "\u001b[33m"
+// //Yellow ...
+// var Yellow = Reset + "\u001b[33m"
 
-//Blue ...
-const Blue = Reset + "\u001b[34m"
+// //Blue ...
+// var Blue = Reset + "\u001b[34m"
 
-//Magenta ...
-const Magenta = Reset + "\u001b[35m"
+// //Magenta ...
+// var Magenta = Reset + "\u001b[35m"
 
-//Cyan ...
-const Cyan = Reset + "\u001b[36m"
+// //Cyan ...
+// var Cyan = Reset + "\x1b[36m"
 
-//Bold ...
-const Bold = Reset + "\u001b[1m"
+// //Bold ...
+// var Bold = Reset + "\u001b[1m"
 
 //Logger ...
 type Logger struct {
@@ -40,28 +42,28 @@ type Logger struct {
 func (l *Logger) Info(m string) {
 	ts := time.Now()
 	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
-	fmt.Println(fTS + Green + l.Prefix + m + Reset)
+	color.Green(fTS + l.Prefix + m)
 }
 
 //Warn ...
 func (l *Logger) Warn(m string) {
 	ts := time.Now()
 	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
-	fmt.Println(fTS + Yellow + l.Prefix + m + Reset)
+	color.Yellow(fTS + l.Prefix + m)
 }
 
 //Debug ...
 func (l *Logger) Debug(m string) {
 	ts := time.Now()
 	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
-	fmt.Println(fTS + Blue + l.Prefix + m + Reset)
+	color.Blue(fTS + l.Prefix + m)
 }
 
 //Error ...
 func (l *Logger) Error(m string) {
 	ts := time.Now()
 	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
-	fmt.Println(fTS + Red + l.Prefix + m + Reset)
+	color.Red(fTS + l.Prefix + m)
 }
 
 //TitleCounts ...

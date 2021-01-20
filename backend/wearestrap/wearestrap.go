@@ -44,9 +44,9 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	t.log.Debug("Starting Task")
 
 	t.cartProcess()
-	//t.checkoutProcess()
+	t.checkoutProcess()
 
-	//discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	discord.PostWebhook(i.WebhookURL, t.webhookMessage())
 	wg.Done()
 }
 
@@ -91,32 +91,40 @@ func (t *task) cartProcess() {
 
 func (t *task) checkoutProcess() {
 	t.log.Warn("Checking out")
-
-	t.log.Debug("Getting Checkout Token")
-	err := t.getToken()
-	if err != nil {
-		t.log.Error(err.Error())
-		return
+	for {
+		t.log.Debug("Getting Checkout Token")
+		err := t.getToken()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
+		break
 	}
+	for {
+		t.log.Debug("Submitting Account and Address")
+		err := t.modifyAccountAndAddress()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
+		t.log.Debug("Accepting GDPR")
+		err = t.acceptGDPR()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
 
-	t.log.Debug("Submitting Account and Address")
-	err = t.modifyAccountAndAddress()
-	if err != nil {
-		t.log.Error(err.Error())
-		return
-	}
-	t.log.Debug("Accepting GDPR")
-	err = t.acceptGDPR()
-	if err != nil {
-		t.log.Error(err.Error())
-		return
-	}
-
-	t.log.Debug("Accepting T&S")
-	err = t.acceptTerms()
-	if err != nil {
-		t.log.Error(err.Error())
-		return
+		t.log.Debug("Accepting T&S")
+		err = t.acceptTerms()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
+		break
 	}
 
 	checkoutURL, err := t.getPPURL()
