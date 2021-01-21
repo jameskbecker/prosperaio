@@ -3,11 +3,49 @@ package wearestrap
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+func (t *task) verifyCart() error {
+	form := t.atcSS().Encode()
+	url := t.baseURL + "/es/pedido"
+	req, err := http.NewRequest("POST", url, strings.NewReader(form))
+	if err != nil {
+		return err
+	}
+
+	for _, v := range defaultHeaders(t.baseURL) {
+		req.Header.Set(v[0], v[1])
+	}
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
+
+	t.client.Do(req)
+
+	return nil
+}
+
+func (t *task) getPaymentAndShippingBlocks() error {
+	form := paymentAndShipping(t.staticToken).Encode()
+	url := t.baseURL + "/es/pedido"
+	req, err := http.NewRequest("POST", url, strings.NewReader(form))
+	if err != nil {
+		return err
+	}
+
+	for _, v := range defaultHeaders(t.baseURL) {
+		req.Header.Set(v[0], v[1])
+	}
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
+
+	t.client.Do(req)
+
+	return nil
+}
 
 func (t *task) modifyAccountAndAddress() error {
 	url := t.baseURL + "/es/pedido?modifyAccountAndAddress"
@@ -29,6 +67,19 @@ func (t *task) modifyAccountAndAddress() error {
 
 	body := addressResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
+
+	sto := body.Account.NewStaticToken
+	to := body.Account.NewToken
+	if sto != "" {
+		t.log.Debug("New STo: " + sto)
+		t.staticToken = sto
+	}
+
+	if to != "" {
+		t.log.Debug("New STo: " + to)
+		t.staticToken = to
+	}
+
 	return nil
 }
 
@@ -71,10 +122,46 @@ func (t *task) getToken() error {
 	return nil
 }
 
+func (t *task) checkEmailReq() error {
+	form := checkEmail(t.email, t.token).Encode()
+	url := t.baseURL + "/es/pedido"
+	req, err := http.NewRequest("POST", url, strings.NewReader(form))
+	if err != nil {
+		return err
+	}
+
+	for _, v := range defaultHeaders(t.baseURL) {
+		req.Header.Set(v[0], v[1])
+	}
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
+
+	t.client.Do(req)
+
+	return nil
+}
+
 //might be apple to add this to modify acc and address
 func (t *task) acceptGDPR() error {
 	form := gdpr(t.staticToken).Encode()
 	url := t.baseURL + "/es/pedido"
+	req, err := http.NewRequest("POST", url, strings.NewReader(form))
+	if err != nil {
+		return err
+	}
+
+	for _, v := range defaultHeaders(t.baseURL) {
+		req.Header.Set(v[0], v[1])
+	}
+	req.Header.Set("referer", t.baseURL+"/es/pedido")
+
+	t.client.Do(req)
+
+	return nil
+}
+
+func (t *task) selectPaymentMethod() error {
+	form := payment(t.staticToken).Encode()
+	url := t.baseURL + "/es/pedido?selectPaymentOption"
 	req, err := http.NewRequest("POST", url, strings.NewReader(form))
 	if err != nil {
 		return err
@@ -109,8 +196,8 @@ func (t *task) acceptTerms() error {
 }
 
 func (t *task) getPPURL() (string, error) {
-	url := t.baseURL + "/es/module/paypal/ecInit?credit_card=0&getToken=1"
-	req, err := http.NewRequest("GET", url, nil)
+	uri := t.baseURL + "/es/module/paypal/ecInit?credit_card=0&getToken=1"
+	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return "", err
 	}
@@ -138,5 +225,13 @@ func (t *task) getPPURL() (string, error) {
 		return "", errors.New("Error getting PayPal Token")
 	}
 
-	return "https://www.paypal.com/checkoutnow?token=" + token, nil
+	cURL, _ := url.Parse("https://www.wearestrap.com/")
+	fmt.Printf("%+v\n", t.client.Jar.Cookies(cURL))
+	qs := url.Values{}
+	qs.Set("token", token)
+	qs.Set("env", "production")
+	qs.Set("sdkMeta", "eyJ1cmwiOiJodHRwczovL3d3dy5wYXlwYWxvYmplY3RzLmNvbS9hcGkvY2hlY2tvdXQubWluLmpzIn0=")
+	qs.Set("xcomponent", "1")
+
+	return "https://www.paypal.com/checkoutnow?" + qs.Encode(), nil
 }

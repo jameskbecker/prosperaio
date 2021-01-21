@@ -87,6 +87,28 @@ func (t *task) cartProcess() {
 	}
 	qtyS := strconv.Itoa(qtyP)
 	t.log.Info("Successfully added " + qtyS + " item(s) to cart!")
+
+	for {
+		t.log.Warn("Verifying ATC")
+		err := t.verifyCart()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
+		break
+	}
+
+	for {
+		t.log.Warn("Getting Blocks")
+		err := t.getPaymentAndShippingBlocks()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
+		break
+	}
 }
 
 func (t *task) checkoutProcess() {
@@ -109,6 +131,15 @@ func (t *task) checkoutProcess() {
 			time.Sleep(t.retry)
 			continue
 		}
+
+		t.log.Debug("Checking Email")
+		err = t.checkEmailReq()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retry)
+			continue
+		}
+
 		t.log.Debug("Accepting GDPR")
 		err = t.acceptGDPR()
 		if err != nil {
@@ -161,10 +192,14 @@ func defaultHeaders(baseURL string) [][]string {
 
 func (t *task) webhookMessage() discord.Message {
 	tn := discord.Image{URL: t.thumbnailURL}
+	size := "N/A"
+	if t.size != "" {
+		size = t.size
+	}
 	fields := []discord.Field{
 		discord.Field{Name: "Product", Value: t.pData.Name, Inline: false},
 		discord.Field{Name: "Site", Value: "wearestrap", Inline: true},
-		discord.Field{Name: "Size", Value: t.size, Inline: true},
+		discord.Field{Name: "Size", Value: size, Inline: true},
 		discord.Field{Name: "Checkout Link", Value: "[Click Here](" + t.checkoutURL + ")", Inline: true},
 	}
 

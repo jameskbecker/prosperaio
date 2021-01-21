@@ -67,6 +67,7 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 		return pData, errors.New("Token Not Found")
 	}
 	pData.Token = token
+	t.staticToken = token
 
 	PIDMatch := doc.Find(`input[name="id_product"],[id="product_page_product_id"]`)
 	PID, exists := PIDMatch.Attr("value")

@@ -7,10 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-
-	"./demandware"
 )
 
 func getDirPaths(dir string, ext string) []string {
@@ -85,94 +82,94 @@ func loadTXT(path string) ([]byte, error) {
 	return bData, nil
 }
 
-func dwTask(columns []string) (demandware.Input, error) {
-	billingAdd := demandware.Address{
-		Title:       columns[4],
-		FirstName:   columns[5],
-		LastName:    columns[6],
-		PostalCode:  columns[7],
-		City:        columns[8],
-		Street:      columns[9],
-		Suite:       columns[10],
-		Address1:    columns[11],
-		Address2:    columns[12],
-		CountryCode: columns[13],
-	}
+// func dwTask(columns []string) (demandware.Input, error) {
+// 	billingAdd := demandware.Address{
+// 		Title:       columns[4],
+// 		FirstName:   columns[5],
+// 		LastName:    columns[6],
+// 		PostalCode:  columns[7],
+// 		City:        columns[8],
+// 		Street:      columns[9],
+// 		Suite:       columns[10],
+// 		Address1:    columns[11],
+// 		Address2:    columns[12],
+// 		CountryCode: columns[13],
+// 	}
 
-	shippingAdd := demandware.Address{
-		Title:       columns[14],
-		FirstName:   columns[15],
-		LastName:    columns[16],
-		PostalCode:  columns[17],
-		City:        columns[18],
-		Street:      columns[19],
-		Suite:       columns[20],
-		Address1:    columns[21],
-		Address2:    columns[22],
-		CountryCode: columns[23],
-	}
+// 	shippingAdd := demandware.Address{
+// 		Title:       columns[14],
+// 		FirstName:   columns[15],
+// 		LastName:    columns[16],
+// 		PostalCode:  columns[17],
+// 		City:        columns[18],
+// 		Street:      columns[19],
+// 		Suite:       columns[20],
+// 		Address1:    columns[21],
+// 		Address2:    columns[22],
+// 		CountryCode: columns[23],
+// 	}
 
-	task := demandware.Input{
-		Site:       columns[0],
-		Mode:       columns[1],
-		ProductURL: columns[2],
-		Size:       columns[3],
-		Profile: demandware.Profile{
-			Shipping: shippingAdd,
-			Billing:  billingAdd,
-			Email:    columns[24],
-			Phone:    columns[25],
-			Payment: demandware.Payment{
-				Method: columns[26],
-			},
-		},
-	}
+// 	task := demandware.Input{
+// 		Site:       columns[0],
+// 		Mode:       columns[1],
+// 		ProductURL: columns[2],
+// 		Size:       columns[3],
+// 		Profile: demandware.Profile{
+// 			Shipping: shippingAdd,
+// 			Billing:  billingAdd,
+// 			Email:    columns[24],
+// 			Phone:    columns[25],
+// 			Payment: demandware.Payment{
+// 				Method: columns[26],
+// 			},
+// 		},
+// 	}
 
-	return task, nil
+// 	return task, nil
 
-}
+// }
 
-func checkDWHeaders(columns []string) [][]string {
-	errs := [][]string{}
+// func checkDWHeaders(columns []string) [][]string {
+// 	errs := [][]string{}
 
-	headers := dwHeaders()
-	for i, v := range columns {
-		if v != headers[i] {
-			errs = append(errs, []string{strconv.Itoa(i), v})
-		}
-	}
+// 	headers := dwHeaders()
+// 	for i, v := range columns {
+// 		if v != headers[i] {
+// 			errs = append(errs, []string{strconv.Itoa(i), v})
+// 		}
+// 	}
 
-	return errs
-}
+// 	return errs
+// }
 
-func dwHeaders() []string {
-	return []string{
-		"Site",
-		"Mode",
-		"Url / SKU",
-		"Size",
-		"Billing Title",
-		"Billing First",
-		"Billing Last",
-		"Billing Zip",
-		"Billing City",
-		"Billing Street",
-		"Billing Suite",
-		"Billing Address 1",
-		"Billing Address2",
-		"Billing Country",
-		"Shipping Title",
-		"Shipping First",
-		"Shipping Last",
-		"Shipping Zip",
-		"Shipping City",
-		"Shipping Street",
-		"Shipping Suite",
-		"Shipping Address 1",
-		"Shipping Address 2",
-		"Shipping Country",
-		"Email",
-		"Phone",
-		"Payment Method",
-	}
-}
+// func dwHeaders() []string {
+// 	return []string{
+// 		"Site",
+// 		"Mode",
+// 		"Url / SKU",
+// 		"Size",
+// 		"Billing Title",
+// 		"Billing First",
+// 		"Billing Last",
+// 		"Billing Zip",
+// 		"Billing City",
+// 		"Billing Street",
+// 		"Billing Suite",
+// 		"Billing Address 1",
+// 		"Billing Address2",
+// 		"Billing Country",
+// 		"Shipping Title",
+// 		"Shipping First",
+// 		"Shipping Last",
+// 		"Shipping Zip",
+// 		"Shipping City",
+// 		"Shipping Street",
+// 		"Shipping Suite",
+// 		"Shipping Address 1",
+// 		"Shipping Address 2",
+// 		"Shipping Country",
+// 		"Email",
+// 		"Phone",
+// 		"Payment Method",
+// 	}
+// }

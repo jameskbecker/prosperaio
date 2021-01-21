@@ -64,12 +64,34 @@ func account(email string, token string) url.Values {
 	return form
 }
 
-func checkEmail(token string) url.Values {
+func (t *task) atcSS() url.Values {
+	form := url.Values{}
+
+	form.Set("action", "add-to-cart")
+	form.Set("id_product", t.pData.PID)
+	form.Set("id_product_attribute", "")
+	form.Set("id_customization", "0")
+
+	return form
+
+}
+
+func paymentAndShipping(staticToken string) url.Values {
+	form := url.Values{}
+
+	form.Set("ajax_request", "1")
+	form.Set("action", "getShippingAndPaymentBlocks")
+	form.Set("token", staticToken)
+
+	return form
+}
+
+func checkEmail(email string, token string) url.Values {
 	form := url.Values{}
 
 	form.Set("ajax_request", "1")
 	form.Set("action", "checkEmail")
-	form.Set("email", "johnsmith@gmail.com")
+	form.Set("email", email)
 	form.Set("token", token)
 
 	return form
@@ -94,6 +116,18 @@ func terms(staticToken string) url.Values {
 	form.Set("action", "modifyCheckboxOption")
 	form.Set("name", "conditions_to_approve[terms-and-conditions]")
 	form.Set("isChecked", "true")
+	form.Set("token", staticToken)
+
+	return form
+}
+
+func payment(staticToken string) url.Values {
+	form := url.Values{}
+
+	form.Set("optionId", "payment-option-2")
+	form.Set("payment_fee", "0")
+	form.Set("ajax_request", "1")
+	form.Set("action", "selectPaymentOption")
 	form.Set("token", staticToken)
 
 	return form

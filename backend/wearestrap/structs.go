@@ -82,8 +82,13 @@ type addressResponse struct {
 	EmptyCart     bool        `json:"emptyCart"`
 	IsVirtualCart bool        `json:"isVirtualCart"`
 	PurchaseError bool        `json:"minimalPurchaseError"`
-	Account       interface{} `json:"account"`
+	Account       accountRes  `json:"account"`
 	Invoice       interface{} `json:"invoice"`
+}
+
+type accountRes struct {
+	NewToken       string `json:"newToken"`
+	NewStaticToken string `json:"newStaticToken"`
 }
 
 type ppTokenResponse struct {
