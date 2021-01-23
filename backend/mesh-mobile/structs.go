@@ -1,4 +1,4 @@
-package mesh
+package meshmobile
 
 import (
 	"net/http"
