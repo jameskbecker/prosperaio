@@ -1,4 +1,4 @@
-package meshmobile
+package meshdesktop
 
 func (t *task) defaultHeaders() [][]string {
 	return [][]string{
