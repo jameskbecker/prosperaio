@@ -9,13 +9,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/manifoldco/promptui"
+
 	"./client"
 	"./discord"
 	"./log"
 	"github.com/fatih/color"
 )
 
-const version = "4.0.0 (ALPHA)"
+const version = "4.0.3 (ALPHA)"
 const taskFields = 14
 const settingsFields = 3
 
@@ -24,30 +26,34 @@ var proxies = []string{}
 var monitorDelay time.Duration
 var retryDelay time.Duration
 
+var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
+var print = color.New(color.FgWhite).PrintlnFunc()
+
 func init() {
 	const expiryDate = "28 Jan 2021 10:55 GMT"
 	expTime, _ := time.Parse("02 Jan 2006 15:04 MST", expiryDate)
 	if time.Until(expTime) < 0*time.Millisecond {
 		os.Exit(0)
 	}
+	promptui.IconInitial = ""
 	discord.SetPresence()
 	m, r := loadDelays()
 	monitorDelay = time.Duration(m) * time.Millisecond
 	retryDelay = time.Duration(r) * time.Millisecond
 
 	color.Cyan(logo())
-	color.White("Welcome to ProsperAIO!")
-	color.White("Expires: " + expiryDate)
-	color.White("Monitor Delay: " + strconv.FormatInt(m, 10))
-	color.White("Retry Delay: " + strconv.FormatInt(r, 10))
+	printBold("Welcome to ProsperAIO!")
+	print("Expires: " + expiryDate)
+	print("Monitor Delay: " + strconv.FormatInt(m, 10))
+	print("Retry Delay: " + strconv.FormatInt(r, 10))
 }
 
 func main() {
 	counters := log.TitleCounts{}
 	log.UpdateTitle(version, &counters)
 	for {
-		mainMenu()
-		selection := getSelection("")
+		prompt := mainMenu()
+		selection, _, _ := prompt.Run()
 		switch selection {
 		case 0:
 			loadTasksHandler()

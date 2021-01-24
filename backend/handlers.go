@@ -10,21 +10,26 @@ import (
 	"./discord"
 	"./log"
 	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 )
 
+//TODO: merge prompt section with proxy handler as almost identical
 func loadTasksHandler() {
 	tasks := [][]string{}
+	color.Cyan(line())
 	for {
 		homedir, _ := os.UserHomeDir()
 		taskFolder := path.Join(homedir, "ProsperAIO", "tasks")
 		taskPaths := getDirPaths(taskFolder, ".csv")
-		selectedFile, err := getSliceSelection("Select Task File", taskPaths)
-		if err != nil {
-			color.Red(err.Error())
-			continue
+		prompt := promptui.Select{
+			Label:    "Select Task File",
+			Items:    taskPaths,
+			Stdout:   &bellSkipper{},
+			HideHelp: true,
 		}
 
-		data, err := loadCSV(path.Join(taskFolder, selectedFile), taskFields)
+		i, _, _ := prompt.Run()
+		data, err := loadCSV(path.Join(taskFolder, taskPaths[i]), taskFields)
 		if err != nil {
 			color.Red("Error: " + err.Error())
 			continue
@@ -37,17 +42,20 @@ func loadTasksHandler() {
 }
 
 func loadProxiesHandler(counters *log.TitleCounts) {
+	color.Cyan(line())
 	for {
 		homedir, _ := os.UserHomeDir()
-		taskFolder := path.Join(homedir, "ProsperAIO", "proxies")
-		taskPaths := getDirPaths(taskFolder, ".txt")
-		selectedFile, err := getSliceSelection("Select Proxy File", taskPaths)
-		if err != nil {
-			color.Red(err.Error())
-			continue
+		proxyFolder := path.Join(homedir, "ProsperAIO", "proxies")
+		proxyPaths := getDirPaths(proxyFolder, ".txt")
+		prompt := promptui.Select{
+			Label:    "Select Proxy File",
+			Items:    proxyPaths,
+			Stdout:   &bellSkipper{},
+			HideHelp: true,
 		}
 
-		sPath := path.Join(taskFolder, selectedFile)
+		i, _, _ := prompt.Run()
+		sPath := path.Join(proxyFolder, proxyPaths[i])
 		bData, _ := loadTXT(sPath)
 		data := strings.FieldsFunc(string(bData), func(r rune) bool {
 			return string(r) == "\n" || string(r) == "\r"
@@ -56,23 +64,28 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 		counters.Proxy = len(data)
 		log.UpdateTitle(version, counters)
 
-		testP := getSelection("Test Proxies? (Y/N) ")
-		if testP == 1 {
-			testProxies(data)
+		prompt = promptui.Select{
+			Label:    "Test Proxies?",
+			Items:    []string{"Yes", "No"},
+			HideHelp: true,
+			Stdout:   &bellSkipper{},
+		}
+		color.Cyan(line())
+		skipTest, _, _ := prompt.Run()
+		if skipTest == 0 {
+			color.Cyan(line())
+			printBold("Proxy Tester")
+			proxyWG := sync.WaitGroup{}
+			for _, v := range data {
+				proxyWG.Add(1)
+				proxies = append(proxies, v)
+				go client.TestProxy(v, &proxyWG)
+			}
+			proxyWG.Wait()
 		}
 
 		break
 	}
-}
-func testProxies(data []string) {
-	color.White("Proxy Tester")
-	proxyWG := sync.WaitGroup{}
-	for _, v := range data {
-		proxyWG.Add(1)
-		proxies = append(proxies, v)
-		go client.TestProxy(v, &proxyWG)
-	}
-	proxyWG.Wait()
 }
 
 //Thought: maybe instead of extracting data in this func have a func that parses all setting data and sets global vars

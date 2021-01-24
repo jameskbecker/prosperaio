@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -41,36 +42,36 @@ func FormatProxy(proxy string) *url.URL {
 func TestProxy(data string, wg *sync.WaitGroup) {
 	c, err := Create(data)
 	if err != nil {
-		color.Red("Failed(E1) - " + data)
+		color.Red(fmt.Sprintf("%-25s", "FAILED(E1)") + data)
 		wg.Done()
 		return
 	}
 
 	req, err := http.NewRequest("GET", "https://wearestrap.com/es/", nil)
 	if err != nil {
-		color.Red("Failed(E2) - " + data)
+		color.Red(fmt.Sprintf("%-25s", "FAILED(E2)") + data)
 		wg.Done()
 		return
 	}
 
 	res, err := c.Do(req)
 	if err != nil {
-		color.Red("Bad - " + data)
+		color.Red(fmt.Sprintf("%-25s", "BAD") + data)
 		wg.Done()
 		return
 	}
 
 	if res.StatusCode < 200 { //1XX
-		color.Yellow(res.Status + " - " + data)
+		color.Yellow(fmt.Sprintf("%-25s", res.Status) + data)
 
 	} else if res.StatusCode < 300 { //2XX
-		color.Green(res.Status + " - " + data)
+		color.Green(fmt.Sprintf("%-25s", res.Status) + data)
 
 	} else if res.StatusCode < 400 { //3XX
-		color.Yellow(res.Status + " - " + data)
+		color.Yellow(fmt.Sprintf("%-25s", res.Status) + data)
 
 	} else {
-		color.Red(res.Status + " - " + data)
+		color.Red(fmt.Sprintf("%-25s", res.Status) + data)
 	}
 
 	wg.Done()

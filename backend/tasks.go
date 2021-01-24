@@ -1,11 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/manifoldco/promptui"
 
 	"./wearestrap"
 	"github.com/fatih/color"
@@ -29,27 +30,27 @@ func getTaskCount(data [][]string) map[string]int {
 	return output
 }
 
-func getSliceSelection(title string, taskPaths []string) (string, error) {
-	fmt.Println(line() + "\n" + title)
-	for i, v := range taskPaths {
-		fmt.Println(strconv.Itoa(i) + ". " + v)
-	}
+// func getSliceSelection(title string, paths []string) (string, error) {
+// 	color.Cyan(line())
+// 	prompt := promptui.Select{
+// 		Label:    title,
+// 		Items:    paths,
+// 		Stdout:   &bellSkipper{},
+// 		HideHelp: true,
+// 	}
 
-	index := getSelection("")
+// 	index, _, _ := prompt.Run()
 
-	if index > len(taskPaths)-1 || index < 0 {
-		return "", errors.New("Out of Bounds")
-	}
+// 	if index > len(paths)-1 || index < 0 {
+// 		return "", errors.New("Out of Bounds")
+// 	}
 
-	return taskPaths[index], nil
-}
+// 	return paths[index], nil
+// }
 
 func taskMenu(data map[string]int) (selection string) {
 	options := make(map[int]string)
 	taskCount := 0
-
-	color.Cyan(line())
-	color.White("\nTask Menu")
 
 	// i := 0
 	// for site, v := range data {
@@ -63,13 +64,17 @@ func taskMenu(data map[string]int) (selection string) {
 	for _, v := range data {
 		taskCount += v
 	}
-
-	fmt.Println(strconv.Itoa(i) + ". Run all Tasks (" + strconv.Itoa(taskCount) + ")")
+	prompt := promptui.Select{
+		Label:    "Task Menu",
+		Items:    []string{"Run all Tasks (" + strconv.Itoa(taskCount) + ")"},
+		HideHelp: true,
+		Stdout:   &bellSkipper{},
+	}
 	options[i] = "all"
 
-	index := getSelection("")
+	color.Cyan(line())
+	index, _, _ := prompt.Run()
 
-	fmt.Println(line())
 	return options[index]
 
 }

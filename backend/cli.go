@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 )
 
 func line() string {
@@ -21,10 +22,14 @@ func logo() string {
 ` + line()
 }
 
-func mainMenu() {
+func mainMenu() promptui.Select {
 	color.Cyan(line())
-	color.White(`Main Menu
-0. Run Tasks
-1. Load Proxies
-2. Test Webhook`)
+	prompt := promptui.Select{
+		Label:    "Main Menu",
+		HideHelp: true,
+		Stdout:   &bellSkipper{},
+		Items:    []string{"Run Tasks", "Load Proxies", "Test Webhook"},
+	}
+
+	return prompt
 }
