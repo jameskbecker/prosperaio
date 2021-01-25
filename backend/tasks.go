@@ -131,7 +131,12 @@ func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
 				Phone:   phone,
 			},
 		}
-		wearestrap.Run(input, taskID, runningTasks)
+		go wearestrap.Run(input, taskID, runningTasks)
+		break
+
+	case "jd_desktop":
+		fmt.Println("Hello JD")
+		break
 
 	default:
 
