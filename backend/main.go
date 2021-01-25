@@ -52,8 +52,7 @@ func main() {
 	counters := log.TitleCounts{}
 	log.UpdateTitle(version, &counters)
 	for {
-		prompt := mainMenu()
-		selection, _, _ := prompt.Run()
+		selection, last := mainMenu()
 		switch selection {
 		case 0:
 			loadTasksHandler()
@@ -64,6 +63,9 @@ func main() {
 		case 2:
 			testWebhookHandler()
 			continue
+		case last:
+			os.Exit(0)
+			break
 		default:
 			color.Red("Invalid Selection: " + strconv.Itoa(selection))
 			continue

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,6 +15,7 @@ import (
 
 func getTaskCount(data [][]string) map[string]int {
 	output := map[string]int{
+		"jd_desktop":  0,
 		"onygo":       0,
 		"sneakavenue": 0,
 		"snipes-de":   0,
@@ -30,69 +32,54 @@ func getTaskCount(data [][]string) map[string]int {
 	return output
 }
 
-// func getSliceSelection(title string, paths []string) (string, error) {
-// 	color.Cyan(line())
-// 	prompt := promptui.Select{
-// 		Label:    title,
-// 		Items:    paths,
-// 		Stdout:   &bellSkipper{},
-// 		HideHelp: true,
-// 	}
-
-// 	index, _, _ := prompt.Run()
-
-// 	if index > len(paths)-1 || index < 0 {
-// 		return "", errors.New("Out of Bounds")
-// 	}
-
-// 	return paths[index], nil
-// }
-
-func taskMenu(data map[string]int) (selection string) {
-	options := make(map[int]string)
+func taskMenu(data map[string]int) (int, int) {
 	taskCount := 0
-
-	// i := 0
-	// for site, v := range data {
-	// 	fmt.Println(strconv.Itoa(i) + ". Run " + site + " Tasks (" + strconv.Itoa(v) + ")")
-	// 	options[i] = site
-	// 	taskCount += v
-	// 	i++
-	// }
-
-	i := 0
 	for _, v := range data {
 		taskCount += v
 	}
+
+	items := []string{
+		"Run All Tasks (" + strconv.Itoa(taskCount) + ")",
+		"Run JD Desktop Tasks (" + strconv.Itoa(data["jd_desktop"]) + ")",
+		//"Run Onygo Tasks (" + strconv.Itoa(data["onygo"]) + ")",
+		"Run SneakAvenue Tasks (" + strconv.Itoa(data["sneakavenue"]) + ")",
+		//"Run Snipes DE Tasks (" + strconv.Itoa(data["snipes-de"]) + ")",
+		"Run Wearestrap Tasks (" + strconv.Itoa(data["wearestrap"]) + ")",
+		"Exit",
+	}
+
 	prompt := promptui.Select{
 		Label:    "Task Menu",
-		Items:    []string{"Run all Tasks (" + strconv.Itoa(taskCount) + ")"},
+		Items:    items,
+		Size:     len(items),
 		HideHelp: true,
 		Stdout:   &bellSkipper{},
 	}
-	options[i] = "all"
 
-	color.Cyan(line())
-	index, _, _ := prompt.Run()
-
-	return options[index]
-
+	selection, _, _ := prompt.Run()
+	return selection, len(items) - 1
 }
 
 func parseMenuSelection(tasks [][]string) {
-
 	runningTasks := sync.WaitGroup{}
 	for {
-		taskCount := getTaskCount(tasks)
-		selection := taskMenu(taskCount)
-		fmt.Println("Task Log")
+		color.Cyan(line())
+		taskCounts := getTaskCount(tasks)
+		selection, last := taskMenu(taskCounts)
+
 		switch selection {
-		case "all":
+		case 0: //All
+			fmt.Println("Task Log")
 			for i, row := range tasks[1:] {
 				runningTasks.Add(1)
 				go startTask(row, i+1, &runningTasks)
 			}
 			break
+
+		case last:
+			os.Exit(0)
+			break
+
 		default:
 			color.Red("Error: unexpected selection value")
 			continue

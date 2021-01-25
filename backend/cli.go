@@ -22,14 +22,17 @@ func logo() string {
 ` + line()
 }
 
-func mainMenu() promptui.Select {
+func mainMenu() (int, int) {
 	color.Cyan(line())
+	items := []string{"Run Tasks", "Load Proxies", "Test Webhook", "Exit"}
 	prompt := promptui.Select{
 		Label:    "Main Menu",
 		HideHelp: true,
 		Stdout:   &bellSkipper{},
-		Items:    []string{"Run Tasks", "Load Proxies", "Test Webhook"},
+		Items:    items,
 	}
 
-	return prompt
+	selection, _, _ := prompt.Run()
+
+	return selection, len(items) - 1
 }

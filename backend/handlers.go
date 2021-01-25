@@ -21,14 +21,20 @@ func loadTasksHandler() {
 		homedir, _ := os.UserHomeDir()
 		taskFolder := path.Join(homedir, "ProsperAIO", "tasks")
 		taskPaths := getDirPaths(taskFolder, ".csv")
+
+		items := append(taskPaths, "Exit")
 		prompt := promptui.Select{
 			Label:    "Select Task File",
-			Items:    taskPaths,
+			Items:    items,
 			Stdout:   &bellSkipper{},
 			HideHelp: true,
 		}
 
 		i, _, _ := prompt.Run()
+		if i == len(items)-1 {
+			os.Exit(0)
+		}
+
 		data, err := loadCSV(path.Join(taskFolder, taskPaths[i]), taskFields)
 		if err != nil {
 			color.Red("Error: " + err.Error())
