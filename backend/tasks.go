@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -90,7 +89,6 @@ func parseMenuSelection(tasks [][]string) {
 	}
 
 	runningTasks.Wait()
-	fmt.Println("hello")
 }
 
 func startTask(data []string, taskID int) {
