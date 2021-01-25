@@ -70,6 +70,7 @@ func main() {
 			color.Red("Invalid Selection: " + strconv.Itoa(selection))
 			continue
 		}
+		break
 	}
 
 }
