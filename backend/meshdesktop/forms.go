@@ -1,6 +1,9 @@
 package meshdesktop
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"net/url"
+)
 
 func (t *task) addressBookAddForm() ([]byte, error) {
 	form := address{
@@ -21,4 +24,12 @@ func (t *task) addressBookAddForm() ([]byte, error) {
 	}
 
 	return formBytes, nil
+}
+
+func paymentV3Form() string {
+	form := url.Values{}
+	form.Set("paySelect", "card")
+	form.Set("isSafari", "true")
+
+	return form.Encode()
 }

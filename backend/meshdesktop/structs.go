@@ -3,13 +3,28 @@ package meshdesktop
 import (
 	"net/http"
 	"net/url"
+	"time"
+
+	"../log"
 )
+
+//Input ...
+type Input struct {
+	ErrorDelay   time.Duration
+	MonitorDelay time.Duration
+	MonitorInput string
+	Size         string
+	Proxy        string
+}
 
 type task struct {
 	client     *http.Client
 	productURL *url.URL
+	log        log.Logger
+	id         int
+	size       string
 	baseURL    string
-	sku        string
+	sku        int
 	useragent  string
 }
 

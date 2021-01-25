@@ -9,9 +9,12 @@ import (
 
 	"github.com/manifoldco/promptui"
 
+	"./meshdesktop"
 	"./wearestrap"
 	"github.com/fatih/color"
 )
+
+var runningTasks = sync.WaitGroup{}
 
 func getTaskCount(data [][]string) map[string]int {
 	output := map[string]int{
@@ -61,18 +64,17 @@ func taskMenu(data map[string]int) (int, int) {
 }
 
 func parseMenuSelection(tasks [][]string) {
-	runningTasks := sync.WaitGroup{}
 	for {
 		color.Cyan(line())
 		taskCounts := getTaskCount(tasks)
 		selection, last := taskMenu(taskCounts)
-
 		switch selection {
 		case 0: //All
-			fmt.Println("Task Log")
+			color.Cyan(line())
+			printBold("Task Log")
 			for i, row := range tasks[1:] {
 				runningTasks.Add(1)
-				go startTask(row, i+1, &runningTasks)
+				startTask(row, i+1)
 			}
 			break
 
@@ -88,9 +90,10 @@ func parseMenuSelection(tasks [][]string) {
 	}
 
 	runningTasks.Wait()
+	fmt.Println("hello")
 }
 
-func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
+func startTask(data []string, taskID int) {
 	site := data[0]
 	//mode := data[1]
 	searchInput := data[2]
@@ -131,11 +134,17 @@ func startTask(data []string, taskID int, runningTasks *sync.WaitGroup) {
 				Phone:   phone,
 			},
 		}
-		go wearestrap.Run(input, taskID, runningTasks)
+		go wearestrap.Run(input, taskID, &runningTasks)
 		break
 
 	case "jd_desktop":
-		fmt.Println("Hello JD")
+		input := meshdesktop.Input{
+			MonitorInput: searchInput,
+			MonitorDelay: monitorDelay,
+			ErrorDelay:   retryDelay,
+			Size:         size,
+		}
+		go meshdesktop.Run(input, taskID, &runningTasks)
 		break
 
 	default:
