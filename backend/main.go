@@ -56,7 +56,7 @@ func main() {
 		switch selection {
 		case 0:
 			loadTasksHandler()
-			continue
+			break
 		case 1:
 			loadProxiesHandler(&counters)
 			continue
