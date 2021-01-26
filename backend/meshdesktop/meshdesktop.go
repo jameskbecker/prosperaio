@@ -19,22 +19,42 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 
 	}
 	splitPath := strings.Split(pURL.Path, "/")
-	sku, err := strconv.Atoi(splitPath[3])
+	plu, err := strconv.Atoi(splitPath[3])
 	if err != nil {
 
 	}
 	t := task{
-		size:   i.Size,
-		id:     taskID,
-		sku:    sku,
-		client: &c,
+		productURL: pURL,
+		baseURL:    "https://" + pURL.Hostname(),
+		size:       i.Size,
+		id:         taskID,
+		plu:        plu,
+		client:     &c,
 	}
+	//t.sku = strconv.Itoa(t.plu)
 	t.updatePrefix()
 	t.log.Debug("Starting Task")
+	err = t.getStockData()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	t.log.Debug("SKU: " + t.sku)
+	t.log.Debug("Price: " + t.price)
+	err = t.add()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+
+	t.log.Warn("Checking Out")
+	err = t.initGuest()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+
 	wg.Done()
 }
 func (t *task) updatePrefix() {
 	tID := fmt.Sprintf("%04d", t.id)
-	prefix := "[" + tID + "] [jd_desktop] [" + t.size + "] [" + strconv.Itoa(t.sku) + "] "
+	prefix := "[" + tID + "] [jd_desktop] [" + t.size + "] "
 	t.log = log.Logger{Prefix: prefix}
 }

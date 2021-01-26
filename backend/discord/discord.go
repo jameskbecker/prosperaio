@@ -12,12 +12,20 @@ import (
 
 const version = "4.0.3 (ALPHA)"
 
+var timeout = 5000
+var attempts = 0
+
 // SetPresence sets the currently logged in user's presence via IPC
 func SetPresence() {
 	startTS := time.Now()
 	err := client.Login("648966990400061451")
 	if err != nil {
-		fmt.Println(err)
+		if attempts < 10 {
+			time.Sleep(time.Duration(timeout) * time.Millisecond)
+			timeout = timeout * 2
+			attempts++
+			SetPresence()
+		}
 		return
 	}
 
@@ -34,7 +42,13 @@ func SetPresence() {
 		},
 	})
 	if err != nil {
-		fmt.Println(err)
+		if attempts < 10 {
+			time.Sleep(time.Duration(timeout) * time.Millisecond)
+			timeout = timeout * 2
+			attempts++
+			SetPresence()
+		}
+		return
 	}
 }
 

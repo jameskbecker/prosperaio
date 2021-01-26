@@ -141,6 +141,7 @@ func startTask(data []string, taskID int) {
 			MonitorDelay: monitorDelay,
 			ErrorDelay:   retryDelay,
 			Size:         size,
+			Email:        email,
 		}
 		go meshdesktop.Run(input, taskID, &runningTasks)
 		break

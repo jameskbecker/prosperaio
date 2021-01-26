@@ -5,6 +5,20 @@ import (
 	"net/url"
 )
 
+func buildATCForm() ([]byte, error) {
+	return json.Marshal(atcForm{
+		Customisations:          false,
+		CartPosition:            nil,
+		RecaptchaResponse:       false,
+		CartProductNotification: nil,
+		QuantityToAdd:           1,
+	})
+}
+
+func guestForm(email string) []byte {
+	return []byte(`{"email":"` + email + `"}`)
+}
+
 func (t *task) addressBookAddForm() ([]byte, error) {
 	form := address{
 		SameDelivery: true,

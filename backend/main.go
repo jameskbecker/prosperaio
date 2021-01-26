@@ -36,7 +36,7 @@ func init() {
 		os.Exit(0)
 	}
 	promptui.IconInitial = ""
-	discord.SetPresence()
+
 	m, r := loadDelays()
 	monitorDelay = time.Duration(m) * time.Millisecond
 	retryDelay = time.Duration(r) * time.Millisecond
@@ -49,6 +49,7 @@ func init() {
 }
 
 func main() {
+	go discord.SetPresence()
 	counters := log.TitleCounts{}
 	log.UpdateTitle(version, &counters)
 	for {

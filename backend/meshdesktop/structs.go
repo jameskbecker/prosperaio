@@ -15,6 +15,7 @@ type Input struct {
 	MonitorInput string
 	Size         string
 	Proxy        string
+	Email        string
 }
 
 type task struct {
@@ -22,28 +23,36 @@ type task struct {
 	productURL *url.URL
 	log        log.Logger
 	id         int
+	email      string
 	size       string
 	baseURL    string
-	sku        int
+	plu        int
+	sku        string
+	price      string
 	useragent  string
 }
 
+//Using pointers to show type as null
 type atcForm struct {
-	Customisations          bool        `json:"customisations"`
-	CartPosition            interface{} `json:"cartPosition"`
-	RecaptchaResponse       bool        `json:"recaptchaResponse"`
-	CartProductNotification interface{} `json:"cartProductNotification"`
-	QuantityToAdd           int         `json:"quantityToAdd"`
+	Customisations          bool         `json:"customisations"`
+	CartPosition            *interface{} `json:"cartPosition"`
+	RecaptchaResponse       interface{}  `json:"recaptchaResponse"` // -> false or capRespString
+	CartProductNotification *interface{} `json:"cartProductNotification"`
+	QuantityToAdd           int          `json:"quantityToAdd"`
 }
 
-type apiResponse struct {
-	ID       string `json:"ID"`
-	Href     string `json:"href"`
-	Count    int    `json:"count"`
-	HasGuest bool   `json:"canCheckoutAsGuest"`
+type order struct {
+	ID              string       `json:"ID"`
+	Href            string       `json:"href"`
+	Count           int          `json:"count"`
+	HasGuest        bool         `json:"canCheckoutAsGuest"`
+	Ref             string       `json:"reference"`
+	Customer        *interface{} `json:"customer"`
+	BillingAddress  *interface{} `json:"billingAddress"`
+	DeliveryAddress *interface{} `json:"deliveryAddress"`
 }
 
-type guestResponse struct {
+type messageResponse struct {
 	Message string `json:"message"`
 }
 
@@ -71,4 +80,22 @@ type deliverySlot struct {
 
 type billingUpdate struct {
 	EditAddressID string `json:"editAddressID"`
+}
+
+type priceData struct {
+	PLU      string         `json:"plu"`
+	Name     string         `json:"description"`
+	Price    string         `json:"unitPrice"`
+	Variants []priceVariant `json:"variants"`
+}
+
+type priceVariant struct {
+	Name string `json:"name"`
+	UPC  string `json:"upc"`
+	SKU  string `json:"page_id_variant"`
+}
+
+type productData struct {
+	price string
+	sku   string
 }
