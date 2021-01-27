@@ -10,7 +10,7 @@ import (
 
 func (t *task) initGuest() error {
 	uri := "https://www.jdsports.co.uk/checkout/guest/"
-	form := guestForm(t.email)
+	form := guestForm(t.profile.Email)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (t *task) initGuest() error {
 
 func (t *task) addAddress() error {
 	path := "/myaccount/addressbook/add/"
-	form := addressBookAddForm()
+	form := addressBookAddForm(t.profile)
 	req, err := http.NewRequest("POST", t.baseURL+path, bytes.NewBuffer(form))
 	if err != nil {
 		return err

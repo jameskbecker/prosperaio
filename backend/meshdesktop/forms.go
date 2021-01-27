@@ -3,6 +3,8 @@ package meshdesktop
 import (
 	"encoding/json"
 	"net/url"
+
+	"../config"
 )
 
 func buildATCForm() ([]byte, error) {
@@ -19,19 +21,19 @@ func guestForm(email string) []byte {
 	return []byte(`{"email":"` + email + `"}`)
 }
 
-func addressBookAddForm() []byte {
+func addressBookAddForm(profile config.Profile) []byte {
 	form := address{
 		SameDelivery:       true,
 		Country:            "",
 		Locale:             "",
-		FirstName:          "",
-		LastName:           "",
-		Phone:              "",
-		Address1:           "",
-		Address2:           "",
-		Town:               "",
+		FirstName:          profile.Billing.FirstName,
+		LastName:           profile.Billing.LastName,
+		Phone:              profile.Phone,
+		Address1:           profile.Billing.Address1,
+		Address2:           profile.Billing.Address2,
+		Town:               profile.Billing.City,
 		County:             "",
-		Postcode:           "",
+		Postcode:           profile.Billing.PostCode,
 		AddressPredict:     "",
 		SetOnCart:          "deliveryAddressID",
 		AddressPredictflag: "false",

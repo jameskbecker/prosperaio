@@ -23,8 +23,8 @@ type task struct {
 	client     *http.Client
 	productURL *url.URL
 	log        log.Logger
+	profile    config.Profile
 	id         int
-	email      string
 	size       string
 	baseURL    string
 	plu        int

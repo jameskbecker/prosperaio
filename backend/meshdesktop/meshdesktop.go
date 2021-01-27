@@ -25,6 +25,7 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	}
 	t := task{
 		productURL: pURL,
+		profile:    i.Profile,
 		baseURL:    "https://" + pURL.Hostname(),
 		size:       i.Size,
 		id:         taskID,
@@ -55,6 +56,6 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 }
 func (t *task) updatePrefix() {
 	tID := fmt.Sprintf("%04d", t.id)
-	prefix := "[" + tID + "] [jd_desktop] [" + t.size + "] "
+	prefix := "[" + tID + "] [jd-gb_frontend] [" + t.size + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
