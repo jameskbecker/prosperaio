@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 
+	"../config"
 	"../log"
 )
 
@@ -12,10 +13,10 @@ import (
 type Input struct {
 	ErrorDelay   time.Duration
 	MonitorDelay time.Duration
+	Profile      config.Profile
 	MonitorInput string
 	Size         string
 	Proxy        string
-	Email        string
 }
 
 type task struct {

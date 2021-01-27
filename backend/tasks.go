@@ -8,6 +8,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 
+	"./config"
 	"./meshdesktop"
 	"./wearestrap"
 	"github.com/fatih/color"
@@ -107,6 +108,20 @@ func startTask(data []string, taskID int) {
 	phone := strings.ReplaceAll(data[12], `"`, "")
 	//pMethod := data[13]
 
+	profile := config.Profile{
+		Email: email,
+		Phone: phone,
+		Billing: config.Address{
+			FirstName: firstName,
+			LastName:  lastName,
+			Address1:  address1,
+			Address2:  address2,
+			PostCode:  zip,
+			City:      city,
+			Country:   country,
+		},
+	}
+
 	address := address1
 	if address2 != "" {
 		address += " " + address2
@@ -141,7 +156,7 @@ func startTask(data []string, taskID int) {
 			MonitorDelay: monitorDelay,
 			ErrorDelay:   retryDelay,
 			Size:         size,
-			Email:        email,
+			Profile:      profile,
 		}
 		go meshdesktop.Run(input, taskID, &runningTasks)
 		break
