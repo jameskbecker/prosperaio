@@ -12,6 +12,7 @@ import (
 	"github.com/manifoldco/promptui"
 
 	"./client"
+	"./config"
 	"./discord"
 	"./log"
 	"github.com/fatih/color"
@@ -112,7 +113,7 @@ func getProxy() string {
 func loadDelays() (int64, int64) {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
-	records, err := loadCSV(path.Join(basedir, "settings.csv"), settingsFields)
+	records, err := config.LoadCSV(path.Join(basedir, "settings.csv"), settingsFields)
 	if err != nil {
 		color.Red("Error: " + err.Error())
 	}

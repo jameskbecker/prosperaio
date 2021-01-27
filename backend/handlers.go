@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"./client"
+	"./config"
 	"./discord"
 	"./log"
 	"github.com/fatih/color"
@@ -20,7 +21,7 @@ func loadTasksHandler() {
 	for {
 		homedir, _ := os.UserHomeDir()
 		taskFolder := path.Join(homedir, "ProsperAIO", "tasks")
-		taskPaths := getDirPaths(taskFolder, ".csv")
+		taskPaths := config.GetDirPaths(taskFolder, ".csv")
 
 		items := append(taskPaths, "Exit")
 		prompt := promptui.Select{
@@ -35,7 +36,7 @@ func loadTasksHandler() {
 			os.Exit(0)
 		}
 
-		data, err := loadCSV(path.Join(taskFolder, taskPaths[i]), taskFields)
+		data, err := config.LoadCSV(path.Join(taskFolder, taskPaths[i]), taskFields)
 		if err != nil {
 			color.Red("Error: " + err.Error())
 			continue
@@ -52,7 +53,7 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 	for {
 		homedir, _ := os.UserHomeDir()
 		proxyFolder := path.Join(homedir, "ProsperAIO", "proxies")
-		proxyPaths := getDirPaths(proxyFolder, ".txt")
+		proxyPaths := config.GetDirPaths(proxyFolder, ".txt")
 		prompt := promptui.Select{
 			Label:    "Select Proxy File",
 			Items:    proxyPaths,
@@ -62,7 +63,7 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 
 		i, _, _ := prompt.Run()
 		sPath := path.Join(proxyFolder, proxyPaths[i])
-		bData, _ := loadTXT(sPath)
+		bData, _ := config.LoadTXT(sPath)
 		data := strings.FieldsFunc(string(bData), func(r rune) bool {
 			return string(r) == "\n" || string(r) == "\r"
 		})
@@ -103,7 +104,7 @@ func testWebhookHandler() {
 func getWebhookURL() string {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
-	data, err := loadCSV(path.Join(basedir, "settings.csv"), settingsFields)
+	data, err := config.LoadCSV(path.Join(basedir, "settings.csv"), settingsFields)
 	if err != nil {
 		color.Red("Error: " + err.Error())
 	}

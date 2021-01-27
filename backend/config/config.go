@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/csv"
@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-func getDirPaths(dir string, ext string) []string {
+//GetDirPaths ...
+func GetDirPaths(dir string, ext string) []string {
 	taskPaths := []string{}
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if filepath.Ext(path) == ext {
@@ -60,7 +61,8 @@ func readCSV(r *csv.Reader) (records [][]string, err error) {
 	return records, nil
 }
 
-func loadCSV(path string, cLen int) ([][]string, error) {
+//LoadCSV ...
+func LoadCSV(path string, cLen int) ([][]string, error) {
 	data, err := openCSV(path, cLen)
 	if err != nil {
 		return nil, err
@@ -74,8 +76,8 @@ func loadCSV(path string, cLen int) ([][]string, error) {
 	return tasks, nil
 }
 
-//TODO: check for errors
-func loadTXT(path string) ([]byte, error) {
+//LoadTXT TODO: check for errors
+func LoadTXT(path string) ([]byte, error) {
 	file, _ := os.Open(path)
 	bData, _ := ioutil.ReadAll(file)
 
