@@ -43,18 +43,15 @@ func (t *task) initGuest() error {
 	case "email address is not valid.":
 		return errors.New("Invalid email address")
 	default:
-		return errors.New("Unexpected guest start stage response: " + "'" + body.Message + "'")
+		return errors.New("Guest EP Error: " + "'" + body.Message + "'")
 	}
 
 }
 
 func (t *task) addAddress() error {
 	path := "/myaccount/addressbook/add/"
-	reqBody, err := json.Marshal(address{})
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest("POST", t.baseURL+path, bytes.NewBuffer(reqBody))
+	form := addressBookAddForm()
+	req, err := http.NewRequest("POST", t.baseURL+path, bytes.NewBuffer(form))
 	if err != nil {
 		return err
 	}

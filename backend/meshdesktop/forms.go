@@ -19,25 +19,26 @@ func guestForm(email string) []byte {
 	return []byte(`{"email":"` + email + `"}`)
 }
 
-func (t *task) addressBookAddForm() ([]byte, error) {
+func addressBookAddForm() []byte {
 	form := address{
-		SameDelivery: true,
-		Country:      "",
-		Locale:       "",
-		FirstName:    "",
-		LastName:     "",
-		Phone:        "",
-		Address1:     "",
-		Address2:     "",
-		Town:         "",
-		County:       "",
+		SameDelivery:       true,
+		Country:            "",
+		Locale:             "",
+		FirstName:          "",
+		LastName:           "",
+		Phone:              "",
+		Address1:           "",
+		Address2:           "",
+		Town:               "",
+		County:             "",
+		Postcode:           "",
+		AddressPredict:     "",
+		SetOnCart:          "deliveryAddressID",
+		AddressPredictflag: "false",
 	}
-	formBytes, err := json.Marshal(form)
-	if err != nil {
-		return nil, err
-	}
+	formBytes, _ := json.Marshal(form)
 
-	return formBytes, nil
+	return formBytes
 }
 
 func paymentV3Form() string {

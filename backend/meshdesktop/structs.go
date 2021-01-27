@@ -57,16 +57,20 @@ type messageResponse struct {
 }
 
 type address struct {
-	SameDelivery bool   `json:"useDeliveryAsBilling"`
-	Country      string `json:"country"`
-	Locale       string `json:"locale"`
-	FirstName    string `json:"firstName"`
-	LastName     string `json:"lastName"`
-	Phone        string `json:"phone"`
-	Address1     string `json:"address1"`
-	Address2     string `json:"address2"`
-	Town         string `json:"town"`
-	County       string `json:"county"`
+	SameDelivery       bool   `json:"useDeliveryAsBilling"`
+	Country            string `json:"country"`
+	Locale             string `json:"locale"`
+	FirstName          string `json:"firstName"`
+	LastName           string `json:"lastName"`
+	Phone              string `json:"phone"`
+	Address1           string `json:"address1"`
+	Address2           string `json:"address2"`
+	Town               string `json:"town"`
+	County             string `json:"county"`
+	Postcode           string `json:"postcode"`
+	AddressPredict     string `json:"addressPredict"`
+	SetOnCart          string `json:"setOnCart"`
+	AddressPredictflag string `json:"addressPredictflag"`
 }
 
 type deliveryUpdate struct {
