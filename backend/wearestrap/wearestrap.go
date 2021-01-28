@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"../client"
-	"../discord"
-	"../log"
+	"prosperaio/client"
+	"prosperaio/discord"
+	"prosperaio/log"
 )
 
 const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
@@ -177,16 +177,16 @@ func (t *task) updatePrefix() {
 
 func defaultHeaders(baseURL string) [][]string {
 	return [][]string{
-		[]string{"accept", "application/json, text/javascript, */*; q=0.01"},
-		//[]string{"accept-encoding", "gzip, deflate, br"},
-		[]string{"accept-language", "en-GB,en;q=0.9"},
-		[]string{"content-type", "application/x-www-form-urlencoded; charset=UTF-8"},
-		[]string{"origin", baseURL},
-		[]string{"sec-fetch-site", "same-origin"},
-		[]string{"sec-fetch-mode", "cors"},
-		[]string{"sec-fetch-dest", "empty"},
-		[]string{"user-agent", useragent},
-		[]string{"x-requested-with", "XMLHttpRequest"},
+		{"accept", "application/json, text/javascript, */*; q=0.01"},
+		//{"accept-encoding", "gzip, deflate, br"},
+		{"accept-language", "en-GB,en;q=0.9"},
+		{"content-type", "application/x-www-form-urlencoded; charset=UTF-8"},
+		{"origin", baseURL},
+		{"sec-fetch-site", "same-origin"},
+		{"sec-fetch-mode", "cors"},
+		{"sec-fetch-dest", "empty"},
+		{"user-agent", useragent},
+		{"x-requested-with", "XMLHttpRequest"},
 	}
 }
 
@@ -197,10 +197,10 @@ func (t *task) webhookMessage() discord.Message {
 		size = t.size
 	}
 	fields := []discord.Field{
-		discord.Field{Name: "Product", Value: t.pData.Name, Inline: false},
-		discord.Field{Name: "Site", Value: "wearestrap", Inline: true},
-		discord.Field{Name: "Size", Value: size, Inline: true},
-		discord.Field{Name: "Checkout Link", Value: "[Click Here](" + t.checkoutURL + ")", Inline: true},
+		{Name: "Product", Value: t.pData.Name, Inline: false},
+		{Name: "Site", Value: "wearestrap", Inline: true},
+		{Name: "Size", Value: size, Inline: true},
+		{Name: "Checkout Link", Value: "[Click Here](" + t.checkoutURL + ")", Inline: true},
 	}
 
 	embedData := discord.Embed{

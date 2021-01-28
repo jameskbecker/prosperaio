@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"../config"
-	"../log"
+	"prosperaio/config"
+	"prosperaio/log"
 )
 
 //Input ...
@@ -17,20 +17,30 @@ type Input struct {
 	MonitorInput string
 	Size         string
 	Proxy        string
+	Region       string
 }
 
 type task struct {
-	client     *http.Client
-	productURL *url.URL
-	log        log.Logger
-	profile    config.Profile
-	id         int
-	size       string
-	baseURL    string
-	plu        int
-	sku        string
-	price      string
-	useragent  string
+	client           *http.Client
+	productURL       *url.URL
+	log              log.Logger
+	profile          config.Profile
+	pData            productData
+	id               int
+	size             string
+	baseURL          string
+	useragent        string
+	checkoutURL      string
+	addressID        string
+	shippingMethodID string
+}
+
+type productData struct {
+	name     string
+	pid      int
+	sku      string
+	imageURL string
+	price    string
 }
 
 //Using pointers to show type as null
@@ -51,6 +61,11 @@ type order struct {
 	Customer        *interface{} `json:"customer"`
 	BillingAddress  *interface{} `json:"billingAddress"`
 	DeliveryAddress *interface{} `json:"deliveryAddress"`
+	Delivery        delivery     `json:"delivery"`
+}
+
+type delivery struct {
+	DeliveryMethodID string `json:"deliveryMethodID"`
 }
 
 type messageResponse struct {
@@ -72,6 +87,10 @@ type address struct {
 	AddressPredict     string `json:"addressPredict"`
 	SetOnCart          string `json:"setOnCart"`
 	AddressPredictflag string `json:"addressPredictflag"`
+}
+
+type addressResponse struct {
+	ID string `json:"ID"`
 }
 
 type deliveryUpdate struct {
@@ -98,9 +117,4 @@ type priceVariant struct {
 	Name string `json:"name"`
 	UPC  string `json:"upc"`
 	SKU  string `json:"page_id_variant"`
-}
-
-type productData struct {
-	price string
-	sku   string
 }

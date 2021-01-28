@@ -6,12 +6,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 
-	"./config"
-	"./meshdesktop"
-	"./wearestrap"
-	"github.com/fatih/color"
+	"prosperaio/config"
+	"prosperaio/meshdesktop"
+	"prosperaio/wearestrap"
 )
 
 var runningTasks = sync.WaitGroup{}
@@ -93,20 +93,21 @@ func parseMenuSelection(tasks [][]string) {
 }
 
 func startTask(data []string, taskID int) {
-	site := data[0]
-	//mode := data[1]
-	searchInput := data[2]
-	size := data[3]
-	firstName := data[4]
-	lastName := data[5]
-	zip := data[6]
-	city := data[7]
-	address1 := data[8]
-	address2 := data[9]
-	country := data[10]
-	email := data[11]
-	phone := strings.ReplaceAll(data[12], `"`, "")
-	//pMethod := data[13]
+	site := strings.TrimSpace(data[0])
+	mode := strings.TrimSpace(data[1])
+	region := strings.TrimSpace(data[2])
+	searchInput := strings.TrimSpace(data[3])
+	size := strings.TrimSpace(data[4])
+	email := strings.TrimSpace(data[5])
+	phone := strings.ReplaceAll(strings.TrimSpace(data[6]), `"`, "")
+	//pMethod := strings.TrimSpace(data[7])
+	firstName := strings.TrimSpace(data[8])
+	lastName := strings.TrimSpace(data[9])
+	zip := strings.TrimSpace(data[10])
+	city := strings.TrimSpace(data[11])
+	address1 := strings.TrimSpace(data[12])
+	address2 := strings.TrimSpace(data[13])
+	country := strings.TrimSpace(data[14])
 
 	profile := config.Profile{
 		Email: email,
@@ -127,8 +128,12 @@ func startTask(data []string, taskID int) {
 		address += " " + address2
 	}
 
-	switch strings.ToLower(site) {
-	case "wearestrap":
+	if mode != "" {
+		site += "_" + mode
+	}
+
+	switch strings.ToUpper(site) {
+	case "WEARESTRAP":
 		input := wearestrap.Input{
 			ProductURL: searchInput,
 			Size:       size,
@@ -150,19 +155,19 @@ func startTask(data []string, taskID int) {
 		go wearestrap.Run(input, taskID, &runningTasks)
 		break
 
-	case "jd_desktop":
+	case "JD_FE":
 		input := meshdesktop.Input{
 			MonitorInput: searchInput,
 			MonitorDelay: monitorDelay,
 			ErrorDelay:   retryDelay,
 			Size:         size,
 			Profile:      profile,
+			Region:       region,
 		}
 		go meshdesktop.Run(input, taskID, &runningTasks)
 		break
 
 	default:
-
-		//fmt.Println("[Row " + strconv.Itoa(i+1) + "] Error: invalid site")
+		color.Red("[Row " + strconv.Itoa(taskID+1) + "] Invalid Site: '" + site + "'")
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	"../log"
+	"prosperaio/log"
 )
 
 //Input data for task

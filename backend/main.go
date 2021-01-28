@@ -9,17 +9,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 
-	"./client"
-	"./config"
-	"./discord"
-	"./log"
-	"github.com/fatih/color"
+	"prosperaio/client"
+	"prosperaio/config"
+	"prosperaio/discord"
+	"prosperaio/log"
 )
 
 const version = "4.0.3 (ALPHA)"
-const taskFields = 14
+const taskFields = 15
 const settingsFields = 3
 
 var scanner = bufio.NewScanner(os.Stdin)
@@ -31,9 +31,10 @@ var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
 
 func init() {
-	const expiryDate = "28 Jan 2021 10:55 GMT"
+	const expiryDate = "28 Feb 2021 10:55 GMT"
 	expTime, _ := time.Parse("02 Jan 2006 15:04 MST", expiryDate)
 	if time.Until(expTime) < 0*time.Millisecond {
+		color.Red("Expired.")
 		os.Exit(0)
 	}
 	promptui.IconInitial = ""

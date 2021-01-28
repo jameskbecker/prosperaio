@@ -104,14 +104,14 @@ func (t *task) getStockData() error {
 	sel := s.EachWithBreak(t.findSize)
 	sku, exists := sel.Attr("data-sku")
 	if exists {
-		t.sku = sku
+		t.pData.sku = sku
 		t.updatePrefix()
 	}
 	price, exists := sel.Attr("data-price")
 	if exists {
-		t.price = price
+		t.pData.price = price
 	}
-	if t.sku == "" {
+	if t.pData.sku == "" {
 		return errors.New("Size not found or OOS")
 	}
 
@@ -119,15 +119,16 @@ func (t *task) getStockData() error {
 }
 
 func (t *task) findSize(i int, sel *goquery.Selection) bool {
-	if strings.Contains(sel.Text(), t.size) {
+	if strings.TrimSpace(sel.Text()) == t.size {
 		return false
 	}
 	return true
 }
 
+//Need to put the delivery method id
 func (t *task) add() error {
 	t.log.Warn("Adding to Cart")
-	uri := t.baseURL + "/cart/" + t.sku
+	uri := t.baseURL + "/cart/" + t.pData.sku
 	form, _ := buildATCForm()
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
@@ -157,6 +158,7 @@ func (t *task) add() error {
 		return errors.New("Added 0 items to Cart")
 	}
 	t.log.Info("Successfully Added " + strconv.Itoa(body.Count) + " Item(s) to Cart! (" + body.Ref + ")")
+	t.shippingMethodID = body.Delivery.DeliveryMethodID
 	return nil
 }
 

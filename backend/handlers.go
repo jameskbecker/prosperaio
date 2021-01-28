@@ -6,10 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"./client"
-	"./config"
-	"./discord"
-	"./log"
+	"prosperaio/client"
+	"prosperaio/config"
+	"prosperaio/discord"
+	"prosperaio/log"
+
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 )
