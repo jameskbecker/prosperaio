@@ -16,25 +16,6 @@ import (
 
 var runningTasks = sync.WaitGroup{}
 
-func getTaskCount(data [][]string) map[string]int {
-	output := map[string]int{
-		"JD":          0,
-		"onygo":       0,
-		"sneakavenue": 0,
-		"snipes-de":   0,
-		"snipes-uk":   0,
-		"wearestrap":  0,
-	}
-	for _, v := range data[1:] {
-		_, exists := output[strings.ToUpper(v[0])]
-		if !exists {
-			continue
-		}
-		output[v[0]]++
-	}
-	return output
-}
-
 func taskMenu(data map[string]int) (int, int) {
 	taskCount := 0
 	for _, v := range data {
@@ -66,7 +47,7 @@ func taskMenu(data map[string]int) (int, int) {
 func parseMenuSelection(tasks [][]string) {
 	for {
 		color.Cyan(line())
-		taskCounts := getTaskCount(tasks)
+		taskCounts := config.GetTaskCount(tasks)
 		selection, last := taskMenu(taskCounts)
 		switch selection {
 		case 0: //All
