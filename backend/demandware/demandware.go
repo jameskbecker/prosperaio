@@ -77,10 +77,10 @@ func Run(i Input, tNbr string, wg *sync.WaitGroup) {
 	}
 
 	cookies := []*http.Cookie{
-		&http.Cookie{Name: "hideLocalizationDialog", Value: "true"},
-		&http.Cookie{Name: "acceptCookie", Value: "true"},
-		//&http.Cookie{Name: "customerCountry", Value: "gb"},
-		&http.Cookie{Name: "_px3", Value: task.PX3},
+		{Name: "hideLocalizationDialog", Value: "true"},
+		{Name: "acceptCookie", Value: "true"},
+		//{Name: "customerCountry", Value: "gb"},
+		{Name: "_px3", Value: task.PX3},
 	}
 
 	task.Client.Jar.SetCookies(task.BaseURL, cookies)
