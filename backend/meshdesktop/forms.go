@@ -8,6 +8,15 @@ import (
 	"prosperaio/config"
 )
 
+//Using pointers to show type as null
+type atcForm struct {
+	Customisations          bool         `json:"customisations"`
+	CartPosition            *interface{} `json:"cartPosition"`
+	RecaptchaResponse       interface{}  `json:"recaptchaResponse"` // -> false or capRespString
+	CartProductNotification *interface{} `json:"cartProductNotification"`
+	QuantityToAdd           int          `json:"quantityToAdd"`
+}
+
 func buildATCForm() ([]byte, error) {
 	return json.Marshal(atcForm{
 		Customisations:          false,
@@ -20,6 +29,23 @@ func buildATCForm() ([]byte, error) {
 
 func guestForm(email string) []byte {
 	return []byte(`{"email":"` + email + `"}`)
+}
+
+type address struct {
+	SameDelivery       bool   `json:"useDeliveryAsBilling"`
+	Country            string `json:"country"`
+	Locale             string `json:"locale"`
+	FirstName          string `json:"firstName"`
+	LastName           string `json:"lastName"`
+	Phone              string `json:"phone"`
+	Address1           string `json:"address1"`
+	Address2           string `json:"address2"`
+	Town               string `json:"town"`
+	County             string `json:"county"`
+	Postcode           string `json:"postcode"`
+	AddressPredict     string `json:"addressPredict"`
+	SetOnCart          string `json:"setOnCart"`
+	AddressPredictflag string `json:"addressPredictflag"`
 }
 
 func addressBookAddForm(profile config.Profile) []byte {

@@ -10,7 +10,6 @@ import (
 )
 
 func (t *task) initGuest() error {
-	//Create Request
 	uri := t.baseURL + "/checkout/guest/"
 	form := guestForm(t.profile.Email)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
@@ -18,19 +17,14 @@ func (t *task) initGuest() error {
 		return err
 	}
 
-	//Set Headers
+	setDefaultHeaders(req, t.useragent, t.baseURL)
 	req.Header.Set("referer", t.baseURL+"/checkout/login/")
-	for _, v := range defaultHeaders(t.useragent, t.baseURL) {
-		req.Header.Set(v[0], v[1])
-	}
 
-	//Send Request
 	res, err := t.client.Do(req)
 	if err != nil {
 		return err
 	}
 
-	//Parse message from response
 	message, err := parseGuestResponse(res.Body)
 	if err != nil {
 		return err

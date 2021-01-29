@@ -11,8 +11,16 @@ import (
 	"strings"
 )
 
+type messageResponse struct {
+	Message string `json:"message"`
+}
+
+type addressResponse struct {
+	IDPrimary string `json:"id"`
+	ID        string `json:"ID"`
+}
+
 func (t *task) addAddress() error {
-	t.log.Warn("Checking Out [1/3]")
 	uri := t.baseURL + "/myaccount/addressbook/add/"
 	form := addressBookAddForm(t.profile)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
@@ -20,9 +28,7 @@ func (t *task) addAddress() error {
 		return err
 	}
 
-	for _, v := range defaultHeaders(t.useragent, t.baseURL) {
-		req.Header.Set(v[0], v[1])
-	}
+	setDefaultHeaders(req, t.useragent, t.baseURL)
 	req.Header.Set("referer", t.baseURL+"/checkout/delivery/")
 
 	res, err := t.client.Do(req)
@@ -43,8 +49,14 @@ func (t *task) addAddress() error {
 	return nil
 }
 
+type deliverySlot struct{}
+type deliveryUpdate struct {
+	AddressID    string       `json:"addressId"`
+	MethodID     string       `json:"methodId"`
+	DeliverySlot deliverySlot `json:"deliverySlot"`
+}
+
 func (t *task) updateDeliveryAddressAndMethod() error {
-	t.log.Warn("Checking Out [2/3]")
 	path := "/checkout/updateDeliveryAddressAndMethod/ajax/"
 	reqBody, err := json.Marshal(deliveryUpdate{
 		AddressID: t.addressID,
@@ -58,9 +70,7 @@ func (t *task) updateDeliveryAddressAndMethod() error {
 		return err
 	}
 
-	for _, v := range defaultHeaders(t.useragent, t.baseURL) {
-		req.Header.Set(v[0], v[1])
-	}
+	setDefaultHeaders(req, t.useragent, t.baseURL)
 	req.Header.Set("referer", t.baseURL+"/checkout/delivery/")
 
 	res, err := t.client.Do(req)
@@ -85,8 +95,11 @@ func (t *task) updateDeliveryAddressAndMethod() error {
 	return nil
 }
 
+type billingUpdate struct {
+	EditAddressID string `json:"editAddressID"`
+}
+
 func (t *task) updateBillingAddress() error {
-	t.log.Warn("Checking Out [3/3]")
 	path := "/checkout/updateBillingAddress/ajax/"
 	reqBody, err := json.Marshal(billingUpdate{
 		EditAddressID: t.addressID,
@@ -99,9 +112,7 @@ func (t *task) updateBillingAddress() error {
 		return err
 	}
 
-	for _, v := range defaultHeaders(t.useragent, t.baseURL) {
-		req.Header.Set(v[0], v[1])
-	}
+	setDefaultHeaders(req, t.useragent, t.baseURL)
 	req.Header.Set("referer", t.baseURL+"/checkout/billing/")
 
 	res, err := t.client.Do(req)
@@ -125,7 +136,6 @@ func (t *task) updateBillingAddress() error {
 }
 
 func (t *task) submitCheckout() (string, error) {
-	t.log.Warn("Submitting Order")
 	path := "/checkout/payment/?paySelect=paypalViaHosted"
 	req, err := http.NewRequest("GET", t.baseURL+path, nil)
 	if err != nil {
@@ -156,41 +166,6 @@ func (t *task) submitCheckout() (string, error) {
 	checkoutURL := res.Header.Get("location")
 	if checkoutURL == "" {
 		return "", errors.New("NO RESPONSE LOCATION HEADER")
-	}
-	return checkoutURL, nil
-}
-
-func (t *task) submitCheckoutCC() (string, error) {
-	t.log.Warn("Submitting Order")
-	path := "/checkout/paymentV3/"
-	//REMEMBER FORM
-	req, err := http.NewRequest("POST", t.baseURL+path, nil)
-	if err != nil {
-		return "", err
-	}
-
-	for _, v := range defaultHeaders(t.useragent, t.baseURL) {
-		req.Header.Set(v[0], v[1])
-	}
-	req.Header.Set("referer", t.baseURL+"/checkout/billing/")
-
-	res, err := t.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	body := map[string]string{}
-	bodyD, err := client.Decompress(res)
-	if err != nil {
-		return "", err
-	}
-	json.NewDecoder(bodyD).Decode(&body)
-
-	checkoutURL, exists := body[""]
-	if !exists {
-		bodyS, _ := ioutil.ReadAll(bodyD)
-		fmt.Println(string(bodyS))
-		return "", errors.New("Error getting checkout url")
 	}
 	return checkoutURL, nil
 }

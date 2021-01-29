@@ -2,20 +2,60 @@ package meshdesktop
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"prosperaio/client"
+	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/log"
 )
 
+//Input ...
+type Input struct {
+	ErrorDelay   time.Duration
+	MonitorDelay time.Duration
+	Profile      config.Profile
+	MonitorInput string
+	Size         string
+	Proxy        string
+	Region       string
+	WebhookURL   string
+}
+
+type task struct {
+	client           *http.Client
+	productURL       *url.URL
+	log              log.Logger
+	profile          config.Profile
+	pData            productData
+	id               int
+	region           string
+	size             string
+	baseURL          string
+	useragent        string
+	checkoutURL      string
+	addressID        string
+	shippingMethodID string
+	exportCookies    []byte
+}
+
+type productData struct {
+	name     string
+	pid      int
+	sku      string
+	imageURL string
+	price    string
+}
+
 //Run mesh desktop task ---> TODO: HANDLE ERRORS
 func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	//Initalise
-	c, _ := client.Create("")
+	c, _ := client.Create(i.Proxy)
 	pURL, err := url.Parse(i.MonitorInput)
 	if err != nil {
 
@@ -42,12 +82,14 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	t.log.Debug("Starting Task")
 
 	//ATC PROCESS
+	//t.log.Warn("Fetching Stock Data")
 	err = t.getStockData()
 	if err != nil {
 		t.log.Error(err.Error())
 	}
 
-	err = t.add()
+	//t.log.Warn("Adding to Cart")
+	err = t.addToCart()
 	if err != nil {
 		t.log.Error(err.Error())
 	}
@@ -57,19 +99,22 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	// if err != nil {
 	// 	t.log.Error(err.Error())
 	// }
-
+	//t.log.Warn("Checking Out [1/3]")
 	// err = t.addAddress()
 	// if err != nil {
 	// 	t.log.Error(err.Error())
 	// }
+	//t.log.Warn("Checking Out [2/3]")
 	// err = t.updateDeliveryAddressAndMethod()
 	// if err != nil {
 	// 	t.log.Error(err.Error())
 	// }
+	//t.log.Warn("Checking Out [3/3]")
 	// err = t.updateBillingAddress()
 	// if err != nil {
 	// 	t.log.Error(err.Error())
 	// }
+	//t.log.Warn("Submitting Order")
 	// checkoutURL, err := t.submitCheckout()
 	// if err != nil {
 	// 	t.log.Error(err.Error())
@@ -146,17 +191,21 @@ func (t *task) webhookMessage() discord.Message {
 	}
 }
 
-func defaultHeaders(useragent string, baseURL string) [][]string {
-	return [][]string{
+func setDefaultHeaders(req *http.Request, ua string, bURL string) {
+	headers := [][]string{
 		{"accept", "*/*"},
 		{"x-requested-with", "XMLHttpRequest"},
-		{"user-agent", useragent},
+		{"user-agent", ua},
 		{"content-type", "application/json"},
-		{"origin", baseURL},
+		{"origin", bURL},
 		{"sec-fetch-site", "same-origin"},
 		{"sec-fetch-mode", "cors"},
 		{"sec-fetch-dest", "empty"},
 		{"accept-encoding", "gzip"},
 		{"accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7"},
+	}
+
+	for _, v := range headers {
+		req.Header.Set(v[0], v[1])
 	}
 }

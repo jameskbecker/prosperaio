@@ -4,12 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"prosperaio/client"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -17,66 +13,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func (t *task) getProductData() error {
-	req, err := http.NewRequest("GET", t.productURL.String(), nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("upgrade-insecure-requests", "1")
-	req.Header.Set("user-agent", "t.useragent")
-	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
-	req.Header.Set("sec-fetch-site", "none")
-	req.Header.Set("sec-fetch-mode", "navigate")
-	req.Header.Set("sec-fetch-user", "?1")
-	req.Header.Set("sec-fetch-dest", "document")
-	req.Header.Set("accept-encoding", "identity")
-	req.Header.Set("accept-language", "en-GB,en-US;q=0.9,en;q=0.8")
-
-	res, err := t.client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	bodyD, err := client.Decompress(res)
-	if err != nil {
-		return err
-	}
-	pData, err := parsePriceData(bodyD)
-	if err != nil {
-		return err
-	}
-
-	if pData.Name == "" || len(pData.Variants) == 0 {
-
-	}
-
-	t.log.Info("Found Product Data for: " + pData.Name)
-	t.log.Debug(pData.PLU)
-	t.log.Debug(pData.Price)
-	t.log.Debug(pData.Variants[0].SKU)
-	return nil
-}
-
-//TODO: consider more reliable method rather than regex
-func parsePriceData(body io.Reader) (data priceData, err error) {
-	bodyB, err := ioutil.ReadAll(body)
-	if err != nil {
-		return
-	}
-	bodyS := string(bodyB)
-	dataExp := regexp.MustCompile("(?m)" + `(?:^var dataObject\s?=\s?)(?P<data>\{\n[\w\W]*?^})`)
-	match := dataExp.FindStringSubmatch(bodyS)
-	if match == nil || len(match) < 2 {
-		err = errors.New("Unable to Parse Product Data")
-		return
-	}
-	fmt.Println(match[1])
-	err = json.Unmarshal([]byte(match[1]), &data)
-	return
-}
-
 func (t *task) getStockData() error {
-	t.log.Warn("Fetching Stock Data")
 	ts := time.Now().UTC().UnixNano() / 1e6
 	uri := t.productURL.String() + "/stock/?_=" + strconv.FormatInt(ts, 10)
 	req, err := http.NewRequest("GET", uri, nil)
@@ -136,9 +73,34 @@ func (t *task) findSize(i int, sel *goquery.Selection) bool {
 	return true
 }
 
+type order struct {
+	ID              string       `json:"ID"`
+	Href            string       `json:"href"`
+	Count           int          `json:"count"`
+	HasGuest        bool         `json:"canCheckoutAsGuest"`
+	Ref             string       `json:"reference"`
+	Customer        *interface{} `json:"customer"`
+	BillingAddress  *interface{} `json:"billingAddress"`
+	DeliveryAddress *interface{} `json:"deliveryAddress"`
+	Delivery        delivery     `json:"delivery"`
+	Contents        []contents   `json:"contents"`
+}
+
+type contents struct {
+	Name  string `json:"name"`
+	Image image  `json:"image"`
+}
+
+type image struct {
+	URL string `json:"originalURL"`
+}
+
+type delivery struct {
+	DeliveryMethodID string `json:"deliveryMethodID"`
+}
+
 //Need to put the delivery method id
-func (t *task) add() error {
-	t.log.Warn("Adding to Cart")
+func (t *task) addToCart() error {
 	uri := t.baseURL + "/cart/" + t.pData.sku
 	form, _ := buildATCForm()
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
