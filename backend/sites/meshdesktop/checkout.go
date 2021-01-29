@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"prosperaio/client"
+	"prosperaio/utils/client"
 	"strings"
 )
 

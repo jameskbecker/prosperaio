@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"prosperaio/prompt"
+	"prosperaio/utils/prompt"
 	"strings"
 
 	"github.com/fatih/color"

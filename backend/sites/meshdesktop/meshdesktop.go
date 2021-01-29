@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"prosperaio/client"
 	"prosperaio/config"
 	"prosperaio/discord"
-	"prosperaio/log"
+	"prosperaio/utils/client"
+	"prosperaio/utils/log"
 )
 
 //Input ...

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"sync"
 
-	"prosperaio/client"
 	"prosperaio/config"
 	"prosperaio/discord"
-	"prosperaio/log"
-	"prosperaio/prompt"
+	"prosperaio/utils/client"
+	"prosperaio/utils/log"
+	"prosperaio/utils/prompt"
 
 	"github.com/fatih/color"
 )

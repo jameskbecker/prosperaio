@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"prosperaio/client"
+	"prosperaio/utils/client"
 	"strconv"
 	"strings"
 	"time"

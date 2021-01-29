@@ -1,7 +1,7 @@
 package main
 
 import (
-	"prosperaio/prompt"
+	"prosperaio/utils/prompt"
 
 	"github.com/fatih/color"
 )

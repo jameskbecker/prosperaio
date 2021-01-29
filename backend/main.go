@@ -12,10 +12,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 
-	"prosperaio/client"
 	"prosperaio/config"
 	"prosperaio/discord"
-	"prosperaio/log"
+	"prosperaio/utils/client"
+	"prosperaio/utils/log"
 )
 
 const version = "4.0.3 (ALPHA)"
