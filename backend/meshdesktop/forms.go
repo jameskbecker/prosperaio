@@ -2,7 +2,6 @@ package meshdesktop
 
 import (
 	"encoding/json"
-	"net/url"
 	"strings"
 
 	"prosperaio/config"
@@ -332,12 +331,4 @@ func getCountry(code string) string {
 	}
 
 	return ""
-}
-
-func paymentV3Form() string {
-	form := url.Values{}
-	form.Set("paySelect", "card")
-	form.Set("isSafari", "true")
-
-	return form.Encode()
 }
