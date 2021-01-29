@@ -18,6 +18,7 @@ type Input struct {
 	Size         string
 	Proxy        string
 	Region       string
+	WebhookURL   string
 }
 
 type task struct {
@@ -27,12 +28,14 @@ type task struct {
 	profile          config.Profile
 	pData            productData
 	id               int
+	region           string
 	size             string
 	baseURL          string
 	useragent        string
 	checkoutURL      string
 	addressID        string
 	shippingMethodID string
+	exportCookies    []byte
 }
 
 type productData struct {
@@ -62,6 +65,16 @@ type order struct {
 	BillingAddress  *interface{} `json:"billingAddress"`
 	DeliveryAddress *interface{} `json:"deliveryAddress"`
 	Delivery        delivery     `json:"delivery"`
+	Contents        []contents   `json:"contents"`
+}
+
+type contents struct {
+	Name  string `json:"name"`
+	Image image  `json:"image"`
+}
+
+type image struct {
+	URL string `json:"originalURL"`
 }
 
 type delivery struct {
@@ -90,7 +103,8 @@ type address struct {
 }
 
 type addressResponse struct {
-	ID string `json:"ID"`
+	IDPrimary string `json:"id"`
+	ID        string `json:"ID"`
 }
 
 type deliveryUpdate struct {

@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"prosperaio/client"
 	"regexp"
 	"strconv"
 	"strings"
@@ -36,7 +37,11 @@ func (t *task) getProductData() error {
 		return err
 	}
 
-	pData, err := parsePriceData(res.Body)
+	bodyD, err := client.Decompress(res)
+	if err != nil {
+		return err
+	}
+	pData, err := parsePriceData(bodyD)
 	if err != nil {
 		return err
 	}
@@ -53,7 +58,7 @@ func (t *task) getProductData() error {
 }
 
 //TODO: consider more reliable method rather than regex
-func parsePriceData(body io.ReadCloser) (data priceData, err error) {
+func parsePriceData(body io.Reader) (data priceData, err error) {
 	bodyB, err := ioutil.ReadAll(body)
 	if err != nil {
 		return
@@ -94,7 +99,11 @@ func (t *task) getStockData() error {
 		return err
 	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	bodyD, err := client.Decompress(res)
+	if err != nil {
+		return err
+	}
+	doc, err := goquery.NewDocumentFromReader(bodyD)
 	if err != nil {
 		return err
 	}
@@ -115,6 +124,8 @@ func (t *task) getStockData() error {
 		return errors.New("Size not found or OOS")
 	}
 
+	t.log.Debug("SKU: " + t.pData.sku)
+	t.log.Debug("Price: " + t.pData.price)
 	return nil
 }
 
@@ -152,13 +163,19 @@ func (t *task) add() error {
 	}
 
 	body := order{}
-	json.NewDecoder(res.Body).Decode(&body)
+	bodyD, err := client.Decompress(res)
+	if err != nil {
+		return err
+	}
+	json.NewDecoder(bodyD).Decode(&body)
 
-	if body.Count < 1 {
+	if body.Count < 1 || len(body.Contents) < 1 {
 		return errors.New("Added 0 items to Cart")
 	}
 	t.log.Info("Successfully Added " + strconv.Itoa(body.Count) + " Item(s) to Cart! (" + body.Ref + ")")
 	t.shippingMethodID = body.Delivery.DeliveryMethodID
+	t.pData.name = body.Contents[0].Name
+	t.pData.imageURL = body.Contents[0].Image.URL
 	return nil
 }
 

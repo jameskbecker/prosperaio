@@ -14,7 +14,8 @@ import (
 
 //Run mesh desktop task ---> TODO: HANDLE ERRORS
 func Run(i Input, taskID int, wg *sync.WaitGroup) {
-	c, _ := client.Create(i.Proxy)
+	//Initalise
+	c, _ := client.Create("")
 	pURL, err := url.Parse(i.MonitorInput)
 	if err != nil {
 
@@ -27,6 +28,7 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	t := task{
 		productURL: pURL,
 		profile:    i.Profile,
+		region:     i.Region,
 		baseURL:    "https://" + pURL.Hostname(),
 		size:       i.Size,
 		id:         taskID,
@@ -38,40 +40,90 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	//t.sku = strconv.Itoa(t.plu)
 	t.updatePrefix()
 	t.log.Debug("Starting Task")
+
+	//ATC PROCESS
 	err = t.getStockData()
 	if err != nil {
 		t.log.Error(err.Error())
 	}
-	t.log.Debug("SKU: " + t.pData.sku)
-	t.log.Debug("Price: " + t.pData.price)
+
 	err = t.add()
 	if err != nil {
 		t.log.Error(err.Error())
 	}
 
-	t.log.Warn("Checking Out")
-	err = t.initGuest()
+	// //CHECKOUT PROCESS
+	// err = t.initGuest()
+	// if err != nil {
+	// 	t.log.Error(err.Error())
+	// }
+
+	// err = t.addAddress()
+	// if err != nil {
+	// 	t.log.Error(err.Error())
+	// }
+	// err = t.updateDeliveryAddressAndMethod()
+	// if err != nil {
+	// 	t.log.Error(err.Error())
+	// }
+	// err = t.updateBillingAddress()
+	// if err != nil {
+	// 	t.log.Error(err.Error())
+	// }
+	// checkoutURL, err := t.submitCheckout()
+	// if err != nil {
+	// 	t.log.Error(err.Error())
+	// }
+
+	cookieURL, _ := url.Parse(t.baseURL)
+	t.exportCookies, err = client.GetJSONCookies(cookieURL, t.client)
 	if err != nil {
 		t.log.Error(err.Error())
 	}
+	qs := url.Values{}
+	qs.Set("cookie", string(t.exportCookies))
 
+	t.checkoutURL = "http://localhost/extension.prosperaio.com?" + qs.Encode()
+	qs.Set("redirectUrl", t.checkoutURL)
+	// t.checkoutURL = "http://localhost/extension.prosperaio.com?" + qs.Encode()
+	//fmt.Println(t.checkoutURL)
+
+	err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	if err != nil {
+		fmt.Println(t.checkoutURL)
+		panic(err)
+	}
 	wg.Done()
 }
 func (t *task) updatePrefix() {
 	tID := fmt.Sprintf("%04d", t.id)
-	prefix := "[" + tID + "] [jd-gb_frontend] [" + t.size + "] "
+	region := strings.ToLower(t.region)
+	prefix := "[" + tID + "] [jd-" + region + "_fe] [" + t.size + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
 
 func (t *task) webhookMessage() discord.Message {
+
+	//fmt.Println(checkoutURL)
+	productName := "N/A"
+	pid := "N/A"
 	size := "N/A"
+	if t.size != "" {
+		productName = t.pData.name
+	}
+
+	if t.size != "" {
+		pid = strconv.Itoa(t.pData.pid)
+	}
+
 	if t.size != "" {
 		size = t.size
 	}
+
 	fields := []discord.Field{
-		{Name: "Product", Value: t.pData.name, Inline: false},
-		{Name: "PID", Value: strconv.Itoa(t.pData.pid), Inline: false},
-		{Name: "Site", Value: "wearestrap", Inline: true},
+		{Name: "Product", Value: productName, Inline: false},
+		{Name: "PID", Value: pid, Inline: true},
+		{Name: "Site", Value: "jd-" + strings.ToLower(t.region) + "_fe", Inline: true},
 		{Name: "Size", Value: size, Inline: true},
 		{Name: "Price", Value: t.pData.price, Inline: true},
 		{Name: "Checkout Link", Value: "[Click Here](" + t.checkoutURL + ")", Inline: true},
@@ -104,7 +156,7 @@ func defaultHeaders(useragent string, baseURL string) [][]string {
 		{"sec-fetch-site", "same-origin"},
 		{"sec-fetch-mode", "cors"},
 		{"sec-fetch-dest", "empty"},
-		{"accept-encoding", "gzip, deflate, br"},
+		{"accept-encoding", "gzip"},
 		{"accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7"},
 	}
 }

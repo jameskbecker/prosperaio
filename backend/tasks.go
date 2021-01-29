@@ -18,7 +18,7 @@ var runningTasks = sync.WaitGroup{}
 
 func getTaskCount(data [][]string) map[string]int {
 	output := map[string]int{
-		"jd_desktop":  0,
+		"JD":          0,
 		"onygo":       0,
 		"sneakavenue": 0,
 		"snipes-de":   0,
@@ -26,7 +26,7 @@ func getTaskCount(data [][]string) map[string]int {
 		"wearestrap":  0,
 	}
 	for _, v := range data[1:] {
-		_, exists := output[v[0]]
+		_, exists := output[strings.ToUpper(v[0])]
 		if !exists {
 			continue
 		}
@@ -163,6 +163,7 @@ func startTask(data []string, taskID int) {
 			Size:         size,
 			Profile:      profile,
 			Region:       region,
+			WebhookURL:   getWebhookURL(),
 		}
 		go meshdesktop.Run(input, taskID, &runningTasks)
 		break
