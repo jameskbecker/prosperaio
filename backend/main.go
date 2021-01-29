@@ -2,11 +2,8 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
-	"path"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -36,17 +33,15 @@ func init() {
 		color.Red("Expired.")
 		os.Exit(0)
 	}
-	promptui.IconInitial = ""
 
-	m, r := loadDelays()
-	monitorDelay = time.Duration(m) * time.Millisecond
-	retryDelay = time.Duration(r) * time.Millisecond
+	promptui.IconInitial = ""
+	monitorDelay, retryDelay = config.LoadDelays()
 
 	color.Cyan(logo())
 	printBold("Welcome to ProsperAIO!")
 	print("Expires: " + expiryDate)
-	print("Monitor Delay: " + strconv.FormatInt(m, 10))
-	print("Retry Delay: " + strconv.FormatInt(r, 10))
+	print("Monitor Delay: " + monitorDelay.String())
+	print("Retry Delay: " + retryDelay.String())
 
 	profiles = config.LoadProfiles()
 	print("Loaded Profiles.")
@@ -80,27 +75,6 @@ func main() {
 
 }
 
-func getSelection(prefix string) int {
-	for {
-		fmt.Print("\n" + prefix + "> ")
-		scanner.Scan()
-
-		SSelection := scanner.Text()
-		if strings.ToUpper(SSelection) == "Y" {
-			return 1
-		} else if strings.ToUpper(SSelection) == "N" {
-			return 0
-		}
-		IntSelection, err := strconv.Atoi(SSelection)
-		if err != nil {
-			color.Red("Invalid selection please try again.")
-			continue
-		}
-
-		return IntSelection
-	}
-}
-
 func getProxy() string {
 	proxy := ""
 	if len(proxies) == 0 {
@@ -111,33 +85,4 @@ func getProxy() string {
 	proxies = client.RotateProxy(proxies)
 
 	return proxy
-}
-
-func loadDelays() (int64, int64) {
-	homedir, _ := os.UserHomeDir()
-	basedir := path.Join(homedir, "ProsperAIO")
-	records, err := config.LoadCSV(path.Join(basedir, "settings.csv"), config.SettingsFieldCount)
-	if err != nil {
-		color.Red("Error: " + err.Error())
-	}
-
-	if len(records) < 1 || len(records[0]) < 1 {
-		color.Red("Error: invalid settings.csv format")
-	}
-	monitorDelayStr := records[0][1]
-	retryDelayStr := records[0][2]
-
-	monitorDelay, err := strconv.Atoi(monitorDelayStr)
-	if err != nil {
-		color.Red("Error: invalid monitor delay. Using default.")
-		monitorDelay = 1000
-	}
-
-	retryDelay, err := strconv.Atoi(retryDelayStr)
-	if err != nil {
-		color.Red("Error: invalid retry delay. Using default.")
-		retryDelay = 1000
-	}
-
-	return int64(monitorDelay), int64(retryDelay)
 }

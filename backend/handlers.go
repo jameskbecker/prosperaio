@@ -3,23 +3,46 @@ package main
 import (
 	"os"
 	"path"
-	"strings"
-	"sync"
-
 	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 	"prosperaio/utils/prompt"
+	"strings"
+	"sync"
 
 	"github.com/fatih/color"
 )
 
-//TODO: merge prompt section with proxy handler as almost identical
 func loadTasksHandler() {
 	tasks := config.LoadTasks()
 	color.Cyan(line())
-	parseMenuSelection(tasks)
+	for {
+		color.Cyan(line())
+		taskCounts := config.GetTaskCount(tasks)
+		selection, last := taskMenu(taskCounts)
+		switch selection {
+		case 0: //All
+			color.Cyan(line())
+			printBold("Task Log")
+			for i, row := range tasks {
+				runningTasks.Add(1)
+				startTask(row, i+1)
+			}
+			break
+
+		case last:
+			os.Exit(0)
+			break
+
+		default:
+			color.Red("Error: unexpected selection value")
+			continue
+		}
+		break
+	}
+
+	runningTasks.Wait()
 }
 
 func loadProxiesHandler(counters *log.TitleCounts) {
@@ -57,29 +80,7 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 	}
 }
 
-//Thought: maybe instead of extracting data in this func have a func that parses all setting data and sets global vars
 func testWebhookHandler() {
-	webhookURL := getWebhookURL()
+	webhookURL := config.GetWebhookURL()
 	discord.TestWebhook(webhookURL)
-}
-
-func getWebhookURL() string {
-	homedir, _ := os.UserHomeDir()
-	basedir := path.Join(homedir, "ProsperAIO")
-	data, err := config.LoadCSV(path.Join(basedir, "settings.csv"), config.SettingsFieldCount)
-	if err != nil {
-		color.Red("Error: " + err.Error())
-	}
-
-	if len(data) < 2 || len(data[0]) < 1 {
-		color.Red("Error: invalid settings.csv format")
-	}
-	webhookURL := data[1][0]
-
-	if webhookURL == "" {
-		color.Red("Error: no webhook URL found in settings.csv")
-		return ""
-	}
-
-	return webhookURL
 }
