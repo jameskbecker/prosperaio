@@ -3,16 +3,16 @@ package main
 import (
 	"bufio"
 	"os"
+	"prosperaio/config"
+	"prosperaio/discord"
+	"prosperaio/utils/cli"
+	"prosperaio/utils/client"
+	"prosperaio/utils/log"
 	"strconv"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-
-	"prosperaio/config"
-	"prosperaio/discord"
-	"prosperaio/utils/client"
-	"prosperaio/utils/log"
 )
 
 const version = "4.0.3 (ALPHA)"
@@ -37,7 +37,7 @@ func init() {
 	promptui.IconInitial = ""
 	monitorDelay, retryDelay = config.LoadDelays()
 
-	color.Cyan(logo())
+	color.Cyan(cli.Logo())
 	printBold("Welcome to ProsperAIO!")
 	print("Expires: " + expiryDate)
 	print("Monitor Delay: " + monitorDelay.String())
@@ -52,7 +52,7 @@ func main() {
 	counters := log.TitleCounts{}
 	log.UpdateTitle(version, &counters)
 	for {
-		selection, last := mainMenu()
+		selection, last := cli.MainMenu()
 		switch selection {
 		case 0:
 			loadTasksHandler()

@@ -1,4 +1,4 @@
-package prompt
+package cli
 
 import (
 	"os"
@@ -19,13 +19,6 @@ func GetUserInput(label string, items []string) int {
 	return i
 }
 
-// bellSkipper implements an io.WriteCloser that skips the terminal bell
-// character (ASCII code 7), and writes the rest to os.Stderr. It is used to
-// replace readline.Stdout, that is the package used by promptui to display the
-// prompts.
-//
-// This is a workaround for the bell issue documented in
-// https://github.com/manifoldco/promptui/issues/49.
 type bellSkipper struct{}
 
 // Write implements an io.WriterCloser over os.Stderr, but it skips the terminal

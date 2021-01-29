@@ -5,9 +5,9 @@ import (
 	"path"
 	"prosperaio/config"
 	"prosperaio/discord"
+	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
-	"prosperaio/utils/prompt"
 	"strings"
 	"sync"
 
@@ -16,14 +16,14 @@ import (
 
 func loadTasksHandler() {
 	tasks := config.LoadTasks()
-	color.Cyan(line())
+	color.Cyan(cli.Line())
 	for {
-		color.Cyan(line())
+		color.Cyan(cli.Line())
 		taskCounts := config.GetTaskCount(tasks)
-		selection, last := taskMenu(taskCounts)
+		selection, last := cli.TaskMenu(taskCounts)
 		switch selection {
 		case 0: //All
-			color.Cyan(line())
+			color.Cyan(cli.Line())
 			printBold("Task Log")
 			for i, row := range tasks {
 				runningTasks.Add(1)
@@ -46,13 +46,13 @@ func loadTasksHandler() {
 }
 
 func loadProxiesHandler(counters *log.TitleCounts) {
-	color.Cyan(line())
+	color.Cyan(cli.Line())
 	for {
 		homedir, _ := os.UserHomeDir()
 		proxyFolder := path.Join(homedir, "ProsperAIO", "proxies")
 		proxyPaths := config.GetDirPaths(proxyFolder, ".txt")
 
-		i := prompt.GetUserInput("Select Proxy File", proxyPaths)
+		i := cli.GetUserInput("Select Proxy File", proxyPaths)
 		sPath := path.Join(proxyFolder, proxyPaths[i])
 		bData, _ := config.LoadTXT(sPath)
 		data := strings.FieldsFunc(string(bData), func(r rune) bool {
@@ -62,10 +62,10 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 		counters.Proxy = len(data)
 		log.UpdateTitle(version, counters)
 
-		color.Cyan(line())
-		skipTest := prompt.GetUserInput("Test Proxies?", []string{"Yes", "No"})
+		color.Cyan(cli.Line())
+		skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})
 		if skipTest == 0 {
-			color.Cyan(line())
+			color.Cyan(cli.Line())
 			printBold("Proxy Tester")
 			proxyWG := sync.WaitGroup{}
 			for _, v := range data {

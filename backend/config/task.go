@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"prosperaio/utils/prompt"
+	"prosperaio/utils/cli"
 	"strings"
 
 	"github.com/fatih/color"
@@ -33,7 +33,7 @@ func LoadTasks() []Task {
 		taskPaths := GetDirPaths(taskFolder, ".csv")
 
 		items := append(taskPaths, "Exit")
-		i := prompt.GetUserInput("Select Task File", items)
+		i := cli.GetUserInput("Select Task File", items)
 		if i == len(items)-1 {
 			os.Exit(0)
 		}
