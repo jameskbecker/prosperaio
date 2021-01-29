@@ -54,11 +54,10 @@ func readCSV(r *csv.Reader) (records [][]string, err error) {
 		records = append(records, record)
 	}
 	if len(records) == 0 || len(records) == 1 && len(records[0]) == 1 && records[0][0] == "" {
-		err = errors.New("no tasks in selected file. Please try again")
+		err = errors.New("no data in selected file. Please try again")
 		return records, err
 	}
-
-	return records, nil
+	return records[1:], nil
 }
 
 //LoadCSV ...

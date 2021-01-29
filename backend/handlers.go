@@ -10,42 +10,15 @@ import (
 	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/log"
+	"prosperaio/prompt"
 
 	"github.com/fatih/color"
-	"github.com/manifoldco/promptui"
 )
 
 //TODO: merge prompt section with proxy handler as almost identical
 func loadTasksHandler() {
-	tasks := [][]string{}
+	tasks := config.LoadTasks()
 	color.Cyan(line())
-	for {
-		homedir, _ := os.UserHomeDir()
-		taskFolder := path.Join(homedir, "ProsperAIO", "tasks")
-		taskPaths := config.GetDirPaths(taskFolder, ".csv")
-
-		items := append(taskPaths, "Exit")
-		prompt := promptui.Select{
-			Label:    "Select Task File",
-			Items:    items,
-			Stdout:   &bellSkipper{},
-			HideHelp: true,
-		}
-
-		i, _, _ := prompt.Run()
-		if i == len(items)-1 {
-			os.Exit(0)
-		}
-
-		data, err := config.LoadCSV(path.Join(taskFolder, taskPaths[i]), taskFields)
-		if err != nil {
-			color.Red("Error: " + err.Error())
-			continue
-		}
-		tasks = data
-		break
-	}
-
 	parseMenuSelection(tasks)
 }
 
@@ -55,14 +28,8 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 		homedir, _ := os.UserHomeDir()
 		proxyFolder := path.Join(homedir, "ProsperAIO", "proxies")
 		proxyPaths := config.GetDirPaths(proxyFolder, ".txt")
-		prompt := promptui.Select{
-			Label:    "Select Proxy File",
-			Items:    proxyPaths,
-			Stdout:   &bellSkipper{},
-			HideHelp: true,
-		}
 
-		i, _, _ := prompt.Run()
+		i := prompt.GetUserInput("Select Proxy File", proxyPaths)
 		sPath := path.Join(proxyFolder, proxyPaths[i])
 		bData, _ := config.LoadTXT(sPath)
 		data := strings.FieldsFunc(string(bData), func(r rune) bool {
@@ -72,14 +39,8 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 		counters.Proxy = len(data)
 		log.UpdateTitle(version, counters)
 
-		prompt = promptui.Select{
-			Label:    "Test Proxies?",
-			Items:    []string{"Yes", "No"},
-			HideHelp: true,
-			Stdout:   &bellSkipper{},
-		}
 		color.Cyan(line())
-		skipTest, _, _ := prompt.Run()
+		skipTest := prompt.GetUserInput("Test Proxies?", []string{"Yes", "No"})
 		if skipTest == 0 {
 			color.Cyan(line())
 			printBold("Proxy Tester")
@@ -105,7 +66,7 @@ func testWebhookHandler() {
 func getWebhookURL() string {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
-	data, err := config.LoadCSV(path.Join(basedir, "settings.csv"), settingsFields)
+	data, err := config.LoadCSV(path.Join(basedir, "settings.csv"), config.SettingsFieldCount)
 	if err != nil {
 		color.Red("Error: " + err.Error())
 	}

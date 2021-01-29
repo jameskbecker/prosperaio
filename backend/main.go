@@ -19,8 +19,6 @@ import (
 )
 
 const version = "4.0.3 (ALPHA)"
-const taskFields = 15
-const settingsFields = 3
 
 var scanner = bufio.NewScanner(os.Stdin)
 var proxies = []string{}
@@ -29,6 +27,7 @@ var retryDelay time.Duration
 
 var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
+var profiles map[string]config.Profile
 
 func init() {
 	const expiryDate = "28 Feb 2021 10:55 GMT"
@@ -48,6 +47,9 @@ func init() {
 	print("Expires: " + expiryDate)
 	print("Monitor Delay: " + strconv.FormatInt(m, 10))
 	print("Retry Delay: " + strconv.FormatInt(r, 10))
+
+	profiles = config.LoadProfiles()
+	print("Loaded Profiles.")
 }
 
 func main() {
@@ -114,16 +116,16 @@ func getProxy() string {
 func loadDelays() (int64, int64) {
 	homedir, _ := os.UserHomeDir()
 	basedir := path.Join(homedir, "ProsperAIO")
-	records, err := config.LoadCSV(path.Join(basedir, "settings.csv"), settingsFields)
+	records, err := config.LoadCSV(path.Join(basedir, "settings.csv"), config.SettingsFieldCount)
 	if err != nil {
 		color.Red("Error: " + err.Error())
 	}
 
-	if len(records) < 2 || len(records[0]) < 1 {
+	if len(records) < 1 || len(records[0]) < 1 {
 		color.Red("Error: invalid settings.csv format")
 	}
-	monitorDelayStr := records[1][1]
-	retryDelayStr := records[1][2]
+	monitorDelayStr := records[0][1]
+	retryDelayStr := records[0][2]
 
 	monitorDelay, err := strconv.Atoi(monitorDelayStr)
 	if err != nil {

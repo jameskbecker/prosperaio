@@ -1,8 +1,9 @@
 package main
 
 import (
+	"prosperaio/prompt"
+
 	"github.com/fatih/color"
-	"github.com/manifoldco/promptui"
 )
 
 func line() string {
@@ -24,15 +25,12 @@ func logo() string {
 
 func mainMenu() (int, int) {
 	color.Cyan(line())
-	items := []string{"Run Tasks", "Load Proxies", "Test Webhook", "Exit"}
-	prompt := promptui.Select{
-		Label:    "Main Menu",
-		HideHelp: true,
-		Stdout:   &bellSkipper{},
-		Items:    items,
+	items := []string{
+		"Run Tasks",
+		"Load Proxies",
+		"Test Webhook",
+		"Exit",
 	}
-
-	selection, _, _ := prompt.Run()
-
+	selection := prompt.GetUserInput("Main Menu", items)
 	return selection, len(items) - 1
 }

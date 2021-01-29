@@ -1,6 +1,23 @@
-package main
+package prompt
 
-import "os"
+import (
+	"os"
+
+	"github.com/manifoldco/promptui"
+)
+
+//GetUserInput ...
+func GetUserInput(label string, items []string) int {
+	prompt := promptui.Select{
+		Label:    label,
+		Items:    items,
+		Stdout:   &bellSkipper{},
+		HideHelp: true,
+	}
+
+	i, _, _ := prompt.Run()
+	return i
+}
 
 // bellSkipper implements an io.WriteCloser that skips the terminal bell
 // character (ASCII code 7), and writes the rest to os.Stderr. It is used to
