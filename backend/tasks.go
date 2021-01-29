@@ -10,8 +10,8 @@ import (
 	"github.com/fatih/color"
 
 	"prosperaio/config"
-	"prosperaio/meshdesktop"
 	"prosperaio/prompt"
+	"prosperaio/sites/meshdesktop"
 )
 
 var runningTasks = sync.WaitGroup{}
