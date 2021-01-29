@@ -35,6 +35,19 @@ func startTask(t config.Task, taskID int) {
 	fmt.Println(profile)
 	os.Exit(0)
 	switch strings.ToUpper(site) {
+
+	case "JD_FE":
+		input := meshdesktop.Input{
+			MonitorInput: searchInput,
+			MonitorDelay: monitorDelay,
+			ErrorDelay:   retryDelay,
+			Size:         size,
+			Profile:      profile,
+			Region:       region,
+			WebhookURL:   config.GetWebhookURL(),
+		}
+		go meshdesktop.Run(input, taskID, &runningTasks)
+		break
 	// case "WEARESTRAP":
 	// 	input := wearestrap.Input{
 	// 		ProductURL: searchInput,
@@ -56,19 +69,6 @@ func startTask(t config.Task, taskID int) {
 	// 	}
 	// 	go wearestrap.Run(input, taskID, &runningTasks)
 	// 	break
-
-	case "JD_FE":
-		input := meshdesktop.Input{
-			MonitorInput: searchInput,
-			MonitorDelay: monitorDelay,
-			ErrorDelay:   retryDelay,
-			Size:         size,
-			Profile:      profile,
-			Region:       region,
-			WebhookURL:   config.GetWebhookURL(),
-		}
-		go meshdesktop.Run(input, taskID, &runningTasks)
-		break
 
 	default:
 		color.Red("[Row " + strconv.Itoa(taskID+1) + "] Invalid Site: '" + site + "'")
