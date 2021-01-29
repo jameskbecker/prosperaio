@@ -34,10 +34,10 @@ func (t *task) addAddress() error {
 	if err != nil {
 		return err
 	}
-	bodyS, _ := ioutil.ReadAll(bodyD)
+	bodyB, _ := ioutil.ReadAll(bodyD)
 
 	body := addressResponse{}
-	json.Unmarshal([]byte(bodyS), &body)
+	json.Unmarshal(bodyB, &body)
 
 	t.addressID = body.ID
 	return nil
