@@ -7,7 +7,6 @@ import (
 )
 
 func (t *task) webhookMessage() discord.Message {
-
 	//fmt.Println(checkoutURL)
 	productName := "N/A"
 	pid := "N/A"
