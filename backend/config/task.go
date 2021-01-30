@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"prosperaio/utils/cli"
@@ -86,6 +85,7 @@ func stringToTaskSlice(data [][]string) []Task {
 //GetTaskCount ...
 func GetTaskCount(data []Task) map[string]int {
 	siteCounts := map[string]int{
+		"JD-DE":      0,
 		"JD-GB":      0,
 		"WEARESTRAP": 0,
 	}
@@ -94,7 +94,6 @@ func GetTaskCount(data []Task) map[string]int {
 		if v.Region != "" {
 			site += "-" + v.Region
 		}
-		fmt.Println(site)
 		_, exists := siteCounts[strings.ToUpper(site)]
 		if !exists {
 			continue
