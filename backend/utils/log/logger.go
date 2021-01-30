@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
@@ -74,16 +75,16 @@ type TitleCounts struct {
 }
 
 //UpdateTitle ...
-func UpdateTitle(a string, b *TitleCounts) {
+func UpdateTitle(c *TitleCounts) {
 	title := []string{
-		"ProsperAIO v" + a,
-		//"Carted: " + strconv.Itoa(b.Cart),
-		//"Checkouts: " + strconv.Itoa(b.Checkout),
-		"Proxies: " + strconv.Itoa(b.Proxy),
+		"ProsperAIO v" + os.Getenv("version"),
+		//"Carted: " + strconv.Itoa(c.Cart),
+		//"Checkouts: " + strconv.Itoa(c.Checkout),
+		"Proxies: " + strconv.Itoa(c.Proxy),
 	}
 
 	if runtime.GOOS != "darwin" {
-		exec.Command("title", "your_title_here").Run()
+		exec.Command("title", strings.Join(title, " | ")).Run()
 		return
 	}
 	fmt.Print("\033]0;" + strings.Join(title, " | ") + "\007")

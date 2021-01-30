@@ -19,8 +19,6 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-const version = "4.0.3 (ALPHA)"
-
 var scanner = bufio.NewScanner(os.Stdin)
 var proxies = []string{}
 var monitorDelay time.Duration
@@ -39,6 +37,7 @@ func init() {
 		os.Exit(0)
 	}
 
+	os.Setenv("version", "4.0.3 (ALPHA)")
 	promptui.IconInitial = ""
 	monitorDelay, retryDelay = config.LoadDelays()
 
@@ -55,7 +54,7 @@ func init() {
 func main() {
 	go discord.SetPresence()
 	counters := log.TitleCounts{}
-	log.UpdateTitle(version, &counters)
+	log.UpdateTitle(&counters)
 	for {
 		selection, last := cli.MainMenu()
 		switch selection {
@@ -148,7 +147,7 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 	color.Cyan(cli.Line())
 	data := config.LoadProxies()
 	counters.Proxy = len(data)
-	log.UpdateTitle(version, counters)
+	log.UpdateTitle(counters)
 
 	color.Cyan(cli.Line())
 	skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})

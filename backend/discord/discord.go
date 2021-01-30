@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/hugolgst/rich-go/client"
 )
-
-const version = "4.0.3 (ALPHA)"
 
 var timeout = 5000
 var attempts = 0
@@ -30,7 +29,7 @@ func SetPresence() {
 	}
 
 	err = client.SetActivity(client.Activity{
-		State:      "v" + version,
+		State:      "v" + os.Getenv("version"),
 		Details:    "Running Tasks",
 		LargeImage: "prosperaio_logo",
 		LargeText:  "ProsperAIO",
@@ -139,7 +138,7 @@ func GetFooter() Footer {
 	ts := time.Now().UTC()
 
 	return Footer{
-		Text:    "ProsperAIO v" + version + " • " + ts.Format("02/01/2006 15:04:05.000 MST"),
+		Text:    "ProsperAIO v" + os.Getenv("version") + " • " + ts.Format("02/01/2006 15:04:05.000 MST"),
 		IconURL: "https://i.imgur.com/NGGew9J.png",
 	}
 }
