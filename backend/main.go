@@ -83,26 +83,20 @@ func main() {
 func loadTasksHandler() {
 	tasks := config.LoadTasks()
 	color.Cyan(cli.Line())
-	for {
-		color.Cyan(cli.Line())
-		taskCounts := config.GetTaskCount(tasks)
-		selection, last := cli.TaskMenu(taskCounts)
-		switch selection {
-		case 0: //All
-			color.Cyan(cli.Line())
-			printBold("Task Log")
-			startTaskHandler(tasks)
-			break
+	taskCounts := config.GetTaskCount(tasks)
+	selection, last := cli.TaskMenu(taskCounts)
 
-		case last:
-			os.Exit(0)
-			break
-
-		default:
-			color.Red("Error: unexpected selection value")
-			continue
-		}
+	color.Cyan(cli.Line())
+	printBold("Task Log")
+	switch selection {
+	case 0: //All
+		startTaskHandler(tasks)
 		break
+
+	case last:
+		os.Exit(0)
+		break
+
 	}
 
 	runningTasks.Wait()
