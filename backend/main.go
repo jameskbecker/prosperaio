@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"os"
-	"path"
 	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/sites/meshdesktop"
@@ -147,37 +146,29 @@ func startTaskHandler(tasks []config.Task) {
 
 func loadProxiesHandler(counters *log.TitleCounts) {
 	color.Cyan(cli.Line())
-	for {
-		homedir, _ := os.UserHomeDir()
-		proxyFolder := path.Join(homedir, "ProsperAIO", "proxies")
-		proxyPaths := config.GetDirPaths(proxyFolder, ".txt")
+	data := config.LoadProxies()
+	counters.Proxy = len(data)
+	log.UpdateTitle(version, counters)
 
-		i := cli.GetUserInput("Select Proxy File", proxyPaths)
-		sPath := path.Join(proxyFolder, proxyPaths[i])
-		bData, _ := config.LoadTXT(sPath)
-		data := strings.FieldsFunc(string(bData), func(r rune) bool {
-			return string(r) == "\n" || string(r) == "\r"
-		})
-
-		counters.Proxy = len(data)
-		log.UpdateTitle(version, counters)
-
-		color.Cyan(cli.Line())
-		skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})
-		if skipTest == 0 {
-			color.Cyan(cli.Line())
-			printBold("Proxy Tester")
-			proxyWG := sync.WaitGroup{}
-			for _, v := range data {
-				proxyWG.Add(1)
-				proxies = append(proxies, v)
-				go client.TestProxy(v, &proxyWG)
-			}
-			proxyWG.Wait()
-		}
-
-		break
+	color.Cyan(cli.Line())
+	skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})
+	if skipTest == 0 {
+		testProxyHandler(data)
 	}
+
+}
+
+func testProxyHandler(data []string) {
+	color.Cyan(cli.Line())
+	printBold("Proxy Tester")
+
+	proxyWG := sync.WaitGroup{}
+	for _, v := range data {
+		proxyWG.Add(1)
+		proxies = append(proxies, v)
+		go client.TestProxy(v, &proxyWG)
+	}
+	proxyWG.Wait()
 }
 
 func testWebhookHandler() {
