@@ -72,17 +72,13 @@ func main() {
 		}
 		break
 	}
-
 }
 
-func getProxy() string {
-	proxy := ""
-	if len(proxies) == 0 {
-		return proxy
+func getProxy() (proxy string) {
+	if len(proxies) < 1 {
+		return
 	}
-
 	proxy = proxies[0]
 	proxies = client.RotateProxy(proxies)
-
-	return proxy
+	return
 }
