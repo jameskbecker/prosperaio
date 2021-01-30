@@ -91,10 +91,7 @@ func loadTasksHandler() {
 		case 0: //All
 			color.Cyan(cli.Line())
 			printBold("Task Log")
-			for i, task := range tasks {
-				runningTasks.Add(1)
-				startTaskHandler(task, i+1)
-			}
+			startTaskHandler(tasks)
 			break
 
 		case last:
@@ -109,6 +106,49 @@ func loadTasksHandler() {
 	}
 
 	runningTasks.Wait()
+}
+
+func startTaskHandler(tasks []config.Task) {
+	for i, t := range tasks {
+		site := t.Site
+		if t.Mode != "" {
+			site += "_" + t.Mode
+		}
+
+		profile, ok := profiles[t.ProfileName]
+		if !ok {
+			color.Red("Invalid Profile: '" + t.ProfileName + "'")
+			continue
+		}
+
+		taskID := i + 1
+		runningTasks.Add(1)
+		input := config.TaskInput{
+			ID:            taskID,
+			MonitorInput:  t.MonitorInput,
+			Region:        t.Region,
+			Size:          t.Size,
+			Proxy:         getProxy(),
+			PaymentMethod: t.PaymentMethod,
+			WebhookURL:    config.GetWebhookURL(),
+			Profile:       profile,
+			MonitorDelay:  monitorDelay,
+			RetryDelay:    retryDelay,
+			WG:            &runningTasks,
+		}
+
+		switch strings.ToUpper(site) {
+		case "JD_FE":
+			go meshdesktop.Run(input)
+			break
+		case "WEARESTRAP":
+			go wearestrap.Run(input)
+			break
+
+		default:
+			color.Red("Invalid Site: '" + site + "'")
+		}
+	}
 }
 
 func loadProxiesHandler(counters *log.TitleCounts) {
@@ -149,44 +189,6 @@ func loadProxiesHandler(counters *log.TitleCounts) {
 func testWebhookHandler() {
 	webhookURL := config.GetWebhookURL()
 	discord.TestWebhook(webhookURL)
-}
-
-func startTaskHandler(t config.Task, taskID int) {
-	_, ok := profiles[t.ProfileName]
-	if !ok {
-
-	}
-	profile := profiles[t.ProfileName]
-	site := t.Site
-	if t.Mode != "" {
-		site += "_" + t.Mode
-	}
-
-	input := config.TaskInput{
-		ID:            taskID,
-		MonitorInput:  t.MonitorInput,
-		Region:        t.Region,
-		Size:          t.Size,
-		Proxy:         getProxy(),
-		PaymentMethod: t.PaymentMethod,
-		WebhookURL:    config.GetWebhookURL(),
-		Profile:       profile,
-		MonitorDelay:  monitorDelay,
-		RetryDelay:    retryDelay,
-		WG:            &runningTasks,
-	}
-
-	switch strings.ToUpper(site) {
-	case "JD_FE":
-		go meshdesktop.Run(input)
-		break
-	case "WEARESTRAP":
-		go wearestrap.Run(input)
-		break
-
-	default:
-		color.Red("Invalid Site: '" + site + "'")
-	}
 }
 
 func getProxy() (proxy string) {
