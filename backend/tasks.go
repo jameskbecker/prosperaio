@@ -13,31 +13,23 @@ import (
 var runningTasks = sync.WaitGroup{}
 
 func startTask(t config.Task, taskID int) {
-	site := t.Site
-	mode := t.Mode
-	region := t.Region
-	profileName := t.ProfileName
-	searchInput := t.MonitorInput
-	size := t.Size
-	paymentMethod := t.PaymentMethod
-
-	_, ok := profiles[profileName]
+	_, ok := profiles[t.ProfileName]
 	if !ok {
 
 	}
-	profile := profiles[profileName]
-
-	if mode != "" {
-		site += "_" + mode
+	profile := profiles[t.ProfileName]
+	site := t.Site
+	if t.Mode != "" {
+		site += "_" + t.Mode
 	}
 
 	input := config.TaskInput{
 		ID:            taskID,
-		MonitorInput:  searchInput,
-		Region:        region,
-		Size:          size,
+		MonitorInput:  t.MonitorInput,
+		Region:        t.Region,
+		Size:          t.Size,
 		Proxy:         getProxy(),
-		PaymentMethod: paymentMethod,
+		PaymentMethod: t.PaymentMethod,
 		WebhookURL:    config.GetWebhookURL(),
 		Profile:       profile,
 		MonitorDelay:  monitorDelay,
