@@ -47,6 +47,19 @@ func (t *task) getPaymentAndShippingBlocks() error {
 	return nil
 }
 
+type addressResponse struct {
+	EmptyCart     bool        `json:"emptyCart"`
+	IsVirtualCart bool        `json:"isVirtualCart"`
+	PurchaseError bool        `json:"minimalPurchaseError"`
+	Account       accountRes  `json:"account"`
+	Invoice       interface{} `json:"invoice"`
+}
+
+type accountRes struct {
+	NewToken       string `json:"newToken"`
+	NewStaticToken string `json:"newStaticToken"`
+}
+
 func (t *task) modifyAccountAndAddress() error {
 	url := t.baseURL + "/es/pedido?modifyAccountAndAddress"
 	form := t.accountAndAddress().Encode()
@@ -81,6 +94,11 @@ func (t *task) modifyAccountAndAddress() error {
 	}
 
 	return nil
+}
+
+type ppTokenResponse struct {
+	Success bool   `json:"success"`
+	Token   string `json:"token"`
 }
 
 func (t *task) getToken() error {

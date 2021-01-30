@@ -44,6 +44,10 @@ func (t *task) getProductData() (strings.Reader, error) {
 	return body, nil
 }
 
+type productData struct {
+	Token, PID, CustID, PVal, Name string
+}
+
 func (t *task) parseProductData(data strings.Reader) (productData, error) {
 	pData := productData{}
 	doc, err := goquery.NewDocumentFromReader(&data)
@@ -92,6 +96,31 @@ func (t *task) parseProductData(data strings.Reader) (productData, error) {
 	pData.PVal = group1
 
 	return pData, nil
+}
+
+type atcResponse struct {
+	Success bool   `json:"success"`
+	Errors  string `json:"errors"`
+	Qty     int    `json:"quantity"`
+	Cart    cart   `json:"cart"`
+}
+
+type cart struct {
+	Products []product `json:"products"`
+}
+
+type product struct {
+	Cover imageData `json:"cover"`
+}
+
+type imageData struct {
+	Medium image `json:"medium"`
+}
+
+type image struct {
+	URL    string `json:"url"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 func (t *task) add(form url.Values) (int, error) {

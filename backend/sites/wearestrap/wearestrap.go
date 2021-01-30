@@ -2,6 +2,7 @@ package wearestrap
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -16,6 +17,23 @@ import (
 const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"
 
 //atc url https://wearestrap.com/es/carrito?add=1&id_product=4074&id_product_attribute=14580
+
+type task struct {
+	id           int
+	productURL   *url.URL
+	baseURL      string
+	size         string
+	checkoutURL  string
+	thumbnailURL string
+	token        string
+	staticToken  string
+	monitor      time.Duration
+	retry        time.Duration
+	profile      config.Profile
+	pData        productData
+	log          log.Logger
+	client       *http.Client
+}
 
 //Run --
 func Run(i config.TaskInput) {
