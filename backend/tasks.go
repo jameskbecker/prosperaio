@@ -4,7 +4,6 @@ import (
 	"prosperaio/config"
 	"prosperaio/sites/meshdesktop"
 	"prosperaio/sites/wearestrap"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -55,6 +54,6 @@ func startTask(t config.Task, taskID int) {
 		break
 
 	default:
-		color.Red("[Row " + strconv.Itoa(taskID+1) + "] Invalid Site: '" + site + "'")
+		color.Red("Invalid Site: '" + site + "'")
 	}
 }
