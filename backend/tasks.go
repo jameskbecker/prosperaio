@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"prosperaio/config"
 	"prosperaio/sites/meshdesktop"
 	"strconv"
@@ -32,8 +30,7 @@ func startTask(t config.Task, taskID int) {
 	if mode != "" {
 		site += "_" + mode
 	}
-	fmt.Println(profile)
-	os.Exit(0)
+
 	switch strings.ToUpper(site) {
 
 	case "JD_FE":
