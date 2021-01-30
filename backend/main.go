@@ -3,12 +3,17 @@ package main
 import (
 	"bufio"
 	"os"
+	"path"
 	"prosperaio/config"
 	"prosperaio/discord"
+	"prosperaio/sites/meshdesktop"
+	"prosperaio/sites/wearestrap"
 	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -25,6 +30,7 @@ var retryDelay time.Duration
 var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
 var profiles map[string]config.Profile
+var runningTasks = sync.WaitGroup{}
 
 func init() {
 	const expiryDate = "28 Feb 2021 10:55 GMT"
@@ -81,4 +87,113 @@ func getProxy() (proxy string) {
 	proxy = proxies[0]
 	proxies = client.RotateProxy(proxies)
 	return
+}
+
+func loadTasksHandler() {
+	tasks := config.LoadTasks()
+	color.Cyan(cli.Line())
+	for {
+		color.Cyan(cli.Line())
+		taskCounts := config.GetTaskCount(tasks)
+		selection, last := cli.TaskMenu(taskCounts)
+		switch selection {
+		case 0: //All
+			color.Cyan(cli.Line())
+			printBold("Task Log")
+			for i, row := range tasks {
+				runningTasks.Add(1)
+				startTask(row, i+1)
+			}
+			break
+
+		case last:
+			os.Exit(0)
+			break
+
+		default:
+			color.Red("Error: unexpected selection value")
+			continue
+		}
+		break
+	}
+
+	runningTasks.Wait()
+}
+
+func loadProxiesHandler(counters *log.TitleCounts) {
+	color.Cyan(cli.Line())
+	for {
+		homedir, _ := os.UserHomeDir()
+		proxyFolder := path.Join(homedir, "ProsperAIO", "proxies")
+		proxyPaths := config.GetDirPaths(proxyFolder, ".txt")
+
+		i := cli.GetUserInput("Select Proxy File", proxyPaths)
+		sPath := path.Join(proxyFolder, proxyPaths[i])
+		bData, _ := config.LoadTXT(sPath)
+		data := strings.FieldsFunc(string(bData), func(r rune) bool {
+			return string(r) == "\n" || string(r) == "\r"
+		})
+
+		counters.Proxy = len(data)
+		log.UpdateTitle(version, counters)
+
+		color.Cyan(cli.Line())
+		skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})
+		if skipTest == 0 {
+			color.Cyan(cli.Line())
+			printBold("Proxy Tester")
+			proxyWG := sync.WaitGroup{}
+			for _, v := range data {
+				proxyWG.Add(1)
+				proxies = append(proxies, v)
+				go client.TestProxy(v, &proxyWG)
+			}
+			proxyWG.Wait()
+		}
+
+		break
+	}
+}
+
+func testWebhookHandler() {
+	webhookURL := config.GetWebhookURL()
+	discord.TestWebhook(webhookURL)
+}
+
+func startTask(t config.Task, taskID int) {
+	_, ok := profiles[t.ProfileName]
+	if !ok {
+
+	}
+	profile := profiles[t.ProfileName]
+	site := t.Site
+	if t.Mode != "" {
+		site += "_" + t.Mode
+	}
+
+	input := config.TaskInput{
+		ID:            taskID,
+		MonitorInput:  t.MonitorInput,
+		Region:        t.Region,
+		Size:          t.Size,
+		Proxy:         getProxy(),
+		PaymentMethod: t.PaymentMethod,
+		WebhookURL:    config.GetWebhookURL(),
+		Profile:       profile,
+		MonitorDelay:  monitorDelay,
+		RetryDelay:    retryDelay,
+		WG:            &runningTasks,
+	}
+
+	switch strings.ToUpper(site) {
+	case "JD_FE":
+		go meshdesktop.Run(input)
+		break
+	case "WEARESTRAP":
+		go wearestrap.Run(input)
+		break
+
+	default:
+		color.Red("Invalid Site: '" + site + "'")
+	}
 }
