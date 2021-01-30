@@ -14,6 +14,26 @@ import (
 	"prosperaio/utils/log"
 )
 
+//Run mesh desktop task
+func Run(i config.TaskInput) {
+	t := *initTask(i)
+	t.log.Debug("Starting Task")
+
+	t.stockRoutine()
+	t.log.Debug("SKU: " + t.pData.sku)
+	t.log.Debug("Price: " + t.pData.price)
+
+	t.atcRoutine()
+	t.checkoutRoutine()
+
+	err := discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	if err != nil {
+		fmt.Println(t.checkoutURL)
+		panic(err)
+	}
+	i.WG.Done()
+}
+
 type task struct {
 	client           *http.Client
 	productURL       *url.URL
@@ -39,26 +59,6 @@ type productData struct {
 	sku      string
 	imageURL string
 	price    string
-}
-
-//Run mesh desktop task
-func Run(i config.TaskInput) {
-	t := *initTask(i)
-	t.log.Debug("Starting Task")
-
-	t.stockRoutine()
-	t.log.Debug("SKU: " + t.pData.sku)
-	t.log.Debug("Price: " + t.pData.price)
-
-	t.atcRoutine()
-	t.checkoutRoutine()
-
-	err := discord.PostWebhook(i.WebhookURL, t.webhookMessage())
-	if err != nil {
-		fmt.Println(t.checkoutURL)
-		panic(err)
-	}
-	i.WG.Done()
 }
 
 func initTask(i config.TaskInput) *task {
