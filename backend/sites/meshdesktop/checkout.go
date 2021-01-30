@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"prosperaio/utils/client"
 	"strings"
 )
@@ -168,4 +169,45 @@ func (t *task) submitCheckout() (string, error) {
 		return "", errors.New("NO RESPONSE LOCATION HEADER")
 	}
 	return checkoutURL, nil
+}
+
+func (t *task) checkoutRoutine() {
+	err := t.initGuest()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	t.log.Warn("Checking Out [1/3]")
+	err = t.addAddress()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	t.log.Warn("Checking Out [2/3]")
+	err = t.updateDeliveryAddressAndMethod()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	t.log.Warn("Checking Out [3/3]")
+	err = t.updateBillingAddress()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	t.log.Warn("Submitting Order")
+	checkoutURL, err := t.submitCheckout()
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	cookieURL, _ := url.Parse(t.baseURL)
+	cookies, err := client.GetJSONCookies(cookieURL, t.client)
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	t.checkoutURL = buildCheckoutURL(cookies, checkoutURL)
+}
+
+func buildCheckoutURL(cookies []byte, redirURL string) string {
+	qs := url.Values{}
+	qs.Set("cookie", string(cookies))
+	qs.Set("redirectUrl", redirURL)
+
+	return "http://localhost/extension.prosperaio.com?" + qs.Encode()
 }

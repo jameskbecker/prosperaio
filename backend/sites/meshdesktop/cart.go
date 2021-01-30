@@ -13,29 +13,27 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func (t *task) getStockData() error {
-	ts := time.Now().UTC().UnixNano() / 1e6
-	uri := t.productURL.String() + "/stock/?_=" + strconv.FormatInt(ts, 10)
+func (t *task) getStockData() (*http.Response, error) {
+	ts := int(time.Now().UTC().UnixNano() / 1e6)
+	path := "/stock/?_=" + strconv.Itoa(ts)
+	uri := t.productURL.String() + path
+
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	req.Header.Set("accept", "*/*")
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.useragent)
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("sec-fetch-mode", "cors")
-	req.Header.Set("sec-fetch-dest", "empty")
-	req.Header.Set("referer", "t.productURL.String()")
-	req.Header.Set("accept-encoding", "identity") //TODO: SWITCH BACK TO GZIP ETC
-	req.Header.Set("accept-language", "en-GB,en-US;q=0.9,en;q=0.8")
 
+	setDefaultHeaders(req, t.useragent, t.baseURL)
+	req.Header.Set("referer", t.productURL.String())
 	res, err := t.client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	return res, nil
+}
+
+func (t *task) parseStockData(res *http.Response) error {
 	bodyD, err := client.Decompress(res)
 	if err != nil {
 		return err
@@ -47,22 +45,17 @@ func (t *task) getStockData() error {
 
 	selector := `button[data-e2e="pdp-productDetails-size"]`
 	s := doc.Find(selector)
+
 	sel := s.EachWithBreak(t.findSize)
-	sku, exists := sel.Attr("data-sku")
-	if exists {
-		t.pData.sku = sku
-		t.updatePrefix()
-	}
-	price, exists := sel.Attr("data-price")
-	if exists {
-		t.pData.price = price
-	}
-	if t.pData.sku == "" {
+	sku, _ := sel.Attr("data-sku")
+	price, _ := sel.Attr("data-price")
+
+	if sku == "" {
 		return errors.New("Size not found or OOS")
 	}
+	t.pData.sku = sku
+	t.pData.price = price
 
-	t.log.Debug("SKU: " + t.pData.sku)
-	t.log.Debug("Price: " + t.pData.price)
 	return nil
 }
 
@@ -71,6 +64,28 @@ func (t *task) findSize(i int, sel *goquery.Selection) bool {
 		return false
 	}
 	return true
+}
+
+func (t *task) stockRoutine() {
+	for {
+		t.log.Warn("Fetching Stock Data")
+		stockRes, err := t.getStockData()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.monitorDelay)
+			continue
+		}
+
+		err = t.parseStockData(stockRes)
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.monitorDelay)
+			continue
+		}
+		break
+	}
+
+	t.updatePrefix()
 }
 
 type order struct {
@@ -99,12 +114,12 @@ type delivery struct {
 	DeliveryMethodID string `json:"deliveryMethodID"`
 }
 
-func (t *task) addToCart() error {
+func (t *task) postATC() (*http.Response, error) {
 	uri := t.baseURL + "/cart/" + t.pData.sku
 	form, _ := buildATCForm()
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	setDefaultHeaders(req, t.useragent, t.baseURL)
 	req.Header.Set("referer", t.productURL.String())
@@ -112,9 +127,13 @@ func (t *task) addToCart() error {
 
 	res, err := t.client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	return res, nil
+}
+
+func (t *task) parseATCRes(res *http.Response) error {
 	body := order{}
 	bodyD, err := client.Decompress(res)
 	if err != nil {
@@ -125,9 +144,31 @@ func (t *task) addToCart() error {
 	if body.Count < 1 || len(body.Contents) < 1 {
 		return errors.New("Added 0 items to Cart")
 	}
-	t.log.Info("Successfully Added " + strconv.Itoa(body.Count) + " Item(s) to Cart! (" + body.Ref + ")")
+
 	t.shippingMethodID = body.Delivery.DeliveryMethodID
 	t.pData.name = body.Contents[0].Name
 	t.pData.imageURL = body.Contents[0].Image.URL
+
+	t.log.Info("Successfully Added " + strconv.Itoa(body.Count) + " Item(s) to Cart! (" + body.Ref + ")")
 	return nil
+}
+
+func (t *task) atcRoutine() {
+	for {
+		t.log.Warn("Adding to Cart")
+		res, err := t.postATC()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retryDelay)
+			continue
+		}
+
+		err = t.parseATCRes(res)
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retryDelay)
+			continue
+		}
+		break
+	}
 }
