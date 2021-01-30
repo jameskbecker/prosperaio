@@ -28,10 +28,10 @@ func GetWebhookURL() string {
 		color.Red("Error: " + err.Error())
 	}
 
-	if len(data) < 2 || len(data[0]) < 1 {
+	if len(data) < 1 || len(data[0]) < 1 {
 		color.Red("Error: invalid settings.csv format")
 	}
-	webhookURL := data[1][0]
+	webhookURL := data[0][0]
 
 	if webhookURL == "" {
 		color.Red("Error: no webhook URL found in settings.csv")
