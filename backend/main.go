@@ -93,7 +93,7 @@ func loadTasksHandler() {
 		startTaskHandler(tasks)
 		break
 
-	case last:
+	case last: //Exit
 		os.Exit(0)
 		break
 
