@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -75,12 +74,12 @@ type TitleCounts struct {
 }
 
 //UpdateTitle ...
-func UpdateTitle(c *TitleCounts) {
+func UpdateTitle() {
 	title := []string{
 		"ProsperAIO v" + os.Getenv("version"),
-		//"Carted: " + strconv.Itoa(c.Cart),
-		//"Checkouts: " + strconv.Itoa(c.Checkout),
-		"Proxies: " + strconv.Itoa(c.Proxy),
+		"Carted: " + os.Getenv("cartCount"),
+		"Checkouts: " + os.Getenv("checkoutCount"),
+		"Proxies: " + os.Getenv("proxyCount"),
 	}
 
 	if runtime.GOOS != "darwin" {

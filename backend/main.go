@@ -38,6 +38,9 @@ func init() {
 	}
 
 	os.Setenv("version", "4.0.3 (ALPHA)")
+	os.Setenv("proxyCount", "0")
+	os.Setenv("cartCount", "0")
+	os.Setenv("checkoutCount", "0")
 	promptui.IconInitial = ""
 	monitorDelay, retryDelay = config.LoadDelays()
 
@@ -53,8 +56,7 @@ func init() {
 
 func main() {
 	go discord.SetPresence()
-	counters := log.TitleCounts{}
-	log.UpdateTitle(&counters)
+	log.UpdateTitle()
 	for {
 		selection, last := cli.MainMenu()
 		switch selection {
@@ -62,7 +64,7 @@ func main() {
 			loadTasksHandler()
 			break
 		case 1:
-			loadProxiesHandler(&counters)
+			loadProxiesHandler()
 			continue
 		case 2:
 			testWebhookHandler()
@@ -143,11 +145,11 @@ func startTaskHandler(tasks []config.Task) {
 	}
 }
 
-func loadProxiesHandler(counters *log.TitleCounts) {
+func loadProxiesHandler() {
 	color.Cyan(cli.Line())
 	data := config.LoadProxies()
-	counters.Proxy = len(data)
-	log.UpdateTitle(counters)
+	os.Setenv("proxyCount", strconv.Itoa(len(data)))
+	log.UpdateTitle()
 
 	color.Cyan(cli.Line())
 	skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})
