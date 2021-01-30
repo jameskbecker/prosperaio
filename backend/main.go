@@ -93,7 +93,7 @@ func loadTasksHandler() {
 			printBold("Task Log")
 			for i, task := range tasks {
 				runningTasks.Add(1)
-				startTask(task, i+1)
+				startTaskHandler(task, i+1)
 			}
 			break
 
