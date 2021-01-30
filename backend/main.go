@@ -91,9 +91,9 @@ func loadTasksHandler() {
 		case 0: //All
 			color.Cyan(cli.Line())
 			printBold("Task Log")
-			for i, row := range tasks {
+			for i, task := range tasks {
 				runningTasks.Add(1)
-				startTask(row, i+1)
+				startTask(task, i+1)
 			}
 			break
 
