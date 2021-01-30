@@ -25,13 +25,14 @@ func TaskMenu(data map[string]int) (int, int) {
 	for _, v := range data {
 		taskCount += v
 	}
-
-	items := []string{
-		"Run All Tasks (" + strconv.Itoa(taskCount) + ")",
-		"Run JD-GB Tasks (" + strconv.Itoa(data["JD-GB"]) + ")",
-		"Run Wearestrap Tasks (" + strconv.Itoa(data["WEARESTRAP"]) + ")",
-		"Exit",
+	items := []string{"Run All Tasks (" + strconv.Itoa(taskCount) + ")"}
+	for k, v := range data {
+		if v > 0 {
+			items = append(items, "Run "+k+" Tasks ("+strconv.Itoa(v)+")")
+		}
 	}
+
+	items = append(items, "Exit")
 
 	selection := GetUserInput("Task Menu", items)
 	return selection, len(items) - 1
