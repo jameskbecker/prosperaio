@@ -105,27 +105,27 @@ func TestWebhook(url string) {
 
 func testFields() []Field {
 	return []Field{
-		Field{
+		{
 			Name:   "Product",
 			Value:  "------------------------------",
 			Inline: false,
 		},
-		Field{
+		{
 			Name:   "Site",
 			Value:  "----------",
 			Inline: true,
 		},
-		Field{
+		{
 			Name:   "Size",
 			Value:  "----------",
 			Inline: true,
 		},
-		Field{
+		{
 			Name:   "Order",
 			Value:  "||----------||",
 			Inline: true,
 		},
-		Field{
+		{
 			Name:   "Checkout Link",
 			Value:  "[Click Here](https://twitter.com/theprosperbot)",
 			Inline: true,
