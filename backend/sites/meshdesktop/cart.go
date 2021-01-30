@@ -99,7 +99,6 @@ type delivery struct {
 	DeliveryMethodID string `json:"deliveryMethodID"`
 }
 
-//Need to put the delivery method id
 func (t *task) addToCart() error {
 	uri := t.baseURL + "/cart/" + t.pData.sku
 	form, _ := buildATCForm()
@@ -107,17 +106,9 @@ func (t *task) addToCart() error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("accept", "*/*")
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.useragent)
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("origin", t.baseURL)
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("sec-fetch-mode", "cors")
-	req.Header.Set("sec-fetch-dest", "empty")
+	setDefaultHeaders(req, t.useragent, t.baseURL)
 	req.Header.Set("referer", t.productURL.String())
 	req.Header.Set("accept-encoding", "identity")
-	req.Header.Set("accept-language", "en-GB,en-US;q=0.9,en;q=0.8")
 
 	res, err := t.client.Do(req)
 	if err != nil {
@@ -139,8 +130,4 @@ func (t *task) addToCart() error {
 	t.pData.name = body.Contents[0].Name
 	t.pData.imageURL = body.Contents[0].Image.URL
 	return nil
-}
-
-func (t *task) updateDelivery() {
-
 }
