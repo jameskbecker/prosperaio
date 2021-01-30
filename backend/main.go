@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path"
 	"prosperaio/config"
@@ -11,6 +12,7 @@ import (
 	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -54,6 +56,8 @@ func init() {
 }
 
 func main() {
+	fmt.Println(runtime.GOOS)
+	return
 	go discord.SetPresence()
 	counters := log.TitleCounts{}
 	log.UpdateTitle(version, &counters)
