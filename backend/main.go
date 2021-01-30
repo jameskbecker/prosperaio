@@ -151,7 +151,7 @@ func testWebhookHandler() {
 	discord.TestWebhook(webhookURL)
 }
 
-func startTask(t config.Task, taskID int) {
+func startTaskHandler(t config.Task, taskID int) {
 	_, ok := profiles[t.ProfileName]
 	if !ok {
 
