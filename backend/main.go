@@ -80,15 +80,6 @@ func main() {
 	}
 }
 
-func getProxy() (proxy string) {
-	if len(proxies) < 1 {
-		return
-	}
-	proxy = proxies[0]
-	proxies = client.RotateProxy(proxies)
-	return
-}
-
 func loadTasksHandler() {
 	tasks := config.LoadTasks()
 	color.Cyan(cli.Line())
@@ -196,4 +187,13 @@ func startTask(t config.Task, taskID int) {
 	default:
 		color.Red("Invalid Site: '" + site + "'")
 	}
+}
+
+func getProxy() (proxy string) {
+	if len(proxies) < 1 {
+		return
+	}
+	proxy = proxies[0]
+	proxies = client.RotateProxy(proxies)
+	return
 }
