@@ -5,45 +5,33 @@ import (
 	"net/url"
 	"time"
 
+	"prosperaio/config"
 	"prosperaio/utils/log"
 )
 
-//Input data for task
-type Input struct {
-	ProductURL string
-	Size       string
-	Email      string
-	Proxy      string
-	WebhookURL string
-	Monitor    time.Duration
-	Retry      time.Duration
-	Billing    Address
-}
-
 //Address ...
-type Address struct {
-	First   string
-	Last    string
-	Address string
-	City    string
-	Zip     string
-	Country string
-	Phone   string
-}
+// type Address struct {
+// 	First   string
+// 	Last    string
+// 	Address string
+// 	City    string
+// 	Zip     string
+// 	Country string
+// 	Phone   string
+// }
 
 type task struct {
 	id           int
 	productURL   *url.URL
 	baseURL      string
 	size         string
-	email        string
 	checkoutURL  string
 	thumbnailURL string
 	token        string
 	staticToken  string
 	monitor      time.Duration
 	retry        time.Duration
-	billing      Address
+	profile      config.Profile
 	pData        productData
 	log          log.Logger
 	client       *http.Client

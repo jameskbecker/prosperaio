@@ -6,6 +6,8 @@ import (
 	"path"
 	"prosperaio/utils/cli"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -22,6 +24,21 @@ type Task struct {
 	MonitorInput  string
 	Size          string
 	PaymentMethod string
+}
+
+//TaskInput ...
+type TaskInput struct {
+	ID            int
+	MonitorInput  string
+	Region        string
+	Size          string
+	Proxy         string
+	PaymentMethod string
+	WebhookURL    string
+	Profile       Profile
+	MonitorDelay  time.Duration
+	RetryDelay    time.Duration
+	WG            *sync.WaitGroup
 }
 
 //LoadTasks ...

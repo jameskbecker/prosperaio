@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
+	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
@@ -18,22 +18,21 @@ const useragent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/5
 //atc url https://wearestrap.com/es/carrito?add=1&id_product=4074&id_product_attribute=14580
 
 //Run --
-func Run(i Input, taskID int, wg *sync.WaitGroup) {
+func Run(i config.TaskInput) {
 	// //startTS := time.Now()
 	c, _ := client.Create(i.Proxy)
 
 	t := task{
 		size:    i.Size,
-		email:   i.Email,
-		billing: i.Billing,
-		id:      taskID,
-		monitor: i.Monitor,
-		retry:   i.Retry,
+		profile: i.Profile,
+		id:      i.ID,
+		monitor: i.MonitorDelay,
+		retry:   i.RetryDelay,
 		client:  &c,
 		pData:   productData{PID: "0000"},
 	}
 	t.updatePrefix()
-	pURL, err := url.Parse(i.ProductURL)
+	pURL, err := url.Parse(i.MonitorInput)
 	if err != nil {
 		t.log.Error("Invalid Product URL")
 		return
@@ -47,7 +46,7 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 	t.checkoutProcess()
 
 	discord.PostWebhook(i.WebhookURL, t.webhookMessage())
-	wg.Done()
+	i.WG.Done()
 }
 
 func (t *task) cartProcess() {

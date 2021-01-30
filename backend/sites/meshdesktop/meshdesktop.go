@@ -6,26 +6,12 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 
 	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 )
-
-//Input ...
-type Input struct {
-	ErrorDelay   time.Duration
-	MonitorDelay time.Duration
-	Profile      config.Profile
-	MonitorInput string
-	Size         string
-	Proxy        string
-	Region       string
-	WebhookURL   string
-}
 
 type task struct {
 	client           *http.Client
@@ -53,7 +39,7 @@ type productData struct {
 }
 
 //Run mesh desktop task ---> TODO: HANDLE ERRORS
-func Run(i Input, taskID int, wg *sync.WaitGroup) {
+func Run(i config.TaskInput) {
 	//Initalise
 	c, _ := client.Create(i.Proxy)
 	pURL, err := url.Parse(i.MonitorInput)
@@ -71,7 +57,7 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 		region:     i.Region,
 		baseURL:    "https://" + pURL.Hostname(),
 		size:       i.Size,
-		id:         taskID,
+		id:         i.ID,
 		pData: productData{
 			pid: pid,
 		},
@@ -138,7 +124,7 @@ func Run(i Input, taskID int, wg *sync.WaitGroup) {
 		fmt.Println(t.checkoutURL)
 		panic(err)
 	}
-	wg.Done()
+	i.WG.Done()
 }
 func (t *task) updatePrefix() {
 	tID := fmt.Sprintf("%04d", t.id)

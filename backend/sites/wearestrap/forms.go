@@ -2,6 +2,7 @@ package wearestrap
 
 import (
 	"net/url"
+	"prosperaio/config"
 	"strconv"
 )
 
@@ -26,8 +27,8 @@ func (t *task) accountAndAddress() url.Values {
 	form.Set("ajax_request", "1")
 	form.Set("action", "modifyAccountAndAddress")
 	form.Set("trigger", "thecheckout-address-invoice") // "thecheckout-confirm"
-	form.Set("account", account(t.email, t.token).Encode())
-	form.Set("invoice", address(t.billing).Encode())
+	form.Set("account", account(t.profile.Email, t.token).Encode())
+	form.Set("invoice", address(t.profile.Billing, t.profile.Phone).Encode())
 	form.Set("delivery", "")
 	form.Set("passwordVisible", "0")
 	form.Set("passwordRequired", "0")
@@ -38,16 +39,16 @@ func (t *task) accountAndAddress() url.Values {
 	return form
 }
 
-func address(a Address) url.Values {
+func address(a config.Address, phone string) url.Values {
 	form := url.Values{}
 
-	form.Set("firstname", a.First)
-	form.Set("lastname", a.Last)
-	form.Set("address1", a.Address)
+	form.Set("firstname", a.FirstName)
+	form.Set("lastname", a.LastName)
+	form.Set("address1", a.Address1)
 	form.Set("city", a.City)
-	form.Set("postcode", a.Zip)
+	form.Set("postcode", a.PostCode)
 	form.Set("id_country", strconv.Itoa(getCountryCode(a.Country)))
-	form.Set("phone", a.Phone)
+	form.Set("phone", phone)
 
 	return form
 }

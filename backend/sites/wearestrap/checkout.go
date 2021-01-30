@@ -123,7 +123,7 @@ func (t *task) getToken() error {
 }
 
 func (t *task) checkEmailReq() error {
-	form := checkEmail(t.email, t.token).Encode()
+	form := checkEmail(t.profile.Email, t.token).Encode()
 	url := t.baseURL + "/es/pedido"
 	req, err := http.NewRequest("POST", url, strings.NewReader(form))
 	if err != nil {
