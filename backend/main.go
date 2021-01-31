@@ -5,8 +5,6 @@ import (
 	"os"
 	"prosperaio/config"
 	"prosperaio/discord"
-	"prosperaio/sites/meshdesktop"
-	"prosperaio/sites/wearestrap"
 	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
@@ -117,7 +115,7 @@ func startTaskHandler(tasks []config.Task) {
 
 		taskID := i + 1
 		runningTasks.Add(1)
-		input := config.TaskInput{
+		_ = config.TaskInput{
 			ID:            taskID,
 			MonitorInput:  t.MonitorInput,
 			Region:        t.Region,
@@ -133,10 +131,10 @@ func startTaskHandler(tasks []config.Task) {
 
 		switch strings.ToUpper(site) {
 		case "JD_FE":
-			go meshdesktop.Run(input)
+			//go meshdesktop.Run(input)
 			break
 		case "WEARESTRAP":
-			go wearestrap.Run(input)
+			//go wearestrap.Run(input)
 			break
 
 		default:

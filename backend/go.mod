@@ -3,6 +3,7 @@ module prosperaio
 go 1.14
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.2.7
 	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/ananagame/rich-go v0.0.0-20210101112514-52d3ad6a938f // indirect
 	github.com/fatih/color v1.10.0

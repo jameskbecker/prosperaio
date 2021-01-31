@@ -10,7 +10,7 @@ import (
 )
 
 //ProfileFieldCount ...
-const ProfileFieldCount = 22
+const ProfileFieldCount = 23
 
 //Profile ...
 type Profile struct {

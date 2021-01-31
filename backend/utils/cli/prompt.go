@@ -3,20 +3,19 @@ package cli
 import (
 	"os"
 
-	"github.com/manifoldco/promptui"
+	"github.com/AlecAivazis/survey/v2"
 )
 
 //GetUserInput ...
 func GetUserInput(label string, items []string) int {
-	prompt := promptui.Select{
-		Label:    label,
-		Items:    items,
-		Stdout:   &bellSkipper{},
-		HideHelp: true,
+	selection := 0
+	prompt := &survey.Select{
+		Message: label,
+		Options: items,
 	}
 
-	i, _, _ := prompt.Run()
-	return i
+	survey.AskOne(prompt, &selection)
+	return selection
 }
 
 type bellSkipper struct{}
