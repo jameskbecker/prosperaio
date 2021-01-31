@@ -45,17 +45,15 @@ type Card struct {
 //LoadProfiles ...
 func LoadProfiles() map[string]Profile {
 	profiles := map[string]Profile{}
-	for {
-		homedir, _ := os.UserHomeDir()
-		configFolder := path.Join(homedir, "ProsperAIO")
-		data, err := LoadCSV(path.Join(configFolder, "profiles.csv"), ProfileFieldCount)
-		if err != nil {
-			color.Red("Error: " + err.Error())
-			continue
-		}
-		profiles = stringToProfileSlice(data)
-		break
+	homedir, _ := os.UserHomeDir()
+	configFolder := path.Join(homedir, "ProsperAIO")
+	data, err := LoadCSV(path.Join(configFolder, "profiles.csv"), ProfileFieldCount)
+	if err != nil {
+		color.Red("Error: " + err.Error())
+		os.Exit(0)
 	}
+	profiles = stringToProfileSlice(data)
+
 	return profiles
 }
 
