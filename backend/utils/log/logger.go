@@ -1,11 +1,6 @@
 package log
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"runtime"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -66,25 +61,4 @@ func (l *Logger) Error(m string) {
 	ts := time.Now()
 	fTS := ts.Format("[02/01/2006 15:04:05.000 MST] ")
 	color.Red(fTS + l.Prefix + m)
-}
-
-//TitleCounts ...
-type TitleCounts struct {
-	Cart, Checkout, Proxy int
-}
-
-//UpdateTitle ...
-func UpdateTitle() {
-	title := []string{
-		"ProsperAIO v" + os.Getenv("version"),
-		"Carted: " + os.Getenv("cartCount"),
-		"Checkouts: " + os.Getenv("checkoutCount"),
-		"Proxies: " + os.Getenv("proxyCount"),
-	}
-
-	if runtime.GOOS != "darwin" {
-		exec.Command("title", strings.Join(title, " | ")).Run()
-		return
-	}
-	fmt.Print("\033]0;" + strings.Join(title, " | ") + "\007")
 }

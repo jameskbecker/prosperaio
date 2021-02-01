@@ -2,40 +2,30 @@ package meshdesktop
 
 import (
 	"prosperaio/discord"
-	"strconv"
 	"strings"
 )
 
 func (t *task) webhookMessage() discord.Message {
-	//fmt.Println(checkoutURL)
-	productName := "N/A"
-	pid := "N/A"
-	size := "N/A"
-	if t.size != "" {
-		productName = t.pData.name
-	}
-
-	if t.size != "" {
-		pid = strconv.Itoa(t.pData.pid)
-	}
-
-	if t.size != "" {
-		size = t.size
-	}
 
 	fields := []discord.Field{
-		{Name: "Product", Value: productName, Inline: false},
-		{Name: "PID", Value: pid, Inline: true},
+		{Name: "Product", Value: "N/A", Inline: false},
 		{Name: "Site", Value: "jd-" + strings.ToLower(t.region) + "_fe", Inline: true},
-		{Name: "Size", Value: size, Inline: true},
-		{Name: "Price", Value: t.pData.price, Inline: true},
-		{Name: "Checkout Link", Value: "[Click Here](" + t.checkoutURL + ")", Inline: true},
+		{Name: "Size", Value: "N/A", Inline: true},
+	}
+
+	if t.pData.name != "" {
+		fields[0].Value = t.pData.name
+	}
+
+	if t.size != "" {
+		fields[2].Value = t.size
 	}
 
 	embedData := discord.Embed{
-		Title:  "Successful Checkout",
+		Title:  "Checkout Now",
 		Type:   "rich",
 		Color:  3642623,
+		URL:    t.webhookURL,
 		Fields: fields,
 		Footer: discord.GetFooter(),
 	}

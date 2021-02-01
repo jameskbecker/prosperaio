@@ -1,11 +1,13 @@
 package discord
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/hugolgst/rich-go/client"
@@ -53,14 +55,15 @@ func SetPresence() {
 
 //PostWebhook posts
 func PostWebhook(url string, data Message) error {
+	fmt.Println("post webhook")
 	client := http.Client{}
 	dataB, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
+	fmt.Println(string(dataB))
 
-	dataS := string(dataB)
-	req, err := http.NewRequest("POST", url, strings.NewReader(dataS))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(dataB))
 	if err != nil {
 		return err
 	}
@@ -68,10 +71,21 @@ func PostWebhook(url string, data Message) error {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
-	_, err = client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
+
+	if res.StatusCode != 204 {
+		return errors.New("Discord Webhook Status: " + res.Status)
+	}
+
+	bodyB, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(bodyB))
 
 	return nil
 }
@@ -79,7 +93,7 @@ func PostWebhook(url string, data Message) error {
 //TestWebhook sends a test webhook to a given webhook URL
 func TestWebhook(url string) {
 	logo := Image{
-		URL:    "https://img.favpng.com/20/13/20/air-force-jumpman-nike-free-coloring-book-air-jordan-png-favpng-50G7r6aWHwsbe9YC4ha20PUPj.jpg",
+		URL:    "https://static.nike.com/a/images/t_PDP_864_v1/f_auto,b_rgb:f5f5f5/4f37fca8-6bce-43e7-ad07-f57ae3c13142/air-force-1-07-shoe-QNxTcf.jpg",
 		Height: 500,
 		Width:  500,
 	}
@@ -88,6 +102,7 @@ func TestWebhook(url string) {
 		Title:     "Webhook Test",
 		Type:      "rich",
 		Color:     3642623,
+		URL:       "https://twitter.com/theprosperbot",
 		Thumbnail: logo,
 		Fields:    testFields(),
 		Footer:    GetFooter(),
@@ -107,27 +122,22 @@ func testFields() []Field {
 	return []Field{
 		{
 			Name:   "Product",
-			Value:  "------------------------------",
-			Inline: false,
-		},
-		{
-			Name:   "Site",
-			Value:  "----------",
+			Value:  "Nike Air Force 1 '07",
 			Inline: true,
 		},
 		{
 			Name:   "Size",
-			Value:  "----------",
+			Value:  "9",
+			Inline: true,
+		},
+		{
+			Name:   "Site",
+			Value:  "ProsperAIO",
 			Inline: true,
 		},
 		{
 			Name:   "Order",
-			Value:  "||----------||",
-			Inline: true,
-		},
-		{
-			Name:   "Checkout Link",
-			Value:  "[Click Here](https://twitter.com/theprosperbot)",
+			Value:  "||0000000000||",
 			Inline: true,
 		},
 	}

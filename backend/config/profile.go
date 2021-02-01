@@ -72,7 +72,7 @@ func stringToProfileSlice(data [][]string) map[string]Profile {
 				Country:   strings.TrimSpace(v[7]),
 			},
 			Email: strings.TrimSpace(v[8]),
-			Phone: strings.TrimSpace(v[9]),
+			Phone: strings.ReplaceAll(strings.TrimSpace(v[9]), `"`, ""),
 		}
 		profile.SameShipping, _ = strconv.ParseBool(strings.TrimSpace(v[10]))
 		if !profile.SameShipping {

@@ -5,9 +5,9 @@ import (
 	"os"
 	"prosperaio/config"
 	"prosperaio/discord"
+	"prosperaio/sites/meshdesktop"
 	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
-	"prosperaio/utils/log"
 	"strconv"
 	"strings"
 	"sync"
@@ -54,7 +54,7 @@ func init() {
 
 func main() {
 	go discord.SetPresence()
-	log.UpdateTitle()
+	cli.UpdateTitle()
 	for {
 		selection, last := cli.MainMenu()
 		switch selection {
@@ -115,7 +115,7 @@ func startTaskHandler(tasks []config.Task) {
 
 		taskID := i + 1
 		runningTasks.Add(1)
-		_ = config.TaskInput{
+		input := config.TaskInput{
 			ID:            taskID,
 			MonitorInput:  t.MonitorInput,
 			Region:        t.Region,
@@ -131,7 +131,7 @@ func startTaskHandler(tasks []config.Task) {
 
 		switch strings.ToUpper(site) {
 		case "JD_FE":
-			//go meshdesktop.Run(input)
+			go meshdesktop.Run(input)
 			break
 		case "WEARESTRAP":
 			//go wearestrap.Run(input)
@@ -147,7 +147,7 @@ func loadProxiesHandler() {
 	color.Cyan(cli.Line())
 	data := config.LoadProxies()
 	os.Setenv("proxyCount", strconv.Itoa(len(data)))
-	log.UpdateTitle()
+	cli.UpdateTitle()
 
 	color.Cyan(cli.Line())
 	skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})

@@ -24,11 +24,17 @@ func Run(i config.TaskInput) {
 	t.log.Debug("Price: " + t.pData.price)
 
 	t.atcRoutine()
-	t.checkoutRoutine()
-
-	err := discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	//cli.IncrementCount("cartCount")
+	err := t.checkoutRoutine()
 	if err != nil {
-		fmt.Println(t.checkoutURL)
+		t.log.Error(err.Error())
+		return
+	}
+	//cli.IncrementCount("checkoutCount")
+
+	err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	if err != nil {
+		fmt.Println(t.ppURL)
 		panic(err)
 	}
 	i.WG.Done()
@@ -47,9 +53,11 @@ type task struct {
 	size             string
 	baseURL          string
 	useragent        string
-	checkoutURL      string
 	addressID        string
 	shippingMethodID string
+	adyenURL         string
+	ppURL            string
+	webhookURL       string
 	exportCookies    []byte
 }
 
