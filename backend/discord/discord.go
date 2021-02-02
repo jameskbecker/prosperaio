@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -55,13 +54,11 @@ func SetPresence() {
 
 //PostWebhook posts
 func PostWebhook(url string, data Message) error {
-	fmt.Println("post webhook")
 	client := http.Client{}
 	dataB, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(dataB))
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(dataB))
 	if err != nil {
@@ -79,14 +76,6 @@ func PostWebhook(url string, data Message) error {
 	if res.StatusCode != 204 {
 		return errors.New("Discord Webhook Status: " + res.Status)
 	}
-
-	bodyB, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(bodyB))
-
 	return nil
 }
 
@@ -99,7 +88,10 @@ func TestWebhook(url string) {
 	}
 
 	embedData := Embed{
-		Title:     "Webhook Test",
+		Title: "Webhook Test",
+		Author: Author{
+			Name: "Nike Air Force 1 '07",
+		},
 		Type:      "rich",
 		Color:     3642623,
 		URL:       "https://twitter.com/theprosperbot",
@@ -121,8 +113,8 @@ func TestWebhook(url string) {
 func testFields() []Field {
 	return []Field{
 		{
-			Name:   "Product",
-			Value:  "Nike Air Force 1 '07",
+			Name:   "Site",
+			Value:  "ProsperAIO",
 			Inline: true,
 		},
 		{
@@ -131,12 +123,7 @@ func testFields() []Field {
 			Inline: true,
 		},
 		{
-			Name:   "Site",
-			Value:  "ProsperAIO",
-			Inline: true,
-		},
-		{
-			Name:   "Order",
+			Name:   "Order #",
 			Value:  "||0000000000||",
 			Inline: true,
 		},
