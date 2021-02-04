@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"os"
+	"prosperaio/captcha"
 	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/sites/meshdesktop"
@@ -67,6 +68,8 @@ func main() {
 		case 2:
 			testWebhookHandler()
 			continue
+		case 3:
+			captcha.Launch()
 		case last:
 			os.Exit(0)
 			break
@@ -76,6 +79,7 @@ func main() {
 		}
 		break
 	}
+	defer captcha.RemoveAllRecords()
 }
 
 func loadTasksHandler() {
@@ -130,7 +134,7 @@ func startTaskHandler(tasks []config.Task) {
 		}
 
 		switch strings.ToUpper(site) {
-		case "JD_FE":
+		case "JD_FE", "FP_FE":
 			go meshdesktop.Run(input)
 			break
 		case "WEARESTRAP":

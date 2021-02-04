@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"prosperaio/utils/client"
 	"strconv"
@@ -142,6 +144,8 @@ func (t *task) parseATCRes(res *http.Response) error {
 	json.NewDecoder(bodyD).Decode(&body)
 
 	if body.Count < 1 || len(body.Contents) < 1 {
+		bodyB, _ := ioutil.ReadAll(bodyD)
+		fmt.Println(string(bodyB))
 		return errors.New("Added 0 items to Cart")
 	}
 

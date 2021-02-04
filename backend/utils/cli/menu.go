@@ -13,6 +13,7 @@ func MainMenu() (int, int) {
 		"Run Tasks",
 		"Load Proxies",
 		"Test Webhook",
+		"Manual Captcha Harvester",
 		"Exit",
 	}
 	selection := GetUserInput("Main Menu", items)
