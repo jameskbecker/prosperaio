@@ -57,7 +57,7 @@ func GetJSONCookies(uri *url.URL, c *http.Client) (string, error) {
 }
 
 //Decompress compressed response body TODO: add deflate and brotli
-func Decompress(res *http.Response) (io.Reader, error) {
+func Decompress(res *http.Response) (io.ReadCloser, error) {
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
 		zr, _ := gzip.NewReader(res.Body)
