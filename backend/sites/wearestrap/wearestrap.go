@@ -38,7 +38,7 @@ type task struct {
 //Run --
 func Run(i config.TaskInput) {
 	// //startTS := time.Now()
-	c, _ := client.Create(i.Proxy)
+	c := client.Create(i.Proxy, 0)
 
 	t := task{
 		size:    i.Size,

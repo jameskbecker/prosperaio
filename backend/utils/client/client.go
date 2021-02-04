@@ -12,18 +12,17 @@ import (
 )
 
 //Create a new instance of client
-func Create(proxy string) (http.Client, error) {
+func Create(proxy string, maxRedirects int) http.Client {
 	client := http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
+			if len(via) > maxRedirects {
+				return http.ErrUseLastResponse
+			}
+			return nil
 		},
 		Timeout: 5000 * time.Millisecond,
 	}
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return client, err
-	}
-
+	jar, _ := cookiejar.New(nil)
 	client.Jar = jar
 
 	if proxy != "" {
@@ -33,7 +32,7 @@ func Create(proxy string) (http.Client, error) {
 		}
 	}
 
-	return client, nil
+	return client
 }
 
 //GetJSONCookies ...

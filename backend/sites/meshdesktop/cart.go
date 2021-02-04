@@ -17,9 +17,8 @@ import (
 
 func (t *task) getStockData() (*http.Response, error) {
 	ts := int(time.Now().UTC().UnixNano() / 1e6)
-	path := "/stock/?_=" + strconv.Itoa(ts)
-	uri := t.productURL.String() + path
-
+	qs := "_=" + strconv.Itoa(ts)
+	uri := t.baseURL + "/product/0/" + t.pData.pid + "/stock/?" + qs
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return nil, err
@@ -45,10 +44,10 @@ func (t *task) parseStockData(res *http.Response) error {
 		return err
 	}
 
-	selector := `button[data-e2e="pdp-productDetails-size"]`
+	selector := `button[data-sku]`
 	s := doc.Find(selector)
 
-	sel := s.EachWithBreak(t.findSize)
+	sel := s.FilterFunction(t.findSize)
 	sku, _ := sel.Attr("data-sku")
 	price, _ := sel.Attr("data-price")
 
@@ -57,20 +56,29 @@ func (t *task) parseStockData(res *http.Response) error {
 	}
 	t.pData.sku = sku
 	t.pData.price = price
+	t.log.Debug("SKU: " + t.pData.sku)
+	t.log.Debug("Price: " + t.pData.price)
+
+	stock, _ := sel.Attr("data-stock")
+	if stock == "0" {
+		return errors.New("Out of Stock")
+	}
 
 	return nil
 }
 
 func (t *task) findSize(i int, sel *goquery.Selection) bool {
-	if strings.TrimSpace(sel.Text()) == t.size {
-		return false
+	innerText := strings.TrimSpace(sel.Children().Remove().End().Text())
+	fmt.Println(innerText + " " + t.size)
+	if innerText == t.size {
+		return true
 	}
-	return true
+	return false
 }
 
 func (t *task) stockRoutine() {
 	for {
-		t.log.Warn("Fetching Stock Data")
+		t.log.Warn("Fetching SKU")
 		stockRes, err := t.getStockData()
 		if err != nil {
 			t.log.Error(err.Error())
@@ -90,7 +98,7 @@ func (t *task) stockRoutine() {
 	t.updatePrefix()
 }
 
-type order struct {
+type atcResponse struct {
 	ID              string       `json:"ID"`
 	Href            string       `json:"href"`
 	Count           int          `json:"count"`
@@ -101,19 +109,7 @@ type order struct {
 	DeliveryAddress *interface{} `json:"deliveryAddress"`
 	Delivery        delivery     `json:"delivery"`
 	Contents        []contents   `json:"contents"`
-}
-
-type contents struct {
-	Name  string `json:"name"`
-	Image image  `json:"image"`
-}
-
-type image struct {
-	URL string `json:"originalURL"`
-}
-
-type delivery struct {
-	DeliveryMethodID string `json:"deliveryMethodID"`
+	Error           atcError     `json:"error"`
 }
 
 func (t *task) postATC() (*http.Response, error) {
@@ -136,12 +132,16 @@ func (t *task) postATC() (*http.Response, error) {
 }
 
 func (t *task) parseATCRes(res *http.Response) error {
-	body := order{}
+	body := atcResponse{}
 	bodyD, err := client.Decompress(res)
 	if err != nil {
 		return err
 	}
 	json.NewDecoder(bodyD).Decode(&body)
+
+	if body.Error.Info.RecaptchaRequired {
+		return errors.New("ATC Failed: ReCAPTCHA Required")
+	}
 
 	if body.Count < 1 || len(body.Contents) < 1 {
 		bodyB, _ := ioutil.ReadAll(bodyD)
@@ -175,4 +175,27 @@ func (t *task) atcRoutine() {
 		}
 		break
 	}
+}
+
+type atcError struct {
+	Message string       `json:"message"`
+	Info    atcErrorInfo `json:"info"`
+}
+
+type atcErrorInfo struct {
+	RecaptchaRequired bool   `json:"recaptchaRequired"`
+	Sitekey           string `json:"sitekey"`
+}
+
+type contents struct {
+	Name  string `json:"name"`
+	Image image  `json:"image"`
+}
+
+type image struct {
+	URL string `json:"originalURL"`
+}
+
+type delivery struct {
+	DeliveryMethodID string `json:"deliveryMethodID"`
 }

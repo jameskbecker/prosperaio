@@ -4,39 +4,40 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
 	"prosperaio/config"
-	"prosperaio/discord"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
+
+	"github.com/fatih/color"
 )
 
 //Run mesh desktop task
 func Run(i config.TaskInput) {
-	t := *initTask(i)
+	t, err := initTask(i)
+	if err != nil {
+		color.Red(err.Error())
+		return
+	}
 	t.log.Debug("Starting Task")
 
 	t.stockRoutine()
-	t.log.Debug("SKU: " + t.pData.sku)
-	t.log.Debug("Price: " + t.pData.price)
-
 	t.atcRoutine()
 	//cli.IncrementCount("cartCount")
-	err := t.checkoutRoutine()
-	if err != nil {
-		t.log.Error(err.Error())
-		return
-	}
-	//cli.IncrementCount("checkoutCount")
+	// err := t.checkoutRoutine()
+	// if err != nil {
+	// 	t.log.Error(err.Error())
+	// 	return
+	// }
+	// //cli.IncrementCount("checkoutCount")
 
-	err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
-	if err != nil {
-		fmt.Println(t.ppURL)
-		panic(err)
-	}
+	// err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	// if err != nil {
+	// 	fmt.Println(t.ppURL)
+	// 	panic(err)
+	// }
 	i.WG.Done()
 }
 
@@ -63,38 +64,40 @@ type task struct {
 
 type productData struct {
 	name     string
-	pid      int
+	pid      string
 	sku      string
 	imageURL string
 	price    string
 }
 
-func initTask(i config.TaskInput) *task {
-	c, _ := client.Create(i.Proxy)
+func initTask(i config.TaskInput) (t task, err error) {
+	t = task{
+		profile:      i.Profile,
+		region:       i.Region,
+		size:         i.Size,
+		id:           i.ID,
+		monitorDelay: i.MonitorDelay,
+		retryDelay:   i.RetryDelay,
+	}
+	c := client.Create(i.Proxy, 1)
+	t.client = &c
+
 	pURL, err := url.Parse(i.MonitorInput)
 	if err != nil {
-
+		return
 	}
+
 	splitPath := strings.Split(pURL.Path, "/")
-	pid, err := strconv.Atoi(splitPath[3])
-	if err != nil {
+	if len(splitPath) < 4 {
+		return
+	}
 
-	}
-	t := task{
-		productURL: pURL,
-		profile:    i.Profile,
-		region:     i.Region,
-		baseURL:    "https://" + pURL.Hostname(),
-		size:       i.Size,
-		id:         i.ID,
-		pData: productData{
-			pid: pid,
-		},
-		client: &c,
-	}
+	t.productURL = pURL
+	t.baseURL = "https://" + pURL.Hostname()
+	t.pData.pid = splitPath[3]
 
 	t.updatePrefix()
-	return &t
+	return
 }
 
 func (t *task) updatePrefix() {
