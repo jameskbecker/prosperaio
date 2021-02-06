@@ -9,6 +9,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 //Create a new instance of client
@@ -20,7 +22,7 @@ func Create(proxy string, maxRedirects int) http.Client {
 			}
 			return nil
 		},
-		Timeout: 5000 * time.Millisecond,
+		Timeout: 30000 * time.Millisecond,
 	}
 	jar, _ := cookiejar.New(nil)
 	client.Jar = jar
@@ -36,7 +38,7 @@ func Create(proxy string, maxRedirects int) http.Client {
 }
 
 //GetJSONCookies ...
-func GetJSONCookies(uri *url.URL, c *http.Client) (string, error) {
+func GetJSONCookies(uri *url.URL, c *http.Client) string {
 	rawCookies := c.Jar.Cookies(uri)
 	cookies := []ExtensionCookie{}
 	for _, v := range rawCookies {
@@ -49,11 +51,12 @@ func GetJSONCookies(uri *url.URL, c *http.Client) (string, error) {
 	}
 	jsonCookies, err := json.Marshal(cookies)
 	if err != nil {
-		return "", err
+		color.Red(err.Error())
+		return "[]"
 	}
 
 	encodedJSONCookies := base64.URLEncoding.EncodeToString(jsonCookies)
-	return encodedJSONCookies, nil
+	return encodedJSONCookies
 }
 
 //Decompress compressed response body TODO: add deflate and brotli

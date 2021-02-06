@@ -20,8 +20,6 @@ import (
 
 var scanner = bufio.NewScanner(os.Stdin)
 var proxies = []string{}
-var monitorDelay time.Duration
-var retryDelay time.Duration
 
 var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
@@ -41,13 +39,10 @@ func init() {
 	os.Setenv("cartCount", "0")
 	os.Setenv("checkoutCount", "0")
 	promptui.IconInitial = ""
-	monitorDelay, retryDelay = config.LoadDelays()
 
 	color.Cyan(cli.Logo())
 	printBold("Welcome to ProsperAIO!")
 	print("Expires: " + expiryDate)
-	print("Monitor Delay: " + monitorDelay.String())
-	print("Retry Delay: " + retryDelay.String())
 
 	profiles = config.LoadProfiles()
 	print("Loaded Profiles.")
@@ -105,6 +100,12 @@ func loadTasksHandler() {
 }
 
 func startTaskHandler(tasks []config.Task) {
+	settings, err := config.LoadSettings()
+	if err != nil {
+		color.Red("Error loading settings: " + err.Error())
+		return
+	}
+
 	for i, t := range tasks {
 		site := t.Site
 		if t.Mode != "" {
@@ -121,16 +122,16 @@ func startTaskHandler(tasks []config.Task) {
 		runningTasks.Add(1)
 		input := config.TaskInput{
 			ID:            taskID,
+			WG:            &runningTasks,
 			MonitorInput:  t.MonitorInput,
 			Region:        t.Region,
 			Size:          t.Size,
 			PaymentMethod: t.PaymentMethod,
-			Proxy:         getProxy(),
-			WebhookURL:    config.GetWebhookURL(),
 			Profile:       profile,
-			MonitorDelay:  monitorDelay,
-			RetryDelay:    retryDelay,
-			WG:            &runningTasks,
+			Proxy:         getProxy(),
+			MonitorDelay:  time.Duration(int64(settings.MonitorDelay)) * time.Millisecond,
+			RetryDelay:    time.Duration(int64(settings.MonitorDelay)) * time.Millisecond,
+			WebhookURL:    settings.WebhookURL,
 		}
 
 		switch strings.ToUpper(site) {
@@ -175,8 +176,12 @@ func testProxyHandler(data []string) {
 }
 
 func testWebhookHandler() {
-	webhookURL := config.GetWebhookURL()
-	discord.TestWebhook(webhookURL)
+	settings, err := config.LoadSettings()
+	if err != nil {
+		color.Red("Error loading settings: " + err.Error())
+		return
+	}
+	discord.TestWebhook(settings.WebhookURL)
 }
 
 func getProxy() (proxy string) {

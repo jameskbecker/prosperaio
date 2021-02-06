@@ -1,3 +1,5 @@
+github.com/2captcha/2captcha-go v1.0.0 h1:znUFTmhcPDSENbbJwaeRlyC2oHiV4AYt72ql3NK4QhY=
+github.com/2captcha/2captcha-go v1.0.0/go.mod h1:hYOq+KVOq/0zAG6OTYW7Y313qDkHv58CcaOyjdBQSco=
 github.com/AlecAivazis/survey/v2 v2.2.7 h1:5NbxkF4RSKmpywYdcRgUmos1o+roJY8duCLZXbVjoig=
 github.com/AlecAivazis/survey/v2 v2.2.7/go.mod h1:9DYvHgXtiXm6nCn+jXnOXLKbH+Yo9u8fAS/SduGdoPk=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=

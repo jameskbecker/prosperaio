@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"prosperaio/config"
+	"prosperaio/discord"
+	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 
@@ -19,31 +21,41 @@ func Run(i config.TaskInput) {
 	t, err := initTask(i)
 	if err != nil {
 		color.Red(err.Error())
+		i.WG.Done()
 		return
 	}
 	t.log.Debug("Starting Task")
 
-	t.stockRoutine()
-	t.atcRoutine()
-	//cli.IncrementCount("cartCount")
-	// err := t.checkoutRoutine()
-	// if err != nil {
-	// 	t.log.Error(err.Error())
-	// 	return
-	// }
-	// //cli.IncrementCount("checkoutCount")
+	//Cart Process
+	t.getStock()
+	t.addToCart()
+	cli.IncrementCount("cartCount")
 
-	// err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
-	// if err != nil {
-	// 	fmt.Println(t.ppURL)
-	// 	panic(err)
-	// }
+	//Checkout Process
+	t.registerEmail()
+	t.addAddress()
+	t.addShipping()
+	t.updateBilling()
+	t.submitOrder()
+	cli.IncrementCount("checkoutCount")
+
+	cookies := client.GetJSONCookies(t.baseURL, t.client)
+	t.webhookURL = buildCheckoutURL(cookies, t.ppURL)
+	err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	if err != nil {
+		fmt.Println(t.ppURL)
+		t.log.Error(err.Error())
+		i.WG.Done()
+		return
+	}
+	t.log.Info("Sent Discord Webhook!")
 	i.WG.Done()
 }
 
 type task struct {
 	client           *http.Client
 	productURL       *url.URL
+	baseURL          *url.URL
 	log              log.Logger
 	profile          config.Profile
 	pData            productData
@@ -52,7 +64,6 @@ type task struct {
 	id               int
 	region           string
 	size             string
-	baseURL          string
 	useragent        string
 	addressID        string
 	shippingMethodID string
@@ -72,6 +83,7 @@ type productData struct {
 
 func initTask(i config.TaskInput) (t task, err error) {
 	t = task{
+		baseURL:      getBaseURL("fp", ""),
 		profile:      i.Profile,
 		region:       i.Region,
 		size:         i.Size,
@@ -81,47 +93,24 @@ func initTask(i config.TaskInput) (t task, err error) {
 	}
 	c := client.Create(i.Proxy, 1)
 	t.client = &c
+	t.log.Debug("Monitor Input: " + i.MonitorInput)
+	if !strings.Contains(i.MonitorInput, "/") {
+		t.pData.pid = i.MonitorInput
 
-	pURL, err := url.Parse(i.MonitorInput)
-	if err != nil {
-		return
+	} else {
+		pURL := &url.URL{}
+		pURL, err = url.Parse(i.MonitorInput)
+		if err != nil {
+			return
+		}
+		splitPath := strings.Split(pURL.Path, "/")
+
+		if len(splitPath) < 4 {
+			return
+		}
+		t.pData.pid = splitPath[3]
 	}
-
-	splitPath := strings.Split(pURL.Path, "/")
-	if len(splitPath) < 4 {
-		return
-	}
-
-	t.productURL = pURL
-	t.baseURL = "https://" + pURL.Hostname()
-	t.pData.pid = splitPath[3]
 
 	t.updatePrefix()
 	return
-}
-
-func (t *task) updatePrefix() {
-	tID := fmt.Sprintf("%04d", t.id)
-	region := strings.ToLower(t.region)
-	prefix := "[" + tID + "] [jd-" + region + "_fe] [" + t.size + "] "
-	t.log = log.Logger{Prefix: prefix}
-}
-
-func setDefaultHeaders(req *http.Request, ua string, bURL string) {
-	headers := [][]string{
-		{"accept", "*/*"},
-		{"x-requested-with", "XMLHttpRequest"},
-		{"user-agent", ua},
-		{"content-type", "application/json"},
-		{"origin", bURL},
-		{"sec-fetch-site", "same-origin"},
-		{"sec-fetch-mode", "cors"},
-		{"sec-fetch-dest", "empty"},
-		{"accept-encoding", "gzip"},
-		{"accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7"},
-	}
-
-	for _, v := range headers {
-		req.Header.Set(v[0], v[1])
-	}
 }

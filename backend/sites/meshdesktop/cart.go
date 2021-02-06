@@ -5,30 +5,52 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"prosperaio/utils/client"
 	"strconv"
 	"time"
 )
 
-func (t *task) postATC() (*http.Response, error) {
-	uri := t.baseURL + "/cart/" + t.pData.sku
+func (t *task) addToCart() {
+	for {
+		t.log.Warn("Adding to Cart")
+		res, err := t._postATCReq()
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retryDelay)
+			continue
+		}
+
+		err = t._handleATCRes(res)
+		if err != nil {
+			t.log.Error(err.Error())
+			time.Sleep(t.retryDelay)
+			continue
+		}
+		break
+	}
+}
+
+func (t *task) _postATCReq() (body io.ReadCloser, err error) {
+	uri := t.baseURL.String() + "/cart/" + t.pData.sku
 	form, _ := buildATCForm()
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
 		return nil, err
 	}
-	setDefaultHeaders(req, t.useragent, t.baseURL)
-	req.Header.Set("referer", t.productURL.String())
-	req.Header.Set("accept-encoding", "identity")
+	setDefaultHeaders(req, t.useragent, t.baseURL.String())
+	//req.Header.Set("referer", t.productURL.String())
 
 	res, err := t.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	body, err = client.Decompress(res)
+	return
 }
 
 type atcResponse struct {
@@ -45,50 +67,28 @@ type atcResponse struct {
 	Error           atcError     `json:"error"`
 }
 
-func (t *task) parseATCRes(res *http.Response) error {
-	body := atcResponse{}
-	bodyD, err := client.Decompress(res)
-	if err != nil {
-		return err
-	}
-	json.NewDecoder(bodyD).Decode(&body)
+func (t *task) _handleATCRes(body io.ReadCloser) error {
+	data := atcResponse{}
+	json.NewDecoder(body).Decode(&data)
 
-	if body.Error.Info.RecaptchaRequired {
+	if data.Error.Info.RecaptchaRequired {
+
+		os.Exit(0)
 		return errors.New("ATC Failed: ReCAPTCHA Required")
 	}
 
-	if body.Count < 1 || len(body.Contents) < 1 {
-		bodyB, _ := ioutil.ReadAll(bodyD)
+	if data.Count < 1 || len(data.Contents) < 1 {
+		bodyB, _ := ioutil.ReadAll(body)
 		fmt.Println(string(bodyB))
 		return errors.New("Added 0 items to Cart")
 	}
 
-	t.shippingMethodID = body.Delivery.DeliveryMethodID
-	t.pData.name = body.Contents[0].Name
-	t.pData.imageURL = body.Contents[0].Image.URL
+	t.shippingMethodID = data.Delivery.DeliveryMethodID
+	t.pData.name = data.Contents[0].Name
+	t.pData.imageURL = data.Contents[0].Image.URL
 
-	t.log.Info("Successfully Added " + strconv.Itoa(body.Count) + " Item(s) to Cart! (" + body.Ref + ")")
+	t.log.Info("Successfully Added " + strconv.Itoa(data.Count) + " Item(s) to Cart! (" + data.Ref + ")")
 	return nil
-}
-
-func (t *task) atcRoutine() {
-	for {
-		t.log.Warn("Adding to Cart")
-		res, err := t.postATC()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-
-		err = t.parseATCRes(res)
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		break
-	}
 }
 
 type atcError struct {
