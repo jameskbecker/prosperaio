@@ -52,27 +52,27 @@ func main() {
 	go discord.SetPresence()
 	cli.UpdateTitle()
 	for {
-		selection, last := cli.MainMenu()
+		selection := cli.MainMenu()
 		switch selection {
-		case 0:
+		case "Run Tasks":
 			loadTasksHandler()
 			break
-		case 1:
+		case "Load Proxies":
 			loadProxiesHandler()
 			continue
-		case 2:
+		case "Test Webhook":
 			testWebhookHandler()
 			continue
-		case 3:
+		case "Manual Captcha Harvester":
 			captcha.Launch()
-		case 4:
+		case "Settings":
 			settingsHandler()
 			continue
-		case last:
+		case "Exit":
 			os.Exit(0)
 			break
 		default:
-			color.Red("Invalid Selection: " + strconv.Itoa(selection))
+			color.Red("Invalid Selection: " + selection)
 			continue
 		}
 		break
@@ -84,19 +84,16 @@ func loadTasksHandler() {
 	tasks := config.LoadTasks()
 	color.Cyan(cli.Line())
 	taskCounts := config.GetTaskCount(tasks)
-	selection, last := cli.TaskMenu(taskCounts)
+	selection := cli.TaskMenu(taskCounts)
 
 	color.Cyan(cli.Line())
 	printBold("Task Log")
-	switch selection {
-	case 0: //All
+
+	if strings.HasPrefix(selection, "Run All Tasks") {
 		startTaskHandler(tasks)
-		break
-
-	case last: //Exit
+	} else if selection == "Exit" {
 		os.Exit(0)
-		break
-
+		return
 	}
 
 	runningTasks.Wait()
@@ -203,29 +200,33 @@ func settingsHandler() {
 		return
 	}
 
-	selection, last := cli.SettingsMenu()
+	selection := cli.SettingsMenu()
 	scanner.Scan()
 
 	switch selection {
-	case 0:
+	case "Set Webhook URL":
 		settings.WebhookURL = scanner.Text()
 		break
 
-	case 1:
+	case "Set Monitor Delay":
 		delay, err := strconv.Atoi(scanner.Text())
 		if err != nil {
 			return
 		}
 		settings.MonitorDelay = delay
-	case 2:
+		break
+
+	case "Set Retry Delay":
 		delay, err := strconv.Atoi(scanner.Text())
 		if err != nil {
 			return
 		}
 		settings.RetryDelay = delay
-	case 3:
+	case "Set 2Captcha API Key":
 		settings.TwoCapKey = scanner.Text()
-	case last:
+		break
+
+	case "Exit":
 		os.Exit(0)
 		break
 	}

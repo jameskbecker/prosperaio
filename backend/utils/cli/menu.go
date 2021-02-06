@@ -7,7 +7,7 @@ import (
 )
 
 //MainMenu ...
-func MainMenu() (int, int) {
+func MainMenu() string {
 	color.Cyan(Line())
 	items := []string{
 		"Run Tasks",
@@ -18,24 +18,25 @@ func MainMenu() (int, int) {
 		"Exit",
 	}
 	selection := GetUserInput("Main Menu", items)
-	return selection, len(items) - 1
+	return items[selection]
 }
 
 //SettingsMenu ...
-func SettingsMenu() (int, int) {
+func SettingsMenu() string {
 	color.Cyan(Line())
 	items := []string{
 		"Set Webhook URL",
 		"Set Monitor Delay",
 		"Set Retry Delay",
 		"Set 2Captcha API Key",
+		"Exit",
 	}
 	selection := GetUserInput("Settings", items)
-	return selection, len(items) - 1
+	return items[selection]
 }
 
 //TaskMenu ...
-func TaskMenu(data map[string]int) (int, int) {
+func TaskMenu(data map[string]int) string {
 	taskCount := 0
 	for _, v := range data {
 		taskCount += v
@@ -50,5 +51,5 @@ func TaskMenu(data map[string]int) (int, int) {
 	items = append(items, "Exit")
 
 	selection := GetUserInput("Task Menu", items)
-	return selection, len(items) - 1
+	return items[selection]
 }
