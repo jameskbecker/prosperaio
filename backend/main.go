@@ -65,6 +65,9 @@ func main() {
 			continue
 		case 3:
 			captcha.Launch()
+		case 4:
+			settingsHandler()
+			continue
 		case last:
 			os.Exit(0)
 			break
@@ -191,4 +194,43 @@ func getProxy() (proxy string) {
 	proxy = proxies[0]
 	proxies = client.RotateProxy(proxies)
 	return
+}
+
+func settingsHandler() {
+	settings, err := config.LoadSettings()
+	if err != nil {
+		color.Red("Error loading settings: " + err.Error())
+		return
+	}
+
+	selection, last := cli.SettingsMenu()
+	scanner.Scan()
+
+	switch selection {
+	case 0:
+		settings.WebhookURL = scanner.Text()
+		break
+
+	case 1:
+		delay, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			return
+		}
+		settings.MonitorDelay = delay
+	case 2:
+		delay, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			return
+		}
+		settings.RetryDelay = delay
+	case 3:
+		settings.TwoCapKey = scanner.Text()
+	case last:
+		os.Exit(0)
+		break
+	}
+	err = config.ModifySettings(settings)
+	if err != nil {
+		color.Red(err.Error())
+	}
 }

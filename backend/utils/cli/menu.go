@@ -14,9 +14,23 @@ func MainMenu() (int, int) {
 		"Load Proxies",
 		"Test Webhook",
 		"Manual Captcha Harvester",
+		"Settings",
 		"Exit",
 	}
 	selection := GetUserInput("Main Menu", items)
+	return selection, len(items) - 1
+}
+
+//SettingsMenu ...
+func SettingsMenu() (int, int) {
+	color.Cyan(Line())
+	items := []string{
+		"Set Webhook URL",
+		"Set Monitor Delay",
+		"Set Retry Delay",
+		"Set 2Captcha API Key",
+	}
+	selection := GetUserInput("Settings", items)
 	return selection, len(items) - 1
 }
 
