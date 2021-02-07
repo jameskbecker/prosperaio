@@ -44,8 +44,8 @@ func Run(i config.TaskInput) {
 		size:    i.Size,
 		profile: i.Profile,
 		id:      i.ID,
-		monitor: i.MonitorDelay,
-		retry:   i.RetryDelay,
+		monitor: time.Duration(i.Settings.MonitorDelay) * time.Millisecond,
+		retry:   time.Duration(i.Settings.RetryDelay) * time.Millisecond,
 		client:  &c,
 		pData:   productData{PID: "0000"},
 	}
@@ -63,7 +63,7 @@ func Run(i config.TaskInput) {
 	t.cartProcess()
 	t.checkoutProcess()
 
-	discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	discord.PostWebhook(i.Settings.WebhookURL, t.webhookMessage())
 	i.WG.Done()
 }
 

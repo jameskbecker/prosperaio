@@ -129,9 +129,7 @@ func startTaskHandler(tasks []config.Task) {
 			PaymentMethod: t.PaymentMethod,
 			Profile:       profile,
 			Proxy:         getProxy(),
-			MonitorDelay:  time.Duration(int64(settings.MonitorDelay)) * time.Millisecond,
-			RetryDelay:    time.Duration(int64(settings.MonitorDelay)) * time.Millisecond,
-			WebhookURL:    settings.WebhookURL,
+			Settings:      &settings,
 		}
 
 		switch strings.ToUpper(site) {

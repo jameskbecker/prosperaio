@@ -41,7 +41,7 @@ func Run(i config.TaskInput) {
 
 	cookies := client.GetJSONCookies(t.baseURL, t.client)
 	t.webhookURL = buildCheckoutURL(cookies, t.ppURL)
-	err = discord.PostWebhook(i.WebhookURL, t.webhookMessage())
+	err = discord.PostWebhook(i.Settings.WebhookURL, t.webhookMessage())
 	if err != nil {
 		fmt.Println(t.ppURL)
 		t.log.Error(err.Error())
@@ -88,8 +88,8 @@ func initTask(i config.TaskInput) (t task, err error) {
 		region:       i.Region,
 		size:         i.Size,
 		id:           i.ID,
-		monitorDelay: i.MonitorDelay,
-		retryDelay:   i.RetryDelay,
+		monitorDelay: time.Duration(i.Settings.MonitorDelay) * time.Millisecond,
+		retryDelay:   time.Duration(i.Settings.RetryDelay) * time.Millisecond,
 	}
 	c := client.Create(i.Proxy, 1)
 	t.client = &c
