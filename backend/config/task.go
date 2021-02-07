@@ -27,8 +27,9 @@ type Task struct {
 //TaskInput ...
 type TaskInput struct {
 	ID            int
-	MonitorInput  string
+	Site          string
 	Region        string
+	MonitorInput  string
 	Size          string
 	Proxy         string
 	PaymentMethod string

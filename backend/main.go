@@ -89,9 +89,11 @@ func loadTasksHandler() {
 	color.Cyan(cli.Line())
 	printBold("Task Log")
 
-	if strings.HasPrefix(selection, "Run All Tasks") {
+	switch {
+	case strings.HasPrefix(selection, "Run All Tasks"):
 		startTaskHandler(tasks)
-	} else if selection == "Exit" {
+		break
+	case selection == "Exit":
 		os.Exit(0)
 		return
 	}
@@ -124,6 +126,7 @@ func startTaskHandler(tasks []config.Task) {
 			ID:            taskID,
 			WG:            &runningTasks,
 			MonitorInput:  t.MonitorInput,
+			Site:          t.Site,
 			Region:        t.Region,
 			Size:          t.Size,
 			PaymentMethod: t.PaymentMethod,

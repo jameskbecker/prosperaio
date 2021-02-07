@@ -83,7 +83,7 @@ type productData struct {
 
 func initTask(i config.TaskInput) (t task, err error) {
 	t = task{
-		baseURL:      getBaseURL("fp", ""),
+		baseURL:      getBaseURL(i.Site, i.Region),
 		profile:      i.Profile,
 		region:       i.Region,
 		size:         i.Size,
