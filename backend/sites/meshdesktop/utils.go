@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"prosperaio/captcha"
 	"prosperaio/discord"
+	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 	"strings"
 	"time"
@@ -106,6 +107,13 @@ func (t *task) webhookMessage() discord.Message {
 	return discord.Message{
 		Embeds: []discord.Embed{embedData},
 	}
+}
+
+func (t *task) sendSuccess() (err error) {
+	cookies := client.GetJSONCookies(t.baseURL, t.client)
+	t.webhookURL = buildCheckoutURL(cookies, t.ppURL)
+	err = discord.PostWebhook(t.settings.WebhookURL, t.webhookMessage())
+	return
 }
 
 func (t *task) getCaptcha(sitekey string) string {

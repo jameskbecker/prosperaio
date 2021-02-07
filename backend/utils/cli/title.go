@@ -19,7 +19,7 @@ func IncrementCount(key string) {
 	strVal := os.Getenv(key)
 	count, _ := strconv.Atoi(strVal)
 	count++
-	os.Setenv(key, strconv.Itoa(count))
+	os.Setenv(key+"Count", strconv.Itoa(count))
 	UpdateTitle()
 }
 

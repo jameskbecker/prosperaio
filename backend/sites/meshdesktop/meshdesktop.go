@@ -1,15 +1,13 @@
 package meshdesktop
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"prosperaio/config"
-	"prosperaio/discord"
-	"prosperaio/utils/cli"
+	"prosperaio/utils"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 
@@ -17,7 +15,7 @@ import (
 )
 
 //Run mesh desktop task
-func Run(i config.TaskInput) {
+func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	t, err := initTask(i)
 	if err != nil {
 		color.Red(err.Error())
@@ -29,7 +27,7 @@ func Run(i config.TaskInput) {
 	//Cart Process
 	t.getStock()
 	t.addToCart()
-	cli.IncrementCount("cartCount")
+	ipc <- utils.IPCMessage{Channel: "incrementCart"}
 
 	//Checkout Process
 	t.registerEmail()
@@ -37,13 +35,11 @@ func Run(i config.TaskInput) {
 	t.addShipping()
 	t.updateBilling()
 	t.submitOrder()
-	cli.IncrementCount("checkoutCount")
+	ipc <- utils.IPCMessage{Channel: "incrementCheckout"}
 
-	cookies := client.GetJSONCookies(t.baseURL, t.client)
-	t.webhookURL = buildCheckoutURL(cookies, t.ppURL)
-	err = discord.PostWebhook(i.Settings.WebhookURL, t.webhookMessage())
+	err = t.sendSuccess()
 	if err != nil {
-		fmt.Println(t.ppURL)
+		t.log.Debug(t.ppURL)
 		t.log.Error(err.Error())
 		i.WG.Done()
 		return
@@ -58,6 +54,7 @@ type task struct {
 	baseURL          *url.URL
 	log              log.Logger
 	profile          config.Profile
+	settings         config.Settings
 	pData            productData
 	monitorDelay     time.Duration
 	retryDelay       time.Duration
@@ -93,7 +90,6 @@ func initTask(i config.TaskInput) (t task, err error) {
 	}
 	c := client.Create(i.Proxy, 1)
 	t.client = &c
-	t.log.Debug("Monitor Input: " + i.MonitorInput)
 	if !strings.Contains(i.MonitorInput, "/") {
 		t.pData.pid = i.MonitorInput
 

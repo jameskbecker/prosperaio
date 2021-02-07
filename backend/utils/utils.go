@@ -273,3 +273,9 @@ func GetCountryName(code string) (name string) {
 
 	return
 }
+
+//IPCMessage ...
+type IPCMessage struct {
+	Channel string
+	Args    *interface{}
+}

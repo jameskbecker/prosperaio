@@ -7,6 +7,7 @@ import (
 	"prosperaio/config"
 	"prosperaio/discord"
 	"prosperaio/sites/meshdesktop"
+	"prosperaio/utils"
 	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"strconv"
@@ -24,7 +25,6 @@ var proxies = []string{}
 var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
 var profiles map[string]config.Profile
-var runningTasks = sync.WaitGroup{}
 
 func init() {
 	const expiryDate = "28 Feb 2021 10:55 GMT"
@@ -88,7 +88,6 @@ func loadTasksHandler() {
 
 	color.Cyan(cli.Line())
 	printBold("Task Log")
-
 	switch {
 	case strings.HasPrefix(selection, "Run All Tasks"):
 		startTaskHandler(tasks)
@@ -97,8 +96,11 @@ func loadTasksHandler() {
 		os.Exit(0)
 		return
 	}
+}
 
-	runningTasks.Wait()
+func taskWaiter(wg *sync.WaitGroup, ipc chan utils.IPCMessage) {
+	wg.Wait()
+	close(ipc)
 }
 
 func startTaskHandler(tasks []config.Task) {
@@ -108,6 +110,8 @@ func startTaskHandler(tasks []config.Task) {
 		return
 	}
 
+	var runningTasks = sync.WaitGroup{}
+	ipc := make(chan utils.IPCMessage)
 	for i, t := range tasks {
 		site := t.Site
 		if t.Mode != "" {
@@ -137,7 +141,7 @@ func startTaskHandler(tasks []config.Task) {
 
 		switch strings.ToUpper(site) {
 		case "JD_FE", "FP_FE":
-			go meshdesktop.Run(input)
+			go meshdesktop.Run(input, ipc)
 			break
 		case "WEARESTRAP":
 			//go wearestrap.Run(input)
@@ -145,6 +149,15 @@ func startTaskHandler(tasks []config.Task) {
 
 		default:
 			color.Red("Invalid Site: '" + site + "'")
+		}
+	}
+	go taskWaiter(&runningTasks, ipc)
+	for msg := range ipc {
+		switch msg.Channel {
+		case "incrementCart":
+			cli.IncrementCount("cart")
+		case "incrementCheckout":
+			cli.IncrementCount("checkout")
 		}
 	}
 }
