@@ -201,8 +201,11 @@ func settingsHandler() {
 	}
 
 	selection := cli.SettingsMenu()
+	if selection == "Exit" {
+		os.Exit(0)
+		return
+	}
 	scanner.Scan()
-
 	switch selection {
 	case "Set Webhook URL":
 		settings.WebhookURL = scanner.Text()
@@ -224,10 +227,6 @@ func settingsHandler() {
 		settings.RetryDelay = delay
 	case "Set 2Captcha API Key":
 		settings.TwoCapKey = scanner.Text()
-		break
-
-	case "Exit":
-		os.Exit(0)
 		break
 	}
 	err = config.ModifySettings(settings)
