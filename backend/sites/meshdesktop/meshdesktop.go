@@ -59,6 +59,7 @@ type task struct {
 	monitorDelay     time.Duration
 	retryDelay       time.Duration
 	id               int
+	site             string
 	region           string
 	size             string
 	useragent        string
@@ -82,6 +83,7 @@ func initTask(i config.TaskInput) (t task, err error) {
 	t = task{
 		baseURL:      getBaseURL(i.Site, i.Region),
 		profile:      i.Profile,
+		site:         i.Site,
 		region:       i.Region,
 		size:         i.Size,
 		id:           i.ID,

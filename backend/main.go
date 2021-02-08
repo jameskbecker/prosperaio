@@ -34,7 +34,7 @@ func init() {
 		os.Exit(0)
 	}
 
-	os.Setenv("version", "4.0.3 (ALPHA)")
+	os.Setenv("version", "4.0.0 (CLI)")
 	os.Setenv("proxyCount", "0")
 	os.Setenv("cartCount", "0")
 	os.Setenv("checkoutCount", "0")

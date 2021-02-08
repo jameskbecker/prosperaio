@@ -69,8 +69,12 @@ func buildCheckoutURL(cookies string, redirURL string) string {
 
 func (t *task) updatePrefix() {
 	tID := fmt.Sprintf("%04d", t.id)
+	site := strings.ToLower(t.site)
 	region := strings.ToLower(t.region)
-	prefix := "[" + tID + "] [jd-" + region + "_fe] [" + t.size + "] "
+	if region != "" {
+		site += "-" + region
+	}
+	prefix := "[" + tID + "] [" + site + "_fe] [" + t.size + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
 
