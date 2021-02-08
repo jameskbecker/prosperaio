@@ -29,6 +29,7 @@ func SettingsMenu() string {
 		"Set Monitor Delay",
 		"Set Retry Delay",
 		"Set 2Captcha API Key",
+		"Back",
 		"Exit",
 	}
 	selection := GetUserInput("Settings", items)
