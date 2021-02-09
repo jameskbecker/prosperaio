@@ -42,7 +42,7 @@ func FormatProxy(proxy string) *url.URL {
 func TestProxy(data string, wg *sync.WaitGroup) {
 	c := Create(data, 0)
 
-	req, err := http.NewRequest("GET", "https://wearestrap.com/es/", nil)
+	req, err := http.NewRequest("GET", "https://www.google.com/", nil)
 	if err != nil {
 		color.Red(fmt.Sprintf("%-25s", "FAILED(E1)") + data)
 		wg.Done()
