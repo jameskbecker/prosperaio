@@ -49,7 +49,7 @@ func TaskMenu(data map[string]int) string {
 	// 	}
 	// }
 
-	items = append(items, "Exit")
+	items = append(items, "Back", "Exit")
 
 	selection := GetUserInput("Task Menu", items)
 	return items[selection]

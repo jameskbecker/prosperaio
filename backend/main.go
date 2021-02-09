@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/manifoldco/promptui"
 )
 
 var scanner = bufio.NewScanner(os.Stdin)
@@ -38,11 +37,9 @@ func init() {
 	os.Setenv("proxyCount", "0")
 	os.Setenv("cartCount", "0")
 	os.Setenv("checkoutCount", "0")
-	promptui.IconInitial = ""
 
 	color.Cyan(cli.Logo())
 	printBold("Welcome to ProsperAIO!")
-	print("Expires: " + expiryDate)
 
 	profiles = config.LoadProfiles()
 	print("Loaded Profiles.")
@@ -56,7 +53,7 @@ func main() {
 		switch selection {
 		case "Run Tasks":
 			loadTasksHandler()
-			break
+			continue
 		case "Load Proxies":
 			loadProxiesHandler()
 			continue
@@ -65,6 +62,7 @@ func main() {
 			continue
 		case "Manual Captcha Harvester":
 			captcha.Launch()
+			continue
 		case "Settings":
 			settingsHandler()
 			continue
@@ -81,21 +79,29 @@ func main() {
 }
 
 func loadTasksHandler() {
-	tasks := config.LoadTasks()
-	color.Cyan(cli.Line())
-	taskCounts := config.GetTaskCount(tasks)
-	selection := cli.TaskMenu(taskCounts)
+	for {
+		tasks := config.LoadTasks()
+		if len(tasks) == 0 {
+			return
+		}
+		color.Cyan(cli.Line())
+		taskCounts := config.GetTaskCount(tasks)
+		selection := cli.TaskMenu(taskCounts)
+		switch {
+		case strings.HasPrefix(selection, "Run All Tasks"):
+			color.Cyan(cli.Line())
+			printBold("Task Log")
+			startTaskHandler(tasks)
+			break
 
-	color.Cyan(cli.Line())
-	printBold("Task Log")
-	switch {
-	case strings.HasPrefix(selection, "Run All Tasks"):
-		startTaskHandler(tasks)
-		break
-	case selection == "Exit":
-		os.Exit(0)
-		return
+		case selection == "Back":
+			continue
+		case selection == "Exit":
+			os.Exit(0)
+			return
+		}
 	}
+
 }
 
 func taskWaiter(wg *sync.WaitGroup, ipc chan utils.IPCMessage) {
@@ -165,6 +171,9 @@ func startTaskHandler(tasks []config.Task) {
 func loadProxiesHandler() {
 	color.Cyan(cli.Line())
 	data := config.LoadProxies()
+	if len(data) == 0 {
+		return
+	}
 	os.Setenv("proxyCount", strconv.Itoa(len(data)))
 	cli.UpdateTitle()
 

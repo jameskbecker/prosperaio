@@ -39,25 +39,31 @@ type TaskInput struct {
 }
 
 //LoadTasks ...
-func LoadTasks() []Task {
-	tasks := []Task{}
+func LoadTasks() (tasks []Task) {
 	homedir, _ := os.UserHomeDir()
+
 	taskFolder := path.Join(homedir, "ProsperAIO", "tasks")
 	taskPaths := GetDirPaths(taskFolder, ".csv")
 
-	items := append(taskPaths, "Exit")
+	items := append(taskPaths, "Back", "Exit")
 	i := cli.GetUserInput("Select Task File", items)
-	if i == len(items)-1 {
+
+	switch i {
+	case len(items) - 2: //Back
+		return
+	case len(items) - 1: //Exit
 		os.Exit(0)
+		return
+	default:
+		data, err := LoadCSV(path.Join(taskFolder, taskPaths[i]), TaskFieldCount)
+		if err != nil {
+			color.Red("Error: " + err.Error())
+			os.Exit(0)
+		}
+		tasks = stringToTaskSlice(data)
+		return
 	}
 
-	data, err := LoadCSV(path.Join(taskFolder, taskPaths[i]), TaskFieldCount)
-	if err != nil {
-		color.Red("Error: " + err.Error())
-		os.Exit(0)
-	}
-	tasks = stringToTaskSlice(data)
-	return tasks
 }
 
 func stringToTaskSlice(data [][]string) []Task {
