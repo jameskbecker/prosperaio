@@ -39,10 +39,6 @@ func Create(proxy string, maxRedirects int) http.Client {
 	return client
 }
 
-func redirectHandler(maxRedirects int) {
-
-}
-
 //GetJSONCookies ...
 func GetJSONCookies(uri *url.URL, c *http.Client) string {
 	rawCookies := c.Jar.Cookies(uri)
