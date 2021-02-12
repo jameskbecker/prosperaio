@@ -14,22 +14,13 @@ type TitleCounts struct {
 	Cart, Checkout, Proxy int
 }
 
-//IncrementCount ...
-func IncrementCount(key string) {
-	strVal := os.Getenv(key)
-	count, _ := strconv.Atoi(strVal)
-	count++
-	os.Setenv(key+"Count", strconv.Itoa(count))
-	UpdateTitle()
-}
-
 //UpdateTitle ...
-func UpdateTitle() {
+func UpdateTitle(c TitleCounts) {
 	title := []string{
 		"ProsperAIO v" + os.Getenv("version"),
-		"Carted: " + os.Getenv("cartCount"),
-		"Checkouts: " + os.Getenv("checkoutCount"),
-		"Proxies: " + os.Getenv("proxyCount"),
+		"Carted: " + strconv.Itoa(c.Cart),
+		"Checkouts: " + strconv.Itoa(c.Checkout),
+		"Proxies: " + strconv.Itoa(c.Proxy),
 	}
 
 	if runtime.GOOS != "darwin" {

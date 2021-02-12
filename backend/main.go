@@ -20,10 +20,11 @@ import (
 
 var scanner = bufio.NewScanner(os.Stdin)
 var proxies = []string{}
+var counts = cli.TitleCounts{}
+var profiles map[string]config.Profile
 
 var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
-var profiles map[string]config.Profile
 
 func init() {
 	const expiryDate = "28 Feb 2021 10:55 GMT"
@@ -34,9 +35,7 @@ func init() {
 	}
 
 	os.Setenv("version", "4.0.0 (CLI)")
-	os.Setenv("proxyCount", "0")
-	os.Setenv("cartCount", "0")
-	os.Setenv("checkoutCount", "0")
+	cli.UpdateTitle(counts)
 
 	color.Cyan(cli.Logo())
 	printBold("Welcome to ProsperAIO!")
@@ -47,7 +46,7 @@ func init() {
 
 func main() {
 	go discord.SetPresence()
-	cli.UpdateTitle()
+
 	for {
 		selection := cli.MainMenu()
 		switch selection {
@@ -104,7 +103,7 @@ func loadTasksHandler() {
 
 }
 
-func taskWaiter(wg *sync.WaitGroup, ipc chan utils.IPCMessage) {
+func wait(wg *sync.WaitGroup, ipc chan utils.IPCMessage) {
 	wg.Wait()
 	close(ipc)
 }
@@ -157,15 +156,18 @@ func startTaskHandler(tasks []config.Task) {
 			color.Red("Invalid Site: '" + site + "'")
 		}
 	}
-	go taskWaiter(&runningTasks, ipc)
+
+	go wait(&runningTasks, ipc)
 	for msg := range ipc {
 		switch msg.Channel {
 		case "incrementCart":
-			cli.IncrementCount("cart")
+			counts.Cart++
 		case "incrementCheckout":
-			cli.IncrementCount("checkout")
+			counts.Checkout++
 		}
+		cli.UpdateTitle(counts)
 	}
+
 }
 
 func loadProxiesHandler() {
@@ -174,8 +176,6 @@ func loadProxiesHandler() {
 	if len(data) == 0 {
 		return
 	}
-	os.Setenv("proxyCount", strconv.Itoa(len(data)))
-	cli.UpdateTitle()
 
 	color.Cyan(cli.Line())
 	skipTest := cli.GetUserInput("Test Proxies?", []string{"Yes", "No"})
@@ -190,12 +190,17 @@ func testProxyHandler(data []string) {
 	printBold("Proxy Tester")
 
 	proxyWG := sync.WaitGroup{}
+	ipc := make(chan utils.IPCMessage)
 	for _, v := range data {
 		proxyWG.Add(1)
 		proxies = append(proxies, v)
-		go client.TestProxy(v, &proxyWG)
+		go client.TestProxy(v, &proxyWG, ipc)
 	}
-	proxyWG.Wait()
+	go wait(&proxyWG, ipc)
+	for range ipc {
+		counts.Proxy++
+		cli.UpdateTitle(counts)
+	}
 }
 
 func testWebhookHandler() {

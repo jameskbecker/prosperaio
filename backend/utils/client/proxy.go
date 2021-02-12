@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"prosperaio/utils"
 	"strings"
 	"sync"
 
@@ -39,7 +40,7 @@ func FormatProxy(proxy string) *url.URL {
 }
 
 //TestProxy ...
-func TestProxy(data string, wg *sync.WaitGroup) {
+func 	TestProxy(data string, wg *sync.WaitGroup, ipc chan utils.IPCMessage) {
 	c := Create(data, 0)
 
 	req, err := http.NewRequest("GET", "https://www.google.com/", nil)
@@ -67,8 +68,8 @@ func TestProxy(data string, wg *sync.WaitGroup) {
 
 	} else {
 		color.Red(fmt.Sprintf("%-25s", res.Status) + data)
-	}
-
+	}		
+	ipc <- utils.IPCMessage{Channel: "incrementProxy"}
 	wg.Done()
 }
 
