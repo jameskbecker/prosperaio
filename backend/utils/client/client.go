@@ -11,21 +11,23 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	tls "github.com/refraction-networking/utls"
+	"github.com/x04/cclient"
 )
 
 //Create a new instance of client
 func Create(proxy string, maxRedirects int) http.Client {
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) > maxRedirects {
-				return http.ErrUseLastResponse
-			}
-			return nil
-		},
-		Timeout: 30000 * time.Millisecond,
-	}
+	client, _ := cclient.NewClient(tls.HelloChrome_Auto)
+
 	jar, _ := cookiejar.New(nil)
 	client.Jar = jar
+	client.Timeout = 30 * time.Second
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		if len(via) > maxRedirects {
+			return http.ErrUseLastResponse
+		}
+		return nil
+	}
 
 	if proxy != "" {
 		proxyURL := FormatProxy(proxy)
@@ -35,6 +37,10 @@ func Create(proxy string, maxRedirects int) http.Client {
 	}
 
 	return client
+}
+
+func redirectHandler(maxRedirects int) {
+
 }
 
 //GetJSONCookies ...
