@@ -86,6 +86,7 @@ func stringToTaskSlice(data [][]string) []Task {
 //GetTaskCount ...
 func GetTaskCount(data []Task) map[string]int {
 	siteCounts := map[string]int{
+		"FP":         0,
 		"JD-DE":      0,
 		"JD-GB":      0,
 		"WEARESTRAP": 0,
