@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/google/brotli/go/cbrotli"
 	tls "github.com/refraction-networking/utls"
 	"github.com/x04/cclient"
 )
@@ -73,10 +72,10 @@ func Decompress(res *http.Response) error {
 		res.Body = zr
 		break
 
-	case "br":
-		br := cbrotli.NewReader(res.Body)
-		res.Body = br
-		break
+	// case "br":
+	// 	br := cbrotli.NewReader(res.Body)
+	// 	res.Body = br
+	// 	break
 
 	case "deflate":
 		df := flate.NewReader(res.Body)
