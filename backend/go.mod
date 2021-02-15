@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/ananagame/rich-go v0.0.0-20210101112514-52d3ad6a938f // indirect
 	github.com/fatih/color v1.10.0
+	github.com/google/brotli/go/cbrotli v0.0.0-20210127140805-63be8a994019
 	github.com/gorilla/mux v1.8.0
 	github.com/hugolgst/rich-go v0.0.0-20210101112514-52d3ad6a938f
 	github.com/lobre/goodhosts v2.1.0+incompatible

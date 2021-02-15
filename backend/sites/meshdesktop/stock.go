@@ -2,7 +2,6 @@ package meshdesktop
 
 import (
 	"errors"
-	"io"
 	"net/http"
 	"prosperaio/utils"
 	"prosperaio/utils/client"
@@ -16,14 +15,17 @@ import (
 func (t *task) getStock() {
 	for {
 		t.log.Warn("Fetching SKU")
-		stockRes, err := t._getStockReq()
+		res, err := t._getStockReq()
+		if res != nil {
+			client.Decompress(res)
+		}
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.monitorDelay)
 			continue
 		}
 
-		err = t._handleStockRes(stockRes)
+		err = t._handleStockRes(res)
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.monitorDelay)
@@ -35,9 +37,9 @@ func (t *task) getStock() {
 	t.updatePrefix()
 }
 
-func (t *task) _getStockReq() (data io.ReadCloser, err error) {
-	ts := utils.GetTS()
+func (t *task) _getStockReq() (res *http.Response, err error) {
 	path := "/product/0/" + t.pData.pid + "/stock/"
+	ts := utils.GetTS()
 	qs := "_=" + strconv.Itoa(ts)
 
 	//Create Request
@@ -52,22 +54,17 @@ func (t *task) _getStockReq() (data io.ReadCloser, err error) {
 	//req.Header.Set("referer", t.productURL.String())
 
 	//Send Request
-	res, err := t.client.Do(req)
-	if err != nil {
-		return
-	}
-
-	if res.StatusCode > 299 {
-		err = errors.New("Unexpected Status: " + uri + " " + res.Status)
-		return
-	}
-
-	data, err = client.Decompress(res)
+	res, err = t.client.Do(req)
 	return
 }
 
-func (t *task) _handleStockRes(data io.ReadCloser) (err error) {
-	doc, err := goquery.NewDocumentFromReader(data)
+func (t *task) _handleStockRes(res *http.Response) (err error) {
+	if res.StatusCode > 299 {
+		err = errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		return
 	}

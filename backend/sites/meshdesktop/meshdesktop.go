@@ -25,16 +25,16 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	t.log.Debug("Starting Task")
 
 	//Cart Process
-	// t.getStock()
-	// t.addToCart()
+	t.getStock()
+	t.addToCart()
 	ipc <- utils.IPCMessage{Channel: "incrementCart"}
 
 	//Checkout Process
-	// t.registerEmail()
-	// t.addAddress()
-	// t.addShipping()
-	// t.updateBilling()
-	// t.submitOrder()
+	t.registerEmail()
+	t.addAddress()
+	t.addShipping()
+	t.updateBilling()
+	t.submitOrder()
 	ipc <- utils.IPCMessage{Channel: "incrementCheckout"}
 
 	err = t.sendSuccess()

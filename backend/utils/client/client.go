@@ -1,16 +1,17 @@
 package client
 
 import (
+	"compress/flate"
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/google/brotli/go/cbrotli"
 	tls "github.com/refraction-networking/utls"
 	"github.com/x04/cclient"
 )
@@ -62,20 +63,26 @@ func GetJSONCookies(uri *url.URL, c *http.Client) string {
 }
 
 //Decompress compressed response body TODO: add deflate and brotli
-func Decompress(res *http.Response) (io.ReadCloser, error) {
+func Decompress(res *http.Response) error {
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
-		zr, _ := gzip.NewReader(res.Body)
-		return gzreadCloser{zr, res.Body}, nil
+		zr, err := gzip.NewReader(res.Body)
+		if err != nil {
+			return err
+		}
+		res.Body = zr
+		break
+
+	case "br":
+		br := cbrotli.NewReader(res.Body)
+		res.Body = br
+		break
+
+	case "deflate":
+		df := flate.NewReader(res.Body)
+		res.Body = df
+
 	}
-	return res.Body, nil
-}
-
-type gzreadCloser struct {
-	*gzip.Reader
-	io.Closer
-}
-
-func (gz gzreadCloser) Close() error {
-	return gz.Closer.Close()
+	defer res.Body.Close()
+	return nil
 }

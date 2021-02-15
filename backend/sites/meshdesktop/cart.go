@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -18,6 +17,9 @@ func (t *task) addToCart() {
 	for {
 		t.log.Warn("Adding to Cart")
 		res, err := t._postATCReq()
+		if res != nil {
+			client.Decompress(res)
+		}
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
@@ -34,7 +36,7 @@ func (t *task) addToCart() {
 	}
 }
 
-func (t *task) _postATCReq() (body io.ReadCloser, err error) {
+func (t *task) _postATCReq() (res *http.Response, err error) {
 	uri := t.baseURL.String() + "/cart/" + t.pData.sku
 	form, _ := buildATCForm()
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
@@ -44,12 +46,7 @@ func (t *task) _postATCReq() (body io.ReadCloser, err error) {
 	setDefaultHeaders(req, t.useragent, t.baseURL.String())
 	//req.Header.Set("referer", t.productURL.String())
 
-	res, err := t.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err = client.Decompress(res)
+	res, err = t.client.Do(req)
 	return
 }
 
@@ -67,9 +64,9 @@ type atcResponse struct {
 	Error           atcError     `json:"error"`
 }
 
-func (t *task) _handleATCRes(body io.ReadCloser) error {
+func (t *task) _handleATCRes(res *http.Response) error {
 	data := atcResponse{}
-	json.NewDecoder(body).Decode(&data)
+	json.NewDecoder(res.Body).Decode(&data)
 
 	if data.Error.Info.RecaptchaRequired {
 
@@ -78,7 +75,7 @@ func (t *task) _handleATCRes(body io.ReadCloser) error {
 	}
 
 	if data.Count < 1 || len(data.Contents) < 1 {
-		bodyB, _ := ioutil.ReadAll(body)
+		bodyB, _ := ioutil.ReadAll(res.Body)
 		fmt.Println(string(bodyB))
 		return errors.New("Added 0 items to Cart")
 	}

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"prosperaio/utils/client"
 	"strings"
@@ -13,13 +12,16 @@ import (
 
 func (t *task) registerEmail() {
 	for {
-		body, err := t._postGuestReq()
+		res, err := t._postGuestReq()
+		if res != nil {
+			client.Decompress(res)
+		}
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
 			continue
 		}
-		err = t._handleGuestRes(body)
+		err = t._handleGuestRes(res)
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
@@ -29,30 +31,23 @@ func (t *task) registerEmail() {
 	}
 }
 
-func (t *task) _postGuestReq() (body io.ReadCloser, err error) {
+func (t *task) _postGuestReq() (*http.Response, error) {
 	uri := t.baseURL.String() + "/checkout/guest/"
 	form := guestForm(t.profile.Email)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	setDefaultHeaders(req, t.useragent, t.baseURL.String())
 	req.Header.Set("referer", t.baseURL.String()+"/checkout/login/")
 
-	res, err := t.client.Do(req)
-	if err != nil {
-		return
-	}
-
-	body, err = client.Decompress(res)
-	return
-
+	return t.client.Do(req)
 }
 
-func (t *task) _handleGuestRes(body io.ReadCloser) error {
+func (t *task) _handleGuestRes(res *http.Response) error {
 	data := messageResponse{}
-	json.NewDecoder(body).Decode(&data)
+	json.NewDecoder(res.Body).Decode(&data)
 
 	t.log.Debug("Guest EP Message: " + data.Message)
 	switch strings.ToLower(data.Message) {
@@ -67,5 +62,4 @@ func (t *task) _handleGuestRes(body io.ReadCloser) error {
 		err := errors.New("Guest EP Error: " + "'" + data.Message + "'")
 		return err
 	}
-
 }
