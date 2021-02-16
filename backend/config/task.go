@@ -11,7 +11,7 @@ import (
 )
 
 //TaskFieldCount ...
-const TaskFieldCount = 7
+const TaskFieldCount = 8
 
 //Task format
 type Task struct {
@@ -34,7 +34,7 @@ type TaskInput struct {
 	Proxy         string
 	PaymentMethod string
 	Profile       Profile
-	Settings      *Settings
+	Settings      Settings
 	WG            *sync.WaitGroup
 }
 

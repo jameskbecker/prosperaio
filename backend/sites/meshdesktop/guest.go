@@ -22,6 +22,7 @@ func (t *task) registerEmail() {
 			continue
 		}
 		err = t._handleGuestRes(res)
+		res.Body.Close()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)

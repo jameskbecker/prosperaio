@@ -22,6 +22,7 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 		i.WG.Done()
 		return
 	}
+
 	t.log.Debug("Starting Task")
 
 	//Cart Process
@@ -83,6 +84,7 @@ func initTask(i config.TaskInput) (t task, err error) {
 	t = task{
 		baseURL:      getBaseURL(i.Site, i.Region),
 		profile:      i.Profile,
+		settings:     i.Settings,
 		site:         i.Site,
 		region:       i.Region,
 		size:         i.Size,
@@ -90,7 +92,7 @@ func initTask(i config.TaskInput) (t task, err error) {
 		monitorDelay: time.Duration(i.Settings.MonitorDelay) * time.Millisecond,
 		retryDelay:   time.Duration(i.Settings.RetryDelay) * time.Millisecond,
 	}
-	c := client.Create(i.Proxy, 1)
+	c := client.Create("100.76.72.18:8888", 1)
 	t.client = &c
 	if !strings.Contains(i.MonitorInput, "/") {
 		t.pData.pid = i.MonitorInput

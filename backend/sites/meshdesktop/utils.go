@@ -80,10 +80,13 @@ func (t *task) updatePrefix() {
 
 func (t *task) webhookMessage() discord.Message {
 	productHeader := discord.Author{Name: "Successful Checkout"}
+	site := strings.ToLower(t.site)
+	if t.region != "" {
+		site += "-" + strings.ToLower(t.region)
+	}
 	fields := []discord.Field{
-		{Name: "Site", Value: "jd-" + strings.ToLower(t.region) + "_fe", Inline: true},
+		{Name: "Site", Value: site + "_fe", Inline: true},
 		{Name: "Size", Value: "N/A", Inline: true},
-		{Name: "Order #", Value: "N/A", Inline: true},
 	}
 
 	if t.pData.name != "" {
@@ -93,6 +96,8 @@ func (t *task) webhookMessage() discord.Message {
 	if t.size != "" {
 		fields[1].Value = t.size
 	}
+
+	t.log.Debug(t.webhookURL)
 
 	embedData := discord.Embed{
 		Author: productHeader,
@@ -114,7 +119,11 @@ func (t *task) webhookMessage() discord.Message {
 }
 
 func (t *task) sendSuccess() (err error) {
-	cookies := client.GetJSONCookies(t.baseURL, t.client)
+	adyenURL1, _ := url.Parse("https://live.adyen.com/")
+	adyenURL2, _ := url.Parse("https://live.adyen.com/hpp/")
+	adyenURL3, _ := url.Parse("https://live.adyen.com/hpp")
+	cookieURLs := []*url.URL{t.baseURL, adyenURL1, adyenURL2, adyenURL3}
+	cookies := client.GetJSONCookies(cookieURLs, t.client)
 	t.webhookURL = buildCheckoutURL(cookies, t.ppURL)
 	err = discord.PostWebhook(t.settings.WebhookURL, t.webhookMessage())
 	return

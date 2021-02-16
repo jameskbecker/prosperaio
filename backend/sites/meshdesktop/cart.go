@@ -27,6 +27,7 @@ func (t *task) addToCart() {
 		}
 
 		err = t._handleATCRes(res)
+		res.Body.Close()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)

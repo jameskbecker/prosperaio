@@ -42,6 +42,7 @@ func (t *task) addAddress() {
 			continue
 		}
 		err = t._handleAddressRes(res)
+		res.Body.Close()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
@@ -105,6 +106,7 @@ func (t *task) addShipping() {
 		}
 
 		err = t._handleShippingRes(res)
+		res.Body.Close()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
@@ -173,6 +175,7 @@ func (t *task) updateBilling() {
 		}
 
 		err = t._handleUpdateBillingRes(res)
+		res.Body.Close()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
@@ -234,6 +237,7 @@ func (t *task) submitOrder() {
 		}
 
 		err = t._handleSubmitOrderRes(res)
+		res.Body.Close()
 		if err != nil {
 			t.log.Error(err.Error())
 			time.Sleep(t.retryDelay)
@@ -268,15 +272,22 @@ func (t *task) _postSubmitOrderReq() (*http.Response, error) {
 
 func (t *task) _handleSubmitOrderRes(res *http.Response) error {
 	if res.StatusCode < 300 || res.StatusCode > 399 {
-		return errors.New("STATUS NOT 3XX")
+		return errors.New("Status not 3XX")
 	}
 
-	checkoutURL := res.Header.Get("location")
-	if checkoutURL == "" {
-		return errors.New("NO RESPONSE LOCATION HEADER")
+	redirectURL := res.Header.Get("location")
+
+	switch {
+	case redirectURL == "":
+		return errors.New("Adyen: No Redirect URL")
+
+	case strings.Contains(redirectURL, "productOutOfStock"):
+		return errors.New("OOS")
+
+	case strings.Contains(redirectURL, "paypal"):
+		t.ppURL = base64.URLEncoding.EncodeToString([]byte(redirectURL))
+		return nil
 	}
-	//t.log.Debug("Checkout URL: " + checkoutURL)
-	t.ppURL = base64.URLEncoding.EncodeToString([]byte(checkoutURL))
-	//t.adyenURL = checkoutURL
-	return nil
+
+	return errors.New("Unexpected Adyen Redirect: " + redirectURL)
 }

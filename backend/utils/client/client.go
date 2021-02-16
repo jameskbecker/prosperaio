@@ -40,17 +40,20 @@ func Create(proxy string, maxRedirects int) http.Client {
 }
 
 //GetJSONCookies ...
-func GetJSONCookies(uri *url.URL, c *http.Client) string {
-	rawCookies := c.Jar.Cookies(uri)
+func GetJSONCookies(urls []*url.URL, c *http.Client) string {
 	cookies := []ExtensionCookie{}
-	for _, v := range rawCookies {
-		cookies = append(cookies, ExtensionCookie{
-			Name:  v.Name,
-			Value: v.Value,
-			Path:  "/",
-			URL:   uri.String(),
-		})
+	for _, uri := range urls {
+		rawCookies := c.Jar.Cookies(uri)
+		for _, v := range rawCookies {
+			cookies = append(cookies, ExtensionCookie{
+				Name:  v.Name,
+				Value: v.Value,
+				Path:  v.Path,
+				URL:   uri.String(),
+			})
+		}
 	}
+
 	jsonCookies, err := json.Marshal(cookies)
 	if err != nil {
 		color.Red(err.Error())
@@ -82,6 +85,5 @@ func Decompress(res *http.Response) error {
 		res.Body = df
 
 	}
-	defer res.Body.Close()
 	return nil
 }

@@ -141,7 +141,7 @@ func startTaskHandler(tasks []config.Task) {
 			PaymentMethod: t.PaymentMethod,
 			Profile:       profile,
 			Proxy:         getProxy(),
-			Settings:      &settings,
+			Settings:      settings,
 		}
 
 		switch strings.ToUpper(site) {
