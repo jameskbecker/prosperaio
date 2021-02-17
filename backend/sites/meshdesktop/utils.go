@@ -12,6 +12,8 @@ import (
 	"prosperaio/utils/log"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 func getBaseURL(siteID string, region string) (baseURL *url.URL) {
@@ -81,7 +83,10 @@ func (t *task) updatePrefix() {
 
 func (t *task) webhookMessage() discord.Message {
 	taskID := fmt.Sprintf("%04d", t.id)
-	checkoutlinks.AddCheckoutLink(taskID, t.extensionURL)
+	err := checkoutlinks.AddCheckoutLink(taskID, t.extensionURL)
+	if err != nil {
+		color.Red(err.Error())
+	}
 
 	productHeader := discord.Author{Name: "Successful Checkout"}
 	site := strings.ToLower(t.site)

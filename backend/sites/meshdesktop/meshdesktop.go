@@ -31,21 +31,21 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	t.addToCart()
 	ipc <- utils.IPCMessage{Channel: "incrementCart"}
 
-	// //Checkout Process
-	// t.registerEmail()
-	// t.addAddress()
-	// t.addShipping()
-	// t.updateBilling()
-	// t.submitOrder()
-	// ipc <- utils.IPCMessage{Channel: "incrementCheckout"}
-	// err = t.sendSuccess()
-	// if err != nil {
-	// 	t.log.Debug(t.ppURL)
-	// 	t.log.Error(err.Error())
-	// 	i.WG.Done()
-	// 	return
-	// }
-	// t.log.Info("Sent Discord Webhook!")
+	//Checkout Process
+	t.registerEmail()
+	t.addAddress()
+	t.addShipping()
+	t.updateBilling()
+	t.submitOrder()
+	ipc <- utils.IPCMessage{Channel: "incrementCheckout"}
+	err = t.sendSuccess()
+	if err != nil {
+		t.log.Debug(t.ppURL)
+		t.log.Error(err.Error())
+		i.WG.Done()
+		return
+	}
+	t.log.Info("Sent Discord Webhook!")
 	i.WG.Done()
 }
 
