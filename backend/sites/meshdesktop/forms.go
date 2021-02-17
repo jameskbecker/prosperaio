@@ -17,14 +17,18 @@ type atcForm struct {
 	QuantityToAdd           int          `json:"quantityToAdd"`
 }
 
-func buildATCForm() ([]byte, error) {
-	return json.Marshal(atcForm{
+func buildATCForm(response string) ([]byte, error) {
+	form := atcForm{
 		Customisations:          false,
 		CartPosition:            nil,
 		RecaptchaResponse:       false,
 		CartProductNotification: nil,
 		QuantityToAdd:           1,
-	})
+	}
+	if response != "" {
+		form.RecaptchaResponse = response
+	}
+	return json.Marshal(form)
 }
 
 func guestForm(email string) []byte {

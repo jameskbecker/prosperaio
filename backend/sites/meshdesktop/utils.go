@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"prosperaio/captcha"
 	"prosperaio/discord"
+	"prosperaio/utils/checkoutlinks"
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 	"strings"
@@ -15,7 +16,7 @@ import (
 
 func getBaseURL(siteID string, region string) (baseURL *url.URL) {
 	baseURL = &url.URL{Scheme: "https"}
-	switch siteID {
+	switch strings.ToLower(siteID) {
 	case "jd":
 		baseURL.Host += "www.jdsports"
 		break
@@ -60,11 +61,10 @@ func setDefaultHeaders(req *http.Request, ua string, bURL string) {
 	}
 }
 
-func buildCheckoutURL(cookies []byte, redirURL string) string {
+func buildExtensionURL(cookies []byte, redirURL string) string {
 	qs := url.Values{}
 	qs.Set("cookie", base64.URLEncoding.EncodeToString(cookies))
 	qs.Set("redirectUrl", base64.URLEncoding.EncodeToString([]byte(redirURL)))
-
 	return "http://localhost/extension.prosperaio.com?" + qs.Encode()
 }
 
@@ -80,6 +80,9 @@ func (t *task) updatePrefix() {
 }
 
 func (t *task) webhookMessage() discord.Message {
+	taskID := fmt.Sprintf("%04d", t.id)
+	checkoutlinks.AddCheckoutLink(taskID, t.extensionURL)
+
 	productHeader := discord.Author{Name: "Successful Checkout"}
 	site := strings.ToLower(t.site)
 	if t.region != "" {
@@ -98,14 +101,14 @@ func (t *task) webhookMessage() discord.Message {
 		fields[1].Value = t.size
 	}
 
-	t.log.Debug(t.webhookURL)
+	t.log.Debug(t.extensionURL)
 
 	embedData := discord.Embed{
 		Author: productHeader,
 		Title:  "Checkout Now",
 		Type:   "rich",
 		Color:  3642623,
-		URL:    t.webhookURL,
+		URL:    "http://127.0.0.1:7500/checkouts/" + taskID,
 		Fields: fields,
 		Footer: discord.GetFooter(),
 	}
@@ -125,16 +128,21 @@ func (t *task) sendSuccess() (err error) {
 	adyenURL3, _ := url.Parse("https://live.adyen.com/hpp")
 	cookieURLs := []*url.URL{t.baseURL, adyenURL1, adyenURL2, adyenURL3}
 	cookies := client.GetJSONCookies(cookieURLs, t.client)
-	t.webhookURL = buildCheckoutURL(cookies, t.ppURL)
+	t.extensionURL = buildExtensionURL(cookies, t.ppURL)
 	err = discord.PostWebhook(t.settings.WebhookURL, t.webhookMessage())
 	return
 }
 
-func (t *task) getCaptcha(sitekey string) string {
+func (t *task) getCaptcha() {
+	if t.recaptchaSitekey == "" {
+		t.log.Error("Error getting captcha: missing sitekey")
+		return
+	}
 	for {
+		t.log.Warn("Getting 2Captcha")
 		code, err := captcha.Request2Captcha(captcha.InputParams{
-			APIKey:  "",
-			Sitekey: sitekey,
+			APIKey:  t.settings.TwoCapKey,
+			Sitekey: t.recaptchaSitekey,
 			URL:     t.baseURL.String(),
 		})
 		if err != nil {
@@ -143,7 +151,8 @@ func (t *task) getCaptcha(sitekey string) string {
 			continue
 		}
 		t.log.Debug("ReCap2 Response: " + code)
-		return code
+		t.recaptchaResponse = code
+		break
 	}
 
 }

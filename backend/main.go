@@ -8,6 +8,7 @@ import (
 	"prosperaio/discord"
 	"prosperaio/sites/meshdesktop"
 	"prosperaio/utils"
+	"prosperaio/utils/checkoutlinks"
 	"prosperaio/utils/cli"
 	"prosperaio/utils/client"
 	"strconv"
@@ -45,6 +46,7 @@ func init() {
 }
 
 func main() {
+	go checkoutlinks.StartServer()
 	go discord.SetPresence()
 
 	for {
@@ -129,6 +131,8 @@ func startTaskHandler(tasks []config.Task) {
 			continue
 		}
 
+		forceCaptcha, _ := strconv.ParseBool(t.ForceCaptcha)
+
 		taskID := i + 1
 		runningTasks.Add(1)
 		input := config.TaskInput{
@@ -139,6 +143,7 @@ func startTaskHandler(tasks []config.Task) {
 			Region:        t.Region,
 			Size:          t.Size,
 			PaymentMethod: t.PaymentMethod,
+			ForceCaptcha:  forceCaptcha,
 			Profile:       profile,
 			Proxy:         getProxy(),
 			Settings:      settings,

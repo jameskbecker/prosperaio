@@ -22,6 +22,7 @@ type Task struct {
 	MonitorInput  string
 	Size          string
 	PaymentMethod string
+	ForceCaptcha  string
 }
 
 //TaskInput ...
@@ -33,6 +34,7 @@ type TaskInput struct {
 	Size          string
 	Proxy         string
 	PaymentMethod string
+	ForceCaptcha  bool
 	Profile       Profile
 	Settings      Settings
 	WG            *sync.WaitGroup
@@ -77,6 +79,7 @@ func stringToTaskSlice(data [][]string) []Task {
 			MonitorInput:  strings.TrimSpace(v[4]),
 			Size:          strings.TrimSpace(v[5]),
 			PaymentMethod: strings.TrimSpace(v[6]),
+			ForceCaptcha:  strings.TrimSpace(v[7]),
 		})
 	}
 
