@@ -36,6 +36,11 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	t.addAddress()
 	t.addShipping()
 	t.updateBilling()
+
+	if t.checkoutDelay > 0 {
+		t.log.Warn("Delaying Checkout")
+		time.Sleep(time.Duration(t.checkoutDelay) * time.Millisecond)
+	}
 	t.submitOrder()
 	ipc <- utils.IPCMessage{Channel: "incrementCheckout"}
 	err = t.sendSuccess()
@@ -57,6 +62,7 @@ type task struct {
 	size          string
 	paymentMethod string
 	forceCaptcha  bool
+	checkoutDelay int
 
 	productURL        *url.URL
 	pData             productData
@@ -88,16 +94,17 @@ type productData struct {
 
 func initTask(i config.TaskInput) (t task, err error) {
 	t = task{
-		baseURL:      getBaseURL(i.Site, i.Region),
-		profile:      i.Profile,
-		settings:     i.Settings,
-		site:         i.Site,
-		region:       i.Region,
-		size:         i.Size,
-		id:           i.ID,
-		forceCaptcha: i.ForceCaptcha,
-		monitorDelay: time.Duration(i.Settings.MonitorDelay) * time.Millisecond,
-		retryDelay:   time.Duration(i.Settings.RetryDelay) * time.Millisecond,
+		baseURL:       getBaseURL(i.Site, i.Region),
+		profile:       i.Profile,
+		settings:      i.Settings,
+		site:          i.Site,
+		region:        i.Region,
+		size:          i.Size,
+		id:            i.ID,
+		forceCaptcha:  i.ForceCaptcha,
+		checkoutDelay: i.Delay,
+		monitorDelay:  time.Duration(i.Settings.MonitorDelay) * time.Millisecond,
+		retryDelay:    time.Duration(i.Settings.RetryDelay) * time.Millisecond,
 	}
 	c := client.Create(i.Proxy, 1)
 	t.client = &c

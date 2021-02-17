@@ -132,7 +132,7 @@ func startTaskHandler(tasks []config.Task) {
 		}
 
 		forceCaptcha, _ := strconv.ParseBool(t.ForceCaptcha)
-
+		delay, _ := strconv.Atoi(t.Delay)
 		taskID := i + 1
 		runningTasks.Add(1)
 		input := config.TaskInput{
@@ -144,6 +144,7 @@ func startTaskHandler(tasks []config.Task) {
 			Size:          t.Size,
 			PaymentMethod: t.PaymentMethod,
 			ForceCaptcha:  forceCaptcha,
+			Delay:         delay,
 			Profile:       profile,
 			Proxy:         getProxy(),
 			Settings:      settings,
@@ -172,7 +173,6 @@ func startTaskHandler(tasks []config.Task) {
 		}
 		cli.UpdateTitle(counts)
 	}
-
 }
 
 func loadProxiesHandler() {

@@ -11,7 +11,7 @@ import (
 )
 
 //TaskFieldCount ...
-const TaskFieldCount = 8
+const TaskFieldCount = 9
 
 //Task format
 type Task struct {
@@ -23,6 +23,7 @@ type Task struct {
 	Size          string
 	PaymentMethod string
 	ForceCaptcha  string
+	Delay         string
 }
 
 //TaskInput ...
@@ -35,6 +36,7 @@ type TaskInput struct {
 	Proxy         string
 	PaymentMethod string
 	ForceCaptcha  bool
+	Delay         int
 	Profile       Profile
 	Settings      Settings
 	WG            *sync.WaitGroup
@@ -80,6 +82,7 @@ func stringToTaskSlice(data [][]string) []Task {
 			Size:          strings.TrimSpace(v[5]),
 			PaymentMethod: strings.TrimSpace(v[6]),
 			ForceCaptcha:  strings.TrimSpace(v[7]),
+			Delay:         strings.TrimSpace(v[8]),
 		})
 	}
 
