@@ -1,6 +1,7 @@
 package meshdesktop
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -59,10 +60,10 @@ func setDefaultHeaders(req *http.Request, ua string, bURL string) {
 	}
 }
 
-func buildCheckoutURL(cookies string, redirURL string) string {
+func buildCheckoutURL(cookies []byte, redirURL string) string {
 	qs := url.Values{}
-	qs.Set("cookie", cookies)
-	qs.Set("redirectUrl", redirURL)
+	qs.Set("cookie", base64.URLEncoding.EncodeToString(cookies))
+	qs.Set("redirectUrl", base64.URLEncoding.EncodeToString([]byte(redirURL)))
 
 	return "http://localhost/extension.prosperaio.com?" + qs.Encode()
 }

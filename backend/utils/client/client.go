@@ -3,7 +3,6 @@ package client
 import (
 	"compress/flate"
 	"compress/gzip"
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/cookiejar"
@@ -40,7 +39,7 @@ func Create(proxy string, maxRedirects int) http.Client {
 }
 
 //GetJSONCookies ...
-func GetJSONCookies(urls []*url.URL, c *http.Client) string {
+func GetJSONCookies(urls []*url.URL, c *http.Client) []byte {
 	cookies := []ExtensionCookie{}
 	for _, uri := range urls {
 		rawCookies := c.Jar.Cookies(uri)
@@ -57,11 +56,10 @@ func GetJSONCookies(urls []*url.URL, c *http.Client) string {
 	jsonCookies, err := json.Marshal(cookies)
 	if err != nil {
 		color.Red(err.Error())
-		return "[]"
+		return []byte("[]")
 	}
 
-	encodedJSONCookies := base64.URLEncoding.EncodeToString(jsonCookies)
-	return encodedJSONCookies
+	return jsonCookies
 }
 
 //Decompress compressed response body TODO: add deflate and brotli

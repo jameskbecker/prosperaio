@@ -2,7 +2,6 @@ package meshdesktop
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -285,7 +284,7 @@ func (t *task) _handleSubmitOrderRes(res *http.Response) error {
 		return errors.New("OOS")
 
 	case strings.Contains(redirectURL, "paypal"):
-		t.ppURL = base64.URLEncoding.EncodeToString([]byte(redirectURL))
+		t.ppURL = redirectURL
 		return nil
 	}
 
