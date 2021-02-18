@@ -8,60 +8,29 @@ import (
 	"net/http"
 	"prosperaio/utils/client"
 	"strconv"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-func (t *task) getCaptchaData() (skip bool) {
-	for {
-		res, err := t._getProductReq()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-
-		skip, err = t._handleProductRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		break
+func (t *task) getCaptchaData() {
+	if !t.forceCaptcha {
+		return
 	}
-	return
-}
+	t.log.Warn("Checking for Recaptcha")
+	res, err := t._getProductReq()
+	if err != nil {
+		t.retry(err, t.getCaptchaData)
+		return
+	}
 
-func (t *task) addToCart() {
-	for {
-		if t.forceCaptcha {
-			t.log.Warn("Checking for Captcha")
-			skip := t.getCaptchaData()
-			if !skip {
-				t.getCaptcha()
-			}
-		}
-		t.log.Warn("Adding to Cart")
-		res, err := t._postATCReq()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
+	t.recaptcha.skip, err = t._handleProductRes(res)
+	if err != nil {
+		t.retry(err, t.getCaptchaData)
+		return
+	}
 
-		err = t._handleATCRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			if err.Error() == "ATC Failed: ReCAPTCHA Required" {
-				t.getCaptcha()
-			}
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		break
+	if !t.recaptcha.skip {
+		t.getCaptcha()
 	}
 }
 
@@ -82,6 +51,7 @@ func (t *task) _getProductReq() (res *http.Response, err error) {
 }
 
 func (t *task) _handleProductRes(res *http.Response) (skip bool, err error) {
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		err = errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
 		return
@@ -101,7 +71,7 @@ func (t *task) _handleProductRes(res *http.Response) (skip bool, err error) {
 		return
 	}
 
-	t.recaptchaSitekey = sitekey
+	t.recaptcha.sitekey = sitekey
 	t.log.Debug("Found Sitekey: " + sitekey)
 
 	srcSelector := doc.Find("#recaptchaSourceEnabled")
@@ -114,9 +84,24 @@ func (t *task) _handleProductRes(res *http.Response) (skip bool, err error) {
 	return
 }
 
+func (t *task) addToCart() {
+	t.log.Warn("Adding to Cart")
+	res, err := t._postATCReq()
+	if err != nil {
+		t.retry(err, t.addToCart)
+		return
+	}
+
+	err = t._handleATCRes(res)
+	if err != nil {
+		t.retry(err, t.addToCart)
+		return
+	}
+}
+
 func (t *task) _postATCReq() (res *http.Response, err error) {
 	uri := t.baseURL.String() + "/cart/" + t.pData.sku
-	form, _ := buildATCForm(t.recaptchaResponse)
+	form, _ := buildATCForm(t.recaptcha.response)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
 		return nil, err
@@ -129,13 +114,14 @@ func (t *task) _postATCReq() (res *http.Response, err error) {
 }
 
 func (t *task) _handleATCRes(res *http.Response) error {
+	defer res.Body.Close()
 	client.Decompress(res)
 	data := atcResponse{}
 	json.NewDecoder(res.Body).Decode(&data)
 
 	if data.Error.Info.RecaptchaRequired {
-		t.recaptchaSitekey = data.Error.Info.Sitekey
-		return errors.New("ATC Failed: ReCAPTCHA Required")
+		t.recaptcha.sitekey = data.Error.Info.Sitekey
+		return errCaptchaRequired
 	}
 
 	if data.Count < 1 || len(data.Contents) < 1 {
@@ -143,7 +129,8 @@ func (t *task) _handleATCRes(res *http.Response) error {
 		if err != nil {
 			return err
 		}
-		return errors.New("Added 0 items to Cart - " + string(bodyB))
+		t.log.Debug(string(bodyB))
+		return errATCNotAdded
 	}
 
 	t.shippingMethodID = data.Delivery.DeliveryMethodID

@@ -7,34 +7,23 @@ import (
 	"prosperaio/utils/client"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 func (t *task) getStock() {
-	for {
-		t.log.Warn("Fetching SKU")
-		res, err := t._getStockReq()
-		if res != nil {
-			client.Decompress(res)
-		}
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.monitorDelay)
-			continue
-		}
-
-		err = t._handleStockRes(res)
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.monitorDelay)
-			continue
-		}
-		break
+	t.log.Warn("Fetching SKU")
+	res, err := t._getStockReq()
+	if err != nil {
+		t.monitor(err, t.getStock)
+		return
 	}
 
-	t.updatePrefix()
+	err = t._handleStockRes(res)
+	if err != nil {
+		t.monitor(err, t.getStock)
+		return
+	}
 }
 
 func (t *task) _getStockReq() (res *http.Response, err error) {
@@ -58,15 +47,16 @@ func (t *task) _getStockReq() (res *http.Response, err error) {
 	return
 }
 
-func (t *task) _handleStockRes(res *http.Response) (err error) {
+func (t *task) _handleStockRes(res *http.Response) error {
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
-		err = errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
-		return
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return err
 	}
-
+	client.Decompress(res)
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return
+		return err
 	}
 
 	selector := "button[data-sku]"
@@ -75,8 +65,7 @@ func (t *task) _handleStockRes(res *http.Response) (err error) {
 	//Filter data from selected size
 	sel := s.FilterFunction(t._findSize)
 	if sel == nil {
-		err = errors.New("Size not found")
-		return
+		return errSizeNotFound
 	}
 
 	//Assign data to task
@@ -84,8 +73,7 @@ func (t *task) _handleStockRes(res *http.Response) (err error) {
 	t.pData.price, _ = sel.Attr("data-price")
 
 	if t.pData.sku == "" {
-		err = errors.New("Size not found or OOS")
-		return
+		return errSizeNotFoundOrOOS
 	}
 
 	t.log.Debug("SKU: " + t.pData.sku)
@@ -94,11 +82,10 @@ func (t *task) _handleStockRes(res *http.Response) (err error) {
 	//If stock status available, check if in stock
 	stock, _ := sel.Attr("data-stock")
 	if stock == "0" {
-		err = errors.New("Out of Stock")
-		return
+		return errOOS
 	}
 
-	return
+	return nil
 }
 
 func (t *task) _findSize(i int, sel *goquery.Selection) bool {

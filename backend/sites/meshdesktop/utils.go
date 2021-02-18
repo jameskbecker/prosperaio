@@ -11,7 +11,6 @@ import (
 	"prosperaio/utils/client"
 	"prosperaio/utils/log"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 )
@@ -77,7 +76,7 @@ func (t *task) updatePrefix() {
 	if region != "" {
 		site += "-" + region
 	}
-	prefix := "[" + tID + "] [" + site + "_fe] [" + t.size + "] "
+	prefix := "[" + tID + "] [" + site + "_fe] [" + t.pData.pid + "] [" + t.size + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
 
@@ -139,25 +138,20 @@ func (t *task) sendSuccess() (err error) {
 }
 
 func (t *task) getCaptcha() {
-	if t.recaptchaSitekey == "" {
+	if t.recaptcha.sitekey == "" {
 		t.log.Error("Error getting captcha: missing sitekey")
 		return
 	}
-	for {
-		t.log.Warn("Getting 2Captcha")
-		code, err := captcha.Request2Captcha(captcha.InputParams{
-			APIKey:  t.settings.TwoCapKey,
-			Sitekey: t.recaptchaSitekey,
-			URL:     t.baseURL.String(),
-		})
-		if err != nil {
-			t.log.Error("ReCap2 Err: " + err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		t.log.Debug("ReCap2 Response: " + code)
-		t.recaptchaResponse = code
-		break
+	t.log.Warn("Requesting 2Captcha")
+	code, err := captcha.Request2Captcha(captcha.InputParams{
+		APIKey:  t.settings.TwoCapKey,
+		Sitekey: t.recaptcha.sitekey,
+		URL:     t.baseURL.String(),
+	})
+	if err != nil {
+		t.retry(err, t.getCaptcha)
+		return
 	}
-
+	t.log.Debug("ReCap2 Response: " + code)
+	t.recaptcha.response = code
 }

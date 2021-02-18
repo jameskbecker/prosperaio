@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"prosperaio/utils/client"
 	"strings"
-	"time"
 )
 
 type apiError struct {
@@ -29,25 +28,15 @@ type addressResponse struct {
 }
 
 func (t *task) addAddress() {
-	for {
-		t.log.Warn("Checking Out [1/3]")
-		res, err := t._postAddressReq()
-		if res != nil {
-			client.Decompress(res)
-		}
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		err = t._handleAddressRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		break
+	t.log.Warn("Checking Out [1/3]")
+	res, err := t._postAddressReq()
+	if err != nil {
+		t.retry(err, t.addAddress)
+		return
+	}
+	err = t._handleAddressRes(res)
+	if err != nil {
+		t.retry(err, t.addAddress)
 	}
 }
 
@@ -66,23 +55,23 @@ func (t *task) _postAddressReq() (res *http.Response, err error) {
 	return
 }
 
-func (t *task) _handleAddressRes(res *http.Response) (err error) {
+func (t *task) _handleAddressRes(res *http.Response) error {
+	defer res.Body.Close()
+	client.Decompress(res)
 	body := addressResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
 
 	if body.Error != nil {
-		err = errors.New("[C1] Response error: " + (*body.Error).Info)
-		return
+		return errors.New("[C1] Response error: " + (*body.Error).Info)
 	}
 
 	if body.ID == "" {
 		bodyB, _ := ioutil.ReadAll(res.Body)
 		fmt.Println(string(bodyB))
-		err = errors.New("[C1] Received no address ID")
-		return
+		return errNoAddrID
 	}
 	t.addressID = body.ID
-	return
+	return nil
 }
 
 type deliveryUpdate struct {
@@ -92,27 +81,16 @@ type deliveryUpdate struct {
 }
 
 func (t *task) addShipping() {
-	for {
-		t.log.Warn("Checking Out [2/3]")
-		res, err := t._postShippingReq()
-		if res != nil {
-			client.Decompress(res)
-		}
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
+	t.log.Warn("Checking Out [2/3]")
+	res, err := t._postShippingReq()
+	if err != nil {
+		t.retry(err, t.addShipping)
+		return
+	}
 
-		err = t._handleShippingRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-
-		break
+	err = t._handleShippingRes(res)
+	if err != nil {
+		t.retry(err, t.addShipping)
 	}
 }
 
@@ -132,12 +110,12 @@ func (t *task) _postShippingReq() (res *http.Response, err error) {
 
 	setDefaultHeaders(req, t.useragent, t.baseURL.String())
 	req.Header.Set("referer", t.baseURL.String()+"/checkout/delivery/")
-
-	res, err = t.client.Do(req)
-	return
+	return t.client.Do(req)
 }
 
 func (t *task) _handleShippingRes(res *http.Response) error {
+	defer res.Body.Close()
+	client.Decompress(res)
 	body := messageResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
 
@@ -161,26 +139,16 @@ type billingUpdate struct {
 }
 
 func (t *task) updateBilling() {
-	for {
-		t.log.Warn("Checking Out [3/3]")
-		res, err := t._postUpdateBillingReq()
-		if res != nil {
-			client.Decompress(res)
-		}
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
+	t.log.Warn("Checking Out [3/3]")
+	res, err := t._postUpdateBillingReq()
+	if err != nil {
+		t.retry(err, t.updateBilling)
+		return
+	}
 
-		err = t._handleUpdateBillingRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		break
+	err = t._handleUpdateBillingRes(res)
+	if err != nil {
+		t.retry(err, t.updateBilling)
 	}
 }
 
@@ -205,6 +173,8 @@ func (t *task) _postUpdateBillingReq() (res *http.Response, err error) {
 }
 
 func (t *task) _handleUpdateBillingRes(res *http.Response) error {
+	defer res.Body.Close()
+	client.Decompress(res)
 	body := messageResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
 
@@ -223,27 +193,16 @@ func (t *task) _handleUpdateBillingRes(res *http.Response) error {
 }
 
 func (t *task) submitOrder() {
-	for {
-		t.log.Warn("Submitting Order")
-		res, err := t._postSubmitOrderReq()
-		if res != nil {
-			client.Decompress(res)
-		}
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
+	t.log.Warn("Submitting Order")
+	res, err := t._postSubmitOrderReq()
+	if err != nil {
+		t.retry(err, t.submitOrder)
+		return
+	}
 
-		err = t._handleSubmitOrderRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-
-		break
+	err = t._handleSubmitOrderRes(res)
+	if err != nil {
+		t.retry(err, t.submitOrder)
 	}
 }
 
@@ -270,18 +229,18 @@ func (t *task) _postSubmitOrderReq() (*http.Response, error) {
 }
 
 func (t *task) _handleSubmitOrderRes(res *http.Response) error {
-	if res.StatusCode < 300 || res.StatusCode > 399 {
-		return errors.New("Status not 3XX")
+	defer res.Body.Close()
+	if res.StatusCode <= 299 || res.StatusCode >= 400 {
+		return errNoRedirect
 	}
 
 	redirectURL := res.Header.Get("location")
-
 	switch {
 	case redirectURL == "":
-		return errors.New("Adyen: No Redirect URL")
+		return errNoRedirect
 
 	case strings.Contains(redirectURL, "productOutOfStock"):
-		return errors.New("OOS")
+		return errOOS
 
 	case strings.Contains(redirectURL, "paypal"):
 		t.ppURL = redirectURL

@@ -61,9 +61,9 @@ func main() {
 		case "Test Webhook":
 			testWebhookHandler()
 			continue
-		case "Manual Captcha Harvester":
-			captcha.Launch()
-			continue
+		// case "Manual Captcha Harvester":
+		// 	captcha.Launch()
+		// 	continue
 		case "Settings":
 			settingsHandler()
 			continue

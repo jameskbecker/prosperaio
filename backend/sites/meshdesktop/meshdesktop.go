@@ -1,6 +1,7 @@
 package meshdesktop
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strings"
@@ -28,6 +29,7 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 
 	//Cart Process
 	t.getStock()
+	t.getCaptchaData()
 	t.addToCart()
 	ipc <- utils.IPCMessage{Channel: "incrementCart"}
 
@@ -64,12 +66,11 @@ type task struct {
 	forceCaptcha  bool
 	checkoutDelay int
 
-	productURL        *url.URL
-	pData             productData
-	addressID         string
-	shippingMethodID  string
-	recaptchaSitekey  string
-	recaptchaResponse string
+	productURL       *url.URL
+	pData            productData
+	addressID        string
+	shippingMethodID string
+	recaptcha        recaptcha
 
 	baseURL      *url.URL
 	client       *http.Client
@@ -82,6 +83,12 @@ type task struct {
 	extensionURL  string
 	exportCookies []byte
 	ppURL         string
+}
+
+type recaptcha struct {
+	sitekey  string
+	response string
+	skip     bool
 }
 
 type productData struct {
@@ -126,5 +133,50 @@ func initTask(i config.TaskInput) (t task, err error) {
 	}
 
 	t.pData.pid = splitPath[3]
+	return
+}
+
+var (
+	errSizeNotFound      = errors.New("Size not found")
+	errOOS               = errors.New("Out of Stock")
+	errSizeNotFoundOrOOS = errors.New("Size not found or OOS")
+	errATCNotAdded       = errors.New("Added 0 items to Cart")
+	errCaptchaRequired   = errors.New("ATC Failed: ReCAPTCHA Required")
+	errNoAddrID          = errors.New("[C1] Received no address ID")
+	errNoRedirect        = errors.New("No Redirect URL")
+)
+
+func (t *task) retry(err error, callback func()) {
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	switch err {
+	case errCaptchaRequired:
+		t.getCaptcha()
+		break
+	default:
+		time.Sleep(t.retryDelay)
+	}
+
+	callback()
+}
+
+func (t *task) monitor(err error, callback func()) {
+	if err != nil {
+		t.log.Error(err.Error())
+	}
+	time.Sleep(t.monitorDelay)
+	callback()
+}
+
+func checkStatus(status int) (err error) {
+	switch {
+	case status >= 300 && status <= 399:
+		break
+	case status >= 400 && status <= 499:
+		break
+	case status >= 500 && status <= 599:
+		break
+	}
 	return
 }
