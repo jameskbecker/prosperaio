@@ -11,32 +11,28 @@ import (
 
 func (t *task) registerEmail() {
 	t.log.Warn("Signing in As Guest")
-	res, err := t._postGuestReq()
+	err := t._postGuestReq()
 	if err != nil {
 		t.retry(err, t.registerEmail)
 		return
 	}
-	err = t._handleGuestRes(res)
-	if err != nil {
-		t.retry(err, t.registerEmail)
-	}
 }
 
-func (t *task) _postGuestReq() (*http.Response, error) {
+func (t *task) _postGuestReq() error {
 	uri := t.baseURL.String() + "/checkout/guest/"
 	form := guestForm(t.profile.Email)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(form))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	setDefaultHeaders(req, t.useragent, t.baseURL.String())
 	req.Header.Set("referer", t.baseURL.String()+"/checkout/login/")
 
-	return t.client.Do(req)
-}
-
-func (t *task) _handleGuestRes(res *http.Response) error {
+	res, err := t.client.Do(req)
+	if err != nil {
+		return err
+	}
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
@@ -47,16 +43,19 @@ func (t *task) _handleGuestRes(res *http.Response) error {
 	json.NewDecoder(res.Body).Decode(&data)
 
 	t.log.Debug("Guest EP Message: " + data.Message)
-	switch strings.ToLower(data.Message) {
+	return handleGuestResMessage(data.Message)
+}
+
+func handleGuestResMessage(message string) error {
+	switch strings.ToLower(message) {
 	case "success":
 		return nil
 
 	case "email address is not valid.":
-		err := errors.New("Invalid email address")
-		return err
+		return errInvalidEmail
 
 	default:
-		err := errors.New("Guest EP Error: " + "'" + data.Message + "'")
+		err := errors.New("Guest EP Error: " + "'" + message + "'")
 		return err
 	}
 }

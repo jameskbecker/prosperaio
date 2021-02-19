@@ -142,6 +142,7 @@ var (
 	errSizeNotFoundOrOOS = errors.New("Size not found or OOS")
 	errATCNotAdded       = errors.New("Added 0 items to Cart")
 	errCaptchaRequired   = errors.New("ATC Failed: ReCAPTCHA Required")
+	errInvalidEmail      = errors.New("Invalid email address")
 	errNoAddrID          = errors.New("[C1] Received no address ID")
 	errNoRedirect        = errors.New("No Redirect URL")
 )
