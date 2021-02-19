@@ -33,49 +33,53 @@ func (t *task) getCaptchaData() {
 func (t *task) _getProductReq() (res *http.Response, err error) {
 	path := "/product/0/" + t.pData.pid + "/"
 	uri := t.baseURL.String() + path
+
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return
 	}
 
-	//Set Headers
 	setDefaultHeaders(req, t.useragent, t.baseURL.String())
-
-	//Send Request
 	res, err = t.client.Do(req)
 	return
 }
 
-func (t *task) _handleProductRes(res *http.Response) (skip bool, err error) {
+func (t *task) _handleProductRes(res *http.Response) (bool, error) {
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
-		err = errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
-		return
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return false, err
 	}
 	client.Decompress(res)
+
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return
+		return false, err
 	}
 
+	sitekey, hasSitekey := scrapeCaptchaSitekey(doc)
+	if !hasSitekey {
+		return true, errNoSiteKey
+	}
+	t.log.Debug("Found Sitekey: " + sitekey)
+	t.recaptcha.sitekey = sitekey
+
+	_, recaptchaEnabled := scrapeCaptchaScript(doc)
+	if !recaptchaEnabled {
+		t.log.Warn("Recaptcha disabled. Skipping")
+		return true, nil
+	}
+	return false, nil
+}
+
+func scrapeCaptchaSitekey(doc *goquery.Document) (string, bool) {
 	selector := "[data-sitekey]"
 	recaptchaWidget := doc.Find(selector)
-	sitekey, _ := recaptchaWidget.Attr("data-sitekey")
-	if sitekey == "" {
-		t.log.Warn("No Recaptcha Sitekey Found. Skipping")
-		skip = true
-		return
-	}
+	return recaptchaWidget.Attr("data-sitekey")
+}
 
-	t.recaptcha.sitekey = sitekey
-	t.log.Debug("Found Sitekey: " + sitekey)
-
-	srcSelector := doc.Find("#recaptchaSourceEnabled")
-	_, exists := srcSelector.Attr("src")
-	if !exists {
-		t.log.Warn("Recaptcha disabled. Skipping")
-		skip = true
-		return
-	}
-	return
+func scrapeCaptchaScript(doc *goquery.Document) (string, bool) {
+	selector := "#recaptchaSourceEnabled"
+	srcSelector := doc.Find(selector)
+	return srcSelector.Attr("src")
 }

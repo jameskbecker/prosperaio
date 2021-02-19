@@ -141,6 +141,7 @@ var (
 	errOOS               = errors.New("Out of Stock")
 	errSizeNotFoundOrOOS = errors.New("Size not found or OOS")
 	errATCNotAdded       = errors.New("Added 0 items to Cart")
+	errNoSiteKey         = errors.New("No Recaptcha Sitekey Found. Skipping")
 	errCaptchaRequired   = errors.New("ATC Failed: ReCAPTCHA Required")
 	errInvalidEmail      = errors.New("Invalid email address")
 	errNoAddrID          = errors.New("[C1] Received no address ID")
@@ -149,14 +150,15 @@ var (
 
 func (t *task) retry(err error, callback func()) {
 	if err != nil {
-		t.log.Error(err.Error())
-	}
-	switch err {
-	case errCaptchaRequired:
-		t.getCaptcha()
-		break
-	default:
-		time.Sleep(t.retryDelay)
+		switch err {
+		case errCaptchaRequired:
+			t.log.Error(err.Error())
+			t.getCaptcha()
+			break
+		default:
+			t.log.Error(err.Error())
+			time.Sleep(t.retryDelay)
+		}
 	}
 
 	callback()
