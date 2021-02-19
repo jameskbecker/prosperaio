@@ -1,6 +1,6 @@
 {
 	"name": "prosperaio",
-	"version": "4.0.3",
+	"version": "4.0.0",
 	"private": true,
 	"workspaces": [
 		"backend",
