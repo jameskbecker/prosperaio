@@ -7,28 +7,18 @@ import (
 	"net/http"
 	"prosperaio/utils/client"
 	"strings"
-	"time"
 )
 
 func (t *task) registerEmail() {
-	for {
-		res, err := t._postGuestReq()
-		if res != nil {
-			client.Decompress(res)
-		}
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		err = t._handleGuestRes(res)
-		res.Body.Close()
-		if err != nil {
-			t.log.Error(err.Error())
-			time.Sleep(t.retryDelay)
-			continue
-		}
-		break
+	t.log.Warn("Signing in As Guest")
+	res, err := t._postGuestReq()
+	if err != nil {
+		t.retry(err, t.registerEmail)
+		return
+	}
+	err = t._handleGuestRes(res)
+	if err != nil {
+		t.retry(err, t.registerEmail)
 	}
 }
 
@@ -47,6 +37,12 @@ func (t *task) _postGuestReq() (*http.Response, error) {
 }
 
 func (t *task) _handleGuestRes(res *http.Response) error {
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return err
+	}
+	client.Decompress(res)
 	data := messageResponse{}
 	json.NewDecoder(res.Body).Decode(&data)
 
