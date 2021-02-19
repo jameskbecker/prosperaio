@@ -115,6 +115,10 @@ func (t *task) _postATCReq() (res *http.Response, err error) {
 
 func (t *task) _handleATCRes(res *http.Response) error {
 	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return err
+	}
 	client.Decompress(res)
 	data := atcResponse{}
 	json.NewDecoder(res.Body).Decode(&data)

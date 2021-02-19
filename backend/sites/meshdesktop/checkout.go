@@ -57,6 +57,10 @@ func (t *task) _postAddressReq() (res *http.Response, err error) {
 
 func (t *task) _handleAddressRes(res *http.Response) error {
 	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return err
+	}
 	client.Decompress(res)
 	body := addressResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
@@ -115,6 +119,10 @@ func (t *task) _postShippingReq() (res *http.Response, err error) {
 
 func (t *task) _handleShippingRes(res *http.Response) error {
 	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return err
+	}
 	client.Decompress(res)
 	body := messageResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
@@ -174,6 +182,10 @@ func (t *task) _postUpdateBillingReq() (res *http.Response, err error) {
 
 func (t *task) _handleUpdateBillingRes(res *http.Response) error {
 	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		err := errors.New("Unexpected Status: " + res.Request.RequestURI + " " + res.Status)
+		return err
+	}
 	client.Decompress(res)
 	body := messageResponse{}
 	json.NewDecoder(res.Body).Decode(&body)

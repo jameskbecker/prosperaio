@@ -13,7 +13,7 @@ func MainMenu() string {
 		"Run Tasks",
 		"Load Proxies",
 		"Test Webhook",
-		"Manual Captcha Harvester",
+		//"Manual Captcha Harvester",
 		"Settings",
 		"Exit",
 	}
