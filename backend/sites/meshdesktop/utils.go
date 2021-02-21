@@ -53,7 +53,7 @@ func setDefaultHeaders(req *http.Request, ua string, bURL string) {
 		{"sec-fetch-site", "same-origin"},
 		{"sec-fetch-mode", "cors"},
 		{"sec-fetch-dest", "empty"},
-		{"accept-encoding", "gzip"},
+		{"accept-encoding", "gzip, deflate, br"},
 		{"accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7"},
 	}
 
@@ -93,6 +93,7 @@ func (t *task) webhookMessage() discord.Message {
 		site += "-" + strings.ToLower(t.region)
 	}
 	fields := []discord.Field{
+		{Name: "PID", Value: t.pData.pid, Inline: true},
 		{Name: "Site", Value: site + "_fe", Inline: true},
 		{Name: "Size", Value: "N/A", Inline: true},
 	}
@@ -102,7 +103,7 @@ func (t *task) webhookMessage() discord.Message {
 	}
 
 	if t.size != "" {
-		fields[1].Value = t.size
+		fields[2].Value = t.size
 	}
 
 	t.log.Debug(t.extensionURL)

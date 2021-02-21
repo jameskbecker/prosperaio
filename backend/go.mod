@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.2.7
 	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/ananagame/rich-go v0.0.0-20210101112514-52d3ad6a938f // indirect
+	github.com/dsnet/compress v0.0.1
 	github.com/fatih/color v1.10.0
 	github.com/gorilla/mux v1.8.0
 	github.com/hugolgst/rich-go v0.0.0-20210101112514-52d3ad6a938f

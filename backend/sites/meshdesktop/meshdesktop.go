@@ -28,22 +28,22 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	t.log.Debug("Starting Task")
 
 	//Cart Process
-	t.getStock()
-	t.getCaptchaData()
-	t.addToCart()
+	// t.getStock()
+	// t.getCaptchaData()
+	// t.addToCart()
 	ipc <- utils.IPCMessage{Channel: "incrementCart"}
 
-	//Checkout Process
-	t.registerEmail()
-	t.addAddress()
-	t.addShipping()
-	t.updateBilling()
+	// //Checkout Process
+	// t.registerEmail()
+	// t.addAddress()
+	// t.addShipping()
+	// t.updateBilling()
 
-	if t.checkoutDelay > 0 {
-		t.log.Warn("Delaying Checkout")
-		time.Sleep(time.Duration(t.checkoutDelay) * time.Millisecond)
-	}
-	t.submitOrder()
+	// if t.checkoutDelay > 0 {
+	// 	t.log.Warn("Delaying Checkout")
+	// 	time.Sleep(time.Duration(t.checkoutDelay) * time.Millisecond)
+	// }
+	// t.submitOrder()
 	ipc <- utils.IPCMessage{Channel: "incrementCheckout"}
 	err = t.sendSuccess()
 	if err != nil {

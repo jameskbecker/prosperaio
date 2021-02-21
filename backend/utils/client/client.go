@@ -4,11 +4,13 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"time"
 
+	"github.com/dsnet/compress/brotli"
 	"github.com/fatih/color"
 	tls "github.com/refraction-networking/utls"
 	"github.com/x04/cclient"
@@ -64,6 +66,7 @@ func GetJSONCookies(urls []*url.URL, c *http.Client) []byte {
 
 //Decompress compressed response body TODO: add deflate and brotli
 func Decompress(res *http.Response) error {
+	fmt.Println(res.Header.Get("Content-Encoding"))
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
 		zr, err := gzip.NewReader(res.Body)
@@ -73,10 +76,13 @@ func Decompress(res *http.Response) error {
 		res.Body = zr
 		break
 
-	// case "br":
-	// 	br := cbrotli.NewReader(res.Body)
-	// 	res.Body = br
-	// 	break
+	case "br":
+		br, err := brotli.NewReader(res.Body, nil)
+		if err != nil {
+			return err
+		}
+		res.Body = br
+		break
 
 	case "deflate":
 		df := flate.NewReader(res.Body)
