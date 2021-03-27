@@ -96,6 +96,7 @@ func GetTaskCount(data []Task) map[string]int {
 		"JD-DE":      0,
 		"JD-GB":      0,
 		"WEARESTRAP": 0,
+		"SNIPES-DE":  0,
 	}
 	for _, v := range data {
 		site := v.Site

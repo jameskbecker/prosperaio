@@ -6,29 +6,29 @@ import (
 	"time"
 )
 
-func (t *Task) cartForm() string {
+func (t *task) cartForm() string {
 	form := url.Values{}
 	//option := `[{"optionId":"` + t.OptionID + `","selectedValueId":"` + t.ValueID + `"}]`
 	option := ""
-	form.Set("pid", t.BPID)
+	form.Set("pid", t.bPID)
 	form.Set("options", option)
 	form.Set("quantity", "1")
 
 	return form.Encode()
 }
 
-func (t *Task) registrationForm() string {
+func (t *task) registrationForm() string {
 	form := url.Values{}
 	password := randomString(10)
 
-	form.Set("dwfrm_profile_register_title", t.Profile.Shipping.Title)
-	form.Set("dwfrm_profile_register_firstName", t.Profile.Shipping.FirstName)
-	form.Set("dwfrm_profile_register_lastName", t.Profile.Shipping.LastName)
-	form.Set("dwfrm_profile_register_email", t.Profile.Email)
-	form.Set("dwfrm_profile_register_emailConfirm", t.Profile.Phone)
+	form.Set("dwfrm_profile_register_title", "Herr")
+	form.Set("dwfrm_profile_register_firstName", t.profile.Shipping.FirstName)
+	form.Set("dwfrm_profile_register_lastName", t.profile.Shipping.LastName)
+	form.Set("dwfrm_profile_register_email", t.profile.Email)
+	form.Set("dwfrm_profile_register_emailConfirm", t.profile.Phone)
 	form.Set("dwfrm_profile_register_password", string(password))
 	form.Set("dwfrm_profile_register_passwordConfirm", string(password))
-	form.Set("dwfrm_profile_register_phone", t.Profile.Phone) //Optional
+	form.Set("dwfrm_profile_register_phone", t.profile.Phone) //Optional
 	form.Set("dwfrm_profile_register_birthday", "")           //Optional
 	form.Set("dwfrm_profile_register_acceptPolicy", "true")
 	form.Set("csrf_token", "")
@@ -36,54 +36,61 @@ func (t *Task) registrationForm() string {
 	return form.Encode()
 }
 
-func (t *Task) shippingForm() string {
+func (t *task) shippingForm() string {
 	form := url.Values{}
-	shipping := t.Profile.Shipping
-	billing := t.Profile.Billing
+	shipping := t.profile.Shipping
+	billing := t.profile.Billing
 
-	form.Set("originalShipmentUUID", t.ShipmentID)
-	form.Set("shipmentUUID", t.ShipmentID)
-	form.Set("dwfrm_shipping_shippingAddress_shippingMethodID", "home-delivery")
+	shippingPrefix := "dwfrm_shipping_shippingAddress_addressFields_"
+	billingPrefix := "dwfrm_billing_billingAddress_addressFields_"
+
+	form.Set("originalShipmentUUID", t.shipmentID)
+	form.Set("shipmentUUID", t.shipmentID)
+	form.Set(shippingPrefix+"shippingMethodID", "home-delivery")
 	form.Set("address-selector", "new")
 
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_title", shipping.Title)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_firstName", shipping.FirstName)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_lastName", shipping.LastName)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_postalCode", shipping.PostalCode)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_city", shipping.City)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_street", shipping.Street)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_suite", shipping.Suite)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_address1", shipping.Address1)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_address2", shipping.Address2)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_phone", t.Profile.Phone)
-	form.Set("dwfrm_shipping_shippingAddress_addressFields_countryCode", shipping.CountryCode)
+	form.Set(shippingPrefix+"title", "Herr")
+	form.Set(shippingPrefix+"firstName", shipping.FirstName)
+	form.Set(shippingPrefix+"lastName", shipping.LastName)
+	form.Set(shippingPrefix+"postalCode", shipping.PostCode)
+	form.Set(shippingPrefix+"city", shipping.City)
+	form.Set(shippingPrefix+"street", shipping.Address1)
+	form.Set(shippingPrefix+"suite", shipping.Address2)
+	form.Set(shippingPrefix+"address1", shipping.Address1)
+	form.Set(shippingPrefix+"address2", shipping.Address2)
+	form.Set(shippingPrefix+"phone", t.profile.Phone)
+	form.Set(shippingPrefix+"countryCode", getCountryCode())
 	form.Set("dwfrm_shipping_shippingAddress_shippingAddressUseAsBillingAddress", "true")
 
-	form.Set("dwfrm_billing_billingAddress_addressFields_title", billing.Title)
-	form.Set("dwfrm_billing_billingAddress_addressFields_firstName", billing.FirstName)
-	form.Set("dwfrm_billing_billingAddress_addressFields_lastName", billing.LastName)
-	form.Set("dwfrm_billing_billingAddress_addressFields_postalCode", billing.PostalCode)
-	form.Set("dwfrm_billing_billingAddress_addressFields_city", billing.City) // CHECK ADDRESS FORMATING
-	form.Set("dwfrm_billing_billingAddress_addressFields_street", billing.Street)
-	form.Set("dwfrm_billing_billingAddress_addressFields_suite", billing.Suite)
-	form.Set("dwfrm_billing_billingAddress_addressFields_address1", billing.Address1)
-	form.Set("dwfrm_billing_billingAddress_addressFields_address2", billing.Address1)
-	form.Set("dwfrm_billing_billingAddress_addressFields_countryCode", billing.CountryCode)
-	form.Set("dwfrm_billing_billingAddress_addressFields_phone", t.Profile.Phone)
+	form.Set(billingPrefix+"title", "Herr")
+	form.Set(billingPrefix+"firstName", billing.FirstName)
+	form.Set(billingPrefix+"lastName", billing.LastName)
+	form.Set(billingPrefix+"postalCode", billing.PostCode)
+	form.Set(billingPrefix+"city", billing.City) // CHECK ADDRESS FORMATING
+	form.Set(billingPrefix+"street", billing.Address1)
+	form.Set(billingPrefix+"suite", billing.Address2)
+	form.Set(billingPrefix+"address1", billing.Address1)
+	form.Set(billingPrefix+"address2", billing.Address1)
+	form.Set(billingPrefix+"countryCode", getCountryCode())
+	form.Set(billingPrefix+"phone", t.profile.Phone)
 
-	form.Set("dwfrm_contact_email", t.Profile.Email)
-	form.Set("dwfrm_contact_phone", t.Profile.Phone)
-	form.Set("csrf_token", t.CSRFToken)
+	form.Set("dwfrm_contact_email", t.profile.Email)
+	form.Set("dwfrm_contact_phone", t.profile.Phone)
+	form.Set("csrf_token", t.csrfToken)
 
 	return form.Encode()
 }
 
-func (t *Task) paymentForm() string {
+func getCountryCode() string {
+	return ""
+}
+
+func (t *task) paymentForm() string {
 	form := url.Values{}
-	form.Set("dwfrm_billing_paymentMethod", t.Profile.Payment.Method)
+	form.Set("dwfrm_billing_paymentMethod", "")
 	form.Set("dwfrm_giftCard_cardNumber", "")
 	form.Set("dwfrm_giftCard_pin", "")
-	form.Set("csrf_token", t.CSRFToken)
+	form.Set("csrf_token", t.csrfToken)
 
 	return form.Encode()
 }

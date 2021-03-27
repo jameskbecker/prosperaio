@@ -274,6 +274,15 @@ func GetCountryName(code string) (name string) {
 	return
 }
 
+func SetTimer(t string) {
+	//Task Timer
+	timeFormat := "2006-01-02 15:04 MST"
+	v := "2020-11-16 15:35 GMT"
+	then, _ := time.Parse(timeFormat, v)
+	duration := time.Until(then)
+	time.Sleep(duration)
+}
+
 //IPCMessage ...
 type IPCMessage struct {
 	Channel string

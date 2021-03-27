@@ -87,7 +87,11 @@ func Decompress(res *http.Response) error {
 	case "deflate":
 		df := flate.NewReader(res.Body)
 		res.Body = df
-
+		// case "deflate":
+		// 	dcb, _ := flate.NewReader(bytes.NewReader(res.Body[2:]))
+		// 	return dcb
+		// case "br":
+		// 	break
 	}
 	return nil
 }

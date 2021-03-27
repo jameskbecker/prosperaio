@@ -1,168 +1,154 @@
 package demandware
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
 //GetAuthenticationToken ...
-func (t *Task) GetAuthenticationToken() error {
-	t.warn("Getting Authentication Token")
-	// form := url.Values{}
-	// form.Set("hostname", "www.snipes.com")
-	//ISML (
-	form := []byte(`{"hostname":"www.snipes.com"}`)
+// func (t *task) GetAuthenticationToken() error {
+// 	t.log.Warn("Getting Authentication Token")
+// 	// form := url.Values{}
+// 	// form.Set("hostname", "www.snipes.com")
+// 	//ISML (
+// 	form := []byte(`{"hostname":"www.snipes.com"}`)
 
-	path := "/dw/shop/v20_10/baskets/bdcb-snse-DE-AT"
-	url := t.BaseURL.String() + path
+// 	path := "/dw/shop/v20_10/baskets/bdcb-snse-DE-AT"
+// 	url := t.baseURL.String() + path
 
-	req, err := http.NewRequest("PATCH", url, bytes.NewBuffer(form))
+// 	req, err := http.NewRequest("PATCH", url, bytes.NewBuffer(form))
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
+// 	req.Header.Set("content-type", "application/json")
+// 	req.Header.Set("origin", t.baseURL.String())
+// 	req.Header.Set("sec-fetch-mode", "cors")
+// 	req.Header.Set("sec-fetch-dest", "empty")
+// 	//req.Header.Set("referer", t.BaseURL.String()+"/checkout?stage=shipping")
+
+// 	res, err := t.client.Do(req)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	body, err := ioutil.ReadAll(res.Body)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	fmt.Println(string(body))
+
+// 	return nil
+// }
+
+func (t *task) postShipping() {
+	_, err := t._postShippingReq()
 	if err != nil {
-		return err
+		t.retry(err, t.postShipping)
 	}
-
-	req.Header.Set("accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.UserAgent)
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("origin", t.BaseURL.String())
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("sec-fetch-mode", "cors")
-	req.Header.Set("sec-fetch-dest", "empty")
-	//req.Header.Set("referer", t.BaseURL.String()+"/checkout?stage=shipping")
-	//req.Header.Set(accept-encoding	gzip, deflate, br)
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
-
-	res, err := t.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(body))
-
-	return nil
 }
 
-//SubmitShipping ...
-func (t *Task) SubmitShipping() error {
-	t.warn("Checking out (1/3)...")
+func (t *task) _postShippingReq() (*http.Response, error) {
+	t.log.Warn("Checking out (1/3)...")
 	form := t.shippingForm()
-	path := "/on/demandware.store/Sites-" + t.SiteID + "-Site/de_DE/CheckoutShippingServices-SubmitShipping"
-	url := t.BaseURL.String() + path + "?format=ajax"
+	path := "/on/demandware.store/Sites-" + t.siteID + "-Site/de_DE/CheckoutShippingServices-SubmitShipping"
+	url := t.baseURL.String() + path + "?format=ajax"
 
 	req, err := http.NewRequest("POST", url, strings.NewReader(form))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	req.Header.Set("accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.UserAgent)
+	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
 	req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-	req.Header.Set("origin", t.BaseURL.String())
-	req.Header.Set("sec-fetch-site", "same-origin")
+	req.Header.Set("origin", t.baseURL.String())
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-dest", "empty")
-	req.Header.Set("referer", t.BaseURL.String()+"/checkout?stage=shipping")
-	//req.Header.Set(accept-encoding	gzip, deflate, br)
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
+	req.Header.Set("referer", t.baseURL.String()+"/checkout?stage=shipping")
 
-	_, err = t.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	//log.Println("SubmitShipping Status: " + res.Status + res.Header.Get("location"))
-	//t.info("Submitted shipping & billing info!")
-	// body, err := ioutil.ReadAll(res.Body)
-	// if err != nil {
-	// 	return err
-
-	// }
-	// fmt.Println(string(body))
-	return nil
+	return t.client.Do(req)
 }
 
-//SubmitPayment ...
-func (t *Task) SubmitPayment() error {
-	t.warn("Checking out (2/3)....")
+func (t *task) submitPayment() {
+	_, err := t._postPaymentReq()
+	if err != nil {
+		t.retry(err, t.submitPayment)
+	}
+}
+
+func (t *task) _postPaymentReq() (*http.Response, error) {
+	t.log.Warn("Checking out (2/3)....")
 	form := url.Values{}
 	form.Set("dwfrm_billing_paymentMethod", "Paypal")
 	form.Set("dwfrm_giftCard_cardNumber", "")
 	form.Set("dwfrm_giftCard_pin", "")
-	form.Set("csrf_token", t.CSRFToken)
+	form.Set("csrf_token", t.csrfToken)
 
-	path := "/on/demandware.store/Sites-" + t.SiteID + "-Site/de_DE/CheckoutServices-SubmitPayment"
-	url := t.BaseURL.String() + path + "?format=ajax"
+	path := "/on/demandware.store/Sites-" + t.siteID + "-Site/de_DE/CheckoutServices-SubmitPayment"
+	url := t.baseURL.String() + path + "?format=ajax"
 	req, err := http.NewRequest("POST", url, strings.NewReader(form.Encode()))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	req.Header.Set("accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.UserAgent)
+	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
 	req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-	req.Header.Set("origin", t.BaseURL.String())
-	req.Header.Set("sec-fetch-site", "same-origin")
+	req.Header.Set("origin", t.baseURL.String())
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-dest", "empty")
-	req.Header.Set("referer", t.BaseURL.String()+"/checkout?stage=payment")
-	//req.Header.Set(accept-encoding	gzip, deflate, br)
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
+	req.Header.Set("referer", t.baseURL.String()+"/checkout?stage=payment")
 
-	_, err = t.Client.Do(req)
+	return t.client.Do(req)
+}
+
+func (t *task) placeOrder() {
+	res, err := t._postPlaceOrderReq()
 	if err != nil {
-		return err
+		t.retry(err, t.placeOrder)
 	}
-	//t.info("Submitted payment method!")
-	//log.Println("SubmitPayment Status: " + res.Status)
-	return nil
+
+	err = t._handlePlaceOrderRes(res)
+	if err != nil {
+		t.retry(err, t.placeOrder)
+	}
+}
+
+func (t *task) _postPlaceOrderReq() (*http.Response, error) {
+	t.log.Warn("Checking out (3/3)...")
+	path := "/on/demandware.store/Sites-" + t.siteID + "-Site/de_DE/CheckoutServices-PlaceOrder"
+	url := t.baseURL.String() + path + "?format=ajax"
+	req, err := http.NewRequest("POST", url, strings.NewReader(""))
+	if err != nil {
+		return nil, err
+	}
+
+	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
+	req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+	req.Header.Set("origin", t.baseURL.String())
+	req.Header.Set("sec-fetch-mode", "cors")
+	req.Header.Set("sec-fetch-dest", "empty")
+	req.Header.Set("referer", t.baseURL.String()+"/checkout?stage=placeOrder")
+
+	return t.client.Do(req)
+}
+
+type placeOrderResponse struct {
+	PaypalURL string `json:"continueUrl"`
+	Error     bool   `json:"error"`
 }
 
 //PlaceOrder ...
-func (t *Task) PlaceOrder() error {
-	t.warn("Checking out (3/3)...")
-	path := "/on/demandware.store/Sites-" + t.SiteID + "-Site/de_DE/CheckoutServices-PlaceOrder"
-	url := t.BaseURL.String() + path + "?format=ajax"
-	req, err := http.NewRequest("POST", url, strings.NewReader(""))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.UserAgent)
-	req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-	req.Header.Set("origin", t.BaseURL.String())
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("sec-fetch-mode", "cors")
-	req.Header.Set("sec-fetch-dest", "empty")
-	req.Header.Set("referer", t.BaseURL.String()+"/checkout?stage=placeOrder")
-	//req.Header.Set(accept-encoding	gzip, deflate, br)
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
-
-	res, err := t.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
+func (t *task) _handlePlaceOrderRes(res *http.Response) error {
 	//log.Println("PlaceOrder Status: " + res.Status)
-	t.info("Successfully checked out!")
+	t.log.Info("Successfully checked out!")
 	body := placeOrderResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
 
 	//fmt.Println("Error Occured: " + strconv.FormatBool(body.Error))
-	t.debg("Paypal URL: " + body.PaypalURL)
+	t.log.Debug("Paypal URL: " + body.PaypalURL)
 	return nil
 }

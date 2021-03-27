@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"prosperaio/captcha"
 	"prosperaio/config"
 	"prosperaio/discord"
-	"prosperaio/sites/meshdesktop"
+	"prosperaio/sites/demandware"
 	"prosperaio/utils"
 	"prosperaio/utils/checkoutlinks"
 	"prosperaio/utils/cli"
@@ -28,7 +29,7 @@ var printBold = color.New(color.Bold, color.FgWhite).PrintlnFunc()
 var print = color.New(color.FgWhite).PrintlnFunc()
 
 func init() {
-	const expiryDate = "28 Feb 2021 10:55 GMT"
+	const expiryDate = "28 Mar 2021 10:55 GMT"
 	expTime, _ := time.Parse("02 Jan 2006 15:04 MST", expiryDate)
 	if time.Until(expTime) < 0*time.Millisecond {
 		color.Red("Expired.")
@@ -149,15 +150,17 @@ func startTaskHandler(tasks []config.Task) {
 			Proxy:         getProxy(),
 			Settings:      settings,
 		}
+		fmt.Print(strings.ToUpper(site))
 
 		switch strings.ToUpper(site) {
-		case "JD_FE", "FP_FE":
-			go meshdesktop.Run(input, ipc)
-			break
-		case "WEARESTRAP":
-			//go wearestrap.Run(input)
-			break
+		// case "JD_FE", "FP_FE":
+		// 	go meshdesktop.Run(input, ipc)
 
+		// case "WEARESTRAP":
+		// 	//go wearestrap.Run(input)
+
+		case "SNIPES", "ONYGO", "SOLEBOX":
+			go demandware.Run(input, ipc)
 		default:
 			color.Red("Invalid Site: '" + site + "'")
 		}

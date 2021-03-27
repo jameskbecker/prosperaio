@@ -2,262 +2,137 @@ package demandware
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
+
+	"prosperaio/config"
+	"prosperaio/utils"
+	"prosperaio/utils/client"
+	"prosperaio/utils/log"
+
+	"github.com/fatih/color"
 )
 
 const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"
 
 //Run DemandWare task
-func Run(i Input, tNbr string, wg *sync.WaitGroup) {
-	task := Task{
-		Size:      i.Size,
-		Site:      i.Site,
-		Profile:   i.Profile,
-		Client:    createClient(),
-		TNbr:      tNbr,
-		UserAgent: userAgent,
-		lDbg:      log.New(os.Stdout, "", 0),
-		lErr:      log.New(os.Stdout, "", 0),
-		lInf:      log.New(os.Stdout, "", 0),
-		lWrn:      log.New(os.Stdout, "", 0),
-	}
-	task.debg("Starting Task...")
-
-	baseURL, err := getBaseURL(i.Site)
+func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
+	t, err := initTask(i)
 	if err != nil {
-		task.err(err.Error())
+		color.Red(err.Error())
+		i.WG.Done()
 		return
 	}
-	task.BaseURL = baseURL
+	t.log.Debug("Starting Task...")
 
-	if !strings.Contains(i.ProductURL, "www") {
-		task.BPID = strings.Replace(i.ProductURL, `"`, "", 1)
+	t.getPXCookie()
+	t.getCSRFToken()
+	t.submitRegistration()
+
+	//ProductURL Mode
+	if t.bPID == "" {
+		t.getProductShowURL()
+		t.getProductData()
+	}
+
+	t.addToCart()
+	t.postShipping()
+	t.submitPayment()
+	t.placeOrder()
+
+	i.WG.Done()
+
+}
+
+type task struct {
+	id           int
+	log          log.Logger
+	monitorDelay time.Duration
+	retryDelay   time.Duration
+
+	productURL *url.URL
+	baseURL    *url.URL
+	region     string
+	profile    config.Profile
+	pDataURL   string
+	siteID     string
+	site       string
+	size       string
+	pid        string
+	shipmentID string
+	bPID       string
+	pName      string
+	pBrand     string
+	// optionID   string
+	// valueID    string
+	px3       string
+	csrfToken string
+	userAgent string
+	client    http.Client
+}
+
+func initTask(i config.TaskInput) (t task, err error) {
+	t = task{
+		id:           i.ID,
+		region:       i.Region,
+		size:         i.Size,
+		site:         i.Site,
+		profile:      i.Profile,
+		client:       client.Create(i.Proxy, 1),
+		userAgent:    userAgent,
+		monitorDelay: time.Duration(i.Settings.MonitorDelay) * time.Millisecond,
+		retryDelay:   time.Duration(i.Settings.RetryDelay) * time.Millisecond,
+	}
+
+	t.baseURL = t.getBaseURL(i.Site)
+
+	if !strings.Contains(i.MonitorInput, "www") {
+		t.bPID = strings.Replace(i.MonitorInput, `"`, "", 1)
 	} else {
-		f, err := url.Parse(i.ProductURL)
+		f, err := url.Parse(i.MonitorInput)
 		if err != nil {
 			panic("Invalid URL")
 		}
-		task.ProductURL = f
+		t.productURL = f
 
 		pidExp := regexp.MustCompile(`-(?P<pid>\d*?)\.html`)
 		match := pidExp.FindStringSubmatch(f.String())
 		if match == nil || len(match) < 2 {
 			panic("Unable to Parse PID")
 		}
-		task.PID = match[1]
+		t.pid = match[1]
 	}
 
-	siteID, err := getSiteID(i.Site)
+	siteID, err := getSiteID(strings.ToLower(i.Site + "-" + t.region))
 	if err != nil {
 		panic(err)
 	}
-	task.SiteID = siteID
-	errorDelay := time.Second * 2
-
-	for {
-		px3, err := task.GetPXCookie()
-		if err != nil || px3 == "" {
-			if err != nil {
-				task.err(err.Error())
-			}
-			select {
-			case <-time.After(errorDelay):
-				continue
-			}
-		}
-		task.PX3 = px3
-		break
-	}
-
-	cookies := []*http.Cookie{
-		{Name: "hideLocalizationDialog", Value: "true"},
-		{Name: "acceptCookie", Value: "true"},
-		//{Name: "customerCountry", Value: "gb"},
-		{Name: "_px3", Value: task.PX3},
-	}
-
-	task.Client.Jar.SetCookies(task.BaseURL, cookies)
-
-	//Get CSFR Token for valid POST requests
-	// for {
-	// 	err = task.GetCSRFToken()
-	// 	if err != nil {
-	// 		task.err(err.Error())
-	// 		select {
-	// 		case <-time.After(errorDelay):
-	// 			continue
-	// 		}
-	// 	}
-
-	// 	break
-	// }
-
-	//Generate Account
-	// for {
-	// 	err = task.SubmitRegistration()
-	// 	if err != nil {
-	// 		task.err(err.Error())
-	// 		select {
-	// 		case <-time.After(errorDelay):
-	// 			continue
-	// 		}
-	// 	}
-	// 	break
-	// }
-
-	//ProductURL Mode
-	if task.BPID == "" {
-		//Get Url for Product Data Endpoint
-		for {
-			err = task.GetProductShowURL()
-			if err != nil {
-				task.err(err.Error())
-				select {
-				case <-time.After(errorDelay):
-					continue
-				}
-			}
-			break
-		}
-
-		for {
-			err = task.GetProductData()
-			if err != nil {
-				//task.err(err.Error())
-				select {
-				case <-time.After(errorDelay):
-					continue
-				}
-			}
-			break
-		}
-	}
-	// timeFormat := "2006-01-02 15:04 MST"
-	// v := "2020-11-16 15:35 GMT"
-	// then, _ := time.Parse(timeFormat, v)
-	// task.debg("Preload Complete. Task Scheduled For: " + v)
-	// duration := time.Until(then)
-	// time.Sleep(duration)
-
-	//Add item to cart
-	// for {
-	// 	err = task.AddToCart()
-	// 	if err != nil {
-	// 		task.err(err.Error())
-	// 		select {
-	// 		case <-time.After(errorDelay):
-	// 			continue
-	// 		}
-	// 	}
-	// 	break
-	// }
-
-	// for {
-	// 	err = task.SubmitShipping()
-	// 	if err != nil {
-	// 	task.err(err.Error())
-	// 	select {
-	// 	case <-time.After(errorDelay):
-	// 		continue
-	// 	}
-	// }
-	// 	break
-	// }
-
-	// for {
-	// 	err = task.SubmitPayment()
-	// 	if err != nil {
-	// 	task.err(err.Error())
-	// 	select {
-	// 	case <-time.After(errorDelay):
-	// 		continue
-	// 	}
-	// }
-	// 	break
-	// }
-
-	// for {
-	// 	err = task.PlaceOrder()
-	// if err != nil {
-	// 	task.err(err.Error())
-	// 	select {
-	// 	case <-time.After(errorDelay):
-	// 		continue
-	// 	}
-	// }
-	// 	break
-	// }
-
-	wg.Done()
-
+	t.siteID = siteID
+	t.updatePrefix()
+	return
 }
 
-func getBaseURL(s string) (baseURL *url.URL, err error) {
-	switch strings.ToLower(s) {
-	case "onygo":
-		baseURL, err = url.Parse("https://www.onygo.com")
-		if err != nil {
-			return nil, err
+var (
+	errUnknownSite  = errors.New("unknown site")
+	errPUrlOption   = errors.New("unable to parse product url option")
+	errSizeNotFound = errors.New("size not found")
+	errATCNotAdded  = errors.New("item not added to cart")
+	errCSFRNoVal    = errors.New("no CSFR Value")
+	errForbidden    = errors.New("403 forbidden")
+)
+
+func (t *task) retry(err error, callback func()) {
+	if err != nil {
+		switch err {
+
+		default:
+			t.log.Error(err.Error())
+			time.Sleep(t.retryDelay)
 		}
-
-		break
-
-	case "snipes-at", "snipes-de", "snipes-fr", "snipes-ch", "snipes-es", "snipes-it", "snipes-nl", "snipes-be", "snipes-usa":
-		baseURL, err = url.Parse("https://www.snipes.com")
-		if err != nil {
-			return nil, err
-		}
-
-		break
-
-	case "solebox-de":
-		baseURL, err = url.Parse("https://www.solebox.com")
-		if err != nil {
-			return nil, err
-		}
-
-		break
-	default:
-		err = errors.New("Error Setting Parsing Input Site (SBURL)")
-		return
 	}
 
-	return baseURL, err
-}
-
-func getSiteID(s string) (string, error) {
-	switch strings.ToLower(s) {
-	case "onygo":
-		return "ong-DE", nil
-
-	case "snipes-at", "snipes-de":
-		return "snse-DE-AT", nil
-
-	case "snipes-es", "snipes-it":
-		return "snse-SOUTH", nil
-
-	case "snipes-nl", "snipes-be":
-		return "snse-NL-BE", nil
-
-	case "snipes-fr":
-		return "snse-FR", nil
-
-	case "snipes-ch":
-		return "snse-CH", nil
-
-	case "snipes-usa":
-		return "snipesusa", nil
-
-	case "solebox-de":
-		return "solebox", nil
-	}
-
-	return "", errors.New("UNKNOWN SITE")
+	callback()
 }

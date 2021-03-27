@@ -1,53 +1,60 @@
 package demandware
 
 import (
-	"compress/gzip"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
-	"os"
+	"prosperaio/utils/client"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-//GetProductShowURL ...
-func (t *Task) GetProductShowURL() error {
-	t.warn("Fetching Product Data...")
-	req, err := http.NewRequest("GET", t.ProductURL.String(), nil)
+func (t *task) getProductShowURL() {
+	res, err := t._getProductShowReq()
 	if err != nil {
-		return err
+		t.retry(err, t.getProductShowURL)
+	}
+	err = t._handleProductShowRes(res)
+	if err != nil {
+		t.retry(err, t.getProductShowURL)
+	}
+}
+
+func (t *task) _getProductShowReq() (*http.Response, error) {
+	t.log.Warn("Fetching Product Data...")
+	req, err := http.NewRequest("GET", t.productURL.String(), nil)
+	if err != nil {
+		return nil, err
 	}
 
-	req.Header.Set("upgrade-insecure-requests", "1")
-	req.Header.Set("user-agent", t.UserAgent)
+	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
+	req.Header.Del("x-requested-with")
 	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Set("upgrade-insecure-requests", "1")
 	req.Header.Set("sec-fetch-site", "none")
 	req.Header.Set("sec-fetch-mode", "navigate")
 	req.Header.Set("sec-fetch-user", "?1")
 	req.Header.Set("sec-fetch-dest", "document")
-	req.Header.Set("accept-encoding", "gzip, deflate, br")
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
 
-	res, err := t.Client.Do(req)
-	if err != nil {
-		return err
-	}
+	return t.client.Do(req)
+}
 
+func (t *task) _handleProductShowRes(res *http.Response) error {
+	defer res.Body.Close()
+	client.Decompress(res)
 	switch res.StatusCode {
 	case 200:
-		resBody := decompressBody(res)
 		//body, _ := ioutil.ReadAll(resBody)
-		optID, err := parseOption(resBody, t.Size)
-		if err == nil {
-
+		optID, err := parseOption(res.Body, t.size)
+		if err != nil {
+			return errPUrlOption
 		}
-		val := t.BaseURL.String() + optID
-		//fmt.Println("Product-Show URL: " + val)
-		t.PDataURL = val
+		val := t.baseURL.String() + optID
+		fmt.Println("Product-Show URL: " + val)
+		t.pDataURL = val
 
 		// t.OptionID = optID
 		// t.ValueID = valID
@@ -55,22 +62,6 @@ func (t *Task) GetProductShowURL() error {
 
 	default:
 		return errors.New(res.Status)
-	}
-
-}
-
-func decompressBody(res *http.Response) io.Reader {
-	switch res.Header.Get("Content-Encoding") {
-	case "gzip":
-		dcb, _ := gzip.NewReader(res.Body)
-		return dcb
-	// case "deflate":
-	// 	dcb, _ := flate.NewReader(bytes.NewReader(res.Body[2:]))
-	// 	return dcb
-	// case "br":
-	// 	break
-	default:
-		return res.Body
 	}
 }
 
@@ -85,62 +76,71 @@ func parseOption(resR io.Reader, s string) (string, error) {
 
 	val, exists := first.Attr("data-href")
 	if !exists {
-		return "", errors.New("Size Not Found")
+		return "", errSizeNotFound
 	}
 
 	return val, nil
 }
 
-//GetProductData ...
-func (t *Task) GetProductData() error {
+func (t *task) getProductData() {
+	res, err := t._getProductDataReq()
+	if err != nil {
+		t.retry(err, t.getProductData)
+	}
+	err = t._handleProductDataRes(res)
+	if err != nil {
+		t.retry(err, t.getProductData)
+	}
+}
+
+func (t *task) _getProductDataReq() (*http.Response, error) {
 	//t.warn("Fetching Product Data...")
-	req, err := http.NewRequest("GET", t.PDataURL+"&format=ajax", nil)
+	req, err := http.NewRequest("GET", t.pDataURL+"&format=ajax", nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	req.Header.Set("user-agent", t.UserAgent)
-	req.Header.Set("accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("sec-fetch-site", "none")
-	req.Header.Set("sec-fetch-mode", "cors")
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("sec-fetch-dest", "empty")
-	//req.Header.Set("accept-encoding", "gzip, deflate, br")
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
-	req.Header.Set("referer", t.ProductURL.String())
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
+	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
 	req.Header.Set("content-type", "application/json")
-	res, err := t.Client.Do(req)
-	if err != nil {
-		return err
-	}
+	req.Header.Set("sec-fetch-dest", "empty")
+	req.Header.Set("sec-fetch-mode", "cors")
+	req.Header.Set("referer", t.productURL.String())
 
+	return t.client.Do(req)
+}
+
+type productShow struct {
+	Product productShowProduct `json:"product"`
+}
+
+type productShowProduct struct {
+	ID    string `json:"id"`
+	Name  string `json:"productName"`
+	Brand string `json:"brand"`
+}
+
+func (t *task) _handleProductDataRes(res *http.Response) error {
+	defer res.Body.Close()
+	client.Decompress(res)
 	switch res.StatusCode {
 
 	case 200:
-		t.info("Fetched Product Data!")
+		t.log.Info("Fetched Product Data!")
 		body := productShow{}
 		json.NewDecoder(res.Body).Decode(&body)
 
-		t.BPID = body.Product.ID
-		t.PName = body.Product.Name
-		t.PBrand = body.Product.Brand
+		t.bPID = body.Product.ID
+		t.pName = body.Product.Name
+		t.pBrand = body.Product.Brand
 
-		t.debg("Found Product - " + t.PBrand + " " + t.PName)
+		t.log.Debug("Found Product - " + t.pBrand + " " + t.pName)
 	case 403:
-		t.lErr.Println("Unable to Fetch Product Data - " + res.Status)
-		body, err := ioutil.ReadAll(res.Body)
-		fmt.Println(string(body))
-		os.Exit(0)
-		if err != nil {
-			return err
-
-		}
+		t.log.Error("Unable to Fetch Product Data - " + res.Status)
 		//fmt.Println(string(body))
-		return errors.New("FORBIDDEN")
+		return errForbidden
 
 	default:
-		t.lErr.Println("Unexpected GetproductData response " + res.Status)
+		t.log.Error("Unexpected GetproductData response " + res.Status)
 		return errors.New("")
 	}
 
@@ -153,49 +153,68 @@ func (t *Task) GetProductData() error {
 	return nil
 }
 
-//AddToCart ...
-func (t *Task) AddToCart() error {
-	t.warn("Adding to cart...")
+func (t *task) addToCart() {
+	res, err := t._postATCReq()
+	if err != nil {
+		t.retry(err, t.addToCart)
+	}
+	err = t._handleATCRres(res)
+	if err != nil {
+		t.retry(err, t.addToCart)
+	}
+}
+
+func (t *task) _postATCReq() (*http.Response, error) {
+	t.log.Warn("Adding to cart...")
 	path := "/add-product?format=ajax"
-	uri := "https://" + t.BaseURL.Hostname() + path
+	uri := "https://" + t.baseURL.Hostname() + path
 	form := t.cartForm()
 
 	req, err := http.NewRequest("POST", uri, strings.NewReader(form))
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	req.Header.Set("x-requested-with", "XMLHttpRequest")
-	req.Header.Set("user-agent", t.UserAgent)
-	req.Header.Set("accept", "application/json, text/javascript, */*; q=0.01")
+	setDefaultHeaders(req, t.userAgent, t.baseURL.String())
+	req.Header.Set("cache-control", "no-store")
 	req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
 	//req.Header.Set("origin", "https://"+t.ProductURL.Hostname())
 	//req.Header.Set("referer", t.ProductURL.String())
-	req.Header.Set("sec-fetch-site", "same-origin")
 	req.Header.Set("sec-fetch-mode", "cors")
-	req.Header.Set("cache-control", "no-store")
 	req.Header.Set("sec-fetch-dest", "empty")
-	//req.Header.Set("accept-encoding", "gzip, deflate, br")
-	req.Header.Set("accept-language", "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7")
 
-	res, err := t.Client.Do(req)
-	if err != nil {
-		return errors.New(res.Status)
-	}
+	return t.client.Do(req)
+}
 
+type atcResponse struct {
+	Action  string `json:"action"`
+	Message string `json:"message"`
+	Error   bool   `json:"error"`
+	Cart    cart   `json:"cart"`
+}
+
+type cart struct {
+	Items []cartItem `json:"items"`
+}
+
+type cartItem struct {
+	ShipmentID string `json:"shipmentUUID"`
+}
+
+func (t *task) _handleATCRres(res *http.Response) error {
+	defer res.Body.Close()
 	switch res.StatusCode {
 
 	case 200:
-		t.info("Successfully added item to cart!")
+		t.log.Info("Successfully added item to cart!")
 
 	case 403:
-		t.lErr.Println("Unable to add to cart - " + res.Status)
+		t.log.Error("Unable to add to cart - " + res.Status)
 		// _, err := ioutil.ReadAll(res.Body)
 		// if err != nil {
 		// 	return err
 
 		// }
-		return errors.New("FORBIDDEN")
+		return errForbidden
 
 	default:
 		return errors.New("Unexpected ATC response " + res.Status)
@@ -204,11 +223,10 @@ func (t *Task) AddToCart() error {
 	body := atcResponse{}
 	json.NewDecoder(res.Body).Decode(&body)
 	if len(body.Cart.Items) < 1 {
-		return errors.New("Not Added")
+		return errATCNotAdded
 	}
-	t.ShipmentID = body.Cart.Items[0].ShipmentID
+	t.shipmentID = body.Cart.Items[0].ShipmentID
 	//fmt.Println("ShipmentUUID " + t.ShipmentID)
-	t.debg("ATC Message: " + body.Message)
-
+	t.log.Debug("ATC Message: " + body.Message)
 	return nil
 }
