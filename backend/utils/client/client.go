@@ -4,7 +4,6 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -66,7 +65,6 @@ func GetJSONCookies(urls []*url.URL, c *http.Client) []byte {
 
 //Decompress compressed response body TODO: add deflate and brotli
 func Decompress(res *http.Response) error {
-	fmt.Println(res.Header.Get("Content-Encoding"))
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
 		zr, err := gzip.NewReader(res.Body)

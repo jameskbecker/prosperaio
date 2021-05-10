@@ -13,6 +13,7 @@ import (
 )
 
 func (t *task) getProductShowURL() {
+	t.log.Warn("Fetching Product Data URL...")
 	res, err := t._getProductShowReq()
 	if err != nil {
 		t.retry(err, t.getProductShowURL)
@@ -24,7 +25,6 @@ func (t *task) getProductShowURL() {
 }
 
 func (t *task) _getProductShowReq() (*http.Response, error) {
-	t.log.Warn("Fetching Product Data...")
 	req, err := http.NewRequest("GET", t.productURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -83,6 +83,7 @@ func parseOption(resR io.Reader, s string) (string, error) {
 }
 
 func (t *task) getProductData() {
+	t.log.Warn("Fetching Product Data...")
 	res, err := t._getProductDataReq()
 	if err != nil {
 		t.retry(err, t.getProductData)
@@ -129,11 +130,9 @@ func (t *task) _handleProductDataRes(res *http.Response) error {
 		body := productShow{}
 		json.NewDecoder(res.Body).Decode(&body)
 
-		t.bPID = body.Product.ID
-		t.pName = body.Product.Name
-		t.pBrand = body.Product.Brand
+		t.product = body.Product
 
-		t.log.Debug("Found Product - " + t.pBrand + " " + t.pName)
+		t.log.Debug("Found Product - " + t.product.Brand + " " + t.product.Name)
 	case 403:
 		t.log.Error("Unable to Fetch Product Data - " + res.Status)
 		//fmt.Println(string(body))

@@ -29,8 +29,8 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	t.log.Debug("Starting Task...")
 
 	t.getPXCookie()
-	t.getCSRFToken()
-	t.submitRegistration()
+	//t.getCSRFToken()
+	///t.submitRegistration()
 
 	//ProductURL Mode
 	if t.bPID == "" {
@@ -39,12 +39,18 @@ func Run(i config.TaskInput, ipc chan utils.IPCMessage) {
 	}
 
 	t.addToCart()
-	t.postShipping()
-	t.submitPayment()
-	t.placeOrder()
+	// t.postShipping()
+	// t.submitPayment()
+	// t.placeOrder()
 
 	i.WG.Done()
 
+}
+
+type productData struct {
+	ID    string
+	Name  string
+	Brand string
 }
 
 type task struct {
@@ -61,11 +67,10 @@ type task struct {
 	siteID     string
 	site       string
 	size       string
-	pid        string
 	shipmentID string
 	bPID       string
-	pName      string
-	pBrand     string
+	product    productShowProduct
+
 	// optionID   string
 	// valueID    string
 	px3       string
@@ -103,7 +108,7 @@ func initTask(i config.TaskInput) (t task, err error) {
 		if match == nil || len(match) < 2 {
 			panic("Unable to Parse PID")
 		}
-		t.pid = match[1]
+		t.product.ID = match[1]
 	}
 
 	siteID, err := getSiteID(strings.ToLower(i.Site + "-" + t.region))

@@ -59,6 +59,8 @@ func setDefaultHeaders(req *http.Request, ua string, bURL string) {
 		{"sec-fetch-site", "same-origin"},
 		{"user-agent", ua},
 		{"x-requested-with", "XMLHttpRequest"},
+		{"sec-ch-ua", `"Google Chrome";v="89", "Chromium";v="89", ";Not A Brand";v="99"`},
+		{"sec-ch-ua-mobile", "?0"},
 	}
 
 	for _, v := range headers {
@@ -80,7 +82,7 @@ func (t *task) updatePrefix() {
 	if region != "" {
 		site += "-" + region
 	}
-	prefix := "[" + tID + "] [" + site + "] [" + t.pid + "] [" + t.size + "] "
+	prefix := "[" + tID + "] [" + site + "] [" + t.product.ID + "] [" + t.size + "] "
 	t.log = log.Logger{Prefix: prefix}
 }
 

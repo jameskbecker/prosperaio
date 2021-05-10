@@ -24,10 +24,11 @@ func (t *task) getPXCookie() {
 	}
 
 	t.px3 = px3
+	t.log.Info("Got PX3! " + t.px3)
 	cookies := []*http.Cookie{
 		{Name: "hideLocalizationDialog", Value: "true"},
 		{Name: "acceptCookie", Value: "true"},
-		//{Name: "customerCountry", Value: "gb"},
+		{Name: "customerCountry", Value: "de"},
 		{Name: "_px3", Value: t.px3},
 	}
 
@@ -35,7 +36,7 @@ func (t *task) getPXCookie() {
 }
 
 func (t *task) _getPXApiReq() (*http.Response, error) {
-	uri := "http://127.0.0.1:8080/px/v1/generate"
+	uri := "http://127.0.0.1:8080"
 	qs := url.Values{}
 	qs.Set("site", "snipes")
 	//qs.Set("productUrl", t.BaseURL.String())
@@ -51,6 +52,7 @@ func (t *task) _getPXApiReq() (*http.Response, error) {
 }
 
 type pxResponse struct {
+	Success bool     `json:"success"`
 	Cookies []cookie `json:"cookies"`
 	Error   string   `json:"error"`
 }
